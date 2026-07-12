@@ -1,5 +1,8 @@
 project_id = "momi-toast-ingest"
 
+[remotes.dev]
+project_id = "xtbraqnlskmqxinjxxdn"
+
 [api]
 enabled = true
 schemas = ["public", "graphql_public"]
