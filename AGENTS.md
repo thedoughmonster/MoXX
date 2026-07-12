@@ -35,7 +35,7 @@ they deploy from the same repository.
 - Do not chain internal modules with HTTP or Edge Function-to-Edge Function calls.
 - Coordinate internal work through durable warehouse records.
 - A dedicated invoker may call the MoMi API only from durable post-hydration work.
-- Persist the full hydrated snapshot before queuing a MoMi API invocation.
+- Persist the full hydrated resource version before queuing MoMi API work.
 - Expose downstream reads as explicitly named, versioned database views.
 - Application and client code may read warehouse data only through the MoMi API.
 - The MoMi API may read approved views, never raw source tables directly.

@@ -22,7 +22,12 @@ One row is attempted in `toast_raw.order_webhook_events` with:
 
 - Supabase receipt timestamp.
 - All request headers as JSON.
-- The complete parsed Toast payload as JSON.
+- The complete parsed Toast payload unchanged as JSON.
+
+Receipt metadata is stored outside the payload. The receiver never adds,
+removes, renames, or maps fields inside the Toast document. This event record is
+permanent and remains separate from full order resource versions in
+`toast_raw.orders`.
 
 The payload event GUID is unique. Replays and retries do not create another row.
 
@@ -50,4 +55,5 @@ the raw event. The hydration contract owns that future work, not receiver code.
 - No Slack formatting or delivery.
 - No source-field mapping.
 - No relational normalization.
+- No treatment of a webhook event as a complete order resource.
 - No polling or reconciliation behavior.

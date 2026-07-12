@@ -12,17 +12,19 @@ flowchart LR
   toast["Toast Orders webhook"]
   ingest["Toast ingest"]
   schedule["Configured hydration schedule"]
-  hydrate["Toast hydration adapter"]
-  toastApi["Toast source API"]
-  events["Toast raw webhook events"]
-  snapshots["Toast raw order snapshots"]
+  wake["Supabase trigger adapter"]
+  fetch["toast.orders.fetch_by_guid.v1"]
+  toastApi["Toast Orders API"]
+  events["Unchanged Toast webhook events"]
   hydrateWork["Durable hydration work"]
+  versions["toast_raw.orders resource versions"]
   apiWork["Durable Order API work"]
   invoker["MoMi Order API invoker"]
   config["Configured sources, rules, routes, destinations"]
   process["Warehouse decision processing"]
   candidates["toast_alerting.order_alert_candidates"]
-  views["Versioned warehouse views"]
+  projections["Rebuildable related projections"]
+  views["Versioned query contracts"]
   api["MoMi API"]
   consumers["MoMi clients and services"]
   delivery["Slack delivery"]
@@ -32,18 +34,20 @@ flowchart LR
   ingest --> events
   events --> hydrateWork
   schedule --> hydrateWork
-  hydrateWork --> hydrate
-  hydrate --> toastApi
-  toastApi --> hydrate
-  hydrate --> snapshots
-  snapshots --> apiWork
+  hydrateWork --> wake
+  wake --> fetch
+  fetch --> toastApi
+  toastApi --> fetch
+  fetch --> versions
+  versions --> projections
+  versions --> apiWork
   apiWork --> invoker
   invoker --> api
   config --> process
   api --> process
   process --> candidates
   events --> views
-  snapshots --> views
+  projections --> views
   candidates --> views
   views --> api
   api --> consumers
@@ -53,18 +57,30 @@ flowchart LR
 
 ## Invariants
 
-- Raw ingest performs authentication and source-preserving persistence only.
+- Raw ingest authenticates and preserves the webhook payload unchanged.
+- A webhook event and a complete order resource version are separate records.
 - Ingest does not call another function or API after persistence.
-- Only a hydration adapter processing durable work may call a source API.
+- `toast.orders.fetch_by_guid.v1` is the only Toast caller in this slice.
+- The primitive implements one operation and accepts no arbitrary URL or method.
 - Hydration and re-hydration are idempotent, configured, and warehouse-backed.
 - Reports and read requests never fetch source data or wait for hydration.
 - Webhook receipt queues hydration only after durable source persistence.
-- Hydration completion stores the snapshot and Order API work atomically.
+- Hydration completion stores the resource version and API work atomically.
 - The Order API invoker cannot start until that transaction commits.
 - The Order API invoker starts from durable work and passes the order GUID only.
-- Downstream reads use named, versioned views through the MoMi API.
+- Raw storage is permanent and separated by source resource type.
+- Every order version contains the complete source record as JSONB.
+- Content hashes deduplicate unchanged records; fetch attempts remain auditable.
+- GET-by-GUID and any approved bulk operation feed `toast_raw.orders`.
+- Related and query projections rebuild entirely from owned resource versions.
+- No recovery or rebuild process may require Toast to remain available.
+- Square uses its own raw resource tables without rewriting Toast history.
+- Downstream reads use named, versioned query contracts through the MoMi API.
 - Application code and the MoMi API do not query raw source tables directly.
-- Internal processing is triggered from durable warehouse work, not HTTP chains.
+- Modules coordinate only through durable database work, never HTTP chains.
+- A Supabase-native adapter may wake an allowlisted Edge Function after commit.
+- Adapter requests carry work identity only; the function reclaims durable work.
+- Duplicate or missed wake-ups are recovered from database state.
 - Business mappings and enable switches live in database configuration.
 - Source, rule, route, and destination enablement are independent controls.
 - Alert claims are durable before notification delivery is attempted.

@@ -19,11 +19,15 @@ implemented. They may not be inferred or duplicated by callers.
 
 The API reads one explicitly named versioned order view. That view owns:
 
-- Selection of the current successful full-order snapshot.
+- Selection of the current successful full-order resource version.
 - Documented ordering and tie-breaking rules.
 - Approved order projections and joins.
 - Retrieval time and source update time when available.
 - Freshness or stale status.
+
+The view may join related projections and does not need to flatten the complete
+order into one table. Every projection must be rebuildable from permanent raw
+resource versions without calling Toast.
 
 The view uses `security_invoker = true` and remains inaccessible to public,
 anonymous, and authenticated database roles unless a later access contract adds
@@ -36,8 +40,8 @@ GUID. It does not trigger hydration, wait for Toast, or silently fall back to a
 source API.
 
 After hydration commits, durable invocation work may ask a dedicated invoker to
-call this API with the GUID. Its idempotency key includes the GUID, snapshot
-identity, and API contract version.
+call this API with the GUID. Its idempotency key includes the GUID, resource
+version identity, and API contract version.
 
 ## Failure Behavior
 
@@ -50,3 +54,4 @@ in the response contract. Source API availability does not alter API behavior.
 - No raw-table reads.
 - No request-time hydration.
 - No order mutation, eligibility decision, or Slack delivery.
+- No dependency on continued Toast availability.

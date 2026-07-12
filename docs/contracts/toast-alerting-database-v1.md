@@ -66,6 +66,11 @@ Each dispatch records its queue time, most recent attempt, attempt count,
 completion time, generic failure text, and the complete eligibility outcome.
 Pending dispatches remain queryable for a later reconciliation service.
 
+After commit, a Supabase-native trigger adapter may wake an allowlisted Edge
+Function with the dispatch id. The adapter does not pass business state or mark
+work complete. The function claims the durable row, and reconciliation retries
+pending work after duplicate, failed, or missed wake-ups.
+
 Before automated processing is enabled, pending work must be exposed through a
 named, versioned warehouse view. A MoMi-owned worker or API may consume that
 view; application code must not query the dispatch or raw tables directly.

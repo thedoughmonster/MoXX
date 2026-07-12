@@ -1,0 +1,22 @@
+{
+  "function_key": "toast.orders.fetch_by_guid.v1",
+  "contract_version": 1,
+  "owner_service": "momi-toast-orders",
+  "function_type": "primitive_source",
+  "entrypoint": "index.ts",
+  "input_schema": "contracts/input.schema.json",
+  "output_schema": "contracts/output.schema.json",
+  "timeout_policy_key": "toast.order.fetch_by_guid.timeout.v1",
+  "retry_policy_key": "toast.order.fetch_by_guid.retry.v1",
+  "idempotency_policy_key": "toast.order.resource_hash.v1",
+  "required_capabilities": [
+    "database_read",
+    "database_write",
+    "toast_http"
+  ],
+  "declared_side_effects": [
+    "records_hydration_attempt",
+    "stores_toast_order_resource_version",
+    "queues_momi_order_api_invocation"
+  ]
+}

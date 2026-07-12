@@ -12,7 +12,7 @@
 - Hydration functions may call only their configured source API.
 - Hydration must start from durable scheduled work and persist complete responses.
 - Hydration retries must be idempotent and must not run inside a read request.
-- Persist a full hydration snapshot before creating downstream invocation work.
+- Persist a full resource version before creating downstream invocation work.
 - MoMi API invokers must start from durable work and pass source identity only.
 - Decision functions must not call source APIs or read raw tables in service code.
 - Internal modules coordinate through warehouse records, not HTTP calls.

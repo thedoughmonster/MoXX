@@ -36,7 +36,9 @@ test("enforces warehouse-first API boundaries", async () => {
       }
       const normalized = path.replaceAll("\\", "/")
       const source = await readFile(join(root, path), "utf8")
-      const mayCallHttp = /(hydration|delivery|api-invoker)/.test(normalized)
+      const mayCallHttp = /(hydration|delivery|api-invoker|fetch-)/.test(
+        normalized,
+      )
 
       if (/\bfetch\s*\(/.test(source) && !mayCallHttp) {
         unauthorizedFetches.push(normalized)
