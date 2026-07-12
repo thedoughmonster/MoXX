@@ -79,7 +79,8 @@ flowchart LR
 - Application code and the MoMi API do not query raw source tables directly.
 - Modules coordinate only through durable database work, never HTTP chains.
 - A Supabase-native adapter may wake an allowlisted Edge Function after commit.
-- Adapter requests carry work identity only; the function reclaims durable work.
+- Adapter requests carry work identity and its private per-work capability token.
+- The function verifies the token while atomically reclaiming durable work.
 - Duplicate or missed wake-ups are recovered from database state.
 - Business mappings and enable switches live in database configuration.
 - Source, rule, route, and destination enablement are independent controls.

@@ -10,10 +10,17 @@ import { functionKey, type ExecutionResult } from "./types.ts"
 
 export async function executeJob(
   jobId: string,
+  triggerToken: string,
   codeCommitSha: string,
   deploymentId: string | null,
 ): Promise<ExecutionResult> {
-  const claim = await claimJob(jobId, functionKey, codeCommitSha, deploymentId)
+  const claim = await claimJob(
+    jobId,
+    triggerToken,
+    functionKey,
+    codeCommitSha,
+    deploymentId,
+  )
 
   if (claim.disposition === "not_found") {
     return { status: 404, body: { ok: false, disposition: "not_found", job_id: jobId } }

@@ -1,5 +1,10 @@
 export const functionKey = "toast.orders.fetch_by_guid.v1"
 
+export type HydrationTriggerInput = {
+  job_id: string
+  trigger_token: string
+}
+
 export type ClaimedJob = {
   disposition: "claimed"
   job_id: string

@@ -35,9 +35,9 @@ The hydration worker starts only after that transaction commits. Scheduled and
 reconciliation jobs enter the same durable work table and execution path.
 
 A Supabase-native trigger adapter may invoke the allowlisted Edge Function after
-commit with the work id. The request is an at-least-once wake-up signal only.
-The function claims and reads durable work; reconciliation recovers missed or
-duplicate invocations.
+commit with the work id and private per-work capability token. The request is an
+at-least-once wake-up signal only. The function verifies the token while it
+claims durable work; reconciliation recovers missed or duplicate invocations.
 
 ## Idempotency
 

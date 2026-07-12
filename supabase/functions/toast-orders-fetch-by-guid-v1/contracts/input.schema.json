@@ -3,7 +3,7 @@
   "$id": "momi://toast.orders.fetch_by_guid.v1/input",
   "type": "object",
   "additionalProperties": false,
-  "required": ["job_id"],
+  "required": ["job_id", "trigger_token"],
   "properties": {
     "job_id": {
       "oneOf": [
@@ -18,6 +18,10 @@
           "maxLength": 19
         }
       ]
+    },
+    "trigger_token": {
+      "type": "string",
+      "format": "uuid"
     }
   }
 }

@@ -54,8 +54,9 @@ for hydration; it returns the latest warehouse state with freshness metadata.
 
 Internal modules coordinate through durable warehouse records. A Supabase-native
 trigger adapter may invoke an allowlisted Edge Function after work commits, but
-the call carries work identity only. It is a wake-up mechanism, not module state
-or completion authority. Duplicate or missed calls reconcile from durable work.
+the call carries only work identity and its private per-work capability token.
+It is a wake-up mechanism, not module state or completion authority. Duplicate
+or missed calls reconcile from durable work.
 
 The Order API invoker is a controlled boundary, not an in-request chain. It
 starts only from committed work created by the hydration completion transaction.

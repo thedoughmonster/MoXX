@@ -4,6 +4,7 @@ import type { ClaimJobResult, ClaimedJob } from "./types.ts"
 
 export async function claimJob(
   jobId: string,
+  triggerToken: string,
   expectedFunctionKey: string,
   codeCommitSha: string,
   deploymentId: string | null,
@@ -23,6 +24,7 @@ export async function claimJob(
            toast_hydration.restaurants as restaurant,
            toast_hydration.function_registry as registered_function
       where job.id = ${jobId}::bigint
+        and job.trigger_token = ${triggerToken}::uuid
         and job.function_key = ${expectedFunctionKey}
         and source.source_key = job.source_key
         and source.is_enabled

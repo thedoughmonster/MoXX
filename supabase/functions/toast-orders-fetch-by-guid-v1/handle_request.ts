@@ -1,6 +1,5 @@
-import { isInternalKeyAuthorization } from "./authorize_request.ts"
 import { executeJob } from "./execute_job.ts"
-import { parseJobId } from "./parse_request.ts"
+import { parseHydrationTrigger } from "./parse_request.ts"
 import { functionKey } from "./types.ts"
 
 export async function handleRequest(request: Request): Promise<Response> {
@@ -15,14 +14,6 @@ export async function handleRequest(request: Request): Promise<Response> {
     })
   }
 
-  const isAuthorized = isInternalKeyAuthorization(
-    request.headers.get("x-momi-internal-key"),
-    Deno.env.get("MOMI_INTERNAL_FUNCTION_KEY"),
-  )
-  if (!isAuthorized) {
-    return new Response("forbidden", { status: 403 })
-  }
-
   let input: unknown
   try {
     input = await request.json()
@@ -30,8 +21,8 @@ export async function handleRequest(request: Request): Promise<Response> {
     return new Response("invalid request", { status: 400 })
   }
 
-  const jobId = parseJobId(input)
-  if (!jobId) {
+  const trigger = parseHydrationTrigger(input)
+  if (!trigger) {
     return new Response("invalid request", { status: 400 })
   }
 
@@ -42,7 +33,8 @@ export async function handleRequest(request: Request): Promise<Response> {
 
   try {
     const result = await executeJob(
-      jobId,
+      trigger.job_id,
+      trigger.trigger_token,
       codeCommitSha,
       Deno.env.get("DENO_DEPLOYMENT_ID") ?? null,
     )
@@ -50,7 +42,7 @@ export async function handleRequest(request: Request): Promise<Response> {
   } catch (error) {
     const errorName = error instanceof Error ? error.name : "UnknownError"
     console.error("Toast order hydration failed", {
-      job_id: jobId,
+      job_id: trigger.job_id,
       error_name: errorName,
     })
     return new Response("persistence failed", { status: 500 })

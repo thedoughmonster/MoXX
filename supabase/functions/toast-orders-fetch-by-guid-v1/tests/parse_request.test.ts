@@ -1,13 +1,19 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 
-import { parseJobId } from "../parse_request.ts"
+import { parseHydrationTrigger } from "../parse_request.ts"
 
-test("accepts only one positive durable job id", () => {
-  assert.equal(parseJobId({ job_id: 42 }), "42")
-  assert.equal(parseJobId({ job_id: "9223372036854775807" }), "9223372036854775807")
-  assert.equal(parseJobId({ job_id: "0" }), null)
-  assert.equal(parseJobId({ job_id: "9223372036854775808" }), null)
-  assert.equal(parseJobId({ job_id: "1", extra: true }), null)
-  assert.equal(parseJobId([]), null)
+test("accepts only a positive job id with its durable token", () => {
+  const token = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+  assert.deepEqual(parseHydrationTrigger({ job_id: 42, trigger_token: token }), {
+    job_id: "42",
+    trigger_token: token,
+  })
+  assert.equal(parseHydrationTrigger({ job_id: "0", trigger_token: token }), null)
+  assert.equal(parseHydrationTrigger({ job_id: "1", trigger_token: "bad" }), null)
+  assert.equal(
+    parseHydrationTrigger({ job_id: "1", trigger_token: token, extra: true }),
+    null,
+  )
+  assert.equal(parseHydrationTrigger([]), null)
 })
