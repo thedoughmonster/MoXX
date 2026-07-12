@@ -1,11 +1,12 @@
-import { isServiceRoleAuthorization } from "./authorize_request.ts"
-import { claimCandidates } from "./claim_candidates.ts"
+import { isSecretKeyAuthorization } from "./authorize_request.ts"
 import { parseRawEventId } from "./parse_request.ts"
+import { processDispatch } from "./process_dispatch.ts"
+import { recordDispatchFailure } from "./record_dispatch_failure.ts"
 
 export async function handleRequest(request: Request): Promise<Response> {
-  const isAuthorized = isServiceRoleAuthorization(
-    request.headers.get("authorization"),
-    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),
+  const isAuthorized = isSecretKeyAuthorization(
+    request.headers.get("apikey"),
+    Deno.env.get("SUPABASE_SECRET_KEYS"),
   )
 
   if (!isAuthorized) {
@@ -38,7 +39,7 @@ export async function handleRequest(request: Request): Promise<Response> {
   }
 
   try {
-    const outcome = await claimCandidates(rawEventId)
+    const outcome = await processDispatch(rawEventId)
 
     if (!outcome.event_found) {
       return Response.json(
@@ -50,6 +51,13 @@ export async function handleRequest(request: Request): Promise<Response> {
     return Response.json({ ok: true, raw_event_id: rawEventId, ...outcome })
   } catch (error) {
     console.error("Toast alert eligibility failed", rawEventId, error)
+
+    try {
+      await recordDispatchFailure(rawEventId)
+    } catch (recordError) {
+      console.error("Toast alert dispatch failure recording failed", rawEventId, recordError)
+    }
+
     return new Response("eligibility failed", { status: 500 })
   }
 }

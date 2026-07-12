@@ -29,4 +29,4 @@ deno_version = 2
 verify_jwt = false
 
 [functions.toast-order-alert-eligibility-v1]
-verify_jwt = true
+verify_jwt = false

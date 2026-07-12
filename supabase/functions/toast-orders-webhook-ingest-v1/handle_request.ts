@@ -1,3 +1,4 @@
+import { invokeEligibility } from "./invoke_eligibility.ts"
 import { parseToastPayload } from "./parse_toast_payload.ts"
 import { storeRawEvent } from "./store_raw_event.ts"
 import { verifyToastSignature } from "./verify_toast_signature.ts"
@@ -37,12 +38,13 @@ export async function handleRequest(request: Request): Promise<Response> {
   }
 
   try {
-    const disposition = await storeRawEvent(
+    const result = await storeRawEvent(
       Object.fromEntries(request.headers.entries()),
       payload,
     )
+    EdgeRuntime.waitUntil(invokeEligibility(result.rawEventId))
 
-    return Response.json({ ok: true, disposition })
+    return Response.json({ ok: true, disposition: result.disposition })
   } catch (error) {
     console.error("Toast webhook persistence failed", error)
     return new Response("persistence failed", { status: 500 })

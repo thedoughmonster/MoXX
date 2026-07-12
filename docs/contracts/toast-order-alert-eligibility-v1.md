@@ -6,8 +6,7 @@ This contract defines the first downstream decision point after raw Toast
 webhook receipt. It identifies when a stored Toast order event should create
 one alert candidate for later Slack delivery.
 
-The raw ingest function remains unchanged. It only authenticates and stores
-Toast events.
+The raw ingest function schedules this processor only after durable storage.
 
 ## Input
 
@@ -18,13 +17,13 @@ Toast events.
 ```
 
 `raw_event_id` may be a positive decimal string or a positive safe integer.
-Supabase JWT verification remains enabled, and the handler also requires the
-branch service-role credential because anonymous legacy keys are valid JWTs.
+Supabase JWT verification is disabled because current secret keys are not JWTs.
+The handler requires the branch's exact default secret key in the `apikey`
+header and reads the expected key from `SUPABASE_SECRET_KEYS`.
 
 The processor reads that row from `toast_raw.order_webhook_events`.
 
-It may inspect the complete stored Toast payload and receipt metadata, but it
-must not alter, enrich, or delete raw rows.
+It may inspect the complete stored Toast payload and receipt metadata, but it must not alter, enrich, or delete raw rows.
 
 ## Order Identity
 
@@ -77,8 +76,14 @@ toast_order_guid + alert_kind
 
 The processor writes durable alert candidates for a later notification service.
 
-A successful response reports whether the event exists, the numbers of matched,
-ambiguous, and newly claimed candidates, and newly created candidate ids.
+A successful response reports whether the event exists, candidate counts and
+ids, and whether the dispatch had already completed.
+
+Processing and dispatch completion are atomic. The processor locks the durable
+dispatch for the raw event, increments its attempt count, claims candidates,
+stores the complete outcome, and marks the dispatch complete in one database
+transaction. A completed dispatch returns its stored outcome without evaluating
+changed configuration again.
 
 Each candidate must include:
 
@@ -98,8 +103,9 @@ and delivery status are owned by a later notification service.
 If eligibility cannot be decided because a required configured rule is missing,
 the event must remain unclaimed and reviewable. The processor should not guess.
 
-If candidate persistence fails, the processor must retry later rather than
-acknowledging the alert as handled.
+If candidate persistence or dispatch completion fails, the dispatch remains
+pending. The handler records a generic failure when the database is available,
+and a later invocation may retry the whole transaction safely.
 
 Missing raw events return `404`. Invalid requests return `400`, unsupported
 methods return `405`, non-service callers return `403`, and database failures
@@ -107,8 +113,7 @@ return `500`.
 
 ## Non-Goals
 
-- No changes to `toast-orders-webhook-ingest-v1`.
-- No automatic database webhook or scheduling configuration.
+- No synchronous eligibility work in `toast-orders-webhook-ingest-v1`.
 - No Slack message formatting or delivery.
 - No hardcoded business value lists in code.
 - No relational normalization of the raw Toast payload.

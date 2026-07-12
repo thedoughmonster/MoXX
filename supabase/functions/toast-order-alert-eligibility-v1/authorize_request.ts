@@ -1,8 +1,18 @@
-export function isServiceRoleAuthorization(
-  authorization: string | null,
-  serviceRoleKey: string | undefined,
+export function isSecretKeyAuthorization(
+  apiKey: string | null,
+  serializedKeys: string | undefined,
 ): boolean {
-  return Boolean(
-    serviceRoleKey && authorization === `Bearer ${serviceRoleKey}`,
-  )
+  if (!apiKey || !serializedKeys) {
+    return false
+  }
+
+  try {
+    const keys = JSON.parse(serializedKeys) as Record<string, unknown>
+    const expectedKey = keys?.default
+
+    return typeof expectedKey === "string" &&
+      expectedKey.startsWith("sb_secret_") && apiKey === expectedKey
+  } catch {
+    return false
+  }
 }

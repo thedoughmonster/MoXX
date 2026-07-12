@@ -5,7 +5,7 @@
 This contract defines private database objects used after raw Toast webhook
 storage to claim alert candidates for later notification delivery.
 
-It does not change raw ingest behavior and does not send Slack messages.
+It provides the durable handoff from raw ingest but does not send Slack messages.
 
 ## Schema
 
@@ -56,9 +56,25 @@ The unique claim key is:
 toast_order_guid + alert_kind
 ```
 
+## Dispatches
+
+`toast_alerting.order_alert_dispatches` stores one durable eligibility dispatch
+per raw Toast event. An `AFTER INSERT` trigger creates it in the same transaction
+as the raw event, before the ingest function schedules background processing.
+
+Each dispatch records its queue time, most recent attempt, attempt count,
+completion time, generic failure text, and the complete eligibility outcome.
+Pending dispatches remain queryable for a later reconciliation service.
+
+`toast_alerting.process_order_alert_dispatch(bigint)` serializes concurrent
+attempts for one event. Candidate claiming and dispatch completion happen in the
+same transaction. Completed dispatches return their stored outcome and do not
+re-evaluate later configuration changes.
+
 ## Ownership
 
-The alerting schema owns Toast-only eligibility state and destination routing.
+The alerting schema owns Toast-only dispatch, eligibility state, and destination
+routing.
 Slack message formatting, delivery attempts, and cross-source joins belong to
 later services or explicit views.
 
