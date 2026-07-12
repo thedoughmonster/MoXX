@@ -13,6 +13,10 @@ The private `toast_alerting` schema defines independently controlled sources,
 rules, routes, Slack destinations, and durable alert candidates. Configuration
 is disabled by default and contains no hardcoded business values.
 
+`toast-order-alert-eligibility-v1` accepts a stored raw event id and atomically
+claims candidates using that configuration. It requires Supabase JWT
+verification and does not send notifications.
+
 Slack formatting and delivery will be implemented as a separate module. It
 must not run inside the raw ingestion request.
 

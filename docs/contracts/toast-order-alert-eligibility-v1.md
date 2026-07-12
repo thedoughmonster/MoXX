@@ -11,7 +11,16 @@ Toast events.
 
 ## Input
 
-The eligibility processor reads from `toast_raw.order_webhook_events`.
+`toast-order-alert-eligibility-v1` accepts `POST` requests containing:
+
+```json
+{"raw_event_id":"123"}
+```
+
+`raw_event_id` may be a positive decimal string or a positive safe integer.
+Supabase JWT verification remains enabled because this is an internal service.
+
+The processor reads that row from `toast_raw.order_webhook_events`.
 
 It may inspect the complete stored Toast payload and receipt metadata, but it
 must not alter, enrich, or delete raw rows.
@@ -35,8 +44,20 @@ status, fulfillment state, revenue center, dining option, or item attributes.
 
 Toast sources must be configurable and independently enabled or disabled.
 
+Each source mapping stores the payload path and expected JSON value used to
+identify that source, plus the payload path containing the Toast order GUID.
+No source or order GUID path is hardcoded in service code.
+
 Unknown or unmapped source values are not alert-eligible by default. They
 should be preserved for review and made eligible only by an explicit mapping.
+
+An enabled rule must have at least one condition, and every condition must
+exactly match its configured payload path and JSON value. Only one version of a
+rule may be enabled for a source and alert kind at a time.
+
+The source, rule, route, and Slack destination must each be enabled. Multiple
+matching sources for the same order and alert kind are ambiguous and create no
+candidate.
 
 ## Idempotency
 
@@ -54,6 +75,9 @@ toast_order_guid + alert_kind
 ## Output
 
 The processor writes durable alert candidates for a later notification service.
+
+A successful response reports whether the event exists, the numbers of matched,
+ambiguous, and newly claimed candidates, and newly created candidate ids.
 
 Each candidate must include:
 
@@ -76,9 +100,13 @@ the event must remain unclaimed and reviewable. The processor should not guess.
 If candidate persistence fails, the processor must retry later rather than
 acknowledging the alert as handled.
 
+Missing raw events return `404`. Invalid requests return `400`, unsupported
+methods return `405`, and database failures return `500`.
+
 ## Non-Goals
 
 - No changes to `toast-orders-webhook-ingest-v1`.
+- No automatic database webhook or scheduling configuration.
 - No Slack message formatting or delivery.
 - No hardcoded business value lists in code.
 - No relational normalization of the raw Toast payload.

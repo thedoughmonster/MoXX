@@ -12,7 +12,7 @@ flowchart LR
   ingest["Toast ingest"]
   raw["toast_raw.order_webhook_events"]
   config["Configured sources, rules, routes, destinations"]
-  eligibility["Alert eligibility"]
+  eligibility["toast-order-alert-eligibility-v1"]
   candidates["toast_alerting.order_alert_candidates"]
   delivery["Slack delivery"]
   slack["Slack channel"]

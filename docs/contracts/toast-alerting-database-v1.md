@@ -16,7 +16,8 @@ no access, and row level security is enabled as defense in depth.
 
 `toast_alerting.toast_sources` stores named Toast source mappings. Each source
 has its own enabled flag so a source can be turned on or off without changing
-rules or Slack destinations.
+rules or Slack destinations. Source and order GUID payload paths are stored as
+configuration rather than hardcoded in a service.
 
 `toast_alerting.slack_destinations` stores named Slack channel targets. Each
 destination has its own enabled flag and channel id. No channel ids are seeded
@@ -25,7 +26,8 @@ by the migration.
 `toast_alerting.alert_rules` stores alert kinds and rule versions.
 
 Rules are disabled by default. Enabling a rule is an explicit operational act
-after its configured conditions are reviewed.
+after its configured conditions are reviewed. A source and alert kind may have
+only one enabled rule version.
 
 `toast_alerting.alert_rule_conditions` stores ordered payload path/value
 conditions for each rule. Conditions use Toast payload paths and JSON values so
@@ -36,6 +38,10 @@ destination. Routes are enabled separately from sources, rules, and
 destinations so channel changes do not require code changes.
 
 No initial business values are seeded by the migration.
+
+Eligibility is evaluated atomically by a private database function. It uses
+exact JSON equality, requires every rule condition to match, and refuses to
+claim an ambiguous source match.
 
 ## Candidate Claims
 
