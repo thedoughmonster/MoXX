@@ -33,11 +33,11 @@ export async function recordFailure(
         lease_expires_at = null,
         last_error = ${failure.error_message},
         last_outcome = jsonb_build_object(
-          'attempt_id', ${work.attempt_id},
-          'invocation_id', ${work.invocation_id},
+          'attempt_id', ${work.attempt_id}::text,
+          'invocation_id', ${work.invocation_id}::text,
           'outcome', 'failed',
-          'http_status', ${failure.http_status},
-          'error_code', ${failure.error_code}
+          'http_status', ${failure.http_status}::integer,
+          'error_code', ${failure.error_code}::text
         )
     from attempt_update
     where delivery_work.id = attempt_update.work_id

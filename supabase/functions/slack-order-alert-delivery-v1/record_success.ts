@@ -39,12 +39,12 @@ export async function recordSuccess(
         completed_at = now(),
         last_error = null,
         last_outcome = jsonb_build_object(
-          'attempt_id', ${work.attempt_id},
-          'invocation_id', ${work.invocation_id},
+          'attempt_id', ${work.attempt_id}::text,
+          'invocation_id', ${work.invocation_id}::text,
           'outcome', 'succeeded',
-          'http_status', ${response.status},
-          'slack_channel_id', ${summary.channel},
-          'slack_message_ts', ${summary.ts}
+          'http_status', ${response.status}::integer,
+          'slack_channel_id', ${summary.channel}::text,
+          'slack_message_ts', ${summary.ts}::text
         )
     from attempt_update
     where delivery_work.id = attempt_update.work_id
