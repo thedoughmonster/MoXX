@@ -1,7 +1,17 @@
+import { isServiceRoleAuthorization } from "./authorize_request.ts"
 import { claimCandidates } from "./claim_candidates.ts"
 import { parseRawEventId } from "./parse_request.ts"
 
 export async function handleRequest(request: Request): Promise<Response> {
+  const isAuthorized = isServiceRoleAuthorization(
+    request.headers.get("authorization"),
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"),
+  )
+
+  if (!isAuthorized) {
+    return new Response("forbidden", { status: 403 })
+  }
+
   if (request.method === "GET") {
     return Response.json({ ok: true })
   }

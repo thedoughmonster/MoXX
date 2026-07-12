@@ -18,7 +18,8 @@ Toast events.
 ```
 
 `raw_event_id` may be a positive decimal string or a positive safe integer.
-Supabase JWT verification remains enabled because this is an internal service.
+Supabase JWT verification remains enabled, and the handler also requires the
+branch service-role credential because anonymous legacy keys are valid JWTs.
 
 The processor reads that row from `toast_raw.order_webhook_events`.
 
@@ -101,7 +102,8 @@ If candidate persistence fails, the processor must retry later rather than
 acknowledging the alert as handled.
 
 Missing raw events return `404`. Invalid requests return `400`, unsupported
-methods return `405`, and database failures return `500`.
+methods return `405`, non-service callers return `403`, and database failures
+return `500`.
 
 ## Non-Goals
 

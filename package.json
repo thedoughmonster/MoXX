@@ -6,6 +6,6 @@
     "node": ">=24 <25"
   },
   "scripts": {
-    "test": "node --test tests/parse_valid_alert_eligibility_request.test.ts tests/reject_invalid_alert_eligibility_request.test.ts tests/verify_invalid_toast_signature.test.ts tests/verify_valid_toast_signature.test.ts"
+    "test": "node --test tests/authorize_alert_eligibility_service.test.ts tests/parse_valid_alert_eligibility_request.test.ts tests/reject_invalid_alert_eligibility_request.test.ts tests/verify_invalid_toast_signature.test.ts tests/verify_valid_toast_signature.test.ts"
   }
 }
