@@ -60,11 +60,15 @@ toast_order_guid + alert_kind
 
 `toast_alerting.order_alert_dispatches` stores one durable eligibility dispatch
 per raw Toast event. An `AFTER INSERT` trigger creates it in the same transaction
-as the raw event, before the ingest function schedules background processing.
+as the raw event, without a downstream API call from ingest.
 
 Each dispatch records its queue time, most recent attempt, attempt count,
 completion time, generic failure text, and the complete eligibility outcome.
 Pending dispatches remain queryable for a later reconciliation service.
+
+Before automated processing is enabled, pending work must be exposed through a
+named, versioned warehouse view. A MoMi-owned worker or API may consume that
+view; application code must not query the dispatch or raw tables directly.
 
 `toast_alerting.process_order_alert_dispatch(bigint)` serializes concurrent
 attempts for one event. Candidate claiming and dispatch completion happen in the

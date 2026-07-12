@@ -26,14 +26,13 @@ One row is attempted in `toast_raw.order_webhook_events` with:
 
 The payload event GUID is unique. Replays and retries do not create another row.
 
-After durable storage, the receiver schedules
-`toast-order-alert-eligibility-v1` with only the raw event row id. This work runs
-as a background task and does not delay Toast's response. A replay schedules the
-same id safely so an incomplete downstream attempt can be retried.
-
 Every newly stored raw event also receives a durable pending dispatch row from
-the database trigger defined by the alerting database contract. Eligibility
-completion, rather than the HTTP handoff itself, marks that dispatch complete.
+the database trigger defined by the alerting database contract. The receiver
+does not call another function or API after storage.
+
+Hydration must not be enabled until warehouse migration creates idempotent
+hydration work from the configured order GUID path in the same transaction as
+the raw event. The hydration contract owns that future work, not receiver code.
 
 ## Responses
 
@@ -44,11 +43,9 @@ completion, rather than the HTTP handoff itself, marks that dispatch complete.
 - `500`: persistence failed and Toast should retry.
 - `503`: the hosted webhook secret is unavailable.
 
-A downstream invocation failure does not change a successful raw receipt into
-an ingest failure. Its dispatch remains pending for a later retry.
-
 ## Non-Goals
 
+- No outbound API or Edge Function calls.
 - No order-state interpretation or eligibility decisions.
 - No Slack formatting or delivery.
 - No source-field mapping.

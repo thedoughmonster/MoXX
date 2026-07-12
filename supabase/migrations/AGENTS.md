@@ -12,3 +12,6 @@
 - Use `timestamptz` for receipt times and `jsonb` for source documents.
 - Revoke public, anonymous, and authenticated access to raw schemas.
 - Enable RLS as defense in depth even when a raw schema is not exposed.
+- Database functions, triggers, and views must not perform network calls.
+- Do not use `pg_net`, HTTP extensions, or database webhooks to chain modules.
+- Insert durable work records for a worker instead of making network requests.

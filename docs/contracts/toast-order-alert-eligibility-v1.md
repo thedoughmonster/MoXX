@@ -6,7 +6,13 @@ This contract defines the first downstream decision point after raw Toast
 webhook receipt. It identifies when a stored Toast order event should create
 one alert candidate for later Slack delivery.
 
-The raw ingest function schedules this processor only after durable storage.
+Raw ingest never calls this processor. A MoMi-owned worker or API may process a durable warehouse dispatch after reading its approved versioned view.
+
+## Status
+
+This raw-event contract is not approved for automation under ADR `0003`. It
+remains disabled until a successor accepts an order GUID and reads the hydrated
+order through the MoMi Order API.
 
 ## Input
 
@@ -21,9 +27,7 @@ Supabase JWT verification is disabled because current secret keys are not JWTs.
 The handler requires the branch's exact default secret key in the `apikey`
 header and reads the expected key from `SUPABASE_SECRET_KEYS`.
 
-The processor reads that row from `toast_raw.order_webhook_events`.
-
-It may inspect the complete stored Toast payload and receipt metadata, but it must not alter, enrich, or delete raw rows.
+The service passes the id to a private warehouse function. Warehouse logic may inspect the complete stored payload, but service code does not query raw tables.
 
 ## Order Identity
 
@@ -85,15 +89,8 @@ stores the complete outcome, and marks the dispatch complete in one database
 transaction. A completed dispatch returns its stored outcome without evaluating
 changed configuration again.
 
-Each candidate must include:
-
-- Toast order GUID.
-- Configured source key.
-- Alert kind.
-- Configured Slack destination key.
-- The raw webhook event row that caused the claim.
-- The rule or mapping version used for the decision.
-- Claim timestamp.
+Each candidate includes the Toast order GUID, configured source and destination
+keys, alert kind, causing raw event, rule version, and claim timestamp.
 
 Slack channel ids are configured in the database. Message formatting, retries,
 and delivery status are owned by a later notification service.
@@ -113,6 +110,8 @@ return `500`.
 
 ## Non-Goals
 
+- No source or vendor API calls.
+- No direct raw-table reads in service code.
 - No synchronous eligibility work in `toast-orders-webhook-ingest-v1`.
 - No Slack message formatting or delivery.
 - No hardcoded business value lists in code.

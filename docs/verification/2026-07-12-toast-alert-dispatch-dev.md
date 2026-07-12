@@ -2,6 +2,10 @@
 
 Date: 2026-07-12
 
+> Historical verification for commit `1ad1e3f`. ADR `0003` later removed the
+> direct ingest-to-eligibility HTTP handoff. The remaining-signal section below
+> is not part of the current warehouse-first architecture.
+
 ## Scope
 
 - Git commit: `1ad1e3f`
