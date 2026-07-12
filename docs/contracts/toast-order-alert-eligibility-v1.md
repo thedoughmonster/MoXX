@@ -33,6 +33,8 @@ Rules must live in database tables or views, not code constants. The initial
 rules may classify Toast-owned fields such as source, payment status, approval
 status, fulfillment state, revenue center, dining option, or item attributes.
 
+Toast sources must be configurable and independently enabled or disabled.
+
 Unknown or unmapped source values are not alert-eligible by default. They
 should be preserved for review and made eligible only by an explicit mapping.
 
@@ -56,13 +58,15 @@ The processor writes durable alert candidates for a later notification service.
 Each candidate must include:
 
 - Toast order GUID.
+- Configured source key.
 - Alert kind.
+- Configured Slack destination key.
 - The raw webhook event row that caused the claim.
 - The rule or mapping version used for the decision.
 - Claim timestamp.
 
-Slack channel selection, message formatting, retries, and delivery status are
-owned by a later notification service.
+Slack channel ids are configured in the database. Message formatting, retries,
+and delivery status are owned by a later notification service.
 
 ## Failure Behavior
 
