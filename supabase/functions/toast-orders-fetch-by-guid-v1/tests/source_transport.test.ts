@@ -1,8 +1,16 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 
+import { isInternalKeyAuthorization } from "../authorize_request.ts"
 import { fetchToastOrder } from "../fetch_toast_order.ts"
 import { getToastToken } from "../get_toast_token.ts"
+
+test("requires the dedicated internal function key", () => {
+  const key = "a".repeat(32)
+  assert.equal(isInternalKeyAuthorization(key, key), true)
+  assert.equal(isInternalKeyAuthorization("wrong", key), false)
+  assert.equal(isInternalKeyAuthorization(key, undefined), false)
+})
 
 test("authenticates with the configured Toast client contract", async () => {
   let capturedUrl = ""

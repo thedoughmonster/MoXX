@@ -1,4 +1,4 @@
-import { isSecretKeyAuthorization } from "./authorize_request.ts"
+import { isInternalKeyAuthorization } from "./authorize_request.ts"
 import { executeJob } from "./execute_job.ts"
 import { parseJobId } from "./parse_request.ts"
 import { functionKey } from "./types.ts"
@@ -15,9 +15,9 @@ export async function handleRequest(request: Request): Promise<Response> {
     })
   }
 
-  const isAuthorized = isSecretKeyAuthorization(
-    request.headers.get("apikey"),
-    Deno.env.get("SUPABASE_SECRET_KEYS"),
+  const isAuthorized = isInternalKeyAuthorization(
+    request.headers.get("x-momi-internal-key"),
+    Deno.env.get("MOMI_INTERNAL_FUNCTION_KEY"),
   )
   if (!isAuthorized) {
     return new Response("forbidden", { status: 403 })

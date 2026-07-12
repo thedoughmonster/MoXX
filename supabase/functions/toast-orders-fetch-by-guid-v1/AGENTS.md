@@ -8,6 +8,7 @@
 - Persist the complete JSON response before returning success.
 - Deduplicate identical resource versions by content hash.
 - Persist attempts and safe response metadata without credentials or tokens.
+- Authorize POST triggers with the dedicated internal function key.
 - Create Order API work only after a valid order resource is durable.
 - Do not evaluate alerts, format messages, call Slack, or call another function.
 - Log identifiers and generic errors only, never source payloads or secrets.
