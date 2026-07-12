@@ -1,0 +1,7 @@
+{
+  "function_key": "toast.orders.alert_from_hydrated_order.v1",
+  "contract_version": 1,
+  "function_type": "action",
+  "route_path": "/functions/v1/toast-order-alert-worker-v1",
+  "authentication_policy_key": "durable.work_token.v1"
+}

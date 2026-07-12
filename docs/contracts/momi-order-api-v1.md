@@ -6,14 +6,22 @@ The MoMi Order API is the only application-facing boundary for order reads.
 It resolves orders from an approved, versioned warehouse view and never calls
 Toast or reads a raw source table directly.
 
-## Input
+## HTTP Contract
 
-The order lookup input is the non-empty Toast order GUID captured from the
-configured webhook payload path. Callers pass identity only, never an order
-document received from Toast.
+The route is `POST /functions/v1/momi-orders-get-by-guid-v1`. Its function key is
+`momi.orders.get_by_guid.v1`.
 
-The exact HTTP route and authentication contract must be fixed before the API is
-implemented. They may not be inferred or duplicated by callers.
+The strict JSON input is:
+
+```json
+{"work_id":"123","order_guid":"toast-guid","trigger_token":"uuid"}
+```
+
+The publishable project key permits gateway entry. Authorization comes from the
+matching private durable work row, exact order GUID, active read-view registry
+entry, running status, and per-work capability token. The selected view row must
+match the immutable order version attached to that work. Callers pass identity
+only, never an order document received from Toast.
 
 ## Warehouse Contract
 
@@ -38,6 +46,11 @@ specific grants and row-level policies.
 A read returns the latest approved warehouse representation available for the
 GUID. It does not trigger hydration, wait for Toast, or silently fall back to a
 source API.
+
+The successful response contains the complete order JSON returned by the
+approved view plus order version id, restaurant GUID, retrieval time, content
+hash, contract key, and contract version. The API records no eligibility or
+delivery decision.
 
 After hydration commits, durable invocation work may ask a dedicated invoker to
 call this API with the GUID. Its idempotency key includes the GUID, resource

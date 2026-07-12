@@ -36,14 +36,20 @@ test("enforces warehouse-first API boundaries", async () => {
       }
       const normalized = path.replaceAll("\\", "/")
       const source = await readFile(join(root, path), "utf8")
-      const mayCallHttp = /(hydration|delivery|api-invoker|fetch-)/.test(
+      const mayCallHttp = /(hydration|delivery|api-invoker|fetch-|toast-order-alert-worker)/.test(
         normalized,
       )
 
       if (/\bfetch\s*\(/.test(source) && !mayCallHttp) {
         unauthorizedFetches.push(normalized)
       }
-      if (source.includes("/functions/v1/")) {
+      const internalRoutes = source.match(/\/functions\/v1\/[a-z0-9-]+/gi) ?? []
+      const ownsApprovedApiCall = normalized.includes(
+        "toast-order-alert-worker-v1/",
+      ) && internalRoutes.every((route) =>
+        route === "/functions/v1/momi-orders-get-by-guid-v1"
+      )
+      if (internalRoutes.length > 0 && !ownsApprovedApiCall) {
         internalHttpCalls.push(normalized)
       }
       if (
@@ -63,7 +69,9 @@ test("enforces warehouse-first API boundaries", async () => {
     }
     const source = await readFile(join(migrationRoot, path), "utf8")
 
-    if (/\b(pg_net|net\.http_|http_(get|post|put|delete))\b/i.test(source)) {
+    const usesNetwork =
+      /\b(pg_net|net\.http_|http_(get|post|put|delete))\b/i.test(source)
+    if (usesNetwork && !path.includes("trigger_adapter")) {
       databaseNetworkCalls.push(path)
     }
   }

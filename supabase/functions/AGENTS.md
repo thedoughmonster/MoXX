@@ -16,6 +16,8 @@
 - MoMi API invokers must start from durable work and pass source identity only.
 - Decision functions must not call source APIs or read raw tables in service code.
 - Internal modules coordinate through warehouse records, not HTTP calls.
+- Under ADR `0004`, the hydrated alert worker may call only the exact versioned
+  MoMi Order API route named by its claimed durable work.
 - Delivery functions may call only configured destinations for durable outcomes.
 - Return success for an idempotent replay.
 - Return a server error when durable storage fails.

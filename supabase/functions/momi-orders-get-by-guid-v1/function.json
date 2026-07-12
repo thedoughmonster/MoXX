@@ -1,0 +1,13 @@
+{
+  "function_key": "momi.orders.get_by_guid.v1",
+  "contract_version": 1,
+  "owner_service": "momi-order-api",
+  "function_type": "read",
+  "entrypoint": "index.ts",
+  "input_schema": "contracts/input.schema.json",
+  "output_schema": "contracts/output.schema.json",
+  "required_capabilities": [
+    "database_read"
+  ],
+  "declared_side_effects": []
+}

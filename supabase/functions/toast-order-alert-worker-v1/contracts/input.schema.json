@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["work_id", "trigger_token"],
+  "properties": {
+    "work_id": { "type": ["string", "integer"], "pattern": "^[1-9][0-9]*$" },
+    "trigger_token": { "type": "string", "format": "uuid" }
+  }
+}

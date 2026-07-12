@@ -66,12 +66,14 @@ export async function persistOrderResponse(
       returning hydration_job.id
     ), api_work as (
       insert into toast_hydration.order_api_invocation_work (
+        hydration_job_id,
         order_version_id,
         restaurant_guid,
         order_guid,
         api_contract_key
       )
       select
+        ${job.job_id}::bigint,
         resource_version.id,
         ${job.restaurant_guid},
         ${job.order_guid},

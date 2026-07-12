@@ -10,9 +10,9 @@ Raw ingest never calls this processor. A MoMi-owned worker or API may process a 
 
 ## Status
 
-This raw-event contract is not approved for automation under ADR `0003`. It
-remains disabled until a successor accepts an order GUID and reads the hydrated
-order through the MoMi Order API.
+This raw-event contract is retired under ADR `0003`. Its enqueue trigger is
+removed. The successor is `Toast Order Alert Pipeline V1`, which accepts durable
+Order API work and reads the hydrated order through the MoMi Order API.
 
 ## Input
 

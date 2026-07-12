@@ -12,6 +12,9 @@
 - Use `timestamptz` for receipt times and `jsonb` for source documents.
 - Revoke public, anonymous, and authenticated access to raw schemas.
 - Enable RLS as defense in depth even when a raw schema is not exposed.
-- Database functions, triggers, and views must not perform network calls.
-- Do not use `pg_net`, HTTP extensions, or database webhooks to chain modules.
-- Insert durable work records for a worker instead of making network requests.
+- Database functions, triggers, and views must not perform business network calls.
+- Insert durable work before any worker is invoked.
+- Only a migration named for a trigger adapter may use `pg_net` under ADR `0004`.
+- Adapter URLs must be exact configured MoMi Edge Function routes.
+- Adapter bodies may contain only work identity and its capability token.
+- Adapters must not call Toast, Slack, or another source or destination API.
