@@ -1,9 +1,15 @@
-# MoMi Toast Ingest Agent Contract
+# MoMi Backend Agent Contract
 
 ## Ownership
 
-This repository owns receipt and source-preserving storage of Toast data.
-It does not own Slack formatting, operational decisions, or cross-source views.
+This repository owns MoMi backend services, database migrations, and their
+explicit contracts. Modules are separated by business capability even when
+they deploy from the same repository.
+
+- Ingest modules authenticate sources and preserve complete source records.
+- Decision modules create durable outcomes from configured rules and mappings.
+- Delivery modules format, send, and track notifications.
+- Frontend and mobile applications belong in their own repositories.
 
 ## Hard Rules
 
@@ -11,12 +17,18 @@ It does not own Slack formatting, operational decisions, or cross-source views.
 - Keep every handwritten file at or below 120 physical lines.
 - Each TypeScript file may declare at most one function.
 - Each callable Edge Function lives in its own directory.
+- Each non-Edge deployable service lives in `services/<service-name>/`.
+- Never place two independently deployable services in the same directory.
 - Keep `index.ts` as wiring only; behavior belongs in imported files.
+- Keep module behavior and tests independently understandable and deployable.
+- Keep one ordered Supabase migration history in this repository.
+- Do not split migrations into a repository separate from the code they support.
 - Preserve complete source payloads. Do not omit source fields.
-- Do not perform business transformations in ingestion code.
+- Do not perform business decisions or delivery work in ingestion code.
 - Put configurable business mappings in database tables, never code constants.
 - Protocol constants may be coded only when an external contract requires them.
 - Keep Toast-owned records in the `toast_raw` database schema.
+- Keep downstream state in explicitly owned non-raw schemas.
 - Do not create cross-source foreign keys in raw schemas.
 - Do not add relationship columns solely to make joins easier.
 - Build joins and projections as explicitly named database views later.

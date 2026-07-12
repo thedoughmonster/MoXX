@@ -1,4 +1,4 @@
-project_id = "momi-toast-ingest"
+project_id = "momi-backend"
 
 [remotes.dev]
 project_id = "xtbraqnlskmqxinjxxdn"

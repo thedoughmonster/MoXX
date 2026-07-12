@@ -1,5 +1,5 @@
 {
-  "name": "momi-toast-ingest",
+  "name": "momi-backend",
   "private": true,
   "type": "module",
   "engines": {

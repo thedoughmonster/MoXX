@@ -2,33 +2,44 @@
 
 ## Boundary
 
-This service ends when an authenticated Toast event is durably stored.
-Downstream projections and notifications consume stored events separately.
+MoMi backend modules share one repository and one ordered Supabase migration
+history. Each module keeps a narrow runtime boundary and communicates through
+durable database records or explicit contracts.
 
 ```mermaid
 flowchart LR
   toast["Toast Orders webhook"]
-  receiver["toast-orders-webhook-ingest-v1"]
+  ingest["Toast ingest"]
   raw["toast_raw.order_webhook_events"]
-  later["Future projections and consumers"]
+  config["Configured sources, rules, routes, destinations"]
+  eligibility["Alert eligibility"]
+  candidates["toast_alerting.order_alert_candidates"]
+  delivery["Slack delivery"]
+  slack["Slack channel"]
 
-  toast --> receiver
-  receiver --> raw
-  raw -. explicit later contract .-> later
+  toast --> ingest
+  ingest --> raw
+  raw --> eligibility
+  config --> eligibility
+  eligibility --> candidates
+  candidates --> delivery
+  delivery --> slack
 ```
 
 ## Invariants
 
-- The receiver is public because Toast cannot send a Supabase JWT.
-- Every POST is authenticated with Toast's HMAC-SHA256 signature.
-- Signature verification uses the exact request body plus Toast timestamp.
-- The complete JSON payload and all received headers are stored.
-- Repeated event GUIDs acknowledge successfully without a second row.
-- Database failure returns a retryable server error instead of acknowledging loss.
-- No Slack call occurs in the ingestion request.
+- Raw ingest performs authentication and source-preserving persistence only.
+- Business mappings and enable switches live in database configuration.
+- Source, rule, route, and destination enablement are independent controls.
+- Alert claims are durable before notification delivery is attempted.
+- Slack calls never occur inside a source ingestion request.
+- Cross-source relationships use explicit views or contracts, not raw foreign keys.
 
-## Data Shape
+## Repository Shape
 
-The raw table has only ingestion metadata, request headers, and source payload.
-Source fields remain inside the payload. Future views may expose fields without
-changing or duplicating the raw record.
+- `supabase/functions/<service-name>/` contains one deployable Edge service.
+- `services/<service-name>/` contains one deployable non-Edge service.
+- `supabase/migrations/` is the single migration history for the shared project.
+- `packages/<package-name>/` contains shared code and is never deployable itself.
+- No directory contains entrypoints for two independently deployable services.
+- Separate repositories are reserved for independently versioned product surfaces.
