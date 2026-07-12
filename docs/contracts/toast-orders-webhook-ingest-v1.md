@@ -1,0 +1,44 @@
+# Toast Orders Webhook Ingest V1
+
+## Request
+
+- Method: `POST`
+- Content type: `application/json`
+- Authentication header: `Toast-Signature`
+- Body: Toast Orders webhook event JSON
+
+The payload must contain non-empty string values for `timestamp` and `guid`.
+No other source field is required or removed by this receiver.
+
+## Authentication
+
+The receiver computes HMAC-SHA256 over the exact body followed by the payload
+timestamp. It verifies the Base64 signature using
+`TOAST_ORDERS_WEBHOOK_SECRET`.
+
+## Persistence
+
+One row is attempted in `toast_raw.order_webhook_events` with:
+
+- Supabase receipt timestamp.
+- All request headers as JSON.
+- The complete parsed Toast payload as JSON.
+
+The payload event GUID is unique. Replays and retries do not create another row.
+
+## Responses
+
+- `200`: stored successfully or already stored.
+- `400`: malformed JSON or required envelope fields missing.
+- `401`: signature missing or invalid.
+- `405`: unsupported HTTP method.
+- `500`: persistence failed and Toast should retry.
+- `503`: the hosted webhook secret is unavailable.
+
+## Non-Goals
+
+- No order-state interpretation.
+- No Slack formatting or delivery.
+- No source-field mapping.
+- No relational normalization.
+- No polling or reconciliation behavior.
