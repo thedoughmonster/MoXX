@@ -2,10 +2,9 @@
 
 ## Purpose
 
-This contract defines private database objects used after raw Toast webhook
-storage to claim alert candidates for later notification delivery.
-
-It provides the durable handoff from raw ingest but does not send Slack messages.
+This contract defines private database objects used after Toast order hydration
+to claim alert candidates for later notification delivery. It does not send
+Slack messages.
 
 ## Schema
 
@@ -50,7 +49,8 @@ exact JSON equality, and refuses to claim an ambiguous source match.
 `toast_alerting.order_alert_candidates` stores durable alert claims.
 
 One row may exist for each Toast order GUID and alert kind. The row records the
-source, destination, raw webhook event, and rule version used.
+source, destination, rule version, hydrated resource version, Order API work,
+and causing raw webhook event when one exists.
 
 The unique claim key is:
 
@@ -58,34 +58,19 @@ The unique claim key is:
 toast_order_guid + alert_kind
 ```
 
-## Dispatches
+## Hydrated Decisions
 
-`toast_alerting.order_alert_dispatches` stores one durable eligibility dispatch
-per raw Toast event. An `AFTER INSERT` trigger creates it in the same transaction
-as the raw event, without a downstream API call from ingest.
+`toast_alerting.claim_hydrated_order_alert_candidates(bigint, jsonb)` accepts
+one durable Order API work id and its complete owned API response. It verifies
+the order identity, applies configured rules, and claims at most one candidate
+for each order GUID and alert kind.
 
-Each dispatch records its queue time, most recent attempt, attempt count,
-completion time, generic failure text, and the complete eligibility outcome.
-Pending dispatches remain queryable for a later reconciliation service.
-
-After commit, a Supabase-native trigger adapter may wake an allowlisted Edge
-Function with the dispatch id. The adapter does not pass business state or mark
-work complete. The function claims the durable row, and reconciliation retries
-pending work after duplicate, failed, or missed wake-ups.
-
-Before automated processing is enabled, pending work must be exposed through a
-named, versioned warehouse view. A MoMi-owned worker or API may consume that
-view; application code must not query the dispatch or raw tables directly.
-
-`toast_alerting.process_order_alert_dispatch(bigint)` serializes concurrent
-attempts for one event. Candidate claiming and dispatch completion happen in the
-same transaction. Completed dispatches return their stored outcome and do not
-re-evaluate later configuration changes.
+The durable Order API work row records decision attempts and outcomes. Raw-event
+eligibility dispatches are not part of the active pipeline.
 
 ## Ownership
 
-The alerting schema owns Toast-only dispatch, eligibility state, and destination
-routing.
+The alerting schema owns Toast eligibility state and destination routing.
 Slack message formatting, delivery attempts, and cross-source joins belong to
 later services or explicit views.
 

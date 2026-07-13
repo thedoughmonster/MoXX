@@ -1,7 +1,6 @@
 # Toast Order Alert Eligibility V1
 
 ## Purpose
-
 This contract defines the first downstream decision point after raw Toast
 webhook receipt. It identifies when a stored Toast order event should create
 one alert candidate for later Slack delivery.
@@ -9,10 +8,12 @@ one alert candidate for later Slack delivery.
 Raw ingest never calls this processor. A MoMi-owned worker or API may process a durable warehouse dispatch after reading its approved versioned view.
 
 ## Status
-
 This raw-event contract is retired under ADR `0003`. Its enqueue trigger is
 removed. The successor is `Toast Order Alert Pipeline V1`, which accepts durable
 Order API work and reads the hydrated order through the MoMi Order API.
+
+Its deployment and raw-dispatch objects were removed from dev on 2026-07-13.
+This file remains only as the historical contract for the retired design.
 
 ## Input
 

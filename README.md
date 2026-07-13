@@ -9,16 +9,14 @@ verifies Toast's signature, and preserves the complete event in Postgres.
 The hosted path was verified with signed in-store lifecycle events on
 2026-07-12.
 
+`toast-orders-fetch-by-guid-v1` hydrates durable order work from Toast and
+stores the complete response before downstream use. `momi-orders-get-by-guid-v1`
+is the owned warehouse read boundary. `toast-order-alert-worker-v1` evaluates
+hydrated orders, and `slack-order-alert-delivery-v1` sends durable outcomes.
+
 The private `toast_alerting` schema defines independently controlled sources,
 rules, routes, Slack destinations, and durable alert candidates. Configuration
-is disabled by default and contains no hardcoded business values.
-
-`toast-order-alert-eligibility-v1` accepts a stored raw event id and atomically
-claims candidates using that configuration. It performs custom authorization
-with the branch's Supabase secret key and does not send notifications.
-
-Slack formatting and delivery will be implemented as a separate module. It
-must not run inside the raw ingestion request.
+is environment-owned and migrations contain no hardcoded business values.
 
 ## Source Ownership
 
@@ -43,7 +41,7 @@ eventually be replaced by Square; Toast access cannot be a recovery strategy.
 
 - Ingestion authenticates and preserves source records.
 - Primitive source functions alone acquire vendor data for durable work.
-- Eligibility evaluates stored records using database configuration.
+- Eligibility evaluates hydrated records using database configuration.
 - Delivery owns Slack formatting, retries, and delivery status.
 - Cross-source projections use explicit database views and contracts.
 - Supabase-native trigger adapters may wake allowlisted Edge Functions only

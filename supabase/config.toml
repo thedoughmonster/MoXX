@@ -28,9 +28,6 @@ deno_version = 2
 [functions.toast-orders-webhook-ingest-v1]
 verify_jwt = false
 
-[functions.toast-order-alert-eligibility-v1]
-verify_jwt = false
-
 [functions.toast-orders-fetch-by-guid-v1]
 verify_jwt = false
 

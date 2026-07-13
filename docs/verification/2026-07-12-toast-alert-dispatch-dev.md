@@ -18,6 +18,11 @@ Date: 2026-07-12
 - Migration `20260712122952_create_order_alert_dispatches` is applied.
 - `toast-orders-webhook-ingest-v1` version 7 is active with JWT verification off.
 - `toast-order-alert-eligibility-v1` version 4 is active with JWT verification off.
+
+This records the historical verification state. The function and its unused
+raw-dispatch database objects were removed from dev on 2026-07-13 after the
+hydrated pipeline replaced them.
+
 - Ingest health returned `200` with `{"ok":true}`.
 - Eligibility rejected an unauthenticated request with `403 forbidden`.
 
