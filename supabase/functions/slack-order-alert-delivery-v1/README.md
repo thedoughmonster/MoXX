@@ -5,7 +5,9 @@
 Another MoMi service prepares an alert, chooses its Slack channel, and puts a
 durable delivery job in the database. This adapter claims that job, sends the
 prepared message exactly once to Slack, and records what happened. It does not
-know or care whether the order came from Toast, Square, or another source.
+know or care whether the order came from Toast, Square, or another source. The
+prepared Block Kit message shows order details, items, and modifiers, never the
+source order GUID.
 
 ## Purpose
 
@@ -26,7 +28,7 @@ the authorization boundary. An already successful work item is never sent again.
 ## Durable Flow
 
 1. Atomically claim eligible delivery work and create an attempt.
-2. Load the versioned prepared message and configured channel from the warehouse.
+2. Load the snapshotted, versioned Block Kit message and configured channel.
 3. Call only Slack `chat.postMessage` with that prepared payload.
 4. Persist safe Slack response metadata and mark the work succeeded or failed.
 

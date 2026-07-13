@@ -11,9 +11,10 @@ The hosted path was verified with signed in-store lifecycle events on
 
 `toast-orders-fetch-by-guid-v1` hydrates durable order work from Toast and
 stores the complete response before downstream use.
-`momi-toast-orders-get-by-id-v1` is the Toast-specific owned warehouse reader.
+`momi-toast-orders-get-by-id-v1` returns the complete Toast document and its
+view-derived, source-neutral order presentation.
 `momi-order-alert-worker-v1` evaluates any configured owned order response,
-and `slack-order-alert-delivery-v1` sends durable outcomes.
+and `slack-order-alert-delivery-v1` sends readable, GUID-free durable outcomes.
 
 Private `momi_runtime`, `momi_orders`, and `momi_alerting` schemas own shared
 registries, source-neutral order work, independently controlled sources, rules,

@@ -24,8 +24,9 @@ owned reader route from `momi_runtime` configuration.
 
 The worker sends `work_id`, `order_id`, and `trigger_token` to that reader. It
 requires the common owned response envelope to match the claimed contract,
-source system, order id, and immutable source version before passing the
-complete payload to the database decision function.
+source system, order id, and immutable source version. It also requires the
+reader's common order-presentation contract before passing both documents to
+the database decision function.
 
 The worker never reads a raw table or approved source view directly and never
 calls Toast, Square, or Slack.
@@ -48,9 +49,13 @@ version identities without cross-source raw-table foreign keys.
 
 ## Slack Delivery
 
-A claimed candidate creates durable Slack delivery work before any network
-call. `momi.slack.order_alert.deliver.v1` accepts only the delivery work id and
-capability token, loads a versioned prepared-message view, and calls Slack
+A claimed candidate snapshots the readable order presentation and creates
+durable Slack delivery work before any network call. The prepared-message view
+renders accessible Slack Block Kit with order number, schedule, total, items,
+and modifiers. Source order GUIDs never enter the Slack payload.
+
+`momi.slack.order_alert.deliver.v1` accepts only the delivery work id and
+capability token, loads that prepared message, and calls Slack
 `chat.postMessage` with the configured channel.
 
 The candidate id is the delivery idempotency key. Attempts store timestamps,

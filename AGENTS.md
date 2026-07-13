@@ -52,6 +52,8 @@ they deploy from the same repository.
 - Application and client code may read warehouse data only through the MoMi API.
 - The MoMi API may read approved views, never raw source tables directly.
 - Delivery adapters may send durable outcomes but may not fetch business data.
+- Snapshot source-neutral presentation data before creating delivery work.
+- Keep source GUIDs out of destination payloads when readable identities exist.
 - Supabase trigger adapters may use `pg_net` only as constrained by ADR `0004`.
 - Trigger adapters may send only work identity and its per-work capability token.
 - Trigger adapters may never call source or destination APIs.

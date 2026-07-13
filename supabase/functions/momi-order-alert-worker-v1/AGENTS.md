@@ -7,9 +7,9 @@
 - Resolve the work's active read contract and exact HTTP route from
   `momi_runtime` registries; never hardcode a provider contract or route.
 - Call only that same-origin owned API with `work_id`, `order_id`, and the token.
-- Validate contract, source, order, location, and version before using a payload.
+- Validate identity, payload, and source-neutral presentation before use.
 - Never read raw/source tables or call Toast, Square, Slack, or another vendor.
-- Pass the complete API document only to
+- Pass the complete API document and presentation only to
   `momi_alerting.claim_order_alert_candidates`.
 - Record every attempt in `momi_orders` before returning.
 - Never log work tokens or order payloads.

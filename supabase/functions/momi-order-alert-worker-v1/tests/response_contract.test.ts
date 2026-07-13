@@ -32,6 +32,15 @@ const response: OrderApiSuccess = {
   retrieved_at: "2026-07-13T12:00:00.000Z",
   content_hash: "a".repeat(64),
   payload: { id: job.order_id, line_items: [] },
+  order_presentation: {
+    presentation_version: 1,
+    display_number: "42",
+    fulfillment_at: "2026-07-13T12:30:00.000Z",
+    fulfillment_epoch: 1_783_945_800,
+    item_count: 1,
+    total_amount: 7.5,
+    items: [{ name: "Latte", quantity: 1, modifiers: [] }],
+  },
 }
 
 test("accepts an owned response bound to the claimed work", () => {
@@ -48,6 +57,8 @@ test("rejects contract, source, order, and version mismatches", () => {
     { location_id: "other-location" },
     { source_version_id: "other-version" },
     { work_source_version_id: "other-version" },
+    { order_presentation: null },
+    { order_presentation: { presentation_version: 2, items: [] } },
   ]) {
     assert.equal(isValidOrderResponse({ ...response, ...changed }, job), false)
   }

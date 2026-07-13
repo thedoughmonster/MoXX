@@ -18,6 +18,7 @@ export type OrderRecord = {
   retrieved_at: string
   content_hash: string
   payload: Record<string, unknown>
+  order_presentation: Record<string, unknown>
 }
 
 export type OrderReadRow = {
@@ -31,6 +32,7 @@ export type OrderReadRow = {
   retrieved_at: string | null
   content_hash: string | null
   payload: Record<string, unknown> | null
+  order_presentation: Record<string, unknown> | null
 }
 
 export type OrderLookup =

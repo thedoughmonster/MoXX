@@ -45,6 +45,15 @@ test("maps authorization states and preserves the complete order payload", async
   assert.equal(missing.body.error, "order_not_found")
 
   const payload = { guid: "order-1", checks: [{ guid: "check-1" }] }
+  const orderPresentation = {
+    presentation_version: 1,
+    display_number: "42",
+    fulfillment_at: "2026-07-12T12:30:00.000Z",
+    fulfillment_epoch: 1_783_859_400,
+    item_count: 1,
+    total_amount: 7.5,
+    items: [{ name: "Latte", quantity: 1, modifiers: [] }],
+  }
   const found = await executeOrderRead(
     input,
     traceId,
@@ -59,6 +68,7 @@ test("maps authorization states and preserves the complete order payload", async
         retrieved_at: "2026-07-12T12:00:00.000Z",
         content_hash: "a".repeat(64),
         payload,
+        order_presentation: orderPresentation,
       },
     }) as unknown as OrderReader,
   )
@@ -71,4 +81,5 @@ test("maps authorization states and preserves the complete order payload", async
   assert.equal(found.body.order_id, "order-1")
   assert.equal(found.body.location_id, "restaurant-1")
   assert.strictEqual(found.body.payload, payload)
+  assert.strictEqual(found.body.order_presentation, orderPresentation)
 })

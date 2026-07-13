@@ -45,6 +45,25 @@ export type OrderApiSuccess = {
   retrieved_at: string
   content_hash: string
   payload: Record<string, unknown>
+  order_presentation: OrderPresentation
+}
+
+export type OrderPresentation = {
+  presentation_version: 1
+  display_number: string
+  fulfillment_at: string | null
+  fulfillment_epoch: number | null
+  item_count: number
+  total_amount: number | null
+  items: Array<{
+    name: string
+    quantity: number
+    modifiers: Array<{
+      name: string
+      quantity: number
+      depth: number
+    }>
+  }>
 }
 
 export type DecisionOutcome = {

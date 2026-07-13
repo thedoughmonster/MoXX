@@ -1,4 +1,5 @@
 import type { ClaimedWork, OrderApiSuccess } from "./types.ts"
+import { isValidOrderPresentation } from "./is_valid_order_presentation.ts"
 
 const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -24,5 +25,6 @@ export function isValidOrderResponse(
     !Number.isNaN(Date.parse(value.retrieved_at)) &&
     typeof value.content_hash === "string" &&
     /^[0-9a-f]{64}$/.test(value.content_hash) &&
-    typeof payload === "object" && payload !== null && !Array.isArray(payload)
+    typeof payload === "object" && payload !== null && !Array.isArray(payload) &&
+    isValidOrderPresentation(value.order_presentation)
 }

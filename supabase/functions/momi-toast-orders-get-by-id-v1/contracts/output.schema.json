@@ -18,7 +18,8 @@
         "location_id",
         "retrieved_at",
         "content_hash",
-        "payload"
+        "payload",
+        "order_presentation"
       ],
       "properties": {
         "ok": { "const": true },
@@ -36,7 +37,8 @@
           "type": "string",
           "pattern": "^[0-9a-f]{64}$"
         },
-        "payload": { "type": "object" }
+        "payload": { "type": "object" },
+        "order_presentation": { "$ref": "#/$defs/orderPresentation" }
       }
     },
     {
@@ -66,5 +68,53 @@
         }
       }
     }
-  ]
+  ],
+  "$defs": {
+    "modifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "quantity", "depth"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "quantity": { "type": "number", "minimum": 0 },
+        "depth": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "quantity", "modifiers"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "quantity": { "type": "number", "minimum": 0 },
+        "modifiers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/modifier" }
+        }
+      }
+    },
+    "orderPresentation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["presentation_version", "display_number",
+        "fulfillment_at", "fulfillment_epoch", "item_count",
+        "total_amount", "items"],
+      "properties": {
+        "presentation_version": { "const": 1 },
+        "display_number": { "type": "string", "minLength": 1 },
+        "fulfillment_at": {
+          "type": ["string", "null"]
+        },
+        "fulfillment_epoch": {
+          "type": ["integer", "null"]
+        },
+        "item_count": { "type": "number", "minimum": 0 },
+        "total_amount": { "type": ["number", "null"], "minimum": 0 },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/item" }
+        }
+      }
+    }
+  }
 }

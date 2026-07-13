@@ -26,7 +26,8 @@ export async function completeWork(
       select *
       from momi_alerting.claim_order_alert_candidates(
         ${job.work_id}::bigint,
-        ${sql.json(order.payload)}
+        ${sql.json(order.payload)},
+        ${sql.json(order.order_presentation)}
       )
     ), attempt_update as (
       update momi_orders.api_invocation_attempts as attempt

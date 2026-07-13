@@ -20,7 +20,8 @@ depth.
 
 `momi_alerting.order_source_mappings` maps one source system and owned API
 contract to configured payload paths and expected values. Each mapping has its
-own enable switch. Values use `equals` or `not_equals`; `not_equals` never
+own enable switch and optional ISO currency code for presentation. Values use
+`equals` or `not_equals`; `not_equals` never
 matches a missing or JSON `null` value.
 
 `momi_alerting.slack_destinations` stores named channel targets. Each
@@ -50,16 +51,18 @@ source_system + order_id + alert_kind
 ```
 
 The row records the source mapping, API contract, destination, rule version,
-and generic API work identity. `decision_context` preserves source work,
+generic API work identity, and immutable source-neutral order presentation.
+`decision_context` preserves source work,
 resource kind, source version, and migrated legacy provenance. There are no
 cross-source foreign keys to raw source schemas.
 
 ## Decisions
 
-`momi_alerting.claim_order_alert_candidates(bigint, jsonb)` accepts one durable
-API work id and its complete owned source payload. It verifies order identity,
-applies configured mapping and rule conditions, refuses ambiguous matches, and
-claims at most one candidate for each order identity and alert kind.
+`momi_alerting.claim_order_alert_candidates(bigint, jsonb, jsonb)` accepts one
+durable API work id, its complete owned source payload, and the validated common
+presentation. It verifies order identity, applies configured mapping and rule
+conditions, refuses ambiguous matches, and claims at most one candidate for
+each order identity and alert kind.
 
 The matching API attempt stores the decision outcome. Raw-webhook eligibility
 dispatches are not part of the active pipeline.
@@ -67,8 +70,9 @@ dispatches are not part of the active pipeline.
 ## Slack Work
 
 Candidate insertion idempotently creates `momi_alerting.slack_delivery_work`.
-The versioned prepared-message view joins only MoMi-owned alert configuration
-and outcomes. A separate Slack adapter performs the external call.
+The versioned prepared-message view renders Block Kit from the snapshotted
+presentation and configured destination. It does not put a source order GUID in
+the Slack payload. A separate Slack adapter performs the external call.
 
 ## Failure Behavior
 

@@ -44,7 +44,8 @@ export async function readOrder(input: OrderReadInput): Promise<OrderLookup> {
       order_record.location_id,
       to_jsonb(order_record.retrieved_at) #>> '{}' as retrieved_at,
       order_record.content_hash,
-      order_record.payload
+      order_record.payload,
+      order_record.order_presentation
     from (values (true)) as request_marker(present)
     left join authorized_work as work on true
     left join active_contract as contract on true
@@ -75,7 +76,8 @@ export async function readOrder(input: OrderReadInput): Promise<OrderLookup> {
     row.source_system === null || row.source_version_id === null ||
     row.order_id === null || row.location_id === null ||
     row.retrieved_at === null ||
-    row.content_hash === null || row.payload === null
+    row.content_hash === null || row.payload === null ||
+    row.order_presentation === null
   ) {
     return {
       disposition: "order_not_found",
@@ -94,6 +96,7 @@ export async function readOrder(input: OrderReadInput): Promise<OrderLookup> {
       retrieved_at: row.retrieved_at,
       content_hash: row.content_hash,
       payload: row.payload,
+      order_presentation: row.order_presentation,
     },
   }
 }

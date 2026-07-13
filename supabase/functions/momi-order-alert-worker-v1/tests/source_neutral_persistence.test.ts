@@ -14,6 +14,7 @@ test("uses only source-neutral work, runtime, and alerting contracts", () => {
   assert.match(claim, /momi_runtime\.function_trigger_registry/)
   assert.match(claim, /trigger\.trigger_type = 'durable_http'/)
   assert.match(complete, /momi_alerting\.claim_order_alert_candidates/)
+  assert.match(complete, /order\.order_presentation/)
   assert.match(complete, /momi_orders\.api_invocation_attempts/)
   assert.match(failure, /momi_orders\.api_invocation_work/)
   assert.doesNotMatch(`${claim}${complete}${failure}`, /toast_|slack_|raw\./i)

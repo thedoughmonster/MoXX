@@ -51,6 +51,7 @@ export async function executeOrderRead(
       retrieved_at: result.order.retrieved_at,
       content_hash: result.order.content_hash,
       payload: result.order.payload,
+      order_presentation: result.order.order_presentation,
     },
   }
 }

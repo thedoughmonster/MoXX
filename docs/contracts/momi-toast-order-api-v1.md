@@ -41,6 +41,8 @@ The view reads a complete Toast order resource version and exposes:
 - `retrieved_at`
 - `content_hash`
 - Complete `payload`
+- Source-neutral `order_presentation` derived from receipt names already present
+  in the complete Toast response
 
 The view uses `security_invoker = true` and remains inaccessible to public,
 anonymous, and authenticated database roles.
@@ -49,8 +51,8 @@ anonymous, and authenticated database roles.
 
 A successful response includes the contract key and version, trace and work
 identity, `work_source_version_id`, source system, source version, order and
-location ids, retrieval metadata, content hash, and the complete Toast payload.
-The worker validates these identities before using the document.
+location ids, retrieval metadata, content hash, the complete Toast payload, and
+the separate presentation. The worker validates all of these before use.
 
 ## Behavior
 
@@ -65,4 +67,4 @@ contracts and missing warehouse versions are explicit failures.
 - No raw-table reads.
 - No request-time hydration.
 - No order mutation, alert decision, or Slack delivery.
-- No source-neutral normalization of the Toast payload.
+- No mutation or replacement of the complete Toast payload.

@@ -49,7 +49,7 @@ flowchart LR
   worker -.->|"future registered contract"| futureReader
   futureReader -.->|"same owned envelope"| worker
   views --> toastReader
-  toastReader -->|"complete owned order"| worker
+  toastReader -->|"payload + common presentation"| worker
   config --> process
   worker --> process
   process --> candidates
@@ -79,7 +79,8 @@ flowchart LR
   registry configuration stored with the durable work.
 - Reader requests carry only work identity, order identity, and capability.
 - Every source-specific reader returns the same owned metadata envelope and its
-  complete source payload; it never calls the source API.
+  complete source payload plus a common presentation; it never calls the source
+  API.
 - Raw storage is permanent and separated by source resource type.
 - Every order version contains the complete source record as JSONB.
 - Content hashes deduplicate unchanged records; fetch attempts remain auditable.
@@ -99,6 +100,8 @@ flowchart LR
 - Source, rule, route, and destination enablement are independent controls.
 - Alert identity is `source_system + order_id + alert_kind`.
 - Alert claims are durable before notification delivery is attempted.
+- Alert claims snapshot readable order presentation before delivery work.
+- Destination payloads omit source GUIDs when readable identities exist.
 - Slack calls never occur inside a source ingestion request.
 - Delivery adapters send durable outcomes and never fetch business data.
 - Cross-source relationships use explicit views or contracts, not raw foreign keys.

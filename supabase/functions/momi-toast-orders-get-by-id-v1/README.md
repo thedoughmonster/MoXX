@@ -5,7 +5,8 @@
 This function gets one saved Toast order for another MoMi function. It first
 checks that the caller has the exact work permission, then opens the
 approved database view and returns the complete saved JSON. It never calls
-Toast and never changes the order.
+Toast and never changes the order. The view also supplies readable receipt
+lines from names already present in that saved response.
 
 ## Purpose
 
@@ -23,8 +24,9 @@ This is the Toast-specific owned read boundary for one hydrated order version.
 work row, Toast source, contract key, order id, and active registered read
 contract. The per-work capability is the authorization boundary.
 
-The successful response returns warehouse metadata and the complete source
-order payload defined in `contracts/output.schema.json`.
+The successful response returns warehouse metadata, the complete source order
+payload, and a separate source-neutral `order_presentation` defined in
+`contracts/output.schema.json`.
 
 ## Read Flow
 
@@ -32,7 +34,7 @@ order payload defined in `contracts/output.schema.json`.
 2. Require the versioned read-view registration to be active.
 3. Match order id, location, and immutable source version in
    `momi_api.toast_orders_by_id_v1`.
-4. Return the complete payload without business transformation.
+4. Return the unchanged payload and the view-derived presentation together.
 
 ## Authority Boundary
 

@@ -5,6 +5,7 @@
 - Accept only a durable delivery work id and its private trigger token.
 - Claim work and create its attempt in one database statement.
 - Load one prepared message from the versioned alert message view.
+- Send readable Block Kit order lines; never include a source order GUID.
 - Call only Slack `chat.postMessage` with the prepared payload unchanged.
 - Never fetch order or other business data.
 - Never log or persist `SLACK_BOT_TOKEN`.
