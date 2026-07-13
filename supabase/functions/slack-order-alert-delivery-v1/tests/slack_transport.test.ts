@@ -13,15 +13,17 @@ test("posts the prepared payload with the fixed Slack contract", async () => {
   }
   let capturedUrl = ""
   let capturedInit: RequestInit | undefined
-  const fetchImpl: typeof fetch = async (input, init) => {
+  const fetchImpl: typeof fetch = (input, init) => {
     capturedUrl = String(input)
     capturedInit = init
-    return Response.json({ ok: true, channel: "C123", ts: "123.456" }, {
-      headers: {
-        "x-slack-req-id": "request-1",
-        "set-cookie": "secret=ignored",
-      },
-    })
+    return Promise.resolve(
+      Response.json({ ok: true, channel: "C123", ts: "123.456" }, {
+        headers: {
+          "x-slack-req-id": "request-1",
+          "set-cookie": "secret=ignored",
+        },
+      }),
+    )
   }
 
   const result = await sendSlackMessage(payload, "bot-token", fetchImpl)

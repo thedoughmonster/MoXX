@@ -2,7 +2,7 @@
   "function_key": "momi.orders.alert.evaluate.v1",
   "contract_version": 1,
   "purpose": "Evaluate one owned order document against alert configuration and create durable delivery work.",
-  "owner_service": "momi-order-alert-worker",
+  "owner_service": "order-alerting",
   "function_type": "action",
   "capability": "decide",
   "boundary": "momi_internal",

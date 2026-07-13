@@ -2,7 +2,7 @@
   "function_key": "toast.orders.webhook_ingest.v1",
   "contract_version": 1,
   "purpose": "Authenticate and preserve one Toast Orders webhook event before downstream hydration.",
-  "owner_service": "momi-toast-orders-ingest",
+  "owner_service": "toast-order-ingest",
   "function_type": "ingest",
   "capability": "ingest",
   "boundary": "toast_inbound",

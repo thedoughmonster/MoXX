@@ -54,7 +54,7 @@ test("declares the source-neutral Slack delivery contract", async () => {
   assert.equal(manifest.function_key, "momi.slack.order_alert.deliver.v1")
   assert.equal(manifest.idempotency_policy_key, "momi.alert.candidate.v1")
   assert.equal(manifest.route_path, "/functions/v1/slack-order-alert-delivery-v1")
-  assert.equal(manifest.owner_service, "momi-slack-alert-delivery")
+  assert.equal(manifest.owner_service, "slack-order-delivery")
   assert.equal(inputSchema.$id, "momi://momi.slack.order_alert.deliver.v1/input")
   assert.equal(outputSchema.$id, "momi://momi.slack.order_alert.deliver.v1/output")
   assert.match(typesSource, /momi\.slack\.order_alert\.deliver\.v1/)

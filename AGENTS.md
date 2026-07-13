@@ -16,22 +16,29 @@ they deploy from the same repository.
 - Do not require Docker or WSL for the normal development workflow.
 - Keep every handwritten file at or below 120 physical lines.
 - Each TypeScript file may declare at most one function.
-- Each callable Edge Function lives in its own directory.
-- Every Edge Function directory contains a `README.md` and local `AGENTS.md`.
-- Function READMEs include an `ELI5` section, then explain purpose, contract,
-  durable flow, and authority without requiring code tracing.
-- Local agent files add function-specific invariants without repeating parents.
-- Every Edge Function directory contains one complete `function.json` manifest.
+- Organize deployable behavior by business capability under `services/`.
+- Each service owns `AGENTS.md`, `README.md`, and one valid `service.json`.
+- Each owned function has a README with `ELI5`, trigger, input, output, side
+  effects, failure handling, and tests, plus one valid `function.json`.
+- Do not add function-level agent files unless a unique local rule requires one.
+- Keep `supabase/functions/<slug>/` as a thin deployment adapter only.
 - Manifests own logical purpose; runtime and route are deployment metadata.
 - Use a vendor prefix only when a function contract or behavior is vendor-specific.
 - Name source-neutral decisions and workers for the MoMi capability they own.
 - Generate `docs/service-catalog.md` from manifests; never edit it by hand.
-- Each non-Edge deployable service lives in `services/<service-name>/`.
+- Each deployable service lives in `services/<service-key>/`.
 - Never place two independently deployable services in the same directory.
-- Keep `index.ts` as wiring only; behavior belongs in imported files.
+- Keep adapter `index.ts` as registration only; behavior belongs to its service.
 - Keep module behavior and tests independently understandable and deployable.
+- Services may import declared public contracts, never another implementation.
+- Do not create catch-all utility folders or generic shared packages.
+- Extract shared code only for three stable consumers or a security-critical
+  need, with an ADR, explicit owner, and tests.
+- Require an ADR for a service, external host, shared package, schema ownership
+  change, or cross-service contract.
 - Keep one ordered Supabase migration history in this repository.
 - Do not split migrations into a repository separate from the code they support.
+- Never modify or delete a migration already present on `prod`.
 - Preserve complete source payloads. Do not omit source fields.
 - Do not perform business decisions or delivery work in ingestion code.
 - Treat the warehouse as the system of record for all source and business data.
@@ -74,7 +81,7 @@ they deploy from the same repository.
 2. Add or revise tests.
 3. Create a migration with the Supabase CLI when schema changes are needed.
 4. Implement the smallest behavior change.
-5. Run tests and line-count checks.
+5. Run `npm run check -- --service <service-key>`.
 6. Review the diff before applying or deploying.
 7. Verify the hosted behavior with a controlled event.
 

@@ -1,3 +1,5 @@
+import type { JSONValue } from "postgres"
+
 export const functionKey = "toast.orders.fetch_by_guid.v1"
 
 export type HydrationTriggerInput = {
@@ -23,20 +25,36 @@ export type ClaimedJob = {
   request_timeout_ms: number
 }
 
-export type ClaimJobResult = ClaimedJob | {
-  disposition: "already_succeeded" | "unavailable" | "not_found"
+type AlreadySucceededJob = {
+  disposition: "already_succeeded"
   job_id: string
   attempt_id?: string
   invocation_id?: string
   order_version_id?: string
 }
 
+type UnavailableJob = {
+  disposition: "unavailable"
+  job_id: string
+}
+
+type MissingJob = {
+  disposition: "not_found"
+  job_id: string
+}
+
+export type ClaimJobResult =
+  | ClaimedJob
+  | AlreadySucceededJob
+  | UnavailableJob
+  | MissingJob
+
 export type ToastAuthResult = {
   ok: boolean
   status: number | null
   token_type?: string
   access_token?: string
-  body: unknown
+  body: JSONValue
 }
 
 export type ToastAuthConfig = {
@@ -58,7 +76,7 @@ export type ToastOrderRequest = {
 
 export type ToastOrderResponse = {
   status: number
-  body: unknown
+  body: JSONValue
   raw_body: string
   response_headers: Record<string, string>
 }

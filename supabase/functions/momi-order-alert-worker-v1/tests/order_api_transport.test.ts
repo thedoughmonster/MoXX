@@ -21,10 +21,12 @@ const job: ClaimedWork = {
 test("calls only the exact owned Order API route", async () => {
   let capturedUrl = ""
   let capturedInit: RequestInit | undefined
-  const fetcher = async (input: URL | RequestInfo, init?: RequestInit) => {
+  const fetcher = (input: URL | RequestInfo, init?: RequestInit) => {
     capturedUrl = String(input)
     capturedInit = init
-    return Response.json({ ok: true }, { headers: { "sb-request-id": "r1" } })
+    return Promise.resolve(
+      Response.json({ ok: true }, { headers: { "sb-request-id": "r1" } }),
+    )
   }
   const response = await callOrderApi(job, "https://project.supabase.co/",
     "publishable", fetcher)
@@ -43,9 +45,9 @@ test("calls only the exact owned Order API route", async () => {
 
 test("rejects a registered route outside the Supabase project", async () => {
   let called = false
-  const fetcher = async () => {
+  const fetcher = () => {
     called = true
-    return Response.json({ ok: true })
+    return Promise.resolve(Response.json({ ok: true }))
   }
   await assert.rejects(
     callOrderApi({ ...job, api_route_path: "https://example.com/orders" },

@@ -2,7 +2,7 @@
   "function_key": "toast.orders.fetch_by_guid.v1",
   "contract_version": 1,
   "purpose": "Hydrate one durable Toast order work item by GUID and preserve the complete source response.",
-  "owner_service": "momi-toast-orders",
+  "owner_service": "toast-order-hydration",
   "function_type": "primitive_source",
   "capability": "hydrate",
   "boundary": "toast_outbound",

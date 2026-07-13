@@ -5,10 +5,10 @@
 Functions are ordered by logical lifecycle capability. Runtime and route
 identify deployment location but do not define business purpose.
 
-| Capability | Function key | Purpose | Boundary | Owner | Runtime | Route |
+| Capability | Function key | Purpose | Service | Kind | Boundary | Route |
 | --- | --- | --- | --- | --- | --- | --- |
-| ingest | `toast.orders.webhook_ingest.v1` | Authenticate and preserve one Toast Orders webhook event before downstream hydration. | toast_inbound | `momi-toast-orders-ingest` | supabase_edge | `/functions/v1/toast-orders-webhook-ingest-v1` |
-| hydrate | `toast.orders.fetch_by_guid.v1` | Hydrate one durable Toast order work item by GUID and preserve the complete source response. | toast_outbound | `momi-toast-orders` | supabase_edge | `/functions/v1/toast-orders-fetch-by-guid-v1` |
-| read | `momi.toast_orders.get_by_id.v1` | Read one fully hydrated Toast order through the owned MoMi API contract. | momi_internal | `momi-toast-order-api` | supabase_edge | `/functions/v1/momi-toast-orders-get-by-id-v1` |
-| decide | `momi.orders.alert.evaluate.v1` | Evaluate one owned order document against alert configuration and create durable delivery work. | momi_internal | `momi-order-alert-worker` | supabase_edge | `/functions/v1/momi-order-alert-worker-v1` |
-| deliver | `momi.slack.order_alert.deliver.v1` | Deliver one durable, prepared order alert to its configured Slack destination. | slack_outbound | `momi-slack-alert-delivery` | supabase_edge | `/functions/v1/slack-order-alert-delivery-v1` |
+| ingest | `toast.orders.webhook_ingest.v1` | Authenticate and preserve one Toast Orders webhook event before downstream hydration. | `toast-order-ingest` | source_adapter | toast_inbound | `/functions/v1/toast-orders-webhook-ingest-v1` |
+| hydrate | `toast.orders.fetch_by_guid.v1` | Hydrate one durable Toast order work item by GUID and preserve the complete source response. | `toast-order-hydration` | source_adapter | toast_outbound | `/functions/v1/toast-orders-fetch-by-guid-v1` |
+| read | `momi.toast_orders.get_by_id.v1` | Read one fully hydrated Toast order through the owned MoMi API contract. | `toast-order-read-api` | source_adapter | momi_internal | `/functions/v1/momi-toast-orders-get-by-id-v1` |
+| decide | `momi.orders.alert.evaluate.v1` | Evaluate one owned order document against alert configuration and create durable delivery work. | `order-alerting` | core_capability | momi_internal | `/functions/v1/momi-order-alert-worker-v1` |
+| deliver | `momi.slack.order_alert.deliver.v1` | Deliver one durable, prepared order alert to its configured Slack destination. | `slack-order-delivery` | destination_adapter | slack_outbound | `/functions/v1/slack-order-alert-delivery-v1` |

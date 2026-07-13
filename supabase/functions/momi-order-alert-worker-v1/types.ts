@@ -1,3 +1,5 @@
+import type { JSONValue } from "postgres"
+
 export const functionKey = "momi.orders.alert.evaluate.v1"
 
 export type WorkTriggerInput = {
@@ -21,7 +23,13 @@ export type ClaimedWork = {
 }
 
 export type WorkClaim = ClaimedWork | {
-  disposition: "already_succeeded" | "unavailable" | "not_found"
+  disposition: "already_succeeded"
+  work_id: string
+} | {
+  disposition: "unavailable"
+  work_id: string
+} | {
+  disposition: "not_found"
   work_id: string
 }
 
@@ -44,7 +52,7 @@ export type OrderApiSuccess = {
   order_id: string
   retrieved_at: string
   content_hash: string
-  payload: Record<string, unknown>
+  payload: JSONValue
   order_presentation: OrderPresentation
 }
 

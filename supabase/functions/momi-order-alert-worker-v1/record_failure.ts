@@ -1,3 +1,5 @@
+import type { JSONValue } from "postgres"
+
 import { sql } from "./database.ts"
 import type { ClaimedWork } from "./types.ts"
 
@@ -6,7 +8,7 @@ export async function recordFailure(
   httpStatus: number | null,
   errorCode: string,
   errorMessage: string,
-  responseMetadata: Record<string, unknown>,
+  responseMetadata: JSONValue,
 ): Promise<void> {
   await sql`
     with attempt_update as (

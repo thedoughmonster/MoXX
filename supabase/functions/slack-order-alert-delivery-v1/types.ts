@@ -1,3 +1,5 @@
+import type { JSONValue } from "postgres"
+
 export const functionKey = "momi.slack.order_alert.deliver.v1"
 
 export type DeliveryTriggerInput = {
@@ -16,12 +18,18 @@ export type ClaimedWork = {
 }
 
 export type WorkState = {
-  disposition: "already_succeeded" | "unavailable" | "not_found"
+  disposition: "already_succeeded"
   work_id: string
   attempt_id?: string | null
   invocation_id?: string | null
   channel?: string | null
   ts?: string | null
+} | {
+  disposition: "unavailable"
+  work_id: string
+} | {
+  disposition: "not_found"
+  work_id: string
 }
 
 export type ClaimWorkResult = ClaimedWork | WorkState
@@ -36,7 +44,7 @@ export type PreparedMessage = {
 }
 
 export type ParsedSlackBody = {
-  body: unknown
+  body: JSONValue
   is_json: boolean
 }
 
@@ -49,14 +57,14 @@ export type SlackResponseSummary = {
   channel: string | null
   ts: string | null
   slack_error: string | null
-  response_metadata: Record<string, unknown>
+  response_metadata: JSONValue
 }
 
 export type FailureRecord = {
   http_status: number | null
   channel: string | null
   ts: string | null
-  response_metadata: Record<string, unknown>
+  response_metadata: JSONValue
   error_code: string
   error_message: string
 }

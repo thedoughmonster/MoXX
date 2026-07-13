@@ -1,0 +1,34 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "slack-order-delivery",
+  "purpose": "Send one prepared durable order alert to its independently configured Slack destination.",
+  "kind": "destination_adapter",
+  "lifecycle_status": "active",
+  "functions": ["slack-order-alert-delivery-v1"],
+  "contracts": {
+    "provides": ["momi.slack.order_alert.deliver.v1"],
+    "consumes": [
+      {
+        "service": "order-alerting",
+        "contract": "momi.order_alert.delivery_work.v1"
+      }
+    ]
+  },
+  "database": {
+    "read": ["momi_runtime", "momi_alerting"],
+    "write": ["momi_alerting"]
+  },
+  "network": { "outbound_hosts": ["slack.com"] },
+  "secrets": [
+    "SUPABASE_DB_URL",
+    "SLACK_BOT_TOKEN",
+    "MOMI_CODE_COMMIT_SHA",
+    "DENO_DEPLOYMENT_ID"
+  ],
+  "runtime_dependencies": [
+    "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
+    "npm:postgres@3.4.3"
+  ],
+  "approved_packages": []
+}

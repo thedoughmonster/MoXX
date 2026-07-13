@@ -1,3 +1,5 @@
+import type { JSONValue } from "postgres"
+
 import type {
   SlackResponseSummary,
   SlackTransportResult,
@@ -8,11 +10,11 @@ export function summarizeSlackResponse(
 ): SlackResponseSummary {
   const body = typeof response.body === "object" && response.body !== null &&
       !Array.isArray(response.body)
-    ? response.body as Record<string, unknown>
+    ? response.body as Record<string, JSONValue>
     : {}
   const slackMetadata = typeof body.response_metadata === "object" &&
       body.response_metadata !== null && !Array.isArray(body.response_metadata)
-    ? body.response_metadata as Record<string, unknown>
+    ? body.response_metadata as Record<string, JSONValue>
     : {}
 
   return {

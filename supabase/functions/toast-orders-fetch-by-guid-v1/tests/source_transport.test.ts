@@ -8,16 +8,16 @@ import { getToastToken } from "../get_toast_token.ts"
 test("authenticates with the configured Toast client contract", async () => {
   let capturedUrl = ""
   let capturedBody = ""
-  const fetchImpl: typeof fetch = async (input, init) => {
+  const fetchImpl: typeof fetch = (input, init) => {
     capturedUrl = String(input)
     capturedBody = String(init?.body)
-    return Response.json({
+    return Promise.resolve(Response.json({
       token: {
         tokenType: "Bearer",
         accessToken: "token-1",
         expiresIn: 3600,
       },
-    })
+    }))
   }
 
   const result = await getToastToken({
@@ -41,12 +41,14 @@ test("authenticates with the configured Toast client contract", async () => {
 test("fetches one configured restaurant order by encoded GUID", async () => {
   let capturedUrl = ""
   let capturedHeaders = new Headers()
-  const fetchImpl: typeof fetch = async (input, init) => {
+  const fetchImpl: typeof fetch = (input, init) => {
     capturedUrl = String(input)
     capturedHeaders = new Headers(init?.headers)
-    return Response.json({ guid: "order/guid", checks: [] }, {
-      headers: { "x-request-id": "request-1" },
-    })
+    return Promise.resolve(
+      Response.json({ guid: "order/guid", checks: [] }, {
+        headers: { "x-request-id": "request-1" },
+      }),
+    )
   }
 
   const result = await fetchToastOrder({

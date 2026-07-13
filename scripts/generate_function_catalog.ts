@@ -1,28 +1,14 @@
-import { readdir, readFile, writeFile } from "node:fs/promises"
-import { fileURLToPath } from "node:url"
+import { writeFile } from "node:fs/promises"
 import { join } from "node:path"
 
-import {
-  renderFunctionCatalog,
-  type FunctionManifest,
-} from "./function_catalog.ts"
+import { validateArchitecture } from "./architecture/validate_architecture.ts"
+import { workspaceRoot } from "./architecture/paths.ts"
+import { renderFunctionCatalog } from "./function_catalog.ts"
 
-const root = fileURLToPath(new URL("../", import.meta.url))
-const functionsRoot = join(root, "supabase", "functions")
-const catalogPath = join(root, "docs", "service-catalog.md")
-const entries = await readdir(functionsRoot, { withFileTypes: true })
-const manifests: FunctionManifest[] = []
-
-for (const entry of entries) {
-  if (!entry.isDirectory()) {
-    continue
-  }
-
-  const source = await readFile(
-    join(functionsRoot, entry.name, "function.json"),
-    "utf8",
-  )
-  manifests.push(JSON.parse(source) as FunctionManifest)
-}
-
-await writeFile(catalogPath, renderFunctionCatalog(manifests), "utf8")
+const architecture = await validateArchitecture()
+const catalogPath = join(workspaceRoot, "docs", "service-catalog.md")
+await writeFile(
+  catalogPath,
+  renderFunctionCatalog(architecture.functions),
+  "utf8",
+)

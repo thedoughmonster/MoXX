@@ -2,11 +2,24 @@
   "name": "momi-backend",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.7.0",
   "engines": {
-    "node": ">=24 <25"
+    "node": "24.14.x",
+    "pnpm": "11.7.x"
   },
   "scripts": {
+    "architecture:check": "node scripts/check_architecture.ts",
     "catalog:generate": "node scripts/generate_function_catalog.ts",
-    "test": "node --test tests/enforce_api_boundaries.test.ts tests/function_manifests.test.ts tests/order_alert_presentation_migrations.test.ts tests/retired_edge_functions.test.ts tests/source_neutral_alerting_migrations.test.ts tests/toast_source_matching_migrations.test.ts tests/verify_invalid_toast_signature.test.ts tests/verify_valid_toast_signature.test.ts supabase/functions/momi-toast-orders-get-by-id-v1/tests/boundaries.test.ts supabase/functions/momi-toast-orders-get-by-id-v1/tests/execute_order_read.test.ts supabase/functions/momi-toast-orders-get-by-id-v1/tests/parse_request.test.ts supabase/functions/momi-order-alert-worker-v1/tests/order_api_transport.test.ts supabase/functions/momi-order-alert-worker-v1/tests/parse_request.test.ts supabase/functions/momi-order-alert-worker-v1/tests/read_publishable_key.test.ts supabase/functions/momi-order-alert-worker-v1/tests/response_contract.test.ts supabase/functions/momi-order-alert-worker-v1/tests/source_neutral_persistence.test.ts supabase/functions/slack-order-alert-delivery-v1/tests/parse_request.test.ts supabase/functions/slack-order-alert-delivery-v1/tests/persistence_sql.test.ts supabase/functions/slack-order-alert-delivery-v1/tests/slack_transport.test.ts supabase/functions/toast-orders-fetch-by-guid-v1/tests/parse_request.test.ts supabase/functions/toast-orders-fetch-by-guid-v1/tests/source_transport.test.ts"
+    "catalog:check": "node scripts/check_catalog.ts",
+    "check": "node scripts/check.ts",
+    "edge:check": "node scripts/check_edge_functions.ts",
+    "quality:check": "node scripts/check_source_quality.ts",
+    "test": "node scripts/run_tests.ts"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0",
+    "deno": "2.9.2",
+    "supabase": "2.109.1",
+    "typescript": "6.0.3"
   }
 }

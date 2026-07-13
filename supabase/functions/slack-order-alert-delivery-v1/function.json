@@ -2,7 +2,7 @@
   "function_key": "momi.slack.order_alert.deliver.v1",
   "contract_version": 1,
   "purpose": "Deliver one durable, prepared order alert to its configured Slack destination.",
-  "owner_service": "momi-slack-alert-delivery",
+  "owner_service": "slack-order-delivery",
   "function_type": "action",
   "capability": "deliver",
   "boundary": "slack_outbound",
