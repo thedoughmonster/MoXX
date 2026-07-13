@@ -12,6 +12,7 @@
     "catalog:generate": "node scripts/generate_function_catalog.ts",
     "catalog:check": "node scripts/check_catalog.ts",
     "check": "node scripts/check.ts",
+    "database-access:renew": "node scripts/run_renew_database_access.ts",
     "deploy:apply": "node scripts/run_deploy_apply.ts",
     "deploy:plan": "node scripts/run_deploy_plan.ts",
     "edge:check": "node scripts/check_edge_functions.ts",
