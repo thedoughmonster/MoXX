@@ -71,3 +71,13 @@ No business values or channel ids were added to migrations or function code.
 - Security advisors: informational private-table RLS notices only
 - Performance advisors: informational unused-index notices only
 - Production function inventory: unchanged
+
+## Residual Cleanup
+
+- The retired dev deployments `momi-orders-get-by-guid-v1` and
+  `toast-order-alert-worker-v1` remain hosted but are absent from source,
+  config, and active runtime routes. Dashboard deletion requires explicit
+  approval.
+- `MOMI_CODE_COMMIT_SHA` still contains its pre-cutover value. Deployment ids
+  identify the versions verified above; update the secret before relying on a
+  new attempt row for commit-level provenance.
