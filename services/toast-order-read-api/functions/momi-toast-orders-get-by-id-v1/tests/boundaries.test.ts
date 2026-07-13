@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url"
 import test from "node:test"
 
 test("uses only the approved warehouse read path and no HTTP", async () => {
-  const root = fileURLToPath(new URL("../", import.meta.url))
+  const root = fileURLToPath(new URL("../src/", import.meta.url))
   const paths = await readdir(root, { recursive: true })
   for (const path of paths) {
     if (!path.endsWith(".ts") || path.startsWith("tests")) {

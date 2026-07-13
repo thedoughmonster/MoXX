@@ -1,8 +1,8 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 
-import { executeOrderRead } from "../execute_order_read.ts"
-import type { OrderReader } from "../types.ts"
+import { executeOrderRead } from "../src/execute_order_read.ts"
+import type { OrderReader } from "../src/types.ts"
 
 test("maps authorization states and preserves the complete order payload", async () => {
   const input = {

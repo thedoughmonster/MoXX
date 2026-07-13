@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 
-import { parseOrderReadRequest } from "../parse_request.ts"
+import { parseOrderReadRequest } from "../src/parse_request.ts"
 
 test("accepts only the strict durable order-read capability", () => {
   const token = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"

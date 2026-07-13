@@ -14,15 +14,17 @@ This is the Toast-specific owned read boundary for one hydrated order version.
 
 - Function key: `momi.toast_orders.get_by_id.v1`
 - Route: `/functions/v1/momi-toast-orders-get-by-id-v1`
-- Owner: `momi-toast-order-api`
+- Owner: `toast-order-read-api`
 - Boundary: MoMi internal
 
-## HTTP Contract
+## Trigger And Input
 
 `POST` accepts `work_id`, `order_id`, and the matching `trigger_token`; see
 `contracts/input.schema.json`. Authorization requires the exact running durable
 work row, Toast source, contract key, order id, and active registered read
 contract. The per-work capability is the authorization boundary.
+
+## Output
 
 The successful response returns warehouse metadata, the complete source order
 payload, and a separate source-neutral `order_presentation` defined in
@@ -36,6 +38,17 @@ payload, and a separate source-neutral `order_presentation` defined in
    `momi_api.toast_orders_by_id_v1`.
 4. Return the unchanged payload and the view-derived presentation together.
 
+## Side Effects
+
+None. The function performs an authorized read and does not mutate durable work
+or source records.
+
+## Failure Handling
+
+Malformed or unauthorized capabilities are rejected without revealing whether
+an order exists. Missing approved data returns not found; internal failures are
+logged without tokens or order payloads.
+
 ## Authority Boundary
 
 This function may read only the approved versioned view. It never reads a raw
@@ -46,6 +59,8 @@ table, calls Toast or Slack, mutates work, or makes an alert decision.
 - `SUPABASE_DB_URL`: private database connection supplied by Supabase.
 - Read contract activation and view mapping live in database configuration.
 
-See the [function manifest](function.json), [local rules](AGENTS.md), and
-[Toast Order API contract](../../../docs/contracts/momi-toast-order-api-v1.md). Run
-`npm test` from the repository root with Node.js 24.
+## Tests
+
+See the [function manifest](function.json), [service rules](../../AGENTS.md),
+and [Toast Order API contract](../../../../docs/contracts/momi-toast-order-api-v1.md).
+Run `npm run check -- --service toast-order-read-api` from the repository root.
