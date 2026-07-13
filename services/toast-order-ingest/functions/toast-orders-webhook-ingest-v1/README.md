@@ -13,9 +13,10 @@ preserves each complete source event before any downstream work begins.
 
 - Function key: `toast.orders.webhook_ingest.v1`
 - Route: `/functions/v1/toast-orders-webhook-ingest-v1`
+- Owner: `toast-order-ingest`
 - Boundary: Toast inbound
 
-## HTTP Contract
+## Trigger And Input
 
 `GET` is a health check. `POST` accepts the Toast event JSON and requires a
 valid `Toast-Signature` over the exact request body plus its timestamp.
@@ -24,6 +25,11 @@ implemented by this function.
 
 The payload and response schemas live in `contracts/`. The input schema permits
 additional fields so no Toast-owned data is discarded.
+
+## Output
+
+Successful responses acknowledge whether the event was stored or was an
+idempotent duplicate. They never return the source payload.
 
 ## Durable Flow
 
@@ -35,6 +41,17 @@ additional fields so no Toast-owned data is discarded.
 
 The event GUID makes a replay idempotent. A duplicate is acknowledged without
 creating another raw event or hydration job.
+
+## Side Effects
+
+The only direct side effect is inserting the complete event and headers. A
+database trigger may then create durable hydration work from configuration.
+
+## Failure Handling
+
+Invalid payloads or signatures are rejected before storage. Missing runtime
+configuration returns unavailable, and persistence failures are logged without
+payloads or secrets so Toast can retry.
 
 ## Authority Boundary
 
@@ -48,6 +65,8 @@ eligibility or delivery decision.
 - `SUPABASE_DB_URL`: private database connection supplied by Supabase.
 - Source, restaurant, event, and hydration mappings live in database config.
 
-See the [function manifest](function.json), [local rules](AGENTS.md), and
-[webhook contract](../../../docs/contracts/toast-orders-webhook-ingest-v1.md).
-Run `npm test` from the repository root with Node.js 24.
+## Tests
+
+See the [function manifest](function.json), [service rules](../../AGENTS.md),
+and [webhook contract](../../../../docs/contracts/toast-orders-webhook-ingest-v1.md).
+Run `npm run check -- --service toast-order-ingest` from the repository root.
