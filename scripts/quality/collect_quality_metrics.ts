@@ -6,6 +6,12 @@ import { workspaceRoot } from "../architecture/paths.ts"
 import type { QualityMetrics } from "./types.ts"
 
 const extensions = new Set([".ts", ".md", ".json", ".sql", ".toml", ".yml", ".yaml"])
+const ignoredPrefixes = [
+  ".momi/",
+  "node_modules/",
+  "supabase/.branches/",
+  "supabase/.temp/",
+]
 
 export async function collectQualityMetrics(): Promise<QualityMetrics> {
   const metrics: QualityMetrics = {
@@ -22,7 +28,8 @@ export async function collectQualityMetrics(): Promise<QualityMetrics> {
     const path = join(entry.parentPath, entry.name)
     const relativePath = relative(workspaceRoot, path).replaceAll(sep, "/")
     if (
-      relativePath.startsWith("node_modules/") || relativePath === "pnpm-lock.yaml" ||
+      ignoredPrefixes.some((prefix) => relativePath.startsWith(prefix)) ||
+      relativePath === "pnpm-lock.yaml" ||
       relativePath === "docs/quality-metrics.json"
     ) continue
     const source = (await readFile(path, "utf8")).replaceAll("\r\n", "\n")
