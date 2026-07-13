@@ -39,6 +39,9 @@ they deploy from the same repository.
 - Keep one ordered Supabase migration history in this repository.
 - Do not split migrations into a repository separate from the code they support.
 - Never modify or delete a migration already present on `prod`.
+- Begin every new migration with `-- service-owner: <service-key>`.
+- Never deploy with `--prune`; retire hosted functions through an expiring
+  manifest and explicit caller-verified removal.
 - Preserve complete source payloads. Do not omit source fields.
 - Do not perform business decisions or delivery work in ingestion code.
 - Treat the warehouse as the system of record for all source and business data.

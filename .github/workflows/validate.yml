@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  MOMI_PROD_REF: origin/prod
+
 concurrency:
   group: validate-${{ github.ref }}
   cancel-in-progress: true
@@ -19,6 +22,9 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: git fetch origin prod:refs/remotes/origin/prod
       - uses: pnpm/action-setup@v4
         with:
           version: 11.7.0

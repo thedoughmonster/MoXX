@@ -12,8 +12,13 @@
     "catalog:generate": "node scripts/generate_function_catalog.ts",
     "catalog:check": "node scripts/check_catalog.ts",
     "check": "node scripts/check.ts",
+    "deploy:apply": "node scripts/run_deploy_apply.ts",
+    "deploy:plan": "node scripts/run_deploy_plan.ts",
     "edge:check": "node scripts/check_edge_functions.ts",
-    "quality:check": "node scripts/check_source_quality.ts",
+    "inventory": "node scripts/run_inventory.ts",
+    "migration:check": "node scripts/check_migrations.ts",
+    "quality:check": "node scripts/check_source_quality.ts && node scripts/check_quality_report.ts",
+    "quality:generate": "node scripts/generate_quality_report.ts",
     "test": "node scripts/run_tests.ts"
   },
   "devDependencies": {

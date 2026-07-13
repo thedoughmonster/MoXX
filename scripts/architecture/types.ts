@@ -89,9 +89,20 @@ export type SourceModule = {
   imports: string[]
 }
 
+export type RetirementManifest = {
+  schema_version: 1
+  function_slug: string
+  owner_service: string
+  reason: string
+  replacement: string
+  environments: Array<"dev" | "prod">
+  remove_after: string
+}
+
 export type Architecture = {
   workspace: WorkspaceConfig
   services: LoadedService[]
   functions: LoadedFunction[]
   modules: SourceModule[]
+  retirements: RetirementManifest[]
 }

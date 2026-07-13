@@ -1,0 +1,10 @@
+{
+  "$schema": "../schemas/retirement-manifest-v1.schema.json",
+  "schema_version": 1,
+  "function_slug": "toast-order-alert-worker-v1",
+  "owner_service": "order-alerting",
+  "reason": "Legacy development worker retained while caller absence is verified.",
+  "replacement": "momi-order-alert-worker-v1",
+  "environments": ["dev"],
+  "remove_after": "2026-07-27"
+}

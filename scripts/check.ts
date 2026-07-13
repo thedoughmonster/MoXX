@@ -9,6 +9,8 @@ const scripts = [
   "check_architecture.ts",
   "check_catalog.ts",
   "check_source_quality.ts",
+  "check_quality_report.ts",
+  "check_migrations.ts",
   "check_edge_functions.ts",
 ]
 

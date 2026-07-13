@@ -72,6 +72,9 @@ eventually be replaced by Square; Toast access cannot be a recovery strategy.
 - `prod` deploys to the production Supabase project.
 - Production changes flow from reviewed and verified development changes.
 
+See [deployment](docs/deployment.md) for the exact commands, credential
+boundaries, inventory gate, and exact-commit promotion process.
+
 ## Required Hosted Secret
 
 `TOAST_ORDERS_WEBHOOK_SECRET` must contain the secret for the Orders webhook

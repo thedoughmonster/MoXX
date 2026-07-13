@@ -33,8 +33,18 @@ export async function loadFunctions(
       slugs.add(slug)
       const directory = await resolveFunctionDirectory(workspace, service, slug)
       const readme = await readFile(join(directory, "README.md"), "utf8")
-      if (!/^## ELI5$/m.test(readme)) {
-        throw new Error(`${slug}: missing README ELI5`)
+      const sections = [
+        "ELI5",
+        "Trigger And Input",
+        "Output",
+        "Side Effects",
+        "Failure Handling",
+        "Tests",
+      ]
+      for (const section of sections) {
+        if (!new RegExp(`^## ${section}$`, "m").test(readme)) {
+          throw new Error(`${slug}: missing README section ${section}`)
+        }
       }
       const manifest = await readJson<FunctionManifest>(join(directory, "function.json"))
       validateJson(schema, manifest, `${slug}/function.json`)

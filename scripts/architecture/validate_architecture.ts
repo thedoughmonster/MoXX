@@ -8,12 +8,14 @@ import { findImportBoundaryViolations } from "./find_import_boundary_violations.
 import { findAuthorityViolations } from "./find_authority_violations.ts"
 import { findDependencyViolations } from "./find_dependency_violations.ts"
 import { findAdapterViolations } from "./find_adapter_violations.ts"
+import { loadRetirements } from "./load_retirements.ts"
 
 export async function validateArchitecture(): Promise<Architecture> {
   const workspace = await loadWorkspace()
   const services = await discoverServices(workspace.paths.services)
   const functions = await loadFunctions(workspace, services)
   const modules = await loadSourceModules(functions)
+  const retirements = await loadRetirements(workspace.paths.retirements, services)
   const violations = [
     ...findServiceGraphViolations(services),
     ...findImportBoundaryViolations(modules, services),
@@ -26,5 +28,5 @@ export async function validateArchitecture(): Promise<Architecture> {
     throw new Error(`Architecture violations:\n- ${violations.join("\n- ")}`)
   }
 
-  return { workspace, services, functions, modules }
+  return { workspace, services, functions, modules, retirements }
 }

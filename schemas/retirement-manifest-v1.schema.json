@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://momi.local/schemas/retirement-manifest-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "function_slug", "owner_service", "reason",
+    "replacement", "environments", "remove_after"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": 1 },
+    "function_slug": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
+    "owner_service": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
+    "reason": { "type": "string", "minLength": 20 },
+    "replacement": { "type": "string", "minLength": 1 },
+    "environments": {
+      "type": "array", "minItems": 1, "uniqueItems": true,
+      "items": { "enum": ["dev", "prod"] }
+    },
+    "remove_after": {
+      "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    }
+  }
+}
