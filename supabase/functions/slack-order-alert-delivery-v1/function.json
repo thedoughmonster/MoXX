@@ -1,7 +1,7 @@
 {
-  "function_key": "toast.slack_order_alert.deliver.v1",
+  "function_key": "momi.slack.order_alert.deliver.v1",
   "contract_version": 1,
-  "purpose": "Deliver one durable, prepared Toast order alert to its configured Slack destination.",
+  "purpose": "Deliver one durable, prepared order alert to its configured Slack destination.",
   "owner_service": "momi-slack-alert-delivery",
   "function_type": "action",
   "capability": "deliver",
@@ -12,7 +12,7 @@
   "entrypoint": "index.ts",
   "input_schema": "contracts/input.schema.json",
   "output_schema": "contracts/output.schema.json",
-  "idempotency_policy_key": "toast.alert.candidate.v1",
+  "idempotency_policy_key": "momi.alert.candidate.v1",
   "required_capabilities": [
     "database_read",
     "database_write",

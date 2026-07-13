@@ -18,10 +18,13 @@ they deploy from the same repository.
 - Each TypeScript file may declare at most one function.
 - Each callable Edge Function lives in its own directory.
 - Every Edge Function directory contains a `README.md` and local `AGENTS.md`.
-- Function READMEs explain purpose, contract, durable flow, and authority.
+- Function READMEs include an `ELI5` section, then explain purpose, contract,
+  durable flow, and authority without requiring code tracing.
 - Local agent files add function-specific invariants without repeating parents.
 - Every Edge Function directory contains one complete `function.json` manifest.
 - Manifests own logical purpose; runtime and route are deployment metadata.
+- Use a vendor prefix only when a function contract or behavior is vendor-specific.
+- Name source-neutral decisions and workers for the MoMi capability they own.
 - Generate `docs/service-catalog.md` from manifests; never edit it by hand.
 - Each non-Edge deployable service lives in `services/<service-name>/`.
 - Never place two independently deployable services in the same directory.
@@ -42,6 +45,8 @@ they deploy from the same repository.
   except for the allowlisted worker and MoMi API path accepted by ADR `0004`.
 - Coordinate internal work through durable warehouse records.
 - A dedicated invoker may call the MoMi API only from durable post-hydration work.
+- Source-neutral invokers resolve the exact owned reader contract and route from
+  durable work and active registry configuration, never from vendor constants.
 - Persist the full hydrated resource version before queuing MoMi API work.
 - Expose downstream reads as explicitly named, versioned database views.
 - Application and client code may read warehouse data only through the MoMi API.

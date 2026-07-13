@@ -1,4 +1,5 @@
 import assert from "node:assert/strict"
+import { readFile } from "node:fs/promises"
 import test from "node:test"
 
 import { fetchToastOrder } from "../fetch_toast_order.ts"
@@ -65,4 +66,37 @@ test("fetches one configured restaurant order by encoded GUID", async () => {
   )
   assert.deepEqual(result.body, { guid: "order/guid", checks: [] })
   assert.equal(result.response_headers["x-request-id"], "request-1")
+})
+
+test("uses source-neutral runtime and order work contracts", async () => {
+  const [claimSource, persistenceSource] = await Promise.all([
+    readFile(new URL("../claim_job.ts", import.meta.url), "utf8"),
+    readFile(new URL("../persist_order_response.ts", import.meta.url), "utf8"),
+  ])
+
+  assert.match(claimSource, /momi_runtime\.function_registry/)
+  assert.match(claimSource, /momi_runtime\.function_trigger_registry/)
+  assert.doesNotMatch(claimSource, /toast_hydration\.function_registry/)
+  assert.match(persistenceSource, /momi_orders\.api_invocation_work/)
+
+  for (const column of [
+    "source_system",
+    "source_work_kind",
+    "source_work_id",
+    "source_resource_kind",
+    "source_version_id",
+    "location_id",
+    "order_id",
+    "api_contract_key",
+  ]) {
+    assert.match(persistenceSource, new RegExp(`\\b${column}\\b`))
+  }
+
+  assert.match(persistenceSource, /'toast'/)
+  assert.match(persistenceSource, /'order_hydration_job'/)
+  assert.match(persistenceSource, /'order'/)
+  assert.doesNotMatch(
+    persistenceSource,
+    /toast_hydration\.order_api_invocation_work/,
+  )
 })

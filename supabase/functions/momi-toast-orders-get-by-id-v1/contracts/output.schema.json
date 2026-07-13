@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://momi.toast_orders.get_by_id.v1/output",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "contract_key",
+        "contract_version",
+        "trace_id",
+        "work_id",
+        "work_source_version_id",
+        "source_system",
+        "source_version_id",
+        "order_id",
+        "location_id",
+        "retrieved_at",
+        "content_hash",
+        "payload"
+      ],
+      "properties": {
+        "ok": { "const": true },
+        "contract_key": { "const": "momi.toast_orders.get_by_id.v1" },
+        "contract_version": { "const": 1 },
+        "trace_id": { "type": "string", "format": "uuid" },
+        "work_id": { "type": "string" },
+        "work_source_version_id": { "type": "string" },
+        "source_system": { "const": "toast" },
+        "source_version_id": { "type": "string" },
+        "order_id": { "type": "string" },
+        "location_id": { "type": "string" },
+        "retrieved_at": { "type": "string", "format": "date-time" },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "payload": { "type": "object" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "contract_key",
+        "contract_version",
+        "trace_id",
+        "error"
+      ],
+      "properties": {
+        "ok": { "const": false },
+        "contract_key": { "const": "momi.toast_orders.get_by_id.v1" },
+        "contract_version": { "const": 1 },
+        "trace_id": { "type": "string", "format": "uuid" },
+        "work_id": { "type": "string" },
+        "error": {
+          "enum": [
+            "invalid_request",
+            "forbidden",
+            "contract_inactive",
+            "order_not_found",
+            "read_failed"
+          ]
+        }
+      }
+    }
+  ]
+}

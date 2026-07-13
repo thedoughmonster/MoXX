@@ -4,8 +4,8 @@
 - Keep every handwritten file at or below 120 physical lines.
 - Declare at most one function per TypeScript file.
 - Keep `index.ts` limited to imports and runtime registration.
-- Give every direct function directory a `README.md` describing its purpose,
-  contract, durable flow, configuration, and authority boundary.
+- Give every direct function directory a `README.md` with an early `ELI5`
+  section, then its purpose, contract, flow, configuration, and authority.
 - Give every direct function directory a local `AGENTS.md` containing only its
   function-specific invariants; inherit shared rules from this file.
 - Give every direct function directory a complete `function.json` conforming to
@@ -25,11 +25,12 @@
 - Hydration must start from durable scheduled work and persist complete responses.
 - Hydration retries must be idempotent and must not run inside a read request.
 - Persist a full resource version before creating downstream invocation work.
-- MoMi API invokers must start from durable work and pass source identity only.
+- MoMi API invokers must start from durable work and pass only work identity,
+  order identity, and the work capability token.
 - Decision functions must not call source APIs or read raw tables in service code.
 - Internal modules coordinate through warehouse records, not HTTP calls.
-- Under ADR `0004`, the hydrated alert worker may call only the exact versioned
-  MoMi Order API route named by its claimed durable work.
+- Under ADR `0004`, the source-neutral alert worker may call only the exact
+  versioned owned reader route named by its claimed durable work and registry.
 - Delivery functions may call only configured destinations for durable outcomes.
 - Return success for an idempotent replay.
 - Return a server error when durable storage fails.

@@ -22,7 +22,7 @@ export async function claimJob(
           last_error = null
       from toast_hydration.api_sources as source,
            toast_hydration.restaurants as restaurant,
-           toast_hydration.function_registry as registered_function
+           momi_runtime.function_registry as registered_function
       where job.id = ${jobId}::bigint
         and job.trigger_token = ${triggerToken}::uuid
         and job.function_key = ${expectedFunctionKey}
@@ -35,7 +35,7 @@ export async function claimJob(
         and registered_function.active
         and exists (
           select 1
-          from toast_hydration.function_trigger_registry as trigger_record
+          from momi_runtime.function_trigger_registry as trigger_record
           where trigger_record.function_key = job.function_key
             and trigger_record.active
         )

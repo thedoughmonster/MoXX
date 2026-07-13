@@ -31,10 +31,10 @@ verify_jwt = false
 [functions.toast-orders-fetch-by-guid-v1]
 verify_jwt = false
 
-[functions.momi-orders-get-by-guid-v1]
+[functions.momi-toast-orders-get-by-id-v1]
 verify_jwt = false
 
-[functions.toast-order-alert-worker-v1]
+[functions.momi-order-alert-worker-v1]
 verify_jwt = false
 
 [functions.slack-order-alert-delivery-v1]

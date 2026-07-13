@@ -4,6 +4,8 @@ import test from "node:test"
 
 const root = new URL("../", import.meta.url)
 const retiredFunctions = [
+  "momi-orders-get-by-guid-v1",
+  "toast-order-alert-worker-v1",
   "toast-orders-probe",
   "toast-order-alert-eligibility-v1",
 ]

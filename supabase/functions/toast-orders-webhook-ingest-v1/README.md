@@ -1,5 +1,11 @@
 # Toast Orders Webhook Ingest v1
 
+## ELI5
+
+Toast sends MoMi a signed note that an order changed. This function checks the
+signature, saves the entire note exactly once, and stops. The database decides
+whether any later fetching or alert work should happen.
+
 ## Purpose
 
 This public inbound adapter authenticates Toast Orders webhook events and

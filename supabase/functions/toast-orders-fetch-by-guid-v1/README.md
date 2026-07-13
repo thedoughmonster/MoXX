@@ -1,5 +1,12 @@
 # Toast Order Fetch by GUID v1
 
+## ELI5
+
+MoMi gives this function one saved fetch job. It gets the complete order from
+Toast, files the untouched JSON in the warehouse, records what happened, and
+leaves one deduplicated work item for MoMi's own order API. It does nothing
+with alerts or Slack.
+
 ## Purpose
 
 This hydration adapter acquires one complete Toast order for durable warehouse
@@ -22,7 +29,8 @@ because authorization is bound to the durable job row and private token.
    from enabled database configuration.
 3. Authenticate with Toast and call only `GET /orders/v2/orders/{guid}`.
 4. Persist the complete response and safe metadata before reporting success.
-5. Deduplicate identical resource content and queue durable MoMi Order API work.
+5. Deduplicate identical resource content and queue source-neutral MoMi Order
+   API work with its Toast provenance.
 
 Retries are idempotent, and every attempt remains visible even when the source
 is unavailable or its response is invalid.

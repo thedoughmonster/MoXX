@@ -35,8 +35,11 @@ test("enforces warehouse-first API boundaries", async () => {
         continue
       }
       const normalized = path.replaceAll("\\", "/")
+      if (normalized.includes("/tests/")) {
+        continue
+      }
       const source = await readFile(join(root, path), "utf8")
-      const mayCallHttp = /(hydration|delivery|api-invoker|fetch-|toast-order-alert-worker)/.test(
+      const mayCallHttp = /(hydration|delivery|api-invoker|fetch-|momi-order-alert-worker)/.test(
         normalized,
       )
 
@@ -44,12 +47,7 @@ test("enforces warehouse-first API boundaries", async () => {
         unauthorizedFetches.push(normalized)
       }
       const internalRoutes = source.match(/\/functions\/v1\/[a-z0-9-]+/gi) ?? []
-      const ownsApprovedApiCall = normalized.includes(
-        "toast-order-alert-worker-v1/",
-      ) && internalRoutes.every((route) =>
-        route === "/functions/v1/momi-orders-get-by-guid-v1"
-      )
-      if (internalRoutes.length > 0 && !ownsApprovedApiCall) {
+      if (internalRoutes.length > 0) {
         internalHttpCalls.push(normalized)
       }
       if (

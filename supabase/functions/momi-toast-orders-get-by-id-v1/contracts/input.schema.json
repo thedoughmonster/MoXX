@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://momi.toast_orders.get_by_id.v1/input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["work_id", "order_id", "trigger_token"],
+  "properties": {
+    "work_id": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$",
+          "maxLength": 19
+        }
+      ]
+    },
+    "order_id": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "trigger_token": {
+      "type": "string",
+      "format": "uuid"
+    }
+  }
+}

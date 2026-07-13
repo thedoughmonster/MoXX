@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "momi://toast.slack_order_alert.deliver.v1/input",
+  "$id": "momi://momi.slack.order_alert.deliver.v1/input",
   "type": "object",
   "additionalProperties": false,
   "required": ["work_id", "trigger_token"],

@@ -1,4 +1,4 @@
-export const functionKey = "toast.slack_order_alert.deliver.v1"
+export const functionKey = "momi.slack.order_alert.deliver.v1"
 
 export type DeliveryTriggerInput = {
   work_id: string

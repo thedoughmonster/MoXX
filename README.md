@@ -10,13 +10,15 @@ The hosted path was verified with signed in-store lifecycle events on
 2026-07-12.
 
 `toast-orders-fetch-by-guid-v1` hydrates durable order work from Toast and
-stores the complete response before downstream use. `momi-orders-get-by-guid-v1`
-is the owned warehouse read boundary. `toast-order-alert-worker-v1` evaluates
-hydrated orders, and `slack-order-alert-delivery-v1` sends durable outcomes.
+stores the complete response before downstream use.
+`momi-toast-orders-get-by-id-v1` is the Toast-specific owned warehouse reader.
+`momi-order-alert-worker-v1` evaluates any configured owned order response,
+and `slack-order-alert-delivery-v1` sends durable outcomes.
 
-The private `toast_alerting` schema defines independently controlled sources,
-rules, routes, Slack destinations, and durable alert candidates. Configuration
-is environment-owned and migrations contain no hardcoded business values.
+Private `momi_runtime`, `momi_orders`, and `momi_alerting` schemas own shared
+registries, source-neutral order work, independently controlled sources, rules,
+routes, destinations, and durable alert outcomes. Configuration is
+environment-owned and migrations contain no hardcoded business values.
 
 ## Source Ownership
 
@@ -41,11 +43,14 @@ eventually be replaced by Square; Toast access cannot be a recovery strategy.
 
 - Ingestion authenticates and preserves source records.
 - Primitive source functions alone acquire vendor data for durable work.
-- Eligibility evaluates hydrated records using database configuration.
+- Source-specific MoMi readers return complete owned warehouse documents.
+- Source-neutral eligibility evaluates those documents using configuration.
 - Delivery owns Slack formatting, retries, and delivery status.
 - Cross-source projections use explicit database views and contracts.
 - Supabase-native trigger adapters may wake allowlisted Edge Functions only
-  from committed durable work; modules do not coordinate through HTTP chains.
+  from committed durable work.
+- The only internal HTTP hop is the alert worker calling the exact owned reader
+  recorded on durable work and resolved through the active function registry.
 
 ## Repository Map
 
@@ -69,7 +74,9 @@ eventually be replaced by Square; Toast access cannot be a recovery strategy.
 
 `TOAST_ORDERS_WEBHOOK_SECRET` must contain the secret for the Orders webhook
 subscription. `TOAST_CLIENT_ID` and `TOAST_CLIENT_SECRET` authenticate the
-dedicated Toast source function. These values must never be committed.
+dedicated Toast source function. `SLACK_BOT_TOKEN` authorizes the destination
+adapter, and `MOMI_CODE_COMMIT_SHA` records the deployed revision on attempts.
+These values must never be committed.
 
 ## Verification
 

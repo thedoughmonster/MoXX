@@ -18,11 +18,14 @@ flowchart LR
   events["Unchanged Toast webhook events"]
   hydrateWork["Durable hydration work"]
   versions["toast_raw.orders resource versions"]
-  apiWork["Durable Order API work"]
-  invoker["MoMi Order API invoker"]
+  apiWork["momi_orders.api_invocation_work"]
+  worker["Source-neutral order alert worker"]
+  toastReader["Toast-specific owned order reader"]
+  futureReader["Future source-specific owned reader"]
   config["Configured sources, rules, routes, destinations"]
-  process["Warehouse decision processing"]
-  candidates["toast_alerting.order_alert_candidates"]
+  process["momi_alerting configured decision"]
+  candidates["momi_alerting.order_alert_candidates"]
+  deliveryWork["Durable Slack delivery work"]
   projections["Rebuildable related projections"]
   views["Versioned query contracts"]
   api["MoMi API"]
@@ -41,17 +44,22 @@ flowchart LR
   fetch --> versions
   versions --> projections
   versions --> apiWork
-  apiWork --> invoker
-  invoker --> api
+  apiWork --> worker
+  worker -->|"exact registered contract"| toastReader
+  worker -.->|"future registered contract"| futureReader
+  futureReader -.->|"same owned envelope"| worker
+  views --> toastReader
+  toastReader -->|"complete owned order"| worker
   config --> process
-  api --> process
+  worker --> process
   process --> candidates
   events --> views
   projections --> views
   candidates --> views
   views --> api
   api --> consumers
-  candidates --> delivery
+  candidates --> deliveryWork
+  deliveryWork --> delivery
   delivery --> slack
 ```
 
@@ -66,8 +74,12 @@ flowchart LR
 - Reports and read requests never fetch source data or wait for hydration.
 - Webhook receipt queues hydration only after durable source persistence.
 - Hydration completion stores the resource version and API work atomically.
-- The Order API invoker cannot start until that transaction commits.
-- The Order API invoker starts from durable work and passes the order GUID only.
+- The alert worker cannot start until the Order API work transaction commits.
+- The worker resolves the exact source-specific reader route from active
+  registry configuration stored with the durable work.
+- Reader requests carry only work identity, order identity, and capability.
+- Every source-specific reader returns the same owned metadata envelope and its
+  complete source payload; it never calls the source API.
 - Raw storage is permanent and separated by source resource type.
 - Every order version contains the complete source record as JSONB.
 - Content hashes deduplicate unchanged records; fetch attempts remain auditable.
@@ -77,13 +89,15 @@ flowchart LR
 - Square uses its own raw resource tables without rewriting Toast history.
 - Downstream reads use named, versioned query contracts through the MoMi API.
 - Application code and the MoMi API do not query raw source tables directly.
-- Modules coordinate only through durable database work, never HTTP chains.
+- Modules coordinate through durable database work. The only internal HTTP hop
+  in this slice is the ADR-approved worker call to the exact owned reader.
 - A Supabase-native adapter may wake an allowlisted Edge Function after commit.
 - Adapter requests carry work identity and its private per-work capability token.
 - The function verifies the token while atomically reclaiming durable work.
 - Duplicate or missed wake-ups are recovered from database state.
 - Business mappings and enable switches live in database configuration.
 - Source, rule, route, and destination enablement are independent controls.
+- Alert identity is `source_system + order_id + alert_kind`.
 - Alert claims are durable before notification delivery is attempted.
 - Slack calls never occur inside a source ingestion request.
 - Delivery adapters send durable outcomes and never fetch business data.

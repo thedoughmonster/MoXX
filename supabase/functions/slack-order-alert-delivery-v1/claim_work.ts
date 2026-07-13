@@ -11,7 +11,7 @@ export async function claimWork(
 ): Promise<ClaimWorkResult> {
   const rows = await sql<ClaimedWork[]>`
     with claimed_work as (
-      update toast_alerting.slack_delivery_work as work
+      update momi_alerting.slack_delivery_work as work
       set status = 'running',
           attempt_count = work.attempt_count + 1,
           started_at = coalesce(work.started_at, now()),
@@ -22,7 +22,7 @@ export async function claimWork(
         and work.trigger_token = ${triggerToken}::uuid
         and exists (
           select 1
-          from toast_hydration.function_registry as registry
+          from momi_runtime.function_registry as registry
           where registry.function_key = ${functionKey}
             and registry.active
         )
@@ -36,7 +36,7 @@ export async function claimWork(
         )
       returning work.id, work.candidate_id
     ), created_attempt as (
-      insert into toast_alerting.slack_delivery_attempts (
+      insert into momi_alerting.slack_delivery_attempts (
         work_id,
         code_commit_sha,
         deployment_id

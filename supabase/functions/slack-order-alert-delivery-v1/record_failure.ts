@@ -8,12 +8,12 @@ export async function recordFailure(
   const rows = await sql<{ work_id: string }[]>`
     with target_work as (
       select work.id
-      from toast_alerting.slack_delivery_work as work
+      from momi_alerting.slack_delivery_work as work
       where work.id = ${work.work_id}::bigint
         and work.status = 'running'
       for update
     ), attempt_update as (
-      update toast_alerting.slack_delivery_attempts as attempt
+      update momi_alerting.slack_delivery_attempts as attempt
       set finished_at = now(),
           outcome = 'failed',
           http_status = ${failure.http_status},
@@ -28,7 +28,7 @@ export async function recordFailure(
         and attempt.outcome = 'running'
       returning attempt.work_id
     )
-    update toast_alerting.slack_delivery_work as delivery_work
+    update momi_alerting.slack_delivery_work as delivery_work
     set status = 'failed',
         lease_expires_at = null,
         last_error = ${failure.error_message},

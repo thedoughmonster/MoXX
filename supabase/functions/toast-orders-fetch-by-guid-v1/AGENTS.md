@@ -9,6 +9,9 @@
 - Deduplicate identical resource versions by content hash.
 - Persist attempts and safe response metadata without credentials or tokens.
 - Authorize POST triggers with the private token on the durable work row.
-- Create Order API work only after a valid order resource is durable.
+- Create source-neutral `momi_orders.api_invocation_work` only after a valid
+  order resource is durable, preserving Toast provenance in generic columns.
+- Deduplicate downstream work by source system, resource kind, source version,
+  and API contract.
 - Do not evaluate alerts, format messages, call Slack, or call another function.
 - Log identifiers and generic errors only, never source payloads or secrets.

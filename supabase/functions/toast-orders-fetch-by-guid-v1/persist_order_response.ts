@@ -65,22 +65,33 @@ export async function persistOrderResponse(
       where hydration_job.id = attempt_update.job_id
       returning hydration_job.id
     ), api_work as (
-      insert into toast_hydration.order_api_invocation_work (
-        hydration_job_id,
-        order_version_id,
-        restaurant_guid,
-        order_guid,
+      insert into momi_orders.api_invocation_work (
+        source_system,
+        source_work_kind,
+        source_work_id,
+        source_resource_kind,
+        source_version_id,
+        location_id,
+        order_id,
         api_contract_key
       )
       select
-        ${job.job_id}::bigint,
-        resource_version.id,
+        'toast',
+        'order_hydration_job',
+        ${job.job_id},
+        'order',
+        resource_version.id::text,
         ${job.restaurant_guid},
         ${job.order_guid},
         ${job.downstream_api_contract_key}
       from resource_version
       where ${isValid}
-      on conflict (order_version_id) do nothing
+      on conflict (
+        source_system,
+        source_resource_kind,
+        source_version_id,
+        api_contract_key
+      ) do nothing
     )
     select id::text as order_version_id, was_inserted
     from resource_version

@@ -12,7 +12,7 @@ export async function loadPreparedMessage(
       message.destination_enabled,
       message.slack_channel_id,
       message.message_payload
-    from toast_alerting.slack_order_alert_messages_v1 as message
+    from momi_alerting.slack_order_alert_messages_v1 as message
     where message.delivery_work_id = ${workId}::bigint
   `
 

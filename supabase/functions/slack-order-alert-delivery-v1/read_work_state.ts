@@ -16,14 +16,14 @@ export async function readWorkState(
       latest.invocation_id::text,
       latest.slack_channel_id as channel,
       latest.slack_message_ts as ts
-    from toast_alerting.slack_delivery_work as work
+    from momi_alerting.slack_delivery_work as work
     left join lateral (
       select
         attempt.id,
         attempt.invocation_id,
         attempt.slack_channel_id,
         attempt.slack_message_ts
-      from toast_alerting.slack_delivery_attempts as attempt
+      from momi_alerting.slack_delivery_attempts as attempt
       where attempt.work_id = work.id
       order by attempt.id desc
       limit 1

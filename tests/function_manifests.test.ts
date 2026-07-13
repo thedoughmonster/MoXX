@@ -44,7 +44,8 @@ test("keeps complete manifests and the service catalog synchronized", async () =
     }
 
     const directory = join(functionsRoot, entry.name)
-    await access(join(directory, "README.md"))
+    const readme = await readFile(join(directory, "README.md"), "utf8")
+    assert.match(readme, /^## ELI5$/m, `${entry.name}: ELI5`)
     await access(join(directory, "AGENTS.md"))
     const source = await readFile(join(directory, "function.json"), "utf8")
     const manifest = JSON.parse(source) as Record<string, unknown>
