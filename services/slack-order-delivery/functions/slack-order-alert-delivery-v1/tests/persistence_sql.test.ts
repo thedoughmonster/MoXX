@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises"
 import test from "node:test"
 
 test("types dynamic values persisted inside JSON outcomes", async () => {
-  const directory = new URL("../", import.meta.url)
+  const directory = new URL("../src/", import.meta.url)
   const [successSql, failureSql] = await Promise.all([
     readFile(new URL("record_success.ts", directory), "utf8"),
     readFile(new URL("record_failure.ts", directory), "utf8"),
@@ -21,7 +21,7 @@ test("types dynamic values persisted inside JSON outcomes", async () => {
 })
 
 test("uses only source-neutral durable state namespaces", async () => {
-  const directory = new URL("../", import.meta.url)
+  const directory = new URL("../src/", import.meta.url)
   const files = [
     "claim_work.ts",
     "load_prepared_message.ts",
@@ -45,7 +45,7 @@ test("declares the source-neutral Slack delivery contract", async () => {
     readFile(new URL("function.json", directory), "utf8"),
     readFile(new URL("contracts/input.schema.json", directory), "utf8"),
     readFile(new URL("contracts/output.schema.json", directory), "utf8"),
-    readFile(new URL("types.ts", directory), "utf8"),
+    readFile(new URL("src/types.ts", directory), "utf8"),
   ])
   const manifest = JSON.parse(manifestText)
   const inputSchema = JSON.parse(inputText)

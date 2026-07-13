@@ -16,14 +16,20 @@ configured Slack channel and records the delivery result.
 
 - Function key: `momi.slack.order_alert.deliver.v1`
 - Route: `/functions/v1/slack-order-alert-delivery-v1`
+- Owner: `slack-order-delivery`
 - Boundary: Slack outbound
 
-## HTTP Contract
+## Trigger And Input
 
 `POST` accepts only `work_id` and its `trigger_token`; see
 `contracts/input.schema.json`. Authorization is bound to the durable Slack work
 row. Gateway JWT verification is disabled because that per-work capability is
 the authorization boundary. An already successful work item is never sent again.
+
+## Output
+
+The response reports the durable delivery disposition and work identifier. It
+never returns the Slack token or prepared business payload.
 
 ## Durable Flow
 
@@ -34,6 +40,17 @@ the authorization boundary. An already successful work item is never sent again.
 
 Retries use the `momi.alert.candidate.v1` idempotency policy at the alert
 candidate and delivery work boundaries.
+
+## Side Effects
+
+The adapter records a delivery attempt, posts the prepared message to the
+configured channel, and stores only approved Slack response metadata.
+
+## Failure Handling
+
+Network, HTTP, Slack API, and durable-state failures are recorded with stable
+codes and safe metadata. Successful work is never resent; failed work remains
+available to configured retry policy.
 
 ## Authority Boundary
 
@@ -48,6 +65,8 @@ selection.
 - `MOMI_CODE_COMMIT_SHA`: deployed source revision recorded with attempts.
 - Channel, route, and destination enablement live in database configuration.
 
-See the [function manifest](function.json), [local rules](AGENTS.md), and
-[alert pipeline contract](../../../docs/contracts/momi-order-alert-pipeline-v1.md).
-Run `npm test` from the repository root with Node.js 24.
+## Tests
+
+See the [function manifest](function.json), [service rules](../../AGENTS.md),
+and [alert pipeline contract](../../../../docs/contracts/momi-order-alert-pipeline-v1.md).
+Run `npm run check -- --service slack-order-delivery` from the repository root.

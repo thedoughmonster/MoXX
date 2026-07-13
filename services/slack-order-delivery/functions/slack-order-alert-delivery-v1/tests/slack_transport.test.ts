@@ -1,9 +1,9 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 
-import { isSlackSuccess } from "../is_slack_success.ts"
-import { sendSlackMessage } from "../send_slack_message.ts"
-import { summarizeSlackResponse } from "../summarize_slack_response.ts"
+import { isSlackSuccess } from "../src/is_slack_success.ts"
+import { sendSlackMessage } from "../src/send_slack_message.ts"
+import { summarizeSlackResponse } from "../src/summarize_slack_response.ts"
 
 test("posts the prepared payload with the fixed Slack contract", async () => {
   const payload = {

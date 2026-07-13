@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 
-import { parseDeliveryTrigger } from "../parse_request.ts"
+import { parseDeliveryTrigger } from "../src/parse_request.ts"
 
 test("accepts only the strict durable delivery trigger", () => {
   const token = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
