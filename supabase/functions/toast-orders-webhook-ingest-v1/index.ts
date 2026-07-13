@@ -1,5 +1,5 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts"
+import "edge-runtime"
 
-import { handleRequest } from "./handle_request.ts"
+import { handleRequest } from "../../../services/toast-order-ingest/functions/toast-orders-webhook-ingest-v1/src/handle_request.ts"
 
 Deno.serve(handleRequest)

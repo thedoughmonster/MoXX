@@ -1,7 +1,8 @@
 # Edge Function Manifest v1
 
-Every direct child of `supabase/functions/` is one deployable Edge Function and
-must contain one complete `function.json` manifest.
+Every owned function has one complete `function.json` beside its service code:
+`services/<service-key>/functions/<slug>/function.json`. The matching
+`supabase/functions/<slug>/` directory contains only its deployment adapter.
 
 ## Logical Identity
 
@@ -24,8 +25,8 @@ define its business purpose.
 - `runtime` must be `supabase_edge` while deployed as an Edge Function.
 - `route_path` must be `/functions/v1/<function-directory>`.
 - `authentication_policy_key` names the authentication contract.
-- `entrypoint`, `input_schema`, and `output_schema` are function-relative paths
-  to committed files.
+- `entrypoint` names the matching adapter entrypoint.
+- `input_schema` and `output_schema` are function-relative contract paths.
 
 ## Authority Declaration
 
@@ -40,4 +41,5 @@ versions can add policy references without weakening this baseline.
 
 Run `npm run catalog:generate` after changing a manifest. The committed
 `docs/service-catalog.md` is generated from manifests and must not be edited by
-hand. The manifest regression test checks both completeness and catalog drift.
+hand. `npm run check -- --service <key|all>` validates ownership, contracts,
+the adapter, and catalog drift.

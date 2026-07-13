@@ -2,7 +2,7 @@
 
 Source-controlled backend services and database history for MoMi.
 
-## Current Modules
+## Current Services
 
 `toast-orders-webhook-ingest-v1` receives Toast Orders webhook events,
 verifies Toast's signature, and preserves the complete event in Postgres.
@@ -56,13 +56,14 @@ eventually be replaced by Square; Toast access cannot be a recovery strategy.
 ## Repository Map
 
 - `AGENTS.md`: non-negotiable engineering constraints.
-- `docs/service-catalog.md`: generated purpose-oriented service inventory.
+- `docs/service-catalog.md`: generated capability and function inventory.
 - `docs/`: shared architecture, decisions, and module contracts.
+- `services/<service-key>/`: capability-owned code, contracts, tests, and docs.
 - `supabase/migrations/`: reviewed database changes.
-- `supabase/functions/<service-name>/`: one documented directory per Edge
-  service, with its README, local agent contract, and function manifest.
-- `services/<service-name>/`: one directory per future non-Edge service.
-- `packages/<package-name>/`: shared non-deployable code only.
+- `supabase/functions/<function-slug>/`: thin Edge Function deployment adapters.
+- `packages/<package-name>/`: explicitly approved shared code only.
+- `schemas/`: machine-readable workspace and manifest contracts.
+- `scripts/`: manifest-driven checks, inventory, and deployment orchestration.
 - `tests/`: contract tests that require no local Supabase stack.
 
 ## Branches
@@ -70,6 +71,9 @@ eventually be replaced by Square; Toast access cannot be a recovery strategy.
 - `dev` deploys to the persistent Supabase development branch.
 - `prod` deploys to the production Supabase project.
 - Production changes flow from reviewed and verified development changes.
+
+See [deployment](docs/deployment.md) for the exact commands, credential
+boundaries, inventory gate, and exact-commit promotion process.
 
 ## Required Hosted Secret
 
@@ -81,5 +85,5 @@ These values must never be committed.
 
 ## Verification
 
-Run `npm test` with Node.js 24. Hosted verification uses a controlled
-Toast event or Toast's event replay action after deployment.
+Run `npm run check -- --service all` with Node.js 24. Hosted verification uses
+a controlled Toast event or Toast's event replay action after deployment.

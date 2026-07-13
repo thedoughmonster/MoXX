@@ -1,0 +1,38 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "toast-order-hydration",
+  "purpose": "Hydrate durable Toast order work and preserve each complete source response before downstream use.",
+  "kind": "source_adapter",
+  "lifecycle_status": "active",
+  "functions": ["toast-orders-fetch-by-guid-v1"],
+  "contracts": {
+    "provides": [
+      "toast.orders.fetch_by_guid.v1",
+      "momi.order_api.invocation_work.v1"
+    ],
+    "consumes": [
+      {
+        "service": "toast-order-ingest",
+        "contract": "toast.order.hydration_work.v1"
+      }
+    ]
+  },
+  "database": {
+    "read": ["toast_hydration", "momi_runtime"],
+    "write": ["toast_hydration", "toast_raw", "momi_orders"]
+  },
+  "network": { "outbound_hosts": ["configured:toast.api_base_url"] },
+  "secrets": [
+    "SUPABASE_DB_URL",
+    "TOAST_CLIENT_ID",
+    "TOAST_CLIENT_SECRET",
+    "MOMI_CODE_COMMIT_SHA",
+    "DENO_DEPLOYMENT_ID"
+  ],
+  "runtime_dependencies": [
+    "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
+    "npm:postgres@3.4.3"
+  ],
+  "approved_packages": []
+}

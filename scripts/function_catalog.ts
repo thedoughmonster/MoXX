@@ -1,24 +1,16 @@
-export type FunctionManifest = {
-  function_key: string
-  purpose: string
-  owner_service: string
-  capability: string
-  boundary: string
-  runtime: string
-  route_path: string
-}
+import type { LoadedFunction } from "./architecture/types.ts"
 
 const lifecycleOrder = ["ingest", "hydrate", "read", "decide", "deliver"]
 
 export function renderFunctionCatalog(
-  manifests: FunctionManifest[],
+  functions: LoadedFunction[],
 ): string {
-  const ordered = [...manifests].sort((left, right) => {
-    const capabilityDifference = lifecycleOrder.indexOf(left.capability) -
-      lifecycleOrder.indexOf(right.capability)
+  const ordered = [...functions].sort((left, right) => {
+    const capabilityDifference = lifecycleOrder.indexOf(left.manifest.capability) -
+      lifecycleOrder.indexOf(right.manifest.capability)
 
-    return capabilityDifference || left.function_key.localeCompare(
-      right.function_key,
+    return capabilityDifference || left.manifest.function_key.localeCompare(
+      right.manifest.function_key,
     )
   })
   const lines = [
@@ -29,15 +21,17 @@ export function renderFunctionCatalog(
     "Functions are ordered by logical lifecycle capability. Runtime and route",
     "identify deployment location but do not define business purpose.",
     "",
-    "| Capability | Function key | Purpose | Boundary | Owner | Runtime | Route |",
+    "| Capability | Function key | Purpose | Service | Kind | Boundary | Route |",
     "| --- | --- | --- | --- | --- | --- | --- |",
   ]
 
-  for (const manifest of ordered) {
+  for (const entry of ordered) {
+    const manifest = entry.manifest
+    const service = entry.service.manifest
     lines.push(
       `| ${manifest.capability} | \`${manifest.function_key}\` | ${manifest.purpose} | ` +
-        `${manifest.boundary} | \`${manifest.owner_service}\` | ` +
-        `${manifest.runtime} | \`${manifest.route_path}\` |`,
+        `\`${service.service_key}\` | ${service.kind} | ${manifest.boundary} | ` +
+        `\`${manifest.route_path}\` |`,
     )
   }
 

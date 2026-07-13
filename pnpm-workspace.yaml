@@ -1,0 +1,6 @@
+packages:
+  - .
+
+allowBuilds:
+  deno: true
+  supabase: true

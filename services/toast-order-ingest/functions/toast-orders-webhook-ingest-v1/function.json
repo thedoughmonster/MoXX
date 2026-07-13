@@ -1,0 +1,23 @@
+{
+  "function_key": "toast.orders.webhook_ingest.v1",
+  "contract_version": 1,
+  "purpose": "Authenticate and preserve one Toast Orders webhook event before downstream hydration.",
+  "owner_service": "toast-order-ingest",
+  "function_type": "ingest",
+  "capability": "ingest",
+  "boundary": "toast_inbound",
+  "runtime": "supabase_edge",
+  "route_path": "/functions/v1/toast-orders-webhook-ingest-v1",
+  "authentication_policy_key": "toast.orders.webhook_signature.v1",
+  "entrypoint": "index.ts",
+  "input_schema": "contracts/input.schema.json",
+  "output_schema": "contracts/output.schema.json",
+  "idempotency_policy_key": "toast.webhook.event_guid.v1",
+  "required_capabilities": [
+    "database_write"
+  ],
+  "declared_side_effects": [
+    "stores_raw_order_webhook_event",
+    "queues_order_hydration_work"
+  ]
+}
