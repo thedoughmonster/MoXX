@@ -29,6 +29,8 @@ token authorizes one durable row in `momi_orders.api_invocation_work`.
 5. Pass both documents to `momi_alerting.claim_order_alert_candidates`, which
    snapshots the presentation on a claimed candidate.
 6. Complete the attempt and work row with the durable decision outcome.
+7. On failure, finish the attempt and release the lease even when no upstream
+   HTTP status is available.
 
 ## Authority Boundary
 

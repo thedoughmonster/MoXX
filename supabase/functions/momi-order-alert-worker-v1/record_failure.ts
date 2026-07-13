@@ -13,7 +13,7 @@ export async function recordFailure(
       update momi_orders.api_invocation_attempts
       set finished_at = now(),
           outcome = 'failed',
-          http_status = ${httpStatus},
+          http_status = ${httpStatus}::integer,
           response_metadata = ${sql.json(responseMetadata)},
           error_code = ${errorCode},
           error_message = ${errorMessage}
@@ -26,7 +26,7 @@ export async function recordFailure(
         last_error = ${errorMessage},
         last_outcome = jsonb_build_object(
           'error_code', ${errorCode},
-          'http_status', ${httpStatus}
+          'http_status', ${httpStatus}::integer
         )
     from attempt_update
     where work.id = attempt_update.work_id
