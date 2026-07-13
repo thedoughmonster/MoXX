@@ -9,6 +9,8 @@ const path = join(workspaceRoot, "docs", "quality-metrics.json")
 const expected = renderQualityReport(await collectQualityMetrics())
 const actual = await readFile(path, "utf8")
 if (actual.replaceAll("\r\n", "\n") !== expected) {
-  throw new Error("Quality report is stale; run npm run quality:generate")
+  throw new Error(
+    `Quality report is stale; run npm run quality:generate\nExpected:\n${expected}\nActual:\n${actual}`,
+  )
 }
 console.log("Quality trend report is current.")
