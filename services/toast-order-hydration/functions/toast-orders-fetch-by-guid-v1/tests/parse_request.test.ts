@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 
-import { parseHydrationTrigger } from "../parse_request.ts"
+import { parseHydrationTrigger } from "../src/parse_request.ts"
 
 test("accepts only a positive job id with its durable token", () => {
   const token = "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"

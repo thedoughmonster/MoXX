@@ -2,8 +2,8 @@ import assert from "node:assert/strict"
 import { readFile } from "node:fs/promises"
 import test from "node:test"
 
-import { fetchToastOrder } from "../fetch_toast_order.ts"
-import { getToastToken } from "../get_toast_token.ts"
+import { fetchToastOrder } from "../src/fetch_toast_order.ts"
+import { getToastToken } from "../src/get_toast_token.ts"
 
 test("authenticates with the configured Toast client contract", async () => {
   let capturedUrl = ""
@@ -72,8 +72,8 @@ test("fetches one configured restaurant order by encoded GUID", async () => {
 
 test("uses source-neutral runtime and order work contracts", async () => {
   const [claimSource, persistenceSource] = await Promise.all([
-    readFile(new URL("../claim_job.ts", import.meta.url), "utf8"),
-    readFile(new URL("../persist_order_response.ts", import.meta.url), "utf8"),
+    readFile(new URL("../src/claim_job.ts", import.meta.url), "utf8"),
+    readFile(new URL("../src/persist_order_response.ts", import.meta.url), "utf8"),
   ])
 
   assert.match(claimSource, /momi_runtime\.function_registry/)
