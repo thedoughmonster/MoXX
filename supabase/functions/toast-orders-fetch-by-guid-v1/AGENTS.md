@@ -12,5 +12,3 @@
 - Create Order API work only after a valid order resource is durable.
 - Do not evaluate alerts, format messages, call Slack, or call another function.
 - Log identifiers and generic errors only, never source payloads or secrets.
-- Keep every handwritten file at or below 120 physical lines.
-- Each TypeScript file may declare at most one named function.

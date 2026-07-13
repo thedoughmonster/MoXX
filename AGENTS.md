@@ -17,6 +17,9 @@ they deploy from the same repository.
 - Keep every handwritten file at or below 120 physical lines.
 - Each TypeScript file may declare at most one function.
 - Each callable Edge Function lives in its own directory.
+- Every Edge Function directory contains a `README.md` and local `AGENTS.md`.
+- Function READMEs explain purpose, contract, durable flow, and authority.
+- Local agent files add function-specific invariants without repeating parents.
 - Every Edge Function directory contains one complete `function.json` manifest.
 - Manifests own logical purpose; runtime and route are deployment metadata.
 - Generate `docs/service-catalog.md` from manifests; never edit it by hand.

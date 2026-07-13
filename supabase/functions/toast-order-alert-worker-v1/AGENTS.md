@@ -1,5 +1,6 @@
 # Hydrated Alert Worker Rules
 
+- This directory owns only `toast.orders.alert_from_hydrated_order.v1`.
 - Start only from `toast_hydration.order_api_invocation_work`.
 - Authorize with the matching per-work capability token.
 - Call only `momi-orders-get-by-guid-v1` under ADR `0004`.

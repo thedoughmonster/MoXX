@@ -1,0 +1,44 @@
+# Toast Order Fetch by GUID v1
+
+## Purpose
+
+This hydration adapter acquires one complete Toast order for durable warehouse
+work. It is the only function in the current slice allowed to call Toast.
+
+- Function key: `toast.orders.fetch_by_guid.v1`
+- Route: `/functions/v1/toast-orders-fetch-by-guid-v1`
+- Boundary: Toast outbound
+
+## HTTP Contract
+
+`POST` accepts only `job_id` and that job's `trigger_token`; see
+`contracts/input.schema.json`. Supabase gateway JWT verification is disabled
+because authorization is bound to the durable job row and private token.
+
+## Durable Flow
+
+1. Atomically claim eligible configured work and create an attempt.
+2. Resolve the Toast host, restaurant, timeout, and credential secret names
+   from enabled database configuration.
+3. Authenticate with Toast and call only `GET /orders/v2/orders/{guid}`.
+4. Persist the complete response and safe metadata before reporting success.
+5. Deduplicate identical resource content and queue durable MoMi Order API work.
+
+Retries are idempotent, and every attempt remains visible even when the source
+is unavailable or its response is invalid.
+
+## Authority Boundary
+
+This function may call the configured Toast authentication and order endpoints.
+It never evaluates alerts, serves application reads, or calls Slack.
+
+## Configuration
+
+- `SUPABASE_DB_URL`: private database connection supplied by Supabase.
+- `MOMI_CODE_COMMIT_SHA`: deployed source revision recorded with attempts.
+- Toast credential secret names and all non-secret source values are configured
+  in the warehouse, not hardcoded here.
+
+See the [function manifest](function.json), [local rules](AGENTS.md), and
+[hydration contract](../../../docs/contracts/toast-order-hydration-v1.md).
+Run `npm test` from the repository root with Node.js 24.

@@ -9,5 +9,3 @@
 - Return the complete payload from the approved view without transformation.
 - Do not make business decisions, mutate work, or perform delivery work.
 - Log identifiers and generic errors only, never tokens or order payloads.
-- Keep every handwritten file at or below 120 physical lines.
-- Each TypeScript file may declare at most one named function.

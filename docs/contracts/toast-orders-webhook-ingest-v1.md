@@ -31,13 +31,10 @@ permanent and remains separate from full order resource versions in
 
 The payload event GUID is unique. Replays and retries do not create another row.
 
-Every newly stored raw event also receives a durable pending dispatch row from
-the database trigger defined by the alerting database contract. The receiver
-does not call another function or API after storage.
-
-Hydration must not be enabled until warehouse migration creates idempotent
-hydration work from the configured order GUID path in the same transaction as
-the raw event. The hydration contract owns that future work, not receiver code.
+For every newly stored raw event, a database trigger evaluates enabled webhook,
+source, restaurant, and function mappings. A qualifying event creates
+idempotent durable hydration work in the same transaction as the raw event.
+The receiver does not call another function or API after storage.
 
 ## Responses
 

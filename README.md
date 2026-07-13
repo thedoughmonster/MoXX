@@ -53,7 +53,8 @@ eventually be replaced by Square; Toast access cannot be a recovery strategy.
 - `docs/service-catalog.md`: generated purpose-oriented service inventory.
 - `docs/`: shared architecture, decisions, and module contracts.
 - `supabase/migrations/`: reviewed database changes.
-- `supabase/functions/<service-name>/`: one directory per Edge service.
+- `supabase/functions/<service-name>/`: one documented directory per Edge
+  service, with its README, local agent contract, and function manifest.
 - `services/<service-name>/`: one directory per future non-Edge service.
 - `packages/<package-name>/`: shared non-deployable code only.
 - `tests/`: contract tests that require no local Supabase stack.

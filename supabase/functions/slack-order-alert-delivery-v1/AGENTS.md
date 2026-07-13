@@ -9,5 +9,3 @@
 - Persist only safe Slack response fields and metadata.
 - Never send work that has already succeeded.
 - Return a server error when durable state cannot be recorded.
-- Keep every handwritten file at or below 120 physical lines.
-- Each TypeScript file may declare at most one function.

@@ -4,6 +4,10 @@
 - Keep every handwritten file at or below 120 physical lines.
 - Declare at most one function per TypeScript file.
 - Keep `index.ts` limited to imports and runtime registration.
+- Give every direct function directory a `README.md` describing its purpose,
+  contract, durable flow, configuration, and authority boundary.
+- Give every direct function directory a local `AGENTS.md` containing only its
+  function-specific invariants; inherit shared rules from this file.
 - Give every direct function directory a complete `function.json` conforming to
   `docs/contracts/edge-function-manifest-v1.md`.
 - Treat `purpose`, `capability`, `boundary`, and `owner_service` as the function's

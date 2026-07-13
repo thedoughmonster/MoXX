@@ -28,6 +28,11 @@ All five active functions have complete manifests and appear in the generated
 The webhook now owns explicit input and output JSON Schemas. Its input schema
 allows additional Toast fields so source data remains complete.
 
+Each function directory also owns a concise README and function-specific agent
+contract. Parent agent files retain shared engineering rules; local agent files
+contain only the authority and safety invariants unique to that function. The
+manifest regression test requires both files for every active function.
+
 ## Dev Registry
 
 The four functions owned by `toast_hydration.function_registry` were updated to
