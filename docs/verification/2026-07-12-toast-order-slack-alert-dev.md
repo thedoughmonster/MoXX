@@ -54,3 +54,7 @@ alert, with the original timestamp.
 - Business switches: source, rule, route, and destination (`4`)
 - Source key: `toast_in_store`
 - Destination key: `momi_dev_alerts`
+
+This section records the configuration used for the first live delivery. The
+catch-all destination was later disabled and replaced by source-specific
+channels. See [Toast Source Channel Routing Dev Verification](2026-07-12-toast-source-channel-routing-dev.md).

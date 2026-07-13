@@ -17,7 +17,9 @@ no access, and row level security is enabled as defense in depth.
 `toast_alerting.toast_sources` stores named Toast source mappings. Each source
 has its own enabled flag so a source can be turned on or off without changing
 rules or Slack destinations. Source and order GUID payload paths are stored as
-configuration rather than hardcoded in a service.
+configuration rather than hardcoded in a service. Each source also configures
+an `equals` or `not_equals` comparison. A `not_equals` source never matches a
+missing or JSON `null` value.
 
 `toast_alerting.slack_destinations` stores named Slack channel targets. Each
 destination has its own enabled flag and channel id. No channel ids are seeded
@@ -40,8 +42,8 @@ destinations so channel changes do not require code changes.
 No initial business values are seeded by the migration.
 
 Eligibility is evaluated atomically by a private database function. It uses
-exact JSON equality, requires every rule condition to match, and refuses to
-claim an ambiguous source match.
+the configured source comparison, requires every rule condition to match by
+exact JSON equality, and refuses to claim an ambiguous source match.
 
 ## Candidate Claims
 
