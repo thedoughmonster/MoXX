@@ -21,15 +21,13 @@ discovery.
 
 ## Credentials
 
-The `dev` and `prod` GitHub environments each store:
-
-- `SUPABASE_ACCESS_TOKEN`: management and Edge Function deployment credential.
-- `SUPABASE_DB_PASSWORD`: database migration credential for that environment.
-
-Both values currently use the dedicated `momi-backend-github-actions-permanent`
-PAT. The PAT does not expire and must be revoked immediately if exposure is
-suspected. Temporary `postgres` access is inherited by the persistent dev
-branch from production and remains time-bounded independently of the PAT.
+The `dev` and `prod` GitHub environments each store one
+`SUPABASE_ACCESS_TOKEN`. Deployment workflows pass that dedicated
+`momi-backend-github-actions-permanent` PAT to the Supabase Management API and
+as the temporary Postgres password. The PAT does not expire and must be revoked
+immediately if exposure is suspected. Temporary `postgres` access is inherited
+by the persistent dev branch from production and remains time-bounded
+independently of the PAT.
 
 The `renew-database-access.yml` workflow runs monthly from `prod` and extends
 only the existing `postgres` mapping to 89 days. It discovers the PAT owner's
