@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { isValidOrderResponse } from "../is_valid_order_response.ts"
-import type { ClaimedWork, OrderApiSuccess } from "../types.ts"
+import { isValidOrderResponse } from "../src/is_valid_order_response.ts"
+import type { ClaimedWork, OrderApiSuccess } from "../src/types.ts"
 
 const job: ClaimedWork = {
   disposition: "claimed",

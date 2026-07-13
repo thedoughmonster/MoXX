@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { callOrderApi } from "../call_order_api.ts"
-import type { ClaimedWork } from "../types.ts"
+import { callOrderApi } from "../src/call_order_api.ts"
+import type { ClaimedWork } from "../src/types.ts"
 
 const job: ClaimedWork = {
   disposition: "claimed",

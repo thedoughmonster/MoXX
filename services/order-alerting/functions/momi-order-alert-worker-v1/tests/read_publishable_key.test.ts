@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { readPublishableKey } from "../read_publishable_key.ts"
+import { readPublishableKey } from "../src/read_publishable_key.ts"
 
 test("reads only the named default publishable key", () => {
   assert.equal(readPublishableKey('{"default":"sb_publishable_test"}'),

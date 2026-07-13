@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-import { parseWorkTrigger } from "../parse_request.ts"
+import { parseWorkTrigger } from "../src/parse_request.ts"
 
 const token = "4a56f5d8-bce2-4a99-8e79-dd994bf7ea65"
 

@@ -11,13 +11,18 @@ It does not care whether the order came from Toast, Square, or a future source.
 
 - Function key: `momi.orders.alert.evaluate.v1`
 - Route: `/functions/v1/momi-order-alert-worker-v1`
-- Owner: `momi-order-alert-worker`
+- Owner: `order-alerting`
 - Boundary: MoMi internal
 
-## HTTP Contract
+## Trigger And Input
 
 `POST` accepts only `work_id` and `trigger_token`; see the input schema. The
 token authorizes one durable row in `momi_orders.api_invocation_work`.
+
+## Output
+
+The response reports the durable work disposition and identifiers. It never
+returns an order payload or capability token.
 
 ## Durable Flow
 
@@ -31,6 +36,16 @@ token authorizes one durable row in `momi_orders.api_invocation_work`.
 6. Complete the attempt and work row with the durable decision outcome.
 7. On failure, finish the attempt and release the lease even when no upstream
    HTTP status is available.
+
+## Side Effects
+
+The worker records an invocation attempt, claims configured alert candidates,
+snapshots readable presentation data, and queues configured delivery work.
+
+## Failure Handling
+
+Failures finish the attempt, record a stable error code, and release the work
+lease so configured retry policy can act. A failed read creates no alert.
 
 ## Authority Boundary
 
@@ -48,6 +63,8 @@ the owned API.
 - Order readers, sources, rules, routes, and destinations remain independent
   database configuration.
 
-See the [function manifest](function.json), [local rules](AGENTS.md), and
-[alert pipeline contract](../../../docs/contracts/momi-order-alert-pipeline-v1.md).
-Run `npm test` from the repository root with Node.js 24.
+## Tests
+
+See the [function manifest](function.json), [service rules](../../AGENTS.md),
+and [alert pipeline contract](../../../../docs/contracts/momi-order-alert-pipeline-v1.md).
+Run `npm run check -- --service order-alerting` from the repository root.

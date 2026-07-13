@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs"
 import test from "node:test"
 
 const readSource = (name: string) =>
-  readFileSync(new URL(`../${name}`, import.meta.url), "utf8")
+  readFileSync(new URL(`../src/${name}`, import.meta.url), "utf8")
 
 test("uses only source-neutral work, runtime, and alerting contracts", () => {
   const claim = readSource("claim_work.ts")
