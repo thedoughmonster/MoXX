@@ -18,6 +18,7 @@ test("uses only source-neutral work, runtime, and alerting contracts", () => {
   assert.match(complete, /momi_orders\.api_invocation_attempts/)
   assert.match(failure, /momi_orders\.api_invocation_work/)
   assert.equal(failure.match(/\$\{httpStatus\}::integer/g)?.length, 2)
+  assert.match(failure, /'error_code', \$\{errorCode\}::text/)
   assert.doesNotMatch(`${claim}${complete}${failure}`, /toast_|slack_|raw\./i)
 })
 

@@ -25,7 +25,7 @@ export async function recordFailure(
         lease_expires_at = null,
         last_error = ${errorMessage},
         last_outcome = jsonb_build_object(
-          'error_code', ${errorCode},
+          'error_code', ${errorCode}::text,
           'http_status', ${httpStatus}::integer
         )
     from attempt_update
