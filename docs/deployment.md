@@ -29,6 +29,10 @@ immediately if exposure is suspected. Temporary `postgres` access is inherited
 by the persistent dev branch from production and remains time-bounded
 independently of the PAT.
 
+When those two credential values match, the deployment runner adds the
+`jit=on` connection option required by Supabase's shared pooler. A distinct
+database password remains a supported fallback and does not enable JIT mode.
+
 The `renew-database-access.yml` workflow runs monthly from `prod` and extends
 only the existing `postgres` mapping to 89 days. It discovers the PAT owner's
 user id from Supabase, preserves branch and network restrictions, and fails if
