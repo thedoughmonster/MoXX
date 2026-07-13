@@ -14,7 +14,14 @@ const environment = {
 for (const loadedFunction of architecture.functions) {
   const config = join(loadedFunction.adapter_directory, "deno.json")
   const entrypoint = join(loadedFunction.adapter_directory, "index.ts")
-  const check = spawnSync(process.execPath, [launcher, "check", "--config", config, entrypoint], {
+  const check = spawnSync(process.execPath, [
+    launcher,
+    "check",
+    "--no-lock",
+    "--config",
+    config,
+    entrypoint,
+  ], {
     env: environment,
     stdio: "inherit",
   })

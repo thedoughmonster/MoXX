@@ -1,7 +1,7 @@
 {
   "$schema": "./schemas/workspace-v1.schema.json",
   "schema_version": 1,
-  "layout": "transition",
+  "layout": "service_workspaces",
   "paths": {
     "services": "services",
     "function_adapters": "supabase/functions",
