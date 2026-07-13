@@ -13,35 +13,28 @@ npm run deploy:apply -- --env <dev|prod> --service <key|all>
 npm run inventory -- --env <dev|prod>
 ```
 
-The apply command always runs checks, previews and applies migrations, deploys
-explicit manifest-owned functions with the pinned CLI and `--use-api`, checks
-hosted inventory, probes deployed functions, reads Supabase advisors, and writes
-a release artifact. It never uses Docker, `--prune`, or implicit function
-discovery.
+The apply command runs checks, deploys explicit manifest-owned functions with
+the pinned CLI and `--use-api`, checks hosted inventory, probes deployed
+functions, reads Supabase advisors, and writes a release artifact. It never uses
+Docker, `--prune`, or implicit function discovery.
 
 ## Credentials
 
-The `dev` and `prod` GitHub environments each store one
-`SUPABASE_ACCESS_TOKEN`. Deployment workflows pass that dedicated
-`momi-backend-github-actions-permanent` PAT to the Supabase Management API and
-as the temporary Postgres password. The PAT does not expire and must be revoked
-immediately if exposure is suspected. Temporary `postgres` access is inherited
-by the persistent dev branch from production and remains time-bounded
-independently of the PAT.
+The `dev` and `prod` GitHub environments each store a permanent
+`SUPABASE_ACCESS_TOKEN` for Supabase API operations and Edge Function
+deployment. Automatic deployments do not request a database password.
 
-The deployment runner uses the session pooler URL created by `supabase link`,
-adds the required `jit=on` connection option when those two credential values
-match, and supplies the secret through `PGPASSWORD`. A distinct database
-password remains a supported fallback and does not enable JIT mode.
+Automated remote migration planning and apply are paused. Migration files still
+pass ownership, immutability, and architecture checks in GitHub. An intentional
+schema change is applied manually with the Supabase plugin after review, then
+verified against hosted migration history. Re-enabling automatic apply requires
+a healthy non-IPv6 connection and a passing hosted deployment proof.
 
-The `renew-database-access.yml` workflow runs monthly from `prod` and extends
-only the existing `postgres` mapping to 89 days. It discovers the PAT owner's
-user id from Supabase, preserves branch and network restrictions, and fails if
-the expected role or response contract is missing. Run it manually with
-`npm run database-access:renew` when validating credential changes.
+Temporary database access remains an independent administrator path and cannot
+silently change deployment behavior.
 
-Runtime credentials remain only in the matching Supabase project. Manifests
-contain names, never values.
+Runtime credentials remain in Supabase and deployment credentials remain in
+protected GitHub environments. Manifests contain names, never values.
 
 ## Branch Flow
 

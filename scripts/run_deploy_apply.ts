@@ -1,12 +1,10 @@
 import { validateArchitecture } from "./architecture/validate_architecture.ts"
-import { applyMigrations } from "./deploy/apply_migrations.ts"
 import { assertGitState } from "./deploy/assert_git_state.ts"
 import { assertInventory } from "./deploy/assert_inventory.ts"
 import { deployFunctions } from "./deploy/deploy_functions.ts"
 import { linkProject } from "./deploy/link_project.ts"
 import { listHostedFunctions } from "./deploy/list_hosted_functions.ts"
 import { parseDeploymentOptions } from "./deploy/parse_deployment_options.ts"
-import { planMigrations } from "./deploy/plan_migrations.ts"
 import { probeFunctions } from "./deploy/probe_functions.ts"
 import { readAdvisors } from "./deploy/read_advisors.ts"
 import { reconcileInventory } from "./deploy/reconcile_inventory.ts"
@@ -25,12 +23,10 @@ const context = {
   service: options.service,
   functions,
 }
-requireCredentials(true)
+requireCredentials(false)
 assertGitState(environment.branch)
 runChecks(options.service)
 linkProject(environment.project_ref)
-planMigrations()
-applyMigrations()
 deployFunctions(environment.project_ref, functions)
 const hosted = listHostedFunctions(environment.project_ref)
 const inventory = reconcileInventory(architecture, options.environment, hosted)

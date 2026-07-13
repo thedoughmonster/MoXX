@@ -3,7 +3,6 @@ import { assertInventory } from "./deploy/assert_inventory.ts"
 import { linkProject } from "./deploy/link_project.ts"
 import { listHostedFunctions } from "./deploy/list_hosted_functions.ts"
 import { parseDeploymentOptions } from "./deploy/parse_deployment_options.ts"
-import { planMigrations } from "./deploy/plan_migrations.ts"
 import { reconcileInventory } from "./deploy/reconcile_inventory.ts"
 import { requireCredentials } from "./deploy/require_credentials.ts"
 import { runChecks } from "./deploy/run_checks.ts"
@@ -13,10 +12,9 @@ const options = parseDeploymentOptions()
 const architecture = await validateArchitecture()
 const functions = selectFunctions(architecture, options.service)
 const environment = architecture.workspace.environments[options.environment]
-requireCredentials(true)
+requireCredentials(false)
 runChecks(options.service)
 linkProject(environment.project_ref)
-planMigrations()
 const hosted = listHostedFunctions(environment.project_ref)
 assertInventory(reconcileInventory(architecture, options.environment, hosted))
 console.log(JSON.stringify({
@@ -24,5 +22,5 @@ console.log(JSON.stringify({
   project_ref: environment.project_ref,
   service: options.service,
   functions: functions.map((item) => item.slug).sort(),
-  order: ["check", "migrations", "functions", "inventory", "probes", "advisors"],
+  order: ["check", "functions", "inventory", "probes", "advisors"],
 }, null, 2))

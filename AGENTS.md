@@ -42,6 +42,8 @@ they deploy from the same repository.
 - Begin every new migration with `-- service-owner: <service-key>`.
 - Never deploy with `--prune`; retire hosted functions through an expiring
   manifest and explicit caller-verified removal.
+- Automated remote migration apply is paused. Validate migration files in Git,
+  then apply intentional schema changes manually through the Supabase plugin.
 - Preserve complete source payloads. Do not omit source fields.
 - Do not perform business decisions or delivery work in ingestion code.
 - Treat the warehouse as the system of record for all source and business data.

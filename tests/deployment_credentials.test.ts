@@ -5,15 +5,20 @@ import test from "node:test"
 const workflows = ["deploy-dev.yml", "deploy-prod.yml"]
 
 for (const workflow of workflows) {
-  test(`${workflow} derives database access from the permanent PAT`, async () => {
+  test(`${workflow} does not request database credentials`, async () => {
     const source = await readFile(
       new URL(`../.github/workflows/${workflow}`, import.meta.url),
       "utf8",
     )
-    assert.match(
-      source,
-      /SUPABASE_DB_PASSWORD: \$\{\{ secrets\.SUPABASE_ACCESS_TOKEN \}\}/,
-    )
-    assert.doesNotMatch(source, /secrets\.SUPABASE_DB_PASSWORD/)
+    assert.match(source, /SUPABASE_ACCESS_TOKEN/)
+    assert.doesNotMatch(source, /SUPABASE_DB_PASSWORD/)
+  })
+}
+
+for (const script of ["run_deploy_plan.ts", "run_deploy_apply.ts"]) {
+  test(`${script} keeps automated migrations paused`, async () => {
+    const source = await readFile(new URL(`../scripts/${script}`, import.meta.url), "utf8")
+    assert.doesNotMatch(source, /planMigrations|applyMigrations/)
+    assert.match(source, /requireCredentials\(false\)/)
   })
 }
