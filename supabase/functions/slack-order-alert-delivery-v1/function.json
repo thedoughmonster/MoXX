@@ -1,8 +1,12 @@
 {
   "function_key": "toast.slack_order_alert.deliver.v1",
   "contract_version": 1,
+  "purpose": "Deliver one durable, prepared Toast order alert to its configured Slack destination.",
   "owner_service": "momi-slack-alert-delivery",
   "function_type": "action",
+  "capability": "deliver",
+  "boundary": "slack_outbound",
+  "runtime": "supabase_edge",
   "route_path": "/functions/v1/slack-order-alert-delivery-v1",
   "authentication_policy_key": "durable.work_token.v1",
   "entrypoint": "index.ts",

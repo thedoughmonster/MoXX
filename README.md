@@ -50,6 +50,7 @@ eventually be replaced by Square; Toast access cannot be a recovery strategy.
 ## Repository Map
 
 - `AGENTS.md`: non-negotiable engineering constraints.
+- `docs/service-catalog.md`: generated purpose-oriented service inventory.
 - `docs/`: shared architecture, decisions, and module contracts.
 - `supabase/migrations/`: reviewed database changes.
 - `supabase/functions/<service-name>/`: one directory per Edge service.

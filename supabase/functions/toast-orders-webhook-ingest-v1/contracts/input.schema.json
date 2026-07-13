@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://toast.orders.webhook_ingest.v1/input",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["guid", "timestamp"],
+  "properties": {
+    "guid": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

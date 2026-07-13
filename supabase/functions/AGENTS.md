@@ -4,6 +4,14 @@
 - Keep every handwritten file at or below 120 physical lines.
 - Declare at most one function per TypeScript file.
 - Keep `index.ts` limited to imports and runtime registration.
+- Give every direct function directory a complete `function.json` conforming to
+  `docs/contracts/edge-function-manifest-v1.md`.
+- Treat `purpose`, `capability`, `boundary`, and `owner_service` as the function's
+  logical identity; runtime, route, and directory are deployment metadata.
+- Keep each manifest's route aligned with its directory and its contract paths
+  aligned with files owned by that function.
+- Regenerate `docs/service-catalog.md` after manifest changes; never edit the
+  generated catalog by hand.
 - Pin every external dependency in the function's `deno.json`.
 - Public webhooks must implement source-specific authentication in code.
 - Read secrets from environment variables; never accept them in request URLs.
