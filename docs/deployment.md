@@ -36,6 +36,18 @@ exact commit to the development project. Production requires an approved open
 PR from `dev` to `prod`; the promotion workflow fast-forwards `prod` to the
 exact `dev` SHA. The production deploy refuses any other commit.
 
+## Hosted Controls
+
+GitHub environments restrict `dev` deployments to `dev`, `prod` deployments
+to `prod`, and `prod-promotion` runs to `dev`. Supabase remains connected to
+GitHub for visibility, with its production deployment and automatic branching
+toggles disabled.
+
+GitHub does not enforce branch rules or environment reviewers for this private
+personal-account repository. The promotion workflow still requires an approved
+`dev`-to-`prod` PR and an exact SHA. Native hosted enforcement requires moving
+the repository to an organization with GitHub Team or Enterprise.
+
 ## Inventory And Retirement
 
 Every active hosted function must be manifest-owned. A stale function is

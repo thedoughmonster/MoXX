@@ -49,3 +49,16 @@ enabled, with three explicit routes.
 Supabase advisors returned 21 security and 8 performance notices, all at
 informational level. The local architecture, migration, quality, Deno, and
 42-test gate passed after deployment and migration reconciliation.
+
+## Hosted Deployment Controls
+
+Draft PR `#1` contains the nine architecture commits and its hosted validation
+workflow passed. GitHub environments exist with these branch restrictions:
+`dev` to `dev`, `prod` to `prod`, and `prod-promotion` to `dev`.
+
+Supabase remains connected to `thedoughmonster/momi-backend`, but its production
+deployment toggle is disabled and automatic branching remains disabled. GitHub
+reports that branch protections are not enforceable for this private personal
+repository and does not expose environment reviewers. The promotion workflow's
+approved-PR and exact-SHA checks remain the enforceable application-level gate
+until the repository moves to an organization with GitHub Team or Enterprise.
