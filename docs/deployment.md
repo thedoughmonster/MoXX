@@ -25,7 +25,8 @@ promotion, and hosted completion proof.
 
 `npm run deploy:apply` remains executable only inside the matching GitHub
 workflow. Development requires `workflow_dispatch`, `refs/heads/dev`, and an
-input matching `GITHUB_SHA`. Production requires a push to `refs/heads/prod`.
+input matching `GITHUB_SHA`. Production requires the same exact-SHA dispatch
+after the promotion workflow fast-forwards `prod`.
 
 The apply entry point deploys manifest-owned functions with the pinned CLI and
 `--use-api`, checks inventory, probes functions, reads advisors, and writes a

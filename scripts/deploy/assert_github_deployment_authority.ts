@@ -11,7 +11,7 @@ export function assertGitHubDeploymentAuthority(
   if (runtime.GITHUB_ACTIONS !== "true") {
     throw new Error("Deployment apply is restricted to GitHub Actions")
   }
-  const expectedEvent = environment === "dev" ? "workflow_dispatch" : "push"
+  const expectedEvent = "workflow_dispatch"
   if (runtime.GITHUB_EVENT_NAME !== expectedEvent) {
     throw new Error(`Deployment apply requires a GitHub ${expectedEvent} event`)
   }
@@ -21,10 +21,7 @@ export function assertGitHubDeploymentAuthority(
   if (!runtime.GITHUB_WORKFLOW_REF?.includes(expectedWorkflow)) {
     throw new Error(`Deployment apply requires deploy-${environment}.yml`)
   }
-  if (
-    environment === "dev" &&
-    runtime.MOMI_EXPECTED_SHA !== runtime.GITHUB_SHA
-  ) {
-    throw new Error("Development deployment requires the exact approved SHA")
+  if (runtime.MOMI_EXPECTED_SHA !== runtime.GITHUB_SHA) {
+    throw new Error("Deployment requires the exact approved SHA")
   }
 }

@@ -4,7 +4,6 @@ import { ensureDispatchedWorkflow } from "./ensure_dispatched_workflow.ts"
 import { getOrCreatePullRequest } from "./get_or_create_pull_request.ts"
 import { runCommand } from "./run_command.ts"
 import { waitForPullRequest } from "./wait_for_pull_request.ts"
-import { waitForWorkflow } from "./wait_for_workflow.ts"
 
 export async function releaseProd(): Promise<void> {
   const preflight = assertReleasePreflight("prod")
@@ -22,7 +21,7 @@ export async function releaseProd(): Promise<void> {
     "dev",
     preflight.headSha,
   )
-  await waitForWorkflow("deploy-prod.yml", "push", preflight.headSha)
+  await ensureDispatchedWorkflow("deploy-prod.yml", "prod", preflight.headSha)
   runCommand("git", ["fetch", "origin", "prod:refs/remotes/origin/prod"])
   const productionSha = runCommand("git", ["rev-parse", "origin/prod"], {
     capture: true,

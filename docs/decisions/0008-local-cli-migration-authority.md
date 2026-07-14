@@ -22,8 +22,8 @@ backward-compatible because schema can precede code while GitHub completes.
 
 GitHub Actions remains the sole Edge Function deployment authority. Development
 function deployment changes from an automatic push to exact-SHA dispatch after
-the coordinator proves migration parity. Production remains an exact-SHA
-fast-forward followed by the production push workflow.
+the coordinator proves migration parity. Production uses an exact-SHA
+fast-forward followed by an explicit exact-SHA production dispatch.
 
 The local account token stays in Windows Credential Manager. GitHub deployment
 tokens stay in protected GitHub secrets, and runtime secrets stay in Supabase.
