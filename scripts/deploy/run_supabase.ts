@@ -11,6 +11,7 @@ export function runSupabase(
   const result = spawnSync(process.execPath, [launcher, ...args], {
     cwd: workspaceRoot,
     encoding: capture ? "utf8" : undefined,
+    env: { ...process.env, SUPABASE_TELEMETRY_DISABLED: "1" },
     stdio: capture ? ["ignore", "pipe", "inherit"] : "inherit",
   })
   if (result.status !== 0) {
