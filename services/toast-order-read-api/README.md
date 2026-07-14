@@ -2,8 +2,9 @@
 
 ## ELI5
 
-This service opens MoMi's saved copy of one Toast order and hands back the full
-document plus a readable presentation. It never asks Toast for anything.
+This service opens an exact Toast order saved by webhook or hydration and hands
+back the full document plus a readable presentation. It never asks Toast for
+anything.
 
 ## Purpose
 

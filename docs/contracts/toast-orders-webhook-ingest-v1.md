@@ -32,8 +32,10 @@ permanent and remains separate from full order resource versions in
 The payload event GUID is unique. Replays and retries do not create another row.
 
 For every newly stored raw event, a database trigger evaluates enabled webhook,
-source, restaurant, and function mappings. A qualifying event creates
-idempotent durable hydration work in the same transaction as the raw event.
+source, restaurant, and owned-reader mappings. A qualifying event with a
+complete `details.order` object creates idempotent
+`momi_orders.api_invocation_work` in the same transaction. That work names the
+exact stored event version; it does not contain or copy the order document.
 The receiver does not call another function or API after storage.
 
 ## Responses
@@ -52,5 +54,6 @@ The receiver does not call another function or API after storage.
 - No Slack formatting or delivery.
 - No source-field mapping.
 - No relational normalization.
-- No treatment of a webhook event as a complete order resource.
+- No copy of the webhook order into the historical `toast_raw.orders` table.
+- No GET-by-GUID hydration request from webhook receipt.
 - No polling or reconciliation behavior.

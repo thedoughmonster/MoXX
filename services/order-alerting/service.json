@@ -13,6 +13,10 @@
     ],
     "consumes": [
       {
+        "service": "toast-order-ingest",
+        "contract": "toast.order.webhook_alert_work.v1"
+      },
+      {
         "service": "toast-order-hydration",
         "contract": "momi.order_api.invocation_work.v1"
       },

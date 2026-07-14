@@ -3,8 +3,8 @@
 ## ELI5
 
 Toast sends MoMi a signed note that an order changed. This function checks the
-signature, saves the entire note exactly once, and stops. The database decides
-whether any later fetching or alert work should happen.
+signature and saves the entire note exactly once. The database can then hand
+the complete saved order to alerting without fetching it again.
 
 ## Purpose
 
@@ -37,15 +37,16 @@ idempotent duplicate. They never return the source payload.
 2. Verify the Toast HMAC signature.
 3. Insert headers and the complete payload into
    `toast_raw.order_webhook_events`.
-4. Let the database trigger evaluate mappings and queue qualifying hydration.
+4. Let the database trigger evaluate mappings and create qualifying owned
+   order alert work from the stored event.
 
 The event GUID makes a replay idempotent. A duplicate is acknowledged without
-creating another raw event or hydration job.
+creating another raw event or alert work row.
 
 ## Side Effects
 
 The only direct side effect is inserting the complete event and headers. A
-database trigger may then create durable hydration work from configuration.
+database trigger may then create durable owned alert work from configuration.
 
 ## Failure Handling
 
@@ -63,7 +64,7 @@ eligibility or delivery decision.
 
 - `TOAST_ORDERS_WEBHOOK_SECRET`: Toast webhook signing secret.
 - `SUPABASE_DB_URL`: private database connection supplied by Supabase.
-- Source, restaurant, event, and hydration mappings live in database config.
+- Source, restaurant, event, and owned-reader mappings live in database config.
 
 ## Tests
 

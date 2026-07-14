@@ -1,7 +1,7 @@
 {
   "function_key": "toast.orders.webhook_ingest.v1",
   "contract_version": 1,
-  "purpose": "Authenticate and preserve one Toast Orders webhook event before downstream hydration.",
+  "purpose": "Authenticate and preserve one Toast Orders webhook event before durable alert handoff.",
   "owner_service": "toast-order-ingest",
   "function_type": "ingest",
   "capability": "ingest",
@@ -18,6 +18,6 @@
   ],
   "declared_side_effects": [
     "stores_raw_order_webhook_event",
-    "queues_order_hydration_work"
+    "queues_order_alert_work"
   ]
 }

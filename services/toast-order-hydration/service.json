@@ -11,12 +11,7 @@
       "toast.orders.fetch_by_guid.v1",
       "momi.order_api.invocation_work.v1"
     ],
-    "consumes": [
-      {
-        "service": "toast-order-ingest",
-        "contract": "toast.order.hydration_work.v1"
-      }
-    ]
+    "consumes": []
   },
   "database": {
     "read": ["toast_hydration", "momi_runtime"],

@@ -1,6 +1,7 @@
 # Toast Order Hydration Rules
 
 - Start only from durable hydration work and verify its private trigger token.
+- Do not treat order webhooks as automatic GET-by-GUID hydration requests.
 - Resolve non-secret source parameters from approved database records.
 - Call only the configured Toast host and exact GET-by-GUID operation.
 - Never accept an arbitrary URL, method, header, or query parameter.

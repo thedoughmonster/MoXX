@@ -18,9 +18,9 @@ exact owned reader route recorded for that work.
 
 ## Contracts
 
-The service consumes `momi.order_api.invocation_work.v1` and a registered order
-reader contract. It provides `momi.order_alert.delivery_work.v1` for destination
-adapters.
+The service consumes durable order work from stored webhook or hydration
+sources and a registered order reader contract. It provides
+`momi.order_alert.delivery_work.v1` for destination adapters.
 
 ## Authority
 
