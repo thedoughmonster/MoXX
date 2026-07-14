@@ -8,8 +8,10 @@ import { assertGitHubDeploymentAuthority } from
 
 const validDevRuntime = {
   GITHUB_ACTIONS: "true",
-  GITHUB_EVENT_NAME: "push",
+  GITHUB_EVENT_NAME: "workflow_dispatch",
   GITHUB_REF: "refs/heads/dev",
+  GITHUB_SHA: "abc123",
+  MOMI_EXPECTED_SHA: "abc123",
   GITHUB_WORKFLOW_REF:
     "thedoughmonster/momi-backend/.github/workflows/deploy-dev.yml@refs/heads/dev",
 }
@@ -18,14 +20,16 @@ test("accepts only the matching GitHub deployment workflow", () => {
   assert.doesNotThrow(() => assertGitHubDeploymentAuthority("dev", validDevRuntime))
   assert.doesNotThrow(() => assertGitHubDeploymentAuthority("prod", {
     ...validDevRuntime,
+    GITHUB_EVENT_NAME: "push",
     GITHUB_REF: "refs/heads/prod",
     GITHUB_WORKFLOW_REF:
       "thedoughmonster/momi-backend/.github/workflows/deploy-prod.yml@refs/heads/prod",
   }))
   const invalid = [
     { ...validDevRuntime, GITHUB_ACTIONS: "false" },
-    { ...validDevRuntime, GITHUB_EVENT_NAME: "workflow_dispatch" },
+    { ...validDevRuntime, GITHUB_EVENT_NAME: "push" },
     { ...validDevRuntime, GITHUB_REF: "refs/heads/prod" },
+    { ...validDevRuntime, MOMI_EXPECTED_SHA: "different" },
     { ...validDevRuntime, GITHUB_WORKFLOW_REF:
       "thedoughmonster/momi-backend/.github/workflows/validate.yml@refs/heads/dev" },
   ]
@@ -65,9 +69,9 @@ test("codifies the supported agent deployment path", async () => {
     "utf8",
   )
   assert.match(contract, /agent-deployment-procedure\.md/)
-  assert.match(procedure, /connected GitHub app/)
+  assert.match(procedure, /pnpm release:dev/)
   assert.match(procedure, /Never merge or push `prod` directly/)
-  assert.match(procedure, /plugin may administer schema/)
+  assert.match(procedure, /Windows Credential Manager/)
   assert.match(procedure, /Do not retry through a different deployment authority/)
 })
 

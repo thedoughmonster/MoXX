@@ -1,72 +1,42 @@
 # Deployment
 
 GitHub Actions is the sole deployment authority for repository code and Edge
-Functions. The Supabase GitHub deployment integration must remain disabled.
-Local apply and any second deployment path are forbidden by ADR `0006`.
-Agents must also follow `agent-deployment-procedure.md`.
+Functions. The local Node 24 coordinator is the sole normal migration authority.
+Supabase Git deployment remains disabled. ADRs `0006` and `0008` govern this.
 
-## Commands
+## Release Commands
 
 ```text
-npm run check -- --service <key|all>
-npm run deploy:plan -- --env <dev|prod> --service <key|all>
-npm run deploy:apply -- --env <dev|prod> --service <key|all>
-npm run inventory -- --env <dev|prod>
+pnpm release:dev
+pnpm release:prod
 ```
 
-The apply command is executable only by the matching push workflow on `dev` or
-`prod`. It runs checks, deploys explicit manifest-owned functions with the
-pinned CLI and `--use-api`, checks hosted inventory, probes functions, reads
-Supabase advisors, and writes a release artifact. It never uses Docker,
-`--prune`, or implicit function discovery.
+Both commands require a clean worktree and secure CLI sign-in. Development may
+start on a committed feature branch based on current `dev`, or on `dev` when
+resuming an already merged release. Production must start on clean, current
+`dev`. Neither command commits unknown work.
 
-## Credentials
+The development command owns feature PR creation and merge, exact-commit
+validation, migration preview/apply/parity, and GitHub workflow dispatch. The
+production command owns the promotion PR, production migration, exact-SHA
+promotion, and hosted completion proof.
 
-The `dev` and `prod` GitHub environments each store a permanent
-`SUPABASE_ACCESS_TOKEN` for Supabase API operations and Edge Function
-deployment. Automatic deployments do not request a database password.
+## Deployment Boundary
 
-Automated remote migration planning and apply are paused. Migration files still
-pass ownership, immutability, and architecture checks in GitHub. An intentional
-schema change is applied manually with the Supabase plugin after review, then
-verified against hosted migration history. Re-enabling automatic apply requires
-a healthy non-IPv6 connection and a passing hosted deployment proof.
+`npm run deploy:apply` remains executable only inside the matching GitHub
+workflow. Development requires `workflow_dispatch`, `refs/heads/dev`, and an
+input matching `GITHUB_SHA`. Production requires a push to `refs/heads/prod`.
 
-That temporary schema-administration path cannot deploy repository functions.
+The apply entry point deploys manifest-owned functions with the pinned CLI and
+`--use-api`, checks inventory, probes functions, reads advisors, and writes a
+release artifact. It never uses Docker, `--prune`, or implicit discovery.
 
-Temporary database access remains an independent administrator path and cannot
-silently change deployment behavior.
+## Migration Boundary
 
-Runtime credentials remain in Supabase and deployment credentials remain in
-protected GitHub environments. Manifests contain names, never values.
-
-## Branch Flow
-
-Feature branches start from `dev`. A merge to `dev` validates and deploys that
-exact commit to the development project. Production requires a ready open PR
-from `dev` to `prod`. The repository owner dispatches the promotion with the
-exact approved `dev` SHA, and the workflow fast-forwards `prod` only when the
-PR head, input, and current `dev` commit all match.
-
-## Hosted Controls
-
-GitHub environments restrict `dev` deployments to `dev`, `prod` deployments
-to `prod`, and `prod-promotion` runs to `dev`. Supabase's repository deployment
-integration is disabled. Do not reconnect it or Git-sync a Supabase branch.
-
-GitHub does not enforce branch rules or environment reviewers for this private
-personal-account repository. Because GitHub forbids authors from approving
-their own PRs, the promotion workflow treats the owner-only manual dispatch and
-required exact SHA as approval. Native reviewer enforcement requires moving the
-repository to an organization with GitHub Team or Enterprise.
-
-## Inventory And Retirement
-
-Every active hosted function must be manifest-owned. A stale function is
-temporarily allowed only by an unexpired file under `retirements/`. Removal is
-explicit and manual after caller verification. The orchestrator never prunes.
-
-## Migrations
+The coordinator links the selected project, rejects anything except the IPv4
+session pooler on port 5432, previews `db push`, applies it, and compares every
+local migration version with hosted history. GitHub workflows never apply
+migrations and local code never deploys Edge Functions.
 
 Files already present on `prod` are immutable. A new migration begins with:
 
@@ -74,5 +44,15 @@ Files already present on `prod` are immutable. A new migration begins with:
 -- service-owner: <service-key>
 ```
 
-Create migrations with the pinned Supabase CLI. Schema ownership changes and
-cross-service changes require an accepted ADR before the migration is added.
+## Credentials
+
+The permanent local Supabase CLI token is stored by the CLI in Windows
+Credential Manager. GitHub environment secrets authorize GitHub's function
+deployment. Supabase project secrets authorize runtime integrations. No token
+value belongs in a repository file, `.env`, command log, or release record.
+
+## Retirement
+
+Every active hosted function must be manifest-owned. A stale function is
+temporarily allowed only by an unexpired file under `retirements/`. Removal is
+explicit after caller verification; the coordinator never prunes.

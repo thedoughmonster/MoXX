@@ -47,15 +47,17 @@ they deploy from the same repository.
   forbidden by ADR `0006`.
 - Only `.github/workflows/deploy-dev.yml` and `deploy-prod.yml` may invoke the
   deployment apply command.
+- The Node 24 release coordinator is the sole normal database migration
+  authority. It must use the pinned Supabase CLI and IPv4 session pooler.
+- A development deployment may start only after its exact commit is validated
+  and its migrations have reached parity in the development database.
 - Keep manual operator programs under `local-tools/` and obey its `AGENTS.md`.
 - Track local tooling on both branches, but never deploy, host, schedule, or
   import it into runtime code.
-- Automated remote migration apply is paused. Validate migration files in Git,
-  then apply intentional schema changes manually through the Supabase plugin.
 - Follow `docs/agent-deployment-procedure.md` for every hosted release. Do not
   improvise another publisher after an authentication or permission failure.
-- The temporary manual migration path may administer reviewed schema and
-  environment configuration only; it may never deploy repository functions.
+- The Supabase plugin may inspect or repair migration state in an emergency,
+  but it is not a normal migration or repository deployment authority.
 - Preserve complete source payloads. Do not omit source fields.
 - Do not perform business decisions or delivery work in ingestion code.
 - Treat the warehouse as the system of record for all source and business data.
@@ -90,7 +92,8 @@ they deploy from the same repository.
 - Do not add relationship columns solely to make joins easier.
 - Build joins and projections as explicitly named, versioned database views.
 - Treat the Toast event GUID as the delivery idempotency key.
-- Store secrets only in Supabase Edge Function Secrets or local ignored env files.
+- Store runtime secrets in Supabase, deployment secrets in GitHub, and local
+  CLI credentials in Windows Credential Manager. Never duplicate them in Git.
 
 ## Change Sequence
 
@@ -99,7 +102,8 @@ they deploy from the same repository.
 3. Create a migration with the Supabase CLI when schema changes are needed.
 4. Implement the smallest behavior change.
 5. Run `npm run check -- --service <service-key>`.
-6. Review the diff before applying or deploying.
-7. Verify the hosted behavior with a controlled event.
+6. Review and commit the diff on a feature branch based on current `dev`.
+7. Release with `pnpm release:dev`; promote with `pnpm release:prod`.
+8. Verify the hosted behavior with a controlled event.
 
 Applied migrations are immutable. Add a new migration for later corrections.

@@ -7,7 +7,7 @@ import { requireCredentials } from "./deploy/require_credentials.ts"
 
 const options = parseDeploymentOptions()
 const architecture = await validateArchitecture()
-requireCredentials(false)
+requireCredentials()
 const projectRef = architecture.workspace.environments[options.environment].project_ref
 const hosted = listHostedFunctions(projectRef)
 assertInventory(reconcileInventory(architecture, options.environment, hosted))

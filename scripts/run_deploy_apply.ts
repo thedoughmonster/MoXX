@@ -25,7 +25,7 @@ const context = {
   service: options.service,
   functions,
 }
-requireCredentials(false)
+requireCredentials()
 assertGitState(environment.branch)
 runChecks(options.service)
 linkProject(environment.project_ref)
