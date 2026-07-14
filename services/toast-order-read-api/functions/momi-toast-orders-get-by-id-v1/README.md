@@ -6,7 +6,7 @@ This function gets one saved Toast order for another MoMi function. It first
 checks that the caller has the exact work permission, then opens the
 approved database view and returns the complete saved JSON. It never calls
 Toast and never changes the order. The view also supplies readable receipt
-lines from names already present in that saved response.
+lines and a customer label from names already present in that saved response.
 
 ## Purpose
 
@@ -29,7 +29,8 @@ contract. The per-work capability is the authorization boundary.
 
 The successful response returns warehouse metadata, the complete source order
 payload, and a separate source-neutral `order_presentation` defined in
-`contracts/output.schema.json`.
+`contracts/output.schema.json`. Its optional `customer_label` uses Toast's
+stored check tab name and never requires another source request.
 
 ## Read Flow
 

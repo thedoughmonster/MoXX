@@ -35,6 +35,7 @@ const response: OrderApiSuccess = {
   order_presentation: {
     presentation_version: 1,
     display_number: "42",
+    customer_label: "Taylor Morgan",
     fulfillment_at: "2026-07-13T12:30:00.000Z",
     fulfillment_epoch: 1_783_945_800,
     item_count: 1,
@@ -45,6 +46,12 @@ const response: OrderApiSuccess = {
 
 test("accepts an owned response bound to the claimed work", () => {
   assert.equal(isValidOrderResponse(response, job), true)
+  const presentation = { ...response.order_presentation }
+  delete presentation.customer_label
+  assert.equal(isValidOrderResponse({
+    ...response,
+    order_presentation: presentation,
+  }, job), true)
 })
 
 test("rejects contract, source, order, and version mismatches", () => {
@@ -59,6 +66,10 @@ test("rejects contract, source, order, and version mismatches", () => {
     { work_source_version_id: "other-version" },
     { order_presentation: null },
     { order_presentation: { presentation_version: 2, items: [] } },
+    { order_presentation: {
+      ...response.order_presentation,
+      customer_label: "x".repeat(201),
+    } },
   ]) {
     assert.equal(isValidOrderResponse({ ...response, ...changed }, job), false)
   }

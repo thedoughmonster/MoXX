@@ -11,6 +11,9 @@ export function isValidOrderPresentation(
   return value.presentation_version === 1 &&
     typeof value.display_number === "string" &&
     value.display_number.length > 0 && value.display_number.length <= 80 &&
+    (value.customer_label === undefined || value.customer_label === null ||
+      (typeof value.customer_label === "string" &&
+        value.customer_label.length > 0 && value.customer_label.length <= 200)) &&
     (value.fulfillment_at === null ||
       (typeof value.fulfillment_at === "string" &&
         !Number.isNaN(Date.parse(value.fulfillment_at)))) &&

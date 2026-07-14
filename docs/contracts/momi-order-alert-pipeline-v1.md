@@ -55,8 +55,9 @@ source version identities without cross-source raw-table foreign keys.
 
 A claimed candidate snapshots the readable order presentation and creates
 durable Slack delivery work before any network call. The prepared-message view
-renders accessible Slack Block Kit with order number, schedule, total, items,
-and modifiers. Source order GUIDs never enter the Slack payload.
+renders one accessible fenced ticket containing order number, customer label,
+schedule, total, items, and modifiers. The code-block background encloses each
+order without divider blocks. Source order GUIDs never enter the Slack payload.
 
 `momi.slack.order_alert.deliver.v1` accepts only the delivery work id and
 capability token, loads that prepared message, and calls Slack

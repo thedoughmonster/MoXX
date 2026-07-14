@@ -6,8 +6,8 @@ Another MoMi service prepares an alert, chooses its Slack channel, and puts a
 durable delivery job in the database. This adapter claims that job, sends the
 prepared message exactly once to Slack, and records what happened. It does not
 know or care whether the order came from Toast, Square, or another source. The
-prepared Block Kit message shows order details, items, and modifiers, never the
-source order GUID.
+prepared Block Kit message shows one enclosed code-block ticket with customer,
+order details, items, and modifiers, never the source order GUID.
 
 ## Purpose
 

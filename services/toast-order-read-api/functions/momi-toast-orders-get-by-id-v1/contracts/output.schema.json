@@ -102,9 +102,9 @@
       "properties": {
         "presentation_version": { "const": 1 },
         "display_number": { "type": "string", "minLength": 1 },
-        "fulfillment_at": {
-          "type": ["string", "null"]
-        },
+        "customer_label": { "type": ["string", "null"],
+          "minLength": 1, "maxLength": 200 },
+        "fulfillment_at": { "type": ["string", "null"] },
         "fulfillment_epoch": {
           "type": ["integer", "null"]
         },
