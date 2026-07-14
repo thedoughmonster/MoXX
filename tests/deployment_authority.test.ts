@@ -66,6 +66,7 @@ test("requires an exact SHA for solo production promotion", async () => {
   assert.match(source, /--json isDraft/)
   assert.doesNotMatch(source, /reviewDecision/)
   assert.match(source, /origin\/dev:refs\/heads\/prod/)
+  assert.doesNotMatch(source, /gh pr close/)
 })
 
 test("codifies the supported agent deployment path", async () => {

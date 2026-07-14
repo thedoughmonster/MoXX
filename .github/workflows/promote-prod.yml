@@ -45,5 +45,3 @@ jobs:
           echo "pr=$pr" >> "$GITHUB_OUTPUT"
       - name: Fast-forward production
         run: git push origin origin/dev:refs/heads/prod
-      - name: Close promotion PR
-        run: gh pr close "${{ steps.promotion.outputs.pr }}" --comment "Promoted by exact-SHA fast-forward."

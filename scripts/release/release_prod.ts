@@ -7,20 +7,27 @@ import { waitForPullRequest } from "./wait_for_pull_request.ts"
 
 export async function releaseProd(): Promise<void> {
   const preflight = assertReleasePreflight("prod")
-  const pullRequest = getOrCreatePullRequest(
-    "prod",
-    "dev",
-    preflight.headSha,
-    "Promote development to production",
-    "Promotes the exact development commit after checks and database migration.",
-  )
-  await waitForPullRequest(pullRequest.number)
+  const productionBefore = runCommand("git", ["rev-parse", "origin/prod"], {
+    capture: true,
+  }).stdout.trim()
+  if (productionBefore !== preflight.headSha) {
+    const pullRequest = getOrCreatePullRequest(
+      "prod",
+      "dev",
+      preflight.headSha,
+      "Promote development to production",
+      "Promotes the exact development commit after checks and database migration.",
+    )
+    await waitForPullRequest(pullRequest.number)
+  }
   await applyMigrations("prod")
-  await ensureDispatchedWorkflow(
-    "promote-prod.yml",
-    "dev",
-    preflight.headSha,
-  )
+  if (productionBefore !== preflight.headSha) {
+    await ensureDispatchedWorkflow(
+      "promote-prod.yml",
+      "dev",
+      preflight.headSha,
+    )
+  }
   await ensureDispatchedWorkflow("deploy-prod.yml", "prod", preflight.headSha)
   runCommand("git", ["fetch", "origin", "prod:refs/remotes/origin/prod"])
   const productionSha = runCommand("git", ["rev-parse", "origin/prod"], {

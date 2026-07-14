@@ -77,4 +77,5 @@ test("dispatches production only after promotion", async () => {
   assert.match(workflow, /ref: prod/)
   assert.match(workflow, /MOMI_EXPECTED_SHA" = "\$GITHUB_SHA/)
   assert.ok(release.indexOf("promote-prod.yml") < release.indexOf("deploy-prod.yml"))
+  assert.match(release, /productionBefore !== preflight\.headSha/)
 })
