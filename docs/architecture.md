@@ -11,7 +11,7 @@ source reads or service-to-service HTTP calls.
 flowchart LR
   toast["Toast Orders webhook"]
   ingest["Toast ingest"]
-  schedule["Configured hydration schedule"]
+  reconcile["Approved reconciliation work"]
   wake["Supabase trigger adapter"]
   fetch["toast.orders.fetch_by_guid.v1"]
   toastApi["Toast Orders API"]
@@ -35,8 +35,8 @@ flowchart LR
 
   toast --> ingest
   ingest --> events
-  events --> hydrateWork
-  schedule --> hydrateWork
+  events --> apiWork
+  reconcile --> hydrateWork
   hydrateWork --> wake
   wake --> fetch
   fetch --> toastApi
@@ -72,8 +72,9 @@ flowchart LR
 - The primitive implements one operation and accepts no arbitrary URL or method.
 - Hydration and re-hydration are idempotent, configured, and warehouse-backed.
 - Reports and read requests never fetch source data or wait for hydration.
-- Webhook receipt queues hydration only after durable source persistence.
-- Hydration completion stores the resource version and API work atomically.
+- Webhook receipt creates alert API work only after durable source persistence.
+- Webhooks never queue GET-by-GUID hydration.
+- Explicit hydration stores the resource version and API work atomically.
 - The alert worker cannot start until the Order API work transaction commits.
 - The worker resolves the exact source-specific reader route from active
   registry configuration stored with the durable work.
@@ -98,7 +99,7 @@ flowchart LR
 - Duplicate or missed wake-ups are recovered from database state.
 - Business mappings and enable switches live in database configuration.
 - Source, rule, route, and destination enablement are independent controls.
-- Alert identity is `source_system + order_id + alert_kind`.
+- Alert identity includes source system, order id, alert kind, and destination.
 - Alert claims are durable before notification delivery is attempted.
 - Alert claims snapshot readable order presentation before delivery work.
 - Destination payloads omit source GUIDs when readable identities exist.
@@ -108,9 +109,9 @@ flowchart LR
 
 ## Repository Shape
 
-- `supabase/functions/<service-name>/` contains one deployable Edge service.
-- `services/<service-name>/` contains one deployable non-Edge service.
+- `supabase/functions/<slug>/` contains only a thin Edge deployment adapter.
+- `services/<service-key>/` owns capability code, contracts, tests, and docs.
 - `supabase/migrations/` is the single migration history for the shared project.
 - `packages/<package-name>/` contains shared code and is never deployable itself.
-- No directory contains entrypoints for two independently deployable services.
+- One capability service may own multiple cohesive Edge Function entrypoints.
 - Separate repositories are reserved for independently versioned product surfaces.

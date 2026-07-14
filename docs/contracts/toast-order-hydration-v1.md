@@ -25,14 +25,15 @@ No schedule, source id, restaurant id, or business value is hardcoded in the
 service. Recent or active orders may use a different configured cadence from
 closed historical orders.
 
-## Webhook Entry
+## Operational Role
 
-The webhook transaction stores the complete event and creates hydration work
-using the incoming Toast order GUID before the receiver acknowledges Toast.
-The receiver itself does not call Toast or the MoMi API.
+Order webhooks do not create GET-by-GUID hydration work. Their complete stored
+`details.order` object feeds the operational alert path directly through the
+owned Toast reader.
 
-The hydration worker starts only after that transaction commits. Scheduled and
-reconciliation jobs enter the same durable work table and execution path.
+Hydration begins only from a separately approved reconciliation or operator
+job. Scheduled and reconciliation jobs use the same durable work table and
+execution path; no report or application read may create one.
 
 A Supabase-native trigger adapter may invoke the allowlisted Edge Function after
 commit with the work id and private per-work capability token. The request is an

@@ -8,13 +8,16 @@ independently retryable, and idempotent.
 
 ## Source Handoff
 
-A source-specific hydration adapter first stores the complete source response.
-In the same committed transaction it creates `momi_orders.api_invocation_work`
-with source, resource version, order, location, and owned API contract identity.
+A source-specific adapter first stores a complete source document. In the same
+committed transaction, configured handoff creates
+`momi_orders.api_invocation_work` with source, resource version, order,
+location, and owned API contract identity.
 
-Toast currently records `momi.toast_orders.get_by_id.v1`. A future Square
-hydrator records its Square reader contract instead. Neither the alert worker
-nor Slack adapter needs a source-specific implementation change.
+Toast order webhooks use their already stored complete `details.order` object
+and record `momi.toast_orders.get_by_id.v1`; they do not queue GET-by-GUID
+hydration. Explicit hydration can produce the same neutral work contract after
+storing its response. A future Square adapter records its Square reader
+contract instead. The alert worker and Slack adapter remain unchanged.
 
 ## Decision Input
 
@@ -68,4 +71,5 @@ successful delivery is never sent again by a retry.
 Reader, decision, or Slack failures leave durable failed work that can be
 reclaimed. No stage falls back to a source API, raw table, or hardcoded channel.
 Disabled sources, rules, routes, or destinations produce no candidate or
-message.
+message. A missing stored source version is an explicit read failure and never
+falls back to Toast or another vendor API.

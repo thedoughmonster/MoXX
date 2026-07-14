@@ -3,8 +3,9 @@
 ## Purpose
 
 This is MoMi's Toast-specific owned read boundary. It returns one exact,
-fully hydrated Toast order version from the warehouse. It never calls Toast,
-chooses alert behavior, or reads a raw table directly.
+complete Toast order version already saved in the warehouse. The version may
+come from a webhook or approved hydration. The API never calls Toast, chooses
+alert behavior, or reads a raw table directly.
 
 The Toast name is intentional: the response payload is Toast's complete order
 document. A future Square reader will have its own contract while sharing the
@@ -30,7 +31,9 @@ never an order document received directly from Toast.
 
 The function reads `momi_api.toast_orders_by_id_v1`, whose active registration
 must match this contract. The row must match the immutable source version and
-location recorded on `momi_orders.api_invocation_work`.
+location recorded on `momi_orders.api_invocation_work`. The underlying approved
+view can expose a complete webhook `details.order` object or a complete
+hydrated resource without changing this API contract.
 
 The view reads a complete Toast order resource version and exposes:
 

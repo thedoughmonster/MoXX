@@ -1,7 +1,7 @@
 {
   "function_key": "momi.toast_orders.get_by_id.v1",
   "contract_version": 1,
-  "purpose": "Read one fully hydrated Toast order through the owned MoMi API contract.",
+  "purpose": "Read one exact stored Toast order through the owned MoMi API contract.",
   "owner_service": "toast-order-read-api",
   "function_type": "read",
   "capability": "read",

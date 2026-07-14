@@ -47,6 +47,9 @@ they deploy from the same repository.
   forbidden by ADR `0006`.
 - Only `.github/workflows/deploy-dev.yml` and `deploy-prod.yml` may invoke the
   deployment apply command.
+- Keep manual operator programs under `local-tools/` and obey its `AGENTS.md`.
+- Track local tooling on both branches, but never deploy, host, schedule, or
+  import it into runtime code.
 - Automated remote migration apply is paused. Validate migration files in Git,
   then apply intentional schema changes manually through the Supabase plugin.
 - The temporary manual migration path may administer reviewed schema and

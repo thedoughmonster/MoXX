@@ -10,7 +10,8 @@ lines from names already present in that saved response.
 
 ## Purpose
 
-This is the Toast-specific owned read boundary for one hydrated order version.
+This is the Toast-specific owned read boundary for one exact saved order
+version, whether it came from a webhook or an approved hydration operation.
 
 - Function key: `momi.toast_orders.get_by_id.v1`
 - Route: `/functions/v1/momi-toast-orders-get-by-id-v1`

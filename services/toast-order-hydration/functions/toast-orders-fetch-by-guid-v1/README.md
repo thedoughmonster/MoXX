@@ -5,12 +5,13 @@
 MoMi gives this function one saved fetch job. It gets the complete order from
 Toast, files the untouched JSON in the warehouse, records what happened, and
 leaves one deduplicated work item for MoMi's own order API. It does nothing
-with alerts or Slack.
+with alerts or Slack. Normal order webhooks do not create this fetch job.
 
 ## Purpose
 
 This hydration adapter acquires one complete Toast order for durable warehouse
-work. It is the only function in the current slice allowed to call Toast.
+work. It is the only function in the current slice allowed to call Toast, and
+it is not part of the normal webhook alert path.
 
 - Function key: `toast.orders.fetch_by_guid.v1`
 - Route: `/functions/v1/toast-orders-fetch-by-guid-v1`

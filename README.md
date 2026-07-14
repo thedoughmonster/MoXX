@@ -7,10 +7,11 @@ Source-controlled backend services and database history for MoMi.
 `toast-orders-webhook-ingest-v1` receives Toast Orders webhook events,
 verifies Toast's signature, and preserves the complete event in Postgres.
 The hosted path was verified with signed in-store lifecycle events on
-2026-07-12.
+2026-07-12. Configured database handoff exposes the complete stored
+`details.order` through MoMi's owned reader without another Toast request.
 
-`toast-orders-fetch-by-guid-v1` hydrates durable order work from Toast and
-stores the complete response before downstream use.
+`toast-orders-fetch-by-guid-v1` remains the single approved Toast order fetch
+primitive for explicit reconciliation work; webhooks do not invoke it.
 `momi-toast-orders-get-by-id-v1` returns the complete Toast document and its
 view-derived, source-neutral order presentation.
 `momi-order-alert-worker-v1` evaluates any configured owned order response,
@@ -23,22 +24,26 @@ environment-owned and migrations contain no hardcoded business values.
 
 ## Source Ownership
 
-The Toast webhook is retained unchanged as its own source record. It is not a
-substitute for the complete order returned by the Toast Orders API.
+The Toast webhook is retained unchanged as its own source record. Its current
+`details.order` object is a complete order snapshot and is sufficient for the
+operational alert path. A view exposes that exact object without copying it into
+the historical order table or changing its source structure.
 
-For the first order-alert slice, `toast.orders.fetch_by_guid.v1` is the only
-primitive source function permitted to call Toast. It accepts durable work,
-implements one explicit Toast operation, and is not a generic API proxy.
+`toast.orders.fetch_by_guid.v1` is the only primitive source function permitted
+to call Toast. It accepts deliberate durable reconciliation work, implements
+one explicit Toast operation, and is not a generic API proxy.
 
 Fetched records are permanent, source-faithful resource versions in
-resource-specific `toast_raw` tables. `toast_raw.orders` receives complete
-order JSONB from GET-by-GUID and any later approved bulk order operation.
-Identical content is deduplicated by hash while small fetch-attempt metadata is
-retained separately.
+resource-specific `toast_raw` tables. `toast_raw.orders` is separate from the
+webhook event log and receives complete order JSONB from approved historical
+reconciliation. Identical content is deduplicated by hash while fetch-attempt
+metadata is retained separately.
 
 Related and query-oriented projections must be rebuildable from owned raw
 resource versions with Toast unavailable. This is required because Toast will
 eventually be replaced by Square; Toast access cannot be a recovery strategy.
+Future bulk reconciliation must account for late webhook changes such as voids
+and refunds, but it is not a prerequisite for sending an operational alert.
 
 ## Module Boundaries
 
@@ -62,6 +67,7 @@ eventually be replaced by Square; Toast access cannot be a recovery strategy.
 - `supabase/migrations/`: reviewed database changes.
 - `supabase/functions/<function-slug>/`: thin Edge Function deployment adapters.
 - `packages/<package-name>/`: explicitly approved shared code only.
+- `local-tools/`: private manual operator tooling that is never deployed.
 - `schemas/`: machine-readable workspace and manifest contracts.
 - `scripts/`: manifest-driven checks, inventory, and deployment orchestration.
 - `tests/`: contract tests that require no local Supabase stack.
