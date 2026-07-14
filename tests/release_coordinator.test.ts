@@ -39,6 +39,14 @@ test("keeps migration apply in one local coordinator module", async () => {
   assert.deepEqual(callers, ["release/apply_migrations.ts"])
 })
 
+test("disables optional Supabase CLI telemetry during releases", async () => {
+  const source = await readFile(
+    new URL("../scripts/deploy/run_supabase.ts", import.meta.url),
+    "utf8",
+  )
+  assert.match(source, /SUPABASE_TELEMETRY_DISABLED:\s*"1"/)
+})
+
 test("keeps database apply out of GitHub workflows", async () => {
   const directory = new URL("../.github/workflows/", import.meta.url)
   const names = await readdir(directory)
