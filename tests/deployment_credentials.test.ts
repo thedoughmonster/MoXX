@@ -15,10 +15,13 @@ for (const workflow of workflows) {
   })
 }
 
-for (const script of ["run_deploy_plan.ts", "run_deploy_apply.ts"]) {
-  test(`${script} keeps automated migrations paused`, async () => {
-    const source = await readFile(new URL(`../scripts/${script}`, import.meta.url), "utf8")
-    assert.doesNotMatch(source, /planMigrations|applyMigrations/)
-    assert.match(source, /requireCredentials\(false\)/)
-  })
-}
+test("keeps database credentials out of repository deployment", async () => {
+  const source = await readFile(
+    new URL("../scripts/release/apply_migrations.ts", import.meta.url),
+    "utf8",
+  )
+  assert.match(source, /"db", "push", "--linked", "--dry-run"/)
+  assert.match(source, /IPv4 session pooler/)
+  assert.match(source, /5432/)
+  assert.doesNotMatch(source, /SUPABASE_DB_PASSWORD|PGPASSWORD/)
+})

@@ -2,6 +2,8 @@
 
 - Status: accepted
 - Date: 2026-07-14
+- Amendment: ADR `0008` supersedes the migration pause and development
+  push-event requirement below.
 
 ## Context
 

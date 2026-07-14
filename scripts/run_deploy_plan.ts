@@ -12,7 +12,7 @@ const options = parseDeploymentOptions()
 const architecture = await validateArchitecture()
 const functions = selectFunctions(architecture, options.service)
 const environment = architecture.workspace.environments[options.environment]
-requireCredentials(false)
+requireCredentials()
 runChecks(options.service)
 linkProject(environment.project_ref)
 const hosted = listHostedFunctions(environment.project_ref)

@@ -81,6 +81,10 @@ and refunds, but it is not a prerequisite for sending an operational alert.
 See [deployment](docs/deployment.md) for the exact commands, credential
 boundaries, inventory gate, and exact-commit promotion process.
 
+After a change is committed on a clean feature branch, `pnpm release:dev`
+handles its PR, checks, migration, and GitHub deployment. From clean, current
+`dev`, `pnpm release:prod` performs the exact-commit production promotion.
+
 ## Required Hosted Secret
 
 `TOAST_ORDERS_WEBHOOK_SECRET` must contain the secret for the Orders webhook

@@ -1,8 +1,12 @@
 name: Deploy development
 
 on:
-  push:
-    branches: [dev]
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Exact dev commit whose migrations are already applied
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -18,11 +22,18 @@ jobs:
     environment: dev
     env:
       MOMI_PROD_REF: origin/prod
+      MOMI_EXPECTED_SHA: ${{ inputs.expected_sha }}
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ inputs.expected_sha }}
           fetch-depth: 0
+      - name: Verify exact development commit
+        shell: bash
+        run: |
+          test "$MOMI_EXPECTED_SHA" = "$GITHUB_SHA"
+          test "$MOMI_EXPECTED_SHA" = "$(git rev-parse HEAD)"
       - run: git fetch origin prod:refs/remotes/origin/prod
       - uses: pnpm/action-setup@v4
         with:

@@ -20,6 +20,9 @@
     "migration:check": "node scripts/check_migrations.ts",
     "quality:check": "node scripts/check_source_quality.ts && node scripts/check_quality_report.ts",
     "quality:generate": "node scripts/generate_quality_report.ts",
+    "release": "node scripts/run_release.ts",
+    "release:dev": "node scripts/run_release.ts --env dev",
+    "release:prod": "node scripts/run_release.ts --env prod",
     "test": "node scripts/run_tests.ts"
   },
   "devDependencies": {
