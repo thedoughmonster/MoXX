@@ -52,6 +52,8 @@ they deploy from the same repository.
   import it into runtime code.
 - Automated remote migration apply is paused. Validate migration files in Git,
   then apply intentional schema changes manually through the Supabase plugin.
+- Follow `docs/agent-deployment-procedure.md` for every hosted release. Do not
+  improvise another publisher after an authentication or permission failure.
 - The temporary manual migration path may administer reviewed schema and
   environment configuration only; it may never deploy repository functions.
 - Preserve complete source payloads. Do not omit source fields.

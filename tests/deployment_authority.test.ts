@@ -46,6 +46,31 @@ test("keeps deployment apply in the two authorized workflows", async () => {
   assert.deepEqual(callers.sort(), ["deploy-dev.yml", "deploy-prod.yml"])
 })
 
+test("requires an exact SHA for solo production promotion", async () => {
+  const source = await readFile(
+    new URL("../.github/workflows/promote-prod.yml", import.meta.url),
+    "utf8",
+  )
+  assert.match(source, /expected_sha:/)
+  assert.match(source, /inputs\.expected_sha/)
+  assert.match(source, /--json isDraft/)
+  assert.doesNotMatch(source, /reviewDecision/)
+  assert.match(source, /origin\/dev:refs\/heads\/prod/)
+})
+
+test("codifies the supported agent deployment path", async () => {
+  const contract = await readFile(new URL("../AGENTS.md", import.meta.url), "utf8")
+  const procedure = await readFile(
+    new URL("../docs/agent-deployment-procedure.md", import.meta.url),
+    "utf8",
+  )
+  assert.match(contract, /agent-deployment-procedure\.md/)
+  assert.match(procedure, /connected GitHub app/)
+  assert.match(procedure, /Never merge or push `prod` directly/)
+  assert.match(procedure, /plugin may administer schema/)
+  assert.match(procedure, /Do not retry through a different deployment authority/)
+})
+
 test("keeps function deployment behind the guarded apply entry point", async () => {
   const directory = new URL("../scripts/", import.meta.url)
   const entries = await readdir(directory, { recursive: true, withFileTypes: true })

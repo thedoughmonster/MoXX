@@ -2,6 +2,11 @@ name: Promote development to production
 
 on:
   workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Exact dev commit approved for production
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -24,17 +29,18 @@ jobs:
           ref: dev
           fetch-depth: 0
       - run: git fetch origin dev:refs/remotes/origin/dev prod:refs/remotes/origin/prod
-      - name: Verify approved promotion PR
+      - name: Verify exact commit promotion PR
         id: promotion
         shell: bash
         run: |
           pr=$(gh pr list --base prod --head dev --state open --json number --jq 'if length == 1 then .[0].number else empty end')
           test -n "$pr" || { echo "Expected one open dev-to-prod PR"; exit 1; }
-          decision=$(gh pr view "$pr" --json reviewDecision --jq .reviewDecision)
-          test "$decision" = "APPROVED" || { echo "Promotion PR is not approved"; exit 1; }
+          draft=$(gh pr view "$pr" --json isDraft --jq .isDraft)
+          test "$draft" = "false" || { echo "Promotion PR is still a draft"; exit 1; }
           pr_sha=$(gh pr view "$pr" --json headRefOid --jq .headRefOid)
           dev_sha=$(git rev-parse origin/dev)
           test "$pr_sha" = "$dev_sha" || { echo "Promotion PR is stale"; exit 1; }
+          test "${{ inputs.expected_sha }}" = "$dev_sha" || { echo "Approved SHA does not match dev"; exit 1; }
           git merge-base --is-ancestor origin/prod origin/dev
           echo "pr=$pr" >> "$GITHUB_OUTPUT"
       - name: Fast-forward production

@@ -3,6 +3,7 @@
 GitHub Actions is the sole deployment authority for repository code and Edge
 Functions. The Supabase GitHub deployment integration must remain disabled.
 Local apply and any second deployment path are forbidden by ADR `0006`.
+Agents must also follow `agent-deployment-procedure.md`.
 
 ## Commands
 
@@ -42,9 +43,10 @@ protected GitHub environments. Manifests contain names, never values.
 ## Branch Flow
 
 Feature branches start from `dev`. A merge to `dev` validates and deploys that
-exact commit to the development project. Production requires an approved open
-PR from `dev` to `prod`; the promotion workflow fast-forwards `prod` to the
-exact `dev` SHA. The production deploy refuses any other commit.
+exact commit to the development project. Production requires a ready open PR
+from `dev` to `prod`. The repository owner dispatches the promotion with the
+exact approved `dev` SHA, and the workflow fast-forwards `prod` only when the
+PR head, input, and current `dev` commit all match.
 
 ## Hosted Controls
 
@@ -53,9 +55,10 @@ to `prod`, and `prod-promotion` runs to `dev`. Supabase's repository deployment
 integration is disabled. Do not reconnect it or Git-sync a Supabase branch.
 
 GitHub does not enforce branch rules or environment reviewers for this private
-personal-account repository. The promotion workflow still requires an approved
-`dev`-to-`prod` PR and an exact SHA. Native hosted enforcement requires moving
-the repository to an organization with GitHub Team or Enterprise.
+personal-account repository. Because GitHub forbids authors from approving
+their own PRs, the promotion workflow treats the owner-only manual dispatch and
+required exact SHA as approval. Native reviewer enforcement requires moving the
+repository to an organization with GitHub Team or Enterprise.
 
 ## Inventory And Retirement
 
