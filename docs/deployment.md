@@ -1,8 +1,8 @@
 # Deployment
 
-GitHub Actions is the normal deployment authority. Supabase's GitHub connection
-may remain visible, but automatic database or Edge Function deployment must be
-disabled there so only one system can mutate an environment.
+GitHub Actions is the sole deployment authority for repository code and Edge
+Functions. The Supabase GitHub deployment integration must remain disabled.
+Local apply and any second deployment path are forbidden by ADR `0006`.
 
 ## Commands
 
@@ -13,10 +13,11 @@ npm run deploy:apply -- --env <dev|prod> --service <key|all>
 npm run inventory -- --env <dev|prod>
 ```
 
-The apply command runs checks, deploys explicit manifest-owned functions with
-the pinned CLI and `--use-api`, checks hosted inventory, probes deployed
-functions, reads Supabase advisors, and writes a release artifact. It never uses
-Docker, `--prune`, or implicit function discovery.
+The apply command is executable only by the matching push workflow on `dev` or
+`prod`. It runs checks, deploys explicit manifest-owned functions with the
+pinned CLI and `--use-api`, checks hosted inventory, probes functions, reads
+Supabase advisors, and writes a release artifact. It never uses Docker,
+`--prune`, or implicit function discovery.
 
 ## Credentials
 
@@ -29,6 +30,8 @@ pass ownership, immutability, and architecture checks in GitHub. An intentional
 schema change is applied manually with the Supabase plugin after review, then
 verified against hosted migration history. Re-enabling automatic apply requires
 a healthy non-IPv6 connection and a passing hosted deployment proof.
+
+That temporary schema-administration path cannot deploy repository functions.
 
 Temporary database access remains an independent administrator path and cannot
 silently change deployment behavior.
@@ -46,9 +49,8 @@ exact `dev` SHA. The production deploy refuses any other commit.
 ## Hosted Controls
 
 GitHub environments restrict `dev` deployments to `dev`, `prod` deployments
-to `prod`, and `prod-promotion` runs to `dev`. Supabase remains connected to
-GitHub for visibility, with its production deployment and automatic branching
-toggles disabled.
+to `prod`, and `prod-promotion` runs to `dev`. Supabase's repository deployment
+integration is disabled. Do not reconnect it or Git-sync a Supabase branch.
 
 GitHub does not enforce branch rules or environment reviewers for this private
 personal-account repository. The promotion workflow still requires an approved

@@ -42,8 +42,15 @@ they deploy from the same repository.
 - Begin every new migration with `-- service-owner: <service-key>`.
 - Never deploy with `--prune`; retire hosted functions through an expiring
   manifest and explicit caller-verified removal.
+- GitHub Actions is the sole authority for repository code and Edge Function
+  deployments. Local apply, Supabase Git deployment, and second deployers are
+  forbidden by ADR `0006`.
+- Only `.github/workflows/deploy-dev.yml` and `deploy-prod.yml` may invoke the
+  deployment apply command.
 - Automated remote migration apply is paused. Validate migration files in Git,
   then apply intentional schema changes manually through the Supabase plugin.
+- The temporary manual migration path may administer reviewed schema and
+  environment configuration only; it may never deploy repository functions.
 - Preserve complete source payloads. Do not omit source fields.
 - Do not perform business decisions or delivery work in ingestion code.
 - Treat the warehouse as the system of record for all source and business data.

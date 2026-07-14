@@ -1,4 +1,5 @@
 import { validateArchitecture } from "./architecture/validate_architecture.ts"
+import { assertGitHubDeploymentAuthority } from "./deploy/assert_github_deployment_authority.ts"
 import { assertGitState } from "./deploy/assert_git_state.ts"
 import { assertInventory } from "./deploy/assert_inventory.ts"
 import { deployFunctions } from "./deploy/deploy_functions.ts"
@@ -14,6 +15,7 @@ import { selectFunctions } from "./deploy/select_functions.ts"
 import { writeReleaseRecord } from "./deploy/write_release_record.ts"
 
 const options = parseDeploymentOptions()
+assertGitHubDeploymentAuthority(options.environment)
 const architecture = await validateArchitecture()
 const functions = selectFunctions(architecture, options.service)
 const environment = architecture.workspace.environments[options.environment]
