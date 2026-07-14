@@ -39,3 +39,6 @@ verify_jwt = false
 
 [functions.slack-order-alert-delivery-v1]
 verify_jwt = false
+
+[functions.toast-stock-webhook-ingest-v1]
+verify_jwt = false
