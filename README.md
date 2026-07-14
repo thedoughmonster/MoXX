@@ -62,6 +62,7 @@ eventually be replaced by Square; Toast access cannot be a recovery strategy.
 - `supabase/migrations/`: reviewed database changes.
 - `supabase/functions/<function-slug>/`: thin Edge Function deployment adapters.
 - `packages/<package-name>/`: explicitly approved shared code only.
+- `local-tools/`: private manual operator tooling that is never deployed.
 - `schemas/`: machine-readable workspace and manifest contracts.
 - `scripts/`: manifest-driven checks, inventory, and deployment orchestration.
 - `tests/`: contract tests that require no local Supabase stack.
