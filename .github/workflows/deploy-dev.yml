@@ -27,7 +27,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ inputs.expected_sha }}
+          ref: dev
           fetch-depth: 0
       - name: Verify exact development commit
         shell: bash
