@@ -59,5 +59,7 @@ test("requires migration completion before development deployment", async () => 
   )
   assert.match(workflow, /workflow_dispatch:/)
   assert.match(workflow, /expected_sha:/)
+  assert.match(workflow, /ref: dev/)
+  assert.match(workflow, /MOMI_EXPECTED_SHA" = "\$GITHUB_SHA/)
   assert.ok(release.indexOf("applyMigrations") < release.indexOf("deploy-dev.yml"))
 })
