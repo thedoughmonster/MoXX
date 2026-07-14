@@ -9,7 +9,7 @@ const readMigration = (name: string) =>
 
 test("exposes complete webhook orders as immutable source versions", async () => {
   const source = await readMigration(
-    "20260714084407_create_toast_order_source_versions_view.sql",
+    "20260714090005_create_toast_order_source_versions_view.sql",
   )
 
   assert.match(source, /toast_order_source_versions_v1/)
@@ -24,10 +24,10 @@ test("exposes complete webhook orders as immutable source versions", async () =>
 
 test("derives the same presentation and read contract from either source", async () => {
   const presentation = await readMigration(
-    "20260714084419_read_webhook_order_presentations.sql",
+    "20260714090014_read_webhook_order_presentations.sql",
   )
   const reader = await readMigration(
-    "20260714084424_read_webhook_orders_by_id.sql",
+    "20260714090036_read_webhook_orders_by_id.sql",
   )
 
   assert.match(presentation, /toast_order_source_versions_v1/)
@@ -40,7 +40,7 @@ test("derives the same presentation and read contract from either source", async
 
 test("hands stored webhook identity directly to durable alert work", async () => {
   const source = await readMigration(
-    "20260714084428_handoff_webhooks_to_order_alerts.sql",
+    "20260714090044_handoff_webhooks_to_order_alerts.sql",
   )
 
   assert.match(source, /drop trigger if exists enqueue_toast_order_hydration/)
