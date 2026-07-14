@@ -57,3 +57,31 @@ test("keeps the generic decision claim free of Toast storage dependencies", asyn
   assert.match(slack, /momi\.slack\.order_alert\.deliver\.v1/)
   assert.match(triggerUniqueness, /'http', 'durable_http'/)
 })
+
+test("fans one alert out to each enabled destination", async () => {
+  const routes = await readFile(new URL(
+    "20260714064712_enable_order_alert_destination_fanout.sql",
+    migrations,
+  ), "utf8")
+  const claim = await readFile(new URL(
+    "20260714064723_update_order_alert_claim_destination_fanout.sql",
+    migrations,
+  ), "utf8")
+  const index = await readFile(new URL(
+    "20260714065124_cover_order_alert_candidate_route_fk.sql",
+    migrations,
+  ), "utf8")
+
+  assert.match(routes,
+    /primary key \(source_key, alert_kind, destination_key\)/)
+  assert.match(routes,
+    /foreign key \(source_key, alert_kind, destination_key\)/)
+  assert.match(routes, /candidate\.destination_key, false/)
+  assert.match(routes,
+    /unique \(source_system, order_id, alert_kind, destination_key\)/)
+  assert.match(claim, /rule_matches/)
+  assert.match(claim, /deliveries/)
+  assert.match(claim,
+    /on conflict \(source_system, order_id, alert_kind, destination_key\)/)
+  assert.match(index, /source_key, alert_kind, destination_key/)
+})

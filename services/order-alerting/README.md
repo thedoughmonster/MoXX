@@ -3,13 +3,13 @@
 ## ELI5
 
 MoMi gives this service a saved order. It checks the configured alert rules,
-takes one readable snapshot, and creates a delivery job. It does not know how to
-talk to Toast or Slack.
+takes one readable snapshot, and creates one delivery job for every enabled
+destination. It does not know how to talk to Toast or Slack.
 
 ## Purpose
 
 This source-neutral capability owns order alert decisions, idempotent candidate
-claims, presentation snapshots, and durable delivery work.
+claims, destination fan-out, presentation snapshots, and durable delivery work.
 
 ## Owned Function
 

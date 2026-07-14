@@ -37,15 +37,16 @@ Source mappings, rules, routes, and Slack destinations have independent enable
 switches. Mapping paths are evaluated against the complete source payload
 returned by the configured owned reader.
 
-Exactly one matching route claims one candidate for:
+Exactly one matching rule fans out to every enabled route and destination.
+Each destination claims one candidate for:
 
 ```text
-source_system + order_id + alert_kind
+source_system + order_id + alert_kind + destination_key
 ```
 
-Ambiguous or unmapped matches claim nothing and remain visible in the work
-outcome. Candidate context preserves source work, resource kind, and source
-version identities without cross-source raw-table foreign keys.
+Ambiguous rules or unmapped destinations claim nothing and remain visible in
+the work outcome. Candidate context preserves source work, resource kind, and
+source version identities without cross-source raw-table foreign keys.
 
 ## Slack Delivery
 
