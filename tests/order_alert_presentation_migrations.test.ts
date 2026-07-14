@@ -40,17 +40,33 @@ test("snapshots a generic presentation when an alert is claimed", async () => {
   assert.doesNotMatch(claim, /toast_raw|toast_hydration|toast_alerting/)
 })
 
-test("prepares Block Kit without sending an order GUID", async () => {
+test("prepares one fenced Slack ticket without an order GUID", async () => {
   const source = await readMigration(
-    "20260713080437_fix_slack_order_alert_summary_newlines.sql",
+    "20260714131109_format_compact_slack_order_tickets.sql",
   )
 
   assert.match(source, /'blocks'/)
-  assert.match(source, /'header'/)
+  assert.match(source, /'section'/)
+  assert.match(source, /E'```\\n%s\\n```'/)
   assert.match(source, /'display_number'/)
+  assert.match(source, /'customer_label'/)
+  assert.match(source, /CUSTOMER:/)
+  assert.match(source, /then 'ITEM' else 'ITEMS'/)
   assert.match(source, /'items'/)
   assert.match(source, /'modifiers'/)
   assert.match(source, /'client_msg_id'/)
-  assert.match(source, /format\(E'\*Items\*\\n%s'/)
+  assert.doesNotMatch(source, /'divider'|'header'|'container'/)
   assert.doesNotMatch(source, /candidate\.order_id/)
+})
+
+test("derives the optional customer label from stored Toast checks", async () => {
+  const source = await readMigration(
+    "20260714131101_add_toast_order_customer_label.sql",
+  )
+
+  assert.match(source, /toast_orders_by_id_v1/)
+  assert.match(source, /tabName/)
+  assert.match(source, /customer_label/)
+  assert.match(source, /toast_order_source_versions_v1/)
+  assert.doesNotMatch(source, /toast_raw|http|fetch/)
 })

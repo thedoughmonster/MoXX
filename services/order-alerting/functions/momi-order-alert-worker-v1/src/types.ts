@@ -59,6 +59,7 @@ export type OrderApiSuccess = {
 export type OrderPresentation = {
   presentation_version: 1
   display_number: string
+  customer_label?: string | null
   fulfillment_at: string | null
   fulfillment_epoch: number | null
   item_count: number
