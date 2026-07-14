@@ -63,3 +63,18 @@ test("requires migration completion before development deployment", async () => 
   assert.match(workflow, /MOMI_EXPECTED_SHA" = "\$GITHUB_SHA/)
   assert.ok(release.indexOf("applyMigrations") < release.indexOf("deploy-dev.yml"))
 })
+
+test("dispatches production only after promotion", async () => {
+  const workflow = await readFile(
+    new URL("../.github/workflows/deploy-prod.yml", import.meta.url),
+    "utf8",
+  )
+  const release = await readFile(
+    new URL("../scripts/release/release_prod.ts", import.meta.url),
+    "utf8",
+  )
+  assert.match(workflow, /workflow_dispatch:/)
+  assert.match(workflow, /ref: prod/)
+  assert.match(workflow, /MOMI_EXPECTED_SHA" = "\$GITHUB_SHA/)
+  assert.ok(release.indexOf("promote-prod.yml") < release.indexOf("deploy-prod.yml"))
+})

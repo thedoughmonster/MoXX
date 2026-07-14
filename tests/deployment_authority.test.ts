@@ -20,7 +20,6 @@ test("accepts only the matching GitHub deployment workflow", () => {
   assert.doesNotThrow(() => assertGitHubDeploymentAuthority("dev", validDevRuntime))
   assert.doesNotThrow(() => assertGitHubDeploymentAuthority("prod", {
     ...validDevRuntime,
-    GITHUB_EVENT_NAME: "push",
     GITHUB_REF: "refs/heads/prod",
     GITHUB_WORKFLOW_REF:
       "thedoughmonster/momi-backend/.github/workflows/deploy-prod.yml@refs/heads/prod",
@@ -36,6 +35,13 @@ test("accepts only the matching GitHub deployment workflow", () => {
   for (const runtime of invalid) {
     assert.throws(() => assertGitHubDeploymentAuthority("dev", runtime))
   }
+  assert.throws(() => assertGitHubDeploymentAuthority("prod", {
+    ...validDevRuntime,
+    GITHUB_EVENT_NAME: "push",
+    GITHUB_REF: "refs/heads/prod",
+    GITHUB_WORKFLOW_REF:
+      "thedoughmonster/momi-backend/.github/workflows/deploy-prod.yml@refs/heads/prod",
+  }))
 })
 
 test("keeps deployment apply in the two authorized workflows", async () => {
