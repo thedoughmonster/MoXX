@@ -82,6 +82,7 @@ test("deduplicates versions while inserting every new observation", async () => 
   assert.match(repair, /insert into toast_raw\.resource_observations/);
   assert.match(repair, /version\.payload = attempt\.response_json/);
   assert.match(repair, /job\.status = 'succeeded'/);
+  assert.match(repair, /operation\.operation_key = attempt\.operation_key/);
 });
 
 test("records accepted kitchen gaps as coverage before lifecycle advance", async () => {

@@ -41,7 +41,8 @@ select version.resource_version_id, attempt.attempt_id,
   attempt.finished_at, attempt.request_cursor, attempt.correlation_id
 from toast_raw.api_request_attempts as attempt
 join toast_acquisition.jobs as job using (job_id)
-join toast_acquisition.operations as operation using (operation_key)
+join toast_acquisition.operations as operation
+  on operation.operation_key = attempt.operation_key
 join toast_raw.resource_versions as version
   on version.source_system = 'toast'
   and version.resource_type = operation.resource_type
