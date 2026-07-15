@@ -8,14 +8,14 @@ const readSource = (name: string) =>
 
 test("uses one capability-bound event delivery lifecycle", () => {
   const begin = readSource("begin_delivery.ts")
-  const acknowledge = readSource("ack_delivery.ts")
+  const projection = readSource("project_and_ack_delivery.ts")
   const failure = readSource("fail_delivery.ts")
   const wake = readSource("wake_next_delivery.ts")
   assert.equal(subscriptionKey, "warehouse-projection-toast-v1")
-  assert.match(begin, /momi_events\.begin_delivery/)
+  assert.match(begin, /warehouse_projection\.begin_reserved_delivery/)
   assert.match(begin, /capabilityToken.*::uuid/s)
-  assert.match(acknowledge, /momi_events\.ack_delivery/)
-  assert.match(acknowledge, /capabilityToken.*::uuid/s)
+  assert.match(projection, /warehouse_projection\.project_and_ack_delivery/)
+  assert.match(projection, /capabilityToken.*::uuid/s)
   assert.match(failure, /momi_events\.fail_delivery/)
   assert.match(failure, /capabilityToken.*::uuid/s)
   assert.match(wake, /warehouse_projection\.wake_next_delivery/)
@@ -23,7 +23,7 @@ test("uses one capability-bound event delivery lifecycle", () => {
 
 test("queries the source event and invokes only the database projector", () => {
   const sourceEvent = readSource("read_source_event.ts")
-  const projector = readSource("project_toast_event.ts")
+  const projector = readSource("project_and_ack_delivery.ts")
   const process = readSource("process_delivery.ts")
   const runtime = [
     sourceEvent,
@@ -32,11 +32,11 @@ test("queries the source event and invokes only the database projector", () => {
     readSource("handle_request.ts"),
   ].join("\n")
   assert.match(sourceEvent, /momi_events\.events/)
-  assert.match(projector, /warehouse_projection\.project_toast_event/)
+  assert.match(projector, /warehouse_projection\.project_and_ack_delivery/)
   assert.ok(process.indexOf("beginDelivery") <
     process.indexOf("readSourceEvent"))
   assert.ok(process.indexOf("readSourceEvent") <
-    process.indexOf("projectToastEvent"))
+    process.indexOf("projectAndAcknowledgeDelivery"))
   assert.doesNotMatch(runtime, /\bfetch\s*\(/)
   assert.doesNotMatch(runtime, /TOAST_[A-Z_]+/)
   assert.doesNotMatch(runtime, /pgmq\.read|read[B]atch|batch[_]size|wake[_]token/)

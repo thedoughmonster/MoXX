@@ -1,5 +1,4 @@
 import { sql } from "./database.ts"
-import { subscriptionKey } from "./types.ts"
 
 export async function beginDelivery(
   eventId: string,
@@ -7,8 +6,8 @@ export async function beginDelivery(
   capabilityToken: string,
 ): Promise<boolean> {
   const rows = await sql<{ begun: boolean }[]>`
-    select momi_events.begin_delivery(
-      ${subscriptionKey}, ${eventId}::uuid, ${messageId}::bigint,
+    select warehouse_projection.begin_reserved_delivery(
+      ${eventId}::uuid, ${messageId}::bigint,
       ${capabilityToken}::uuid
     ) as begun
   `

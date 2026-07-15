@@ -24,6 +24,8 @@ export type ProjectionOutcome =
   | `projected_${string}`
   | "acquisition_enqueued"
   | "acquisition_already_enqueued"
+  | "menu_refresh_enqueued"
+  | "publication_not_advanced"
   | `ignored_${string}`
 
 export type DeliveryFailure = "retry_wait" | "dead_letter" | "not_found"
@@ -48,12 +50,11 @@ export type WorkerStore = {
     capabilityToken: string,
   ) => Promise<boolean>
   readSourceEvent: (eventId: string) => Promise<SourceEvent | null>
-  projectToastEvent: (eventId: string) => Promise<unknown>
-  acknowledgeDelivery: (
+  projectAndAcknowledgeDelivery: (
     eventId: string,
     messageId: string,
     capabilityToken: string,
-  ) => Promise<boolean>
+  ) => Promise<unknown>
   failDelivery: (
     eventId: string,
     messageId: string,
