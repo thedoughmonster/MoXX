@@ -37,3 +37,10 @@ test("stale reservations cannot claim or invalidate a newer wake", () => {
     /delivery\.capability_token = reservation\.capability_token/)
   assert.match(scheduler, /not exists \([\s\S]*delivery_reservations/)
 })
+
+test("uses the calibrated six-worker projection ceiling", () => {
+  const capacity = readMigration("increase_projection_capacity")
+  assert.match(capacity, /set max_parallel_deliveries = 6/)
+  assert.match(capacity, /is distinct from 6/)
+  assert.match(capacity, /subscription_key = 'warehouse-projection-toast-v1'/)
+})
