@@ -62,6 +62,13 @@ export type ResourceRecord = {
 export type ExecutionResult = {
   status: number;
   body: Record<string, unknown>;
+  continuation?: BatchContinuation;
+};
+
+export type BatchContinuation = {
+  job: ClaimedJob;
+  max_runtime_seconds: number;
+  max_jobs: number;
 };
 
 export type SuccessContext = {

@@ -84,10 +84,10 @@ test("records accepted kitchen gaps as coverage before lifecycle advance", async
     "utf8",
   );
   assert.match(source, /recordCoverage\(\s*job,\s*request,\s*"accepted_gap"/);
-  assert.match(source, /finalizePage\(job, request, nextCursor/);
+  assert.match(source, /finalizePage\(\s*job,\s*request,\s*nextCursor/);
   assert.match(finalizer, /continueJob\(job, nextCursor\)/);
   assert.match(finalizer, /completeJob\(job\)/);
   assert.ok(
-    source.indexOf("recordCoverage") < source.indexOf("finalizePage(job"),
+    source.indexOf("recordCoverage") < source.indexOf("return finalizePage("),
   );
 });
