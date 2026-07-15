@@ -14,8 +14,9 @@ snapshot event. Item-level source observations remain queryable in the archive
 without creating one network wake-up per item.
 
 `momi-event-router-v1` accepts one durable event identity and capability token,
-claims its 120-second lease, creates idempotent subscriber deliveries, and
-marks routing complete. Failures return to durable exponential retry state;
-consumer failures are handled by the separate delivery lifecycle functions.
+claims its 120-second lease, and then drains up to 49 additional due events on
+the same database session. Every event retains an independent capability,
+idempotent subscriber deliveries, and exponential retry state. Consumer
+failures are handled by the separate delivery lifecycle functions.
 
 Run `pnpm check` from the repository root.

@@ -18,6 +18,10 @@ version, source reference, and correlation ID. Source payloads never enter PGMQ.
 One archived stock response is represented by one snapshot event rather than a
 message for each item in that response.
 
+After a valid exact wake routes its named event, that same worker claims up to
+49 additional due events. Every event keeps its own capability token, lease,
+idempotent deliveries, and failure state; one failure does not stop the batch.
+
 `GET` is a health check. `POST` performs routing. Inserting an event only
 commits durable routing work. The database recovery adapter wakes one due item
 every three seconds after that commit.
@@ -30,7 +34,7 @@ includes only the subscriber delivery count.
 ## Side Effects
 
 The worker creates idempotent delivery rows, sends reference-only queue
-messages, and completes or reschedules durable routing work.
+messages, and completes or reschedules each durable routing item independently.
 
 ## Failure Handling
 

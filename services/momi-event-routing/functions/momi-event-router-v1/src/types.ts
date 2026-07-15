@@ -5,6 +5,17 @@ export type RoutingInput = {
   capability_token: string
 }
 
+export type RoutingStore = {
+  claimItem: (eventId: string, capabilityToken: string) => Promise<boolean>
+  claimBatch: (limit: number) => Promise<RoutingInput[]>
+  routeEvent: (eventId: string, capabilityToken: string) => Promise<number>
+  failRouting: (
+    eventId: string,
+    capabilityToken: string,
+    error: string,
+  ) => Promise<boolean>
+}
+
 export type RoutingResult = {
   status: number
   body: {
