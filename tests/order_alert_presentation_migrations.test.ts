@@ -89,3 +89,13 @@ test("derives one targeted order without materializing every source", async () =
   assert.match(views, /toast_order_source_versions_v1/)
   assert.doesNotMatch(views, /with recursive order_rows|join .*presentations/s)
 })
+
+test("retires the emergency production presentation helper", async () => {
+  const source = await readMigration(
+    "20260715164643_retire_emergency_order_reader_hotfix.sql",
+  )
+
+  assert.match(source, /service-owner: toast-order-read-api/)
+  assert.match(source,
+    /drop function if exists\s+momi_api\.toast_order_presentation_hotfix_v1\(jsonb\)/)
+})
