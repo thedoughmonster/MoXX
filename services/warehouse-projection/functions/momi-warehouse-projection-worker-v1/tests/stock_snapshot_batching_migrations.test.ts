@@ -38,11 +38,18 @@ test("one batch projection groups item observations and emits one DM event", () 
   assert.match(routing, /project_toast_stock_snapshot/)
 })
 
-test("backlog recovery uses small frequent batches", () => {
-  const routing = readMigration("smooth_event_backlog_recovery")
-  const projection = readMigration("smooth_projection_backlog_recovery")
+test("backlog recovery serializes durable wakeups", () => {
+  const routing = readMigration("queue_event_routing_trigger_adapter")
+  const projection = readMigration("queue_projection_trigger_adapter")
   for (const migration of [routing, projection]) {
-    assert.match(migration, /schedule := '15 seconds'/)
-    assert.match(migration, /limit 5 for update skip locked/)
+    assert.match(migration, /schedule := '3 seconds'/)
+    assert.match(migration, /limit 1 for update skip locked/)
+    assert.match(migration, /active := true/)
   }
+  assert.match(routing, /tg_op = 'INSERT'/)
+  assert.match(routing, /new\.next_attempt_at > now\(\)/)
+  assert.match(projection, /old\.status is distinct from new\.status/)
+  assert.match(projection,
+    /old\.queue_message_id is distinct from new\.queue_message_id/)
+  assert.match(projection, /set capability_token = gen_random_uuid\(\)/)
 })

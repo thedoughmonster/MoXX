@@ -8,11 +8,12 @@ const readMigration = (name: string) =>
 
 test("paces acquisition while protecting live work", async () => {
   const sql = await readMigration(
-    "20260715104645_pace_toast_acquisition_recovery.sql",
+    "20260715110414_smooth_acquisition_wakeups.sql",
   )
 
-  assert.match(sql, /schedule := '15 seconds'/)
-  assert.match(sql, /limit 5 for update skip locked/)
+  assert.match(sql, /schedule := '5 seconds'/)
+  assert.match(sql, /limit 1 for update skip locked/)
+  assert.match(sql, /active := true/)
   assert.match(sql, /when status = 'running' then 0/)
   assert.match(sql, /when mode in \('live', 'snapshot', 'reconcile'\) then 1/)
   assert.match(sql, /when mode = 'repair' then 2/)
