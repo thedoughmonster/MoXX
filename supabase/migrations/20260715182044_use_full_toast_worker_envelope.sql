@@ -65,7 +65,7 @@ revoke all on function toast_acquisition.reconcile_stale_api_attempts()
 
 select cron.schedule(
   'momi-toast-attempt-reconciliation-v1',
-  '5 minutes',
+  '*/5 * * * *',
   'select toast_acquisition.reconcile_stale_api_attempts()'
 );
 
@@ -80,7 +80,7 @@ begin
   ) then raise exception 'Payment worker envelope is invalid'; end if;
   if (select count(*) from cron.job
     where jobname = 'momi-toast-attempt-reconciliation-v1'
-      and active and schedule = '5 minutes') <> 1
+      and active and schedule = '*/5 * * * *') <> 1
   then raise exception 'Attempt reconciliation schedule is invalid'; end if;
   if exists (
     select 1 from toast_acquisition.archive_integrity_findings_v1
