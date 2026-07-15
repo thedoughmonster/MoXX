@@ -64,6 +64,18 @@ test("internal handoff preserves the external dispatch timestamp", async () => {
   assert.doesNotMatch(source, /last_dispatched_at\s*=/);
 });
 
+test("dispatcher paces only materialized ranked candidates", async () => {
+  const source = await migrationEnding(
+    "_optimize_toast_dispatch_candidate_ranking.sql",
+  );
+  assert.match(source, /ranked as materialized/);
+  const ranked = source.indexOf("ranked.operation_dispatch_rank");
+  const pacing = source.indexOf("from toast_raw.api_request_attempts", ranked);
+  assert.ok(ranked >= 0 && pacing > ranked);
+  assert.match(source, /maximum_active_workers = 4/);
+  assert.match(source, /toast\.orders\.bulk\.v1'[\s\S]*is distinct from 5/);
+});
+
 test("HTTP returns after one job and continues through waitUntil", async () => {
   const handler = await readFile(
     new URL("../src/handle_request.ts", import.meta.url),
