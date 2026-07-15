@@ -87,6 +87,7 @@ test("worker envelope and interrupted attempts are reconciled", async () => {
   assert.match(source, /reconcile_stale_api_attempts/);
   assert.match(source, /worker_interrupted/);
   assert.match(source, /momi-toast-attempt-reconciliation-v1/);
+  assert.match(source, /\*\/5 \* \* \* \*/);
 });
 
 test("HTTP returns after one job and continues through waitUntil", async () => {
