@@ -29,6 +29,8 @@ test("reparented versions carry the survivor ID and matching content hash", () =
 })
 
 test("event references protect duplicates while history is consolidated", () => {
+  assert.match(migration,
+    /^-- service-owner: warehouse-projection\nbegin; lock table[\s\S]*commit;\s*$/)
   assert.match(migration, /lock table[\s\S]*momi_events\.events in share row exclusive mode/)
   assert.match(migration,
     /event\.source_reference @>[\s\S]*'table', 'entity_versions'[\s\S]*version\.entity_version_id/)

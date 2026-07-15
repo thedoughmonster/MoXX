@@ -1,5 +1,5 @@
 -- service-owner: warehouse-projection
-lock table momi_warehouse.source_links, momi_warehouse.entity_versions, momi_warehouse.version_observations, momi_events.events in share row exclusive mode;
+begin; lock table momi_warehouse.source_links, momi_warehouse.entity_versions, momi_warehouse.version_observations, momi_events.events in share row exclusive mode;
 create temporary table legacy_entity_types on commit drop as
 select link.entity_id, min(warehouse_projection.canonical_entity_type(link.resource_type)) expected_type, count(distinct warehouse_projection.canonical_entity_type(link.resource_type)) expected_type_count
 from momi_warehouse.source_links link group by link.entity_id;
@@ -117,4 +117,4 @@ select source_system, 'location', '', coalesce(nullif(source_location_id, ''), s
 where resource_type = 'restaurant' on conflict do nothing;
 do $$ begin if exists (select 1 from momi_warehouse.source_links link join momi_warehouse.entities entity using (entity_id)
   where entity.lifecycle_status = 'active' and entity.entity_type <> warehouse_projection.canonical_entity_type(link.resource_type))
-  then raise exception 'active_source_entity_type_conflict'; end if; end; $$;
+  then raise exception 'active_source_entity_type_conflict'; end if; end; $$; commit;
