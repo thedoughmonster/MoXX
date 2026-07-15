@@ -10,6 +10,7 @@ test("uses one capability-bound event delivery lifecycle", () => {
   const begin = readSource("begin_delivery.ts")
   const acknowledge = readSource("ack_delivery.ts")
   const failure = readSource("fail_delivery.ts")
+  const wake = readSource("wake_next_delivery.ts")
   assert.equal(subscriptionKey, "warehouse-projection-toast-v1")
   assert.match(begin, /momi_events\.begin_delivery/)
   assert.match(begin, /capabilityToken.*::uuid/s)
@@ -17,6 +18,7 @@ test("uses one capability-bound event delivery lifecycle", () => {
   assert.match(acknowledge, /capabilityToken.*::uuid/s)
   assert.match(failure, /momi_events\.fail_delivery/)
   assert.match(failure, /capabilityToken.*::uuid/s)
+  assert.match(wake, /warehouse_projection\.wake_next_delivery/)
 })
 
 test("queries the source event and invokes only the database projector", () => {
@@ -38,6 +40,22 @@ test("queries the source event and invokes only the database projector", () => {
   assert.doesNotMatch(runtime, /\bfetch\s*\(/)
   assert.doesNotMatch(runtime, /TOAST_[A-Z_]+/)
   assert.doesNotMatch(runtime, /pgmq\.read|read[B]atch|batch[_]size|wake[_]token/)
+})
+
+test("continues through one exact advisory-locked delivery", () => {
+  const migrations = new URL(
+    "../../../../../supabase/migrations/", import.meta.url,
+  )
+  const name = readdirSync(migrations).find((candidate) =>
+    candidate.endsWith("_chain_projection_delivery_wakeups.sql"))
+  assert.ok(name)
+  const source = readFileSync(new URL(name, migrations), "utf8")
+  assert.match(source, /pg_advisory_xact_lock\(19482, 1\)/)
+  assert.match(source, /status = 'running'[\s\S]*lease_expires_at > now\(\)/)
+  assert.match(source, /status = 'queued'[\s\S]*limit 1 for update skip locked/)
+  assert.match(source, /set capability_token = gen_random_uuid\(\)/)
+  assert.match(source, /select warehouse_projection\.wake_next_delivery\(\)/)
+  assert.doesNotMatch(source, /batch[_ ]size|limit [2-9][0-9]*/i)
 })
 
 test("adapter wakes and core reclaims only an exact tokenized delivery", () => {

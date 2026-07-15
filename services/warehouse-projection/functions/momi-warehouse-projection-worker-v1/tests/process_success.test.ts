@@ -18,6 +18,7 @@ test("projects and acknowledges a successful message", async () => {
     `source:${eventId}`,
     `project:${eventId}`,
     "ack:1",
+    "wake:next",
   ])
   assert.deepEqual(store.lifecycleTokens, [capabilityToken, capabilityToken])
 })
@@ -27,7 +28,7 @@ test("accepts the explicit stock observation projection result", async () => {
   store.projectionOutcomes.set(eventId, "projected_stock_observation")
   const result = await processDelivery(deliveryTriggerFixture, store)
   assert.equal(result.outcome, "projected_stock_observation")
-  assert.equal(store.calls.at(-1), "ack:1")
+  assert.deepEqual(store.calls.slice(-2), ["ack:1", "wake:next"])
 })
 
 test("acknowledges a duplicate message without projecting again", async () => {
@@ -47,5 +48,17 @@ test("acks an unknown valid category only for an explicit ignored result", async
   store.projectionOutcomes.set(eventId, "ignored_raw_resource_pending_mapper")
   const result = await processDelivery(deliveryTriggerFixture, store)
   assert.equal(result.outcome, "ignored_raw_resource_pending_mapper")
-  assert.equal(store.calls.at(-1), "ack:1")
+  assert.deepEqual(store.calls.slice(-2), ["ack:1", "wake:next"])
+})
+
+test("keeps an acknowledged delivery successful when handoff fails", async () => {
+  const store = new FakeStore()
+  store.wakeError = new Error("wake unavailable")
+  const originalError = console.error
+  console.error = () => undefined
+  const result = await processDelivery(deliveryTriggerFixture, store)
+    .finally(() => { console.error = originalError })
+  assert.equal(result.outcome, "projected")
+  assert.equal(store.calls.at(-1), "wake:next")
+  assert.equal(store.calls.includes("fail:1"), false)
 })

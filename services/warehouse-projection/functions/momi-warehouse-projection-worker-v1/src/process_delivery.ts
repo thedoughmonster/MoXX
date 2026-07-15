@@ -32,6 +32,11 @@ export async function processDelivery(
       trigger.event_id, trigger.message_id, trigger.capability_token,
     )
     if (!acknowledged) throw new Error("acknowledgement_failed")
+    try {
+      await store.wakeNextDelivery()
+    } catch (error) {
+      console.error("next projection delivery could not be woken", error)
+    }
     return { message_id: trigger.message_id, event_id: trigger.event_id,
       outcome: projection }
   } catch (error) {

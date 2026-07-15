@@ -39,6 +39,7 @@ export class FakeStore implements WorkerStore {
   calls: string[] = []
   failureErrors: string[] = []
   lifecycleTokens: string[] = []
+  wakeError: Error | null = null
 
   beginDelivery(
     _eventId: string,
@@ -81,5 +82,10 @@ export class FakeStore implements WorkerStore {
     this.lifecycleTokens.push(token)
     this.failureErrors.push(error)
     return Promise.resolve(this.failureOutcomes.get(messageId) ?? "retry_wait")
+  }
+
+  wakeNextDelivery(): Promise<boolean> {
+    this.calls.push("wake:next")
+    return this.wakeError ? Promise.reject(this.wakeError) : Promise.resolve(true)
   }
 }

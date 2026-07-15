@@ -17,14 +17,16 @@ ID, and consumers receive one `warehouse.stock_snapshot.observed` event.
 ## Owned Function
 
 `momi-warehouse-projection-worker-v1` claims one exact capability-bound
-delivery, runs the Toast event projector, and records its durable outcome.
+delivery, runs the Toast event projector, records its durable outcome, and
+wakes one next exact delivery after a successful acknowledgement.
 
 ## Contracts
 
 The service provides `momi.warehouse_projection.toast.consume.v1`. Its wake
 contains only the event ID, queue message ID, and delivery-owned capability;
 source records remain in private database schemas. Queuing a delivery only
-commits durable work; recovery wakes one due delivery every three seconds.
+commits durable work. Successful workers hand off serially; advisory-locked
+recovery wakes one due delivery every three seconds only when none is running.
 
 ## Authority
 

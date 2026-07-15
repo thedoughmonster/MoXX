@@ -60,4 +60,5 @@ export type WorkerStore = {
     capabilityToken: string,
     error: string,
   ) => Promise<DeliveryFailure>
+  wakeNextDelivery: () => Promise<boolean>
 }
