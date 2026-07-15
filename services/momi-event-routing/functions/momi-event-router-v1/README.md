@@ -15,6 +15,8 @@ that subscribed to that kind of note.
 The worker claims a 120-second lease and calls only private database functions.
 Messages include `event_id`, canonical entity identity, occurrence time, schema
 version, source reference, and correlation ID. Source payloads never enter PGMQ.
+One archived stock response is represented by one snapshot event rather than a
+message for each item in that response.
 
 `GET` is a health check. `POST` performs routing. The gateway invokes it from a
 database wake-up adapter after the event and routing work are committed.

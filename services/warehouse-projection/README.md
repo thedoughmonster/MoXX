@@ -10,6 +10,9 @@ warehouse. It never calls Toast or carries a source payload in the queue.
 
 This capability consumes durable Toast source-event deliveries and projects
 their referenced records into canonical warehouse entities and observations.
+Stock polling is projected from one response-level event per acquisition job;
+all item observations retain individual provenance under one canonical snapshot
+ID, and consumers receive one `warehouse.stock_snapshot.observed` event.
 
 ## Owned Function
 
