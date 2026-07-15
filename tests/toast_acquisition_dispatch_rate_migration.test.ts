@@ -11,6 +11,10 @@ const lifecycle = await readFile(
   new URL("20260715132150_route_toast_pagination_through_dispatch.sql", root),
   "utf8",
 );
+const boundedHistory = await readFile(
+  new URL("20260715152701_bound_toast_dispatch_history.sql", root),
+  "utf8",
+);
 
 test("paces the central Toast dispatcher once per second", () => {
   assert.match(migration, /schedule := '1 second'/);
@@ -38,4 +42,22 @@ test("routes new and continued work through the dispatcher", () => {
     lifecycle,
     /restart_token_cursor_job[\s\S]*last_dispatched_at = null/,
   );
+});
+
+test("bounds dispatcher history without weakening operation spacing", () => {
+  assert.match(boundedHistory, /^-- service-owner: toast-data-acquisition/);
+  assert.match(
+    boundedHistory,
+    /dispatched\.last_dispatched_at > now\(\) - interval '60 seconds'/,
+  );
+  assert.match(
+    boundedHistory,
+    /attempt\.started_at > now\(\) - interval '60 seconds'/,
+  );
+  assert.match(boundedHistory, /secs => operation\.minimum_dispatch_spacing_seconds/g);
+  assert.match(boundedHistory, /acquisition_jobs_recent_dispatch_idx/);
+  assert.match(boundedHistory, /api_attempts_recent_started_idx/);
+  assert.match(boundedHistory, /schedule := '1 second'/);
+  assert.match(boundedHistory, /dispatch_command is null/);
+  assert.match(boundedHistory, /Dispatch history bounds are invalid/);
 });
