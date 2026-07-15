@@ -40,7 +40,7 @@ export async function persistResourceObservations(
       order by source_id, content_hash, ordinality
       on conflict (
         source_system, resource_type, restaurant_guid, source_id, content_hash
-      ) do nothing
+      ) do update set content_hash = excluded.content_hash
       returning resource_version_id, source_id, content_hash
     ), version_rows as (
       select resource_version_id, source_id, content_hash from inserted
