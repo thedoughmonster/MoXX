@@ -55,6 +55,15 @@ test("scheduler caps starts while background workers are active", async () => {
   assert.match(source, /toast\.orders\.bulk\.v1'[\s\S]*is distinct from 5/);
 });
 
+test("internal handoff preserves the external dispatch timestamp", async () => {
+  const source = await migrationEnding(
+    "_preserve_toast_batch_worker_refill.sql",
+  );
+  assert.match(source, /create or replace function[\s\S]*claim_next/);
+  assert.match(source, /status = 'running'/);
+  assert.doesNotMatch(source, /last_dispatched_at\s*=/);
+});
+
 test("HTTP returns after one job and continues through waitUntil", async () => {
   const handler = await readFile(
     new URL("../src/handle_request.ts", import.meta.url),

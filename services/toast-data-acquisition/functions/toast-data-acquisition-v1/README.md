@@ -36,6 +36,8 @@ returned.
 6. For a batch-enabled exact-resource operation, atomically complete the current
    job and claim one next due job. The HTTP request returns after the first job;
    Supabase background work continues for at most the configured safe lifetime.
+   Internal handoffs do not impersonate external scheduler dispatches, allowing
+   the configured worker pool to refill without weakening source-call pacing.
 
 ## Side Effects
 
