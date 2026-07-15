@@ -41,6 +41,9 @@ service charges, tables, tax rates, void reasons, and tip withholding.
 
 - Recurring schedules are inserted inactive for rollout. A later activation
   migration enables them only after hosted POST canaries pass.
+- The first activation enables only the acquisition route and retry wake-up,
+  then enqueues one idempotent ordering-schedule snapshot. Recurring schedules
+  remain inactive until that response derives the real capture windows.
 - Menu metadata runs every 30 minutes without an online-ordering capture window.
 - Management-group discovery runs daily. A discovered restaurant receives the
   same live, daily, after-close, monthly, and configuration schedules plus an

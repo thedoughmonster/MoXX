@@ -5,6 +5,7 @@ import test from "node:test"
 const migrations = new URL("../supabase/migrations/", import.meta.url)
 const scheduleName = "20260714175717_configure_toast_acquisition_live_schedules.sql"
 const discoveryName = "20260714185415_automate_toast_backfill_and_group_discovery.sql"
+const bootstrapName = "20260715085415_bootstrap_toast_ordering_schedule_capture.sql"
 
 test("gives each payment date selector a distinct schedule key", async () => {
   const sql = await readFile(new URL(scheduleName, migrations), "utf8")
@@ -56,4 +57,23 @@ test("the reusable seed includes every required restaurant cadence", async () =>
     "Daily full configuration sweep",
   ]) assert.match(sql, new RegExp(marker))
   assert.equal(sql.match(/on conflict \(schedule_key\) do nothing/g)?.length, 5)
+})
+
+test("bootstraps the real ordering window without enabling recurring polls", async () => {
+  const sql = await readFile(new URL(bootstrapName, migrations), "utf8")
+
+  assert.match(sql, /function_key = 'toast\.data\.acquisition\.v1'/)
+  assert.match(sql, /trigger_key = 'toast\.data\.acquisition\.http\.v1'/)
+  assert.match(sql, /cron\.alter_job\(job_id := jobid, active := true\)/)
+  assert.match(sql, /jobname = 'momi-toast-acquisition-wakeup-v1'/)
+  assert.match(sql, /insert into toast_acquisition\.jobs/)
+  assert.match(sql, /'toast\.ordering_schedule\.snapshot\.v1'/)
+  assert.match(sql, /on conflict \(idempotency_key\) do nothing/)
+  assert.doesNotMatch(sql, /update toast_acquisition\.schedules/)
+  assert.doesNotMatch(sql, /momi-toast-acquisition-due-v1/)
+  for (const forbidden of [
+    "momi.events.route.v1",
+    "momi.warehouse_projection.toast.consume.v1",
+    "momi.orders.get_by_id.v1",
+  ]) assert.doesNotMatch(sql, new RegExp(forbidden.replaceAll(".", "\\.")))
 })

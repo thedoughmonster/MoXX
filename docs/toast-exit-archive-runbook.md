@@ -79,5 +79,7 @@ durable work in an inactive state because database migrations finish before the
 matching Edge deployment. After all hosted function metadata is verified, run
 controlled POST canaries for acquisition, routing, projection, canonical read,
 and alert acknowledgement. A separate activation migration may then enable the
-verified functions, subscriptions, and schedules. Legacy hydration and reading
-remain active until their queues are drained and that activation has soaked.
+acquisition route and capture one real ordering schedule. Enable recurring
+schedules only after its configured buffers produce active capture windows.
+Legacy hydration and reading remain active until their queues are drained and
+that activation has soaked.
