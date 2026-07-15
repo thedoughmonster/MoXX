@@ -28,7 +28,8 @@ one acquisition job every five seconds, with expired leases and live collection
 ahead of repair and backfill work. Payment detail fanout must enter the same
 paced lane rather than wake every discovered payment at once. New events and
 deliveries only create durable work; routing and projection each wake one item
-every three seconds.
+every three seconds. Database-backed Edge adapters release idle sessions after
+two seconds and rotate every connection within one minute.
 
 ## Coverage
 

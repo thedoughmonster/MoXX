@@ -7,6 +7,8 @@ if (!connectionString) {
 }
 
 export const sql = postgres(connectionString, {
+  idle_timeout: 2,
   max: 1,
+  max_lifetime: 60,
   prepare: false,
 })
