@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://momi.payments.get_by_id.v1/output",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "contract_key", "contract_version", "trace_id",
+        "work_id", "entity_id", "entity_type", "schema_version", "document",
+        "provenance", "freshness"],
+      "properties": {
+        "ok": { "const": true },
+        "contract_key": { "const": "momi.payments.get_by_id.v1" },
+        "contract_version": { "const": 1 },
+        "trace_id": { "type": "string", "format": "uuid" },
+        "work_id": { "type": "string" },
+        "entity_id": { "type": "string", "format": "uuid" },
+        "entity_type": { "const": "payment" },
+        "schema_version": { "type": "integer", "minimum": 1 },
+        "document": { "type": "object" },
+        "provenance": { "type": "object" },
+        "freshness": { "type": "object" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "contract_key", "contract_version", "trace_id", "error"],
+      "properties": {
+        "ok": { "const": false },
+        "contract_key": { "const": "momi.payments.get_by_id.v1" },
+        "contract_version": { "const": 1 },
+        "trace_id": { "type": "string", "format": "uuid" },
+        "work_id": { "type": "string" },
+        "error": { "enum": ["invalid_request", "forbidden",
+          "contract_inactive", "entity_not_found", "read_failed"] }
+      }
+    }
+  ]
+}

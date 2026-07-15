@@ -42,3 +42,33 @@ verify_jwt = false
 
 [functions.toast-stock-webhook-ingest-v1]
 verify_jwt = false
+
+[functions.toast-webhooks-ingest-v1]
+verify_jwt = false
+
+[functions.toast-data-acquisition-v1]
+verify_jwt = false
+
+[functions.momi-event-router-v1]
+verify_jwt = false
+
+[functions.momi-warehouse-projection-worker-v1]
+verify_jwt = false
+
+[functions.momi-orders-get-by-id-v1]
+verify_jwt = false
+
+[functions.momi-warehouse-payments-get-by-id-v1]
+verify_jwt = false
+
+[functions.momi-warehouse-menu-entities-get-by-id-v1]
+verify_jwt = false
+
+[functions.momi-warehouse-employees-get-by-id-v1]
+verify_jwt = false
+
+[functions.momi-warehouse-schedules-get-by-id-v1]
+verify_jwt = false
+
+[functions.momi-warehouse-stock-observations-get-by-id-v1]
+verify_jwt = false

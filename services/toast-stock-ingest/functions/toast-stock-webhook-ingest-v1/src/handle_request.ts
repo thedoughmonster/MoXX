@@ -1,3 +1,5 @@
+// service-owner: toast-stock-ingest
+
 import { parseToastStockPayload } from "./parse_toast_stock_payload.ts"
 import { storeRawStockEvent } from "./store_raw_stock_event.ts"
 import { verifyToastSignature } from "./verify_toast_signature.ts"
@@ -38,8 +40,8 @@ export async function handleRequest(request: Request): Promise<Response> {
 
   try {
     const disposition = await storeRawStockEvent(
-      Object.fromEntries(request.headers.entries()),
       payload,
+      rawBody,
     )
 
     return Response.json({ ok: true, disposition })

@@ -1,8 +1,14 @@
-import { executeWork } from "./execute_work.ts"
+import { parseDeliveryTrigger } from "./parse_delivery_trigger.ts"
 import { parseWorkTrigger } from "./parse_request.ts"
+import { processEventDelivery } from "./process_event_delivery.ts"
 import { functionKey } from "./types.ts"
+import type { DeliveryWorkerStore } from "./delivery_types.ts"
 
-export async function handleRequest(request: Request): Promise<Response> {
+export async function handleRequest(
+  request: Request,
+  _connectionInfo?: unknown,
+  testStore?: DeliveryWorkerStore,
+): Promise<Response> {
   if (request.method === "GET") {
     return Response.json({ ok: true, function_key: functionKey })
   }
@@ -17,23 +23,33 @@ export async function handleRequest(request: Request): Promise<Response> {
     body = await request.json()
   } catch {
     return Response.json({ ok: false, function_key: functionKey,
-      work_id: "unknown", error: "invalid_request" }, { status: 400 })
+      error: "invalid_request" }, { status: 400 })
   }
-  const input = parseWorkTrigger(body)
-  if (!input) {
+  const work = parseWorkTrigger(body)
+  const delivery = parseDeliveryTrigger(body)
+  if (!work && !delivery) {
     return Response.json({ ok: false, function_key: functionKey,
-      work_id: "unknown", error: "invalid_request" }, { status: 400 })
+      error: "invalid_request" }, { status: 400 })
   }
   try {
-    const result = await executeWork(input)
-    return Response.json(result.body, { status: result.status })
+    if (work) {
+      const { executeWork } = await import("./execute_work.ts")
+      const result = await executeWork(work)
+      return Response.json(result.body, { status: result.status })
+    }
+    const store = testStore ??
+      (await import("./delivery_worker_store.ts")).deliveryWorkerStore
+    const result = await processEventDelivery(delivery!, store)
+    return Response.json({ ok: result.outcome !== "failed",
+      function_key: functionKey, ...result })
   } catch (error) {
     const errorName = error instanceof Error ? error.name : "UnknownError"
     console.error("Order alert worker failed", {
-      work_id: input.work_id,
+      work_id: work?.work_id,
+      event_id: delivery?.event_id,
       error_name: errorName,
     })
     return Response.json({ ok: false, function_key: functionKey,
-      work_id: input.work_id, error: "worker_failed" }, { status: 500 })
+      error: "worker_failed" }, { status: 500 })
   }
 }

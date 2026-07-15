@@ -1,5 +1,7 @@
+// service-owner: toast-order-ingest
+
 import { parseToastPayload } from "./parse_toast_payload.ts"
-import { storeRawEvent } from "./store_raw_event.ts"
+import { storeRawOrderEvent } from "./store_raw_order_event.ts"
 import { verifyToastSignature } from "./verify_toast_signature.ts"
 
 export async function handleRequest(request: Request): Promise<Response> {
@@ -37,9 +39,9 @@ export async function handleRequest(request: Request): Promise<Response> {
   }
 
   try {
-    const disposition = await storeRawEvent(
-      Object.fromEntries(request.headers.entries()),
+    const disposition = await storeRawOrderEvent(
       payload,
+      rawBody,
     )
 
     return Response.json({ ok: true, disposition })

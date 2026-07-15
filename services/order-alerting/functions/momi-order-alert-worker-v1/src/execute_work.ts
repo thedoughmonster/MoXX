@@ -2,13 +2,17 @@ import { callOrderApi } from "./call_order_api.ts"
 import { claimWork } from "./claim_work.ts"
 import { completeWork } from "./complete_work.ts"
 import { isValidOrderResponse } from "./is_valid_order_response.ts"
+import { issueOrderReadCapability } from "./issue_order_read_capability.ts"
 import { readPublishableKey } from "./read_publishable_key.ts"
 import { recordFailure } from "./record_failure.ts"
-import { functionKey } from "./types.ts"
+import { revokeOrderReadCapability } from "./revoke_order_read_capability.ts"
+import { canonicalOrderContractKey, functionKey } from "./types.ts"
+import type { DeliveryTrigger } from "./delivery_types.ts"
 import type { ExecutionResult, WorkTriggerInput } from "./types.ts"
 
 export async function executeWork(
   input: WorkTriggerInput,
+  delivery: DeliveryTrigger | null = null,
 ): Promise<ExecutionResult> {
   const codeSha = Deno.env.get("MOMI_CODE_COMMIT_SHA")
   const projectUrl = Deno.env.get("SUPABASE_URL")
@@ -34,8 +38,27 @@ export async function executeWork(
       work_id: input.work_id, replay: true } }
   }
   try {
-    const response = await callOrderApi(job, projectUrl, gatewayKey)
-    if (response.status !== 200 || !isValidOrderResponse(response.body, job)) {
+    if (job.api_contract_key === canonicalOrderContractKey && !delivery) {
+      throw new Error("Canonical read requires exact delivery authority")
+    }
+    if (job.api_contract_key !== canonicalOrderContractKey && delivery) {
+      throw new Error("Legacy read cannot use delivery authority")
+    }
+    const readCapability = delivery
+      ? await issueOrderReadCapability(job, delivery)
+      : null
+    let response
+    try {
+      response = await callOrderApi(
+        job, projectUrl, gatewayKey, readCapability,
+      )
+    } finally {
+      if (readCapability) {
+        await revokeOrderReadCapability(job, readCapability.work_id)
+      }
+    }
+    if (response.status !== 200 ||
+      !isValidOrderResponse(response.body, job, readCapability)) {
       const code = response.status === 200
         ? "order_api_contract_mismatch"
         : "order_api_http_error"

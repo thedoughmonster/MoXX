@@ -5,3 +5,10 @@ node_modules/
 supabase/.branches/
 supabase/.temp/
 .momi/
+.momi-postgres-export/
+.momi-postgres-export.lock
+*.backup
+*.dump
+*.pgdump
+*.pgdump.*
+*.sql.gz

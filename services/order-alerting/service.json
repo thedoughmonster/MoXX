@@ -23,12 +23,21 @@
       {
         "service": "toast-order-read-api",
         "contract": "momi.toast_orders.get_by_id.v1"
+      },
+      {
+        "service": "momi-event-routing",
+        "contract": "momi.events.delivery_lifecycle.v1"
+      },
+      {
+        "service": "warehouse-read-api",
+        "contract": "momi.orders.get_by_id.v1"
       }
     ]
   },
   "database": {
-    "read": ["momi_runtime", "momi_orders", "momi_alerting"],
-    "write": ["momi_orders", "momi_alerting"]
+    "read": ["momi_runtime", "momi_orders", "momi_alerting", "momi_events",
+      "momi_api", "momi_warehouse"],
+    "write": ["momi_orders", "momi_alerting", "momi_events", "momi_api"]
   },
   "network": { "outbound_hosts": ["same-origin:supabase-edge-functions"] },
   "secrets": [

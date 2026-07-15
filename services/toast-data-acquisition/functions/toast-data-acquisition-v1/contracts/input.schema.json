@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://toast.data.acquisition.v1/input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["job_id", "capability_token"],
+  "properties": {
+    "job_id": {
+      "oneOf": [
+        { "type": "integer", "minimum": 1, "maximum": 9007199254740991 },
+        { "type": "string", "pattern": "^[1-9][0-9]*$", "maxLength": 19 }
+      ]
+    },
+    "capability_token": { "type": "string", "format": "uuid" }
+  }
+}

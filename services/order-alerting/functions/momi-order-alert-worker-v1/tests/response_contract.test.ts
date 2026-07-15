@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 import { isValidOrderResponse } from "../src/is_valid_order_response.ts"
+import { legacyOrderContractKey } from "../src/types.ts"
 import type { ClaimedWork, OrderApiSuccess } from "../src/types.ts"
 
 const job: ClaimedWork = {
@@ -8,13 +9,13 @@ const job: ClaimedWork = {
   work_id: "8",
   attempt_id: "9",
   invocation_id: "eb4d0412-e4d3-4319-92fd-e6d660bdd812",
-  source_system: "square",
-  source_version_id: "square-version-7",
+  source_system: "toast",
+  source_version_id: "toast-version-7",
   location_id: "location-1",
   order_id: "order-1",
-  api_contract_key: "momi.square_orders.get_by_id.v1",
+  api_contract_key: legacyOrderContractKey,
   api_contract_version: 1,
-  api_route_path: "/functions/v1/momi-square-orders-get-by-id-v1",
+  api_route_path: "/functions/v1/momi-toast-orders-get-by-id-v1",
   trigger_token: "4a56f5d8-bce2-4a99-8e79-dd994bf7ea65",
 }
 
@@ -59,7 +60,7 @@ test("rejects contract, source, order, and version mismatches", () => {
     { contract_key: "momi.other.get.v1" },
     { contract_version: 2 },
     { work_id: "99" },
-    { source_system: "toast" },
+    { source_system: "square" },
     { order_id: "other-order" },
     { location_id: "other-location" },
     { source_version_id: "other-version" },

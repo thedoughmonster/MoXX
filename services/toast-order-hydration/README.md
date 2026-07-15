@@ -8,9 +8,10 @@ Normal order webhooks do not create these jobs.
 
 ## Purpose
 
-This is the only service permitted to fetch Toast order business data. It owns
-explicit hydration, idempotent response storage, and fetch attempt history. It
-is not on the operational webhook-to-Slack path.
+This is the retiring order-specific adapter for explicit hydration, idempotent
+response storage, and fetch attempt history. `toast-data-acquisition` is the
+permanent outbound Toast owner. This service is not on the operational
+webhook-to-Slack path and accepts no new acquisition responsibilities.
 
 ## Owned Function
 
@@ -26,8 +27,9 @@ created only by a separately approved reconciliation or operator workflow.
 ## Authority
 
 Toast host and restaurant values come from database configuration. Secret names
-are configured; values remain in Supabase. No report or read path invokes this
-service synchronously.
+are configured; values remain in Supabase. This adapter retains a temporary
+Toast credential and API exception only while its manifest is `retiring`. No
+report or read path invokes it synchronously.
 
 ## Verification
 

@@ -7,9 +7,19 @@ identify deployment location but do not define business purpose.
 
 | Capability | Function key | Purpose | Service | Kind | Boundary | Route |
 | --- | --- | --- | --- | --- | --- | --- |
+| ingest | `momi.warehouse_projection.toast.consume.v1` | Claim one capability-bound Toast event delivery and project its referenced source record. | `warehouse-projection` | core_capability | momi_internal | `/functions/v1/momi-warehouse-projection-worker-v1` |
 | ingest | `toast.orders.webhook_ingest.v1` | Authenticate and preserve one Toast Orders webhook event before durable alert handoff. | `toast-order-ingest` | source_adapter | toast_inbound | `/functions/v1/toast-orders-webhook-ingest-v1` |
 | ingest | `toast.stock.webhook_ingest.v1` | Authenticate and preserve one Toast stock webhook event. | `toast-stock-ingest` | source_adapter | toast_inbound | `/functions/v1/toast-stock-webhook-ingest-v1` |
+| ingest | `toast.webhooks.webhook_ingest.v1` | Authenticate and preserve one registered Toast webhook event. | `toast-webhook-ingestion` | source_adapter | toast_inbound | `/functions/v1/toast-webhooks-ingest-v1` |
+| hydrate | `toast.data.acquisition.v1` | Fetch one page for a claimed allowlisted Toast acquisition job and preserve its complete response. | `toast-data-acquisition` | source_adapter | toast_outbound | `/functions/v1/toast-data-acquisition-v1` |
 | hydrate | `toast.orders.fetch_by_guid.v1` | Hydrate one durable Toast order work item by GUID and preserve the complete source response. | `toast-order-hydration` | source_adapter | toast_outbound | `/functions/v1/toast-orders-fetch-by-guid-v1` |
+| read | `momi.employees.get_by_id.v1` | Read one canonical Dough Monster employee by its stable entity ID. | `warehouse-read-api` | core_capability | momi_internal | `/functions/v1/momi-warehouse-employees-get-by-id-v1` |
+| read | `momi.menu_entities.get_by_id.v1` | Read one canonical Dough Monster menu entity by its stable entity ID. | `warehouse-read-api` | core_capability | momi_internal | `/functions/v1/momi-warehouse-menu-entities-get-by-id-v1` |
+| read | `momi.orders.get_by_id.v1` | Read one canonical Dough Monster order by its stable entity ID. | `warehouse-read-api` | core_capability | momi_internal | `/functions/v1/momi-orders-get-by-id-v1` |
+| read | `momi.payments.get_by_id.v1` | Read one canonical Dough Monster payment by its stable entity ID. | `warehouse-read-api` | core_capability | momi_internal | `/functions/v1/momi-warehouse-payments-get-by-id-v1` |
+| read | `momi.schedules.get_by_id.v1` | Read one canonical Dough Monster schedule by its stable entity ID. | `warehouse-read-api` | core_capability | momi_internal | `/functions/v1/momi-warehouse-schedules-get-by-id-v1` |
+| read | `momi.stock_observations.get_latest.v1` | Read the latest canonical stock observation for one item and location. | `warehouse-read-api` | core_capability | momi_internal | `/functions/v1/momi-warehouse-stock-observations-get-by-id-v1` |
 | read | `momi.toast_orders.get_by_id.v1` | Read one exact stored Toast order through the owned MoMi API contract. | `toast-order-read-api` | source_adapter | momi_internal | `/functions/v1/momi-toast-orders-get-by-id-v1` |
-| decide | `momi.orders.alert.evaluate.v1` | Evaluate one owned order document against alert configuration and create durable delivery work. | `order-alerting` | core_capability | momi_internal | `/functions/v1/momi-order-alert-worker-v1` |
+| decide | `momi.orders.alert.evaluate.v1` | Consume one exact canonical order delivery, evaluate its owned order, and create durable delivery work. | `order-alerting` | core_capability | momi_internal | `/functions/v1/momi-order-alert-worker-v1` |
+| deliver | `momi.events.route.v1` | Route one durable event reference to configured subscriber queues. | `momi-event-routing` | core_capability | momi_internal | `/functions/v1/momi-event-router-v1` |
 | deliver | `momi.slack.order_alert.deliver.v1` | Deliver one durable, prepared order alert to its configured Slack destination. | `slack-order-delivery` | destination_adapter | slack_outbound | `/functions/v1/slack-order-alert-delivery-v1` |
