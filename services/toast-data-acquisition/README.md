@@ -34,11 +34,13 @@ time zone, so activation cannot release an accumulated startup backlog.
 Windowed intervals remain due while closed and begin only when the captured
 online-ordering window plus configured buffers is open.
 
-The central dispatcher releases one due source request per second. Expired
-leases and live collection stay ahead of repair work, while historical
-backfill uses the remaining capacity. Historical bulk-order pages stay at least
-five seconds apart; every page and payment-detail discovery re-enters the same
-paced lane instead of creating an immediate request burst.
+The central dispatcher releases at most two due source requests per second.
+Each operation has a configured per-tick cap; rank-one work across operations
+is released before any operation receives a second slot. Expired leases and
+live collection stay ahead of repair work, while historical backfill uses the
+remaining capacity. Historical bulk-order pages stay at least five seconds
+apart; every page and payment-detail discovery re-enters the same paced lane
+instead of creating an immediate request burst.
 
 Dispatch eligibility reads at most the latest 60 seconds of attempts and
 releases. The operation registry cannot configure a longer spacing interval,

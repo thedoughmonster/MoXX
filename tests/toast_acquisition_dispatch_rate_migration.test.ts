@@ -15,6 +15,10 @@ const boundedHistory = await readFile(
   new URL("20260715152701_bound_toast_dispatch_history.sql", root),
   "utf8",
 );
+const increasedCapacity = await readFile(
+  new URL("20260715165837_increase_toast_dispatch_capacity.sql", root),
+  "utf8",
+);
 
 test("paces the central Toast dispatcher once per second", () => {
   assert.match(migration, /schedule := '1 second'/);
@@ -60,4 +64,17 @@ test("bounds dispatcher history without weakening operation spacing", () => {
   assert.match(boundedHistory, /schedule := '1 second'/);
   assert.match(boundedHistory, /dispatch_command is null/);
   assert.match(boundedHistory, /Dispatch history bounds are invalid/);
+});
+
+test("doubles capacity without weakening operation fairness", () => {
+  assert.match(increasedCapacity, /^-- service-owner: toast-data-acquisition/);
+  assert.match(increasedCapacity, /maximum_dispatches_per_tick/);
+  assert.match(increasedCapacity, /toast\.payments\.get\.v1/);
+  assert.match(increasedCapacity,
+    /partition by job\.operation_key, job\.restaurant_guid/);
+  assert.match(increasedCapacity,
+    /order by eligible\.operation_dispatch_rank, eligible\.priority/);
+  assert.match(increasedCapacity, /limit 2 for update of job skip locked/);
+  assert.match(increasedCapacity,
+    /toast\.orders\.bulk\.v1'[\s\S]*is distinct from 5/);
 });
