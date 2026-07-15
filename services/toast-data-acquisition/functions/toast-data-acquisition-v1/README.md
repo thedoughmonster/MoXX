@@ -31,8 +31,9 @@ returned.
 2. Resolve a bounded date window and construct the exact registered GET URL.
 3. Authenticate using configured secret names and fetch one response page.
 4. Archive every attempt with redacted headers and complete response evidence.
-5. Deduplicate immutable resource versions, add every observation, fan payment
-   GUID lists into registered detail jobs, and advance the durable lifecycle.
+5. Deduplicate immutable resource versions, return the winning immutable version
+   even during a concurrent conflict, add every observation, fan payment GUID
+   lists into registered detail jobs, and advance the durable lifecycle.
 6. For a batch-enabled exact-resource operation, atomically complete the current
    job and claim one next due job. The HTTP request returns after the first job;
    Supabase background work uses the configured worker-lifetime envelope. A new

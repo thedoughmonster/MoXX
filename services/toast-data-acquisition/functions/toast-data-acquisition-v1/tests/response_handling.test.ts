@@ -64,14 +64,24 @@ test("deduplicates versions while inserting every new observation", async () => 
     new URL("../src/persist_resources.ts", import.meta.url),
     "utf8",
   );
-  assert.match(source, /on conflict \([\s\S]*\) do nothing/);
+  const repair = await readFile(
+    new URL(
+      "../../../../../supabase/migrations/20260715184655_repair_concurrent_toast_observations.sql",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+  assert.match(
+    source,
+    /on conflict \([\s\S]*\) do update[\s\S]*content_hash = excluded\.content_hash/,
+  );
   assert.match(source, /version_rows as/);
   assert.match(source, /insert into toast_raw\.resource_observations/);
   assert.match(source, /from normalized\s+join version_rows/);
-  assert.doesNotMatch(
-    source,
-    /insert into toast_raw\.resource_observations[\s\S]*from inserted/,
-  );
+  assert.match(repair, /to_jsonb\(new\) = to_jsonb\(old\)/);
+  assert.match(repair, /insert into toast_raw\.resource_observations/);
+  assert.match(repair, /version\.payload = attempt\.response_json/);
+  assert.match(repair, /job\.status = 'succeeded'/);
 });
 
 test("records accepted kitchen gaps as coverage before lifecycle advance", async () => {
