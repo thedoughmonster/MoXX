@@ -8,6 +8,7 @@ declare const EdgeRuntime: {
 };
 
 export async function handleRequest(request: Request): Promise<Response> {
+  const invocationStartedAtMs = Date.now();
   if (request.method === "GET") {
     return Response.json({ ok: true, function_key: functionKey });
   }
@@ -26,7 +27,11 @@ export async function handleRequest(request: Request): Promise<Response> {
   const input = parseAcquisitionInput(body);
   if (!input) return new Response("invalid request", { status: 400 });
   try {
-    const result = await executeJob(input.job_id, input.capability_token);
+    const result = await executeJob(
+      input.job_id,
+      input.capability_token,
+      invocationStartedAtMs,
+    );
     if (result.continuation) {
       EdgeRuntime.waitUntil(runBackgroundBatch(result.continuation));
     }

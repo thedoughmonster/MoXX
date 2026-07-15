@@ -17,9 +17,9 @@ async function migrationEnding(suffix: string): Promise<string> {
 }
 
 test("background handoff stops with shutdown margin remaining", () => {
-  assert.equal(canContinueBatch(400_000, 369_999), true);
-  assert.equal(canContinueBatch(400_000, 370_000), false);
-  assert.equal(canContinueBatch(400_000, 400_001), false);
+  assert.equal(canContinueBatch(400_000, 349_999, 30_000), true);
+  assert.equal(canContinueBatch(400_000, 350_000, 30_000), false);
+  assert.equal(canContinueBatch(400_000, 400_001, 30_000), false);
 });
 
 test("payment detail batching is configured and atomically handed off", async () => {
@@ -76,6 +76,19 @@ test("dispatcher paces only materialized ranked candidates", async () => {
   assert.match(source, /toast\.orders\.bulk\.v1'[\s\S]*is distinct from 5/);
 });
 
+test("worker envelope and interrupted attempts are reconciled", async () => {
+  const source = await migrationEnding(
+    "_use_full_toast_worker_envelope.sql",
+  );
+  assert.match(source, /worker_max_runtime_seconds between 60 and 400/);
+  assert.match(source, /worker_max_runtime_seconds = 400/);
+  assert.match(source, /worker_max_jobs = 500/);
+  assert.match(source, /api_request_attempts_open_idx/);
+  assert.match(source, /reconcile_stale_api_attempts/);
+  assert.match(source, /worker_interrupted/);
+  assert.match(source, /momi-toast-attempt-reconciliation-v1/);
+});
+
 test("HTTP returns after one job and continues through waitUntil", async () => {
   const handler = await readFile(
     new URL("../src/handle_request.ts", import.meta.url),
@@ -85,9 +98,13 @@ test("HTTP returns after one job and continues through waitUntil", async () => {
     new URL("../src/run_background_batch.ts", import.meta.url),
     "utf8",
   );
+  const finalizer = await readFile(
+    new URL("../src/finalize_page.ts", import.meta.url),
+    "utf8",
+  );
   assert.match(handler, /EdgeRuntime\.waitUntil\(runBackgroundBatch/);
-  assert.match(runner, /canContinueBatch\(deadline, Date\.now\(\)\)/);
-  assert.match(runner, /processedJobs \+ 1 < continuation\.max_jobs/);
-  assert.match(runner, /executeClaimedJob\(current, allowHandoff\)/);
+  assert.match(runner, /executeClaimedJob\(current, batchTiming\)/);
+  assert.match(finalizer, /completed_jobs \+ 1 </);
+  assert.match(finalizer, /canContinueBatch\(/);
   assert.doesNotMatch(runner, /Promise\.all/);
 });

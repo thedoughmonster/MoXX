@@ -1,5 +1,13 @@
-import { batchShutdownMarginMs } from "./constants.ts";
+import {
+  batchPersistenceMarginMs,
+  batchShutdownMarginMs,
+} from "./constants.ts";
 
-export function canContinueBatch(deadlineMs: number, nowMs: number): boolean {
-  return nowMs < deadlineMs - batchShutdownMarginMs;
+export function canContinueBatch(
+  deadlineMs: number,
+  nowMs: number,
+  requestTimeoutMs: number,
+): boolean {
+  return nowMs + requestTimeoutMs + batchPersistenceMarginMs <
+    deadlineMs - batchShutdownMarginMs;
 }

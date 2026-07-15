@@ -6,6 +6,7 @@ import type { ExecutionResult } from "./runtime_types.ts";
 export async function executeJob(
   jobId: string,
   capabilityToken: string,
+  batchStartedAtMs: number,
 ): Promise<ExecutionResult> {
   const job = await claimJob(jobId, capabilityToken);
   if (!job) {
@@ -19,5 +20,9 @@ export async function executeJob(
       },
     };
   }
-  return executeClaimedJob(job, true);
+  return executeClaimedJob(job, {
+    started_at_ms: batchStartedAtMs,
+    deadline_ms: null,
+    completed_jobs: 0,
+  });
 }

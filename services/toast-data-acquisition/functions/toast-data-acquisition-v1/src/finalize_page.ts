@@ -1,10 +1,11 @@
+import { canContinueBatch } from "./can_continue_batch.ts";
 import { completeJob } from "./complete_job.ts";
 import { completeJobAndClaimNext } from "./complete_job_and_claim_next.ts";
 import { continueJob } from "./continue_job.ts";
 import type { JsonObject } from "./json_types.ts";
 import { recordFailureCoverage } from "./record_failure_coverage.ts";
 import type { ClaimedJob, RegisteredRequest } from "./registry_types.ts";
-import type { ExecutionResult } from "./runtime_types.ts";
+import type { BatchBudget, ExecutionResult } from "./runtime_types.ts";
 
 export async function finalizePage(
   job: ClaimedJob,
@@ -12,19 +13,23 @@ export async function finalizePage(
   nextCursor: JsonObject | null,
   attemptId: string,
   resourceCount: number,
-  batchRuntimeSeconds: number | null,
-  batchMaxJobs: number | null,
+  batchBudget: BatchBudget | null,
 ): Promise<ExecutionResult> {
   let disposition: "completed" | "continued" | "budget_exhausted" = "completed";
   let continuation;
   if (nextCursor) disposition = await continueJob(job, nextCursor);
-  else if (batchRuntimeSeconds !== null && batchMaxJobs !== null) {
+  else if (batchBudget && batchBudget.completed_jobs + 1 <
+      batchBudget.max_jobs && canContinueBatch(
+    batchBudget.deadline_ms,
+    Date.now(),
+    batchBudget.request_timeout_ms,
+  )) {
     const nextJob = await completeJobAndClaimNext(job);
     if (nextJob) {
       continuation = {
+        ...batchBudget,
         job: nextJob,
-        max_runtime_seconds: batchRuntimeSeconds,
-        max_jobs: batchMaxJobs,
+        completed_jobs: batchBudget.completed_jobs + 1,
       };
     }
   } else await completeJob(job);
