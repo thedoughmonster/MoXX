@@ -32,6 +32,8 @@ retry, dead-letter, duplicate, or failed outcome.
 
 A stock response is one delivery. Its archived item observations are projected
 in one database transaction and grouped under one canonical snapshot ID.
+Delivery insertion only commits durable work. Recovery wakes one due delivery
+every three seconds.
 
 ## Side Effects
 

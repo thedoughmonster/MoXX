@@ -18,8 +18,9 @@ version, source reference, and correlation ID. Source payloads never enter PGMQ.
 One archived stock response is represented by one snapshot event rather than a
 message for each item in that response.
 
-`GET` is a health check. `POST` performs routing. The gateway invokes it from a
-database wake-up adapter after the event and routing work are committed.
+`GET` is a health check. `POST` performs routing. Inserting an event only
+commits durable routing work. The database recovery adapter wakes one due item
+every three seconds after that commit.
 
 ## Output
 

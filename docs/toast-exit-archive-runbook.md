@@ -24,9 +24,11 @@ restaurant `firstBusinessDate`. Use resumable day or month windows and complete
 pagination. Never substitute a guessed opening date.
 
 Capture restaurant detail first so Toast supplies the archive anchor. Release
-at most five acquisition jobs every fifteen seconds, with expired leases and
-live collection ahead of repair and backfill work. Payment detail fanout must
-enter the same paced lane rather than wake every discovered payment at once.
+one acquisition job every five seconds, with expired leases and live collection
+ahead of repair and backfill work. Payment detail fanout must enter the same
+paced lane rather than wake every discovered payment at once. New events and
+deliveries only create durable work; routing and projection each wake one item
+every three seconds.
 
 ## Coverage
 

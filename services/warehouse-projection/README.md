@@ -23,7 +23,8 @@ delivery, runs the Toast event projector, and records its durable outcome.
 
 The service provides `momi.warehouse_projection.toast.consume.v1`. Its wake
 contains only the event ID, queue message ID, and delivery-owned capability;
-source records remain in private database schemas.
+source records remain in private database schemas. Queuing a delivery only
+commits durable work; recovery wakes one due delivery every three seconds.
 
 ## Authority
 
