@@ -9,8 +9,10 @@ test("creates a private, job-addressable Toast coverage ledger", async () => {
     "20260715125138_link_toast_archive_coverage_evidence.sql",
     "20260715125152_create_toast_archive_coverage_views.sql",
     "20260715125633_create_toast_archive_integrity_findings.sql",
+    "20260715145800_create_expected_archive_obligations.sql",
+    "20260715145900_surface_archive_obligation_gaps.sql",
   ]
-  const [policy, evidence, ledger, findings] = await Promise.all(
+  const [policy, evidence, ledger, findings, expected, acceptance] = await Promise.all(
     names.map((name) => readFile(new URL(name, migrationRoot), "utf8")),
   )
 
@@ -49,4 +51,26 @@ test("creates a private, job-addressable Toast coverage ledger", async () => {
   assert.match(findings, /RAW_OBSERVATION_MISMATCH/)
   assert.match(findings, /ACQUISITION_DEAD_LETTER/)
   assert.match(findings, /an empty result is required/)
+
+  assert.match(expected, /create table toast_acquisition\.operation_coverage_dimensions/)
+  assert.match(expected, /create table toast_acquisition\.historical_coverage_bounds/)
+  assert.match(expected, /date '2026-07-15'/)
+  assert.match(expected, /create view toast_acquisition\.expected_archive_obligations_v1/)
+  assert.match(expected, /restaurant\.first_business_date/)
+  assert.match(expected, /generate_series/g)
+  assert.match(expected, /paidBusinessDate/)
+  assert.match(expected, /refundBusinessDate/)
+  assert.match(expected, /voidBusinessDate/)
+  assert.match(expected, /includeMissedBreaks/)
+
+  assert.match(acceptance, /'missing_job'/)
+  assert.match(acceptance, /EXPECTED_JOB_MISSING/)
+  assert.match(acceptance, /EXPECTED_JOB_UNRESOLVED/)
+  assert.match(acceptance, /BACKFILL_ANCHOR_MISSING/)
+  assert.match(acceptance, /COVERAGE_DIMENSION_MISSING/)
+  assert.match(acceptance, /HISTORICAL_BOUND_MISSING/)
+  assert.match(acceptance, /EXPECTED_SCHEDULE_MISSING/)
+  assert.match(acceptance, /archive_acceptance_findings_v1/)
+  assert.match(acceptance, /job\.window_start = expected\.window_start/)
+  assert.match(acceptance, /job\.parameters = expected\.coverage_dimensions/)
 })

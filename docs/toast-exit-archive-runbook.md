@@ -45,10 +45,18 @@ date selectors. `toast_acquisition.operation_coverage_v1` must list every
 enabled bulk-capable operation with an active schedule; repair-only operations
 must remain unscheduled.
 
+`toast_acquisition.expected_archive_obligations_v1` derives every historical
+window independently from the coverage policy and Toast `firstBusinessDate`.
+The versioned `historical_coverage_bounds` row pins this archive's backfill
+through date to July 15, 2026; recurring schedules own later observations.
+Use `archive_obligation_status_v1` to expose a missing job instead of silently
+omitting that window from the job-level ledger.
+
 Archive acceptance requires zero rows from
-`toast_acquisition.archive_integrity_findings_v1`. This verifies source-response
-hashes and relationships and blocks unresolved processing failures or dead
-letters without copying response payloads out of `toast_raw`.
+`toast_acquisition.archive_acceptance_findings_v1`. This verifies source-response
+hashes and relationships, expected jobs, schedules, and backfill anchors, and
+blocks unresolved processing failures or dead letters without copying response
+payloads out of `toast_raw`.
 
 ## Manual Exports
 
@@ -66,6 +74,9 @@ cadence because an operator export cannot reconstruct the missing history.
 Every enabled Toast product without API coverage gets its own additional row
 with its real export method and a 30-day cadence. Record the monthly,
 pre-November-29, and pre-closure files as separate immutable `export_runs`.
+Supply an export kind, byte size, original archive path, operator, and SHA-256
+for every run. Use `momi_archive.product_export_status_v1` for latest evidence
+and due dates; `manual_export_findings_v1` lists every overdue recurring export.
 
 ## NAS Backup
 
