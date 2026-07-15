@@ -2,10 +2,10 @@
   "generated": true,
   "purpose": "Repository-wide trend signals; compare this file through Git history.",
   "metrics": {
-    "handwritten_files": 746,
-    "handwritten_lines": 32630,
-    "typescript_files": 423,
-    "import_declarations": 1285,
+    "handwritten_files": 748,
+    "handwritten_lines": 32742,
+    "typescript_files": 424,
+    "import_declarations": 1288,
     "top_level_functions": 274,
     "branch_complexity_points": 1034
   }

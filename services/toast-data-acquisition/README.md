@@ -24,6 +24,10 @@ The service provides `toast.data.acquisition.v1`. A POST contains only a job ID
 and its capability token. Identical source content reuses its immutable version
 while each retrieval creates a new observation.
 
+Each source request inserts its archive attempt before transport and may
+finalize that attempt exactly once. Completed attempts, resource versions, and
+observations remain immutable.
+
 ## Authority
 
 The service may authenticate with the configured Toast source and issue the
