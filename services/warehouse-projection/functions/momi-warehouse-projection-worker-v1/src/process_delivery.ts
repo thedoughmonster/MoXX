@@ -25,13 +25,11 @@ export async function processDelivery(
       throw new Error("source_event_mismatch")
     }
     const projection = classifyProjectionOutcome(
-      await store.projectToastEvent(trigger.event_id),
+      await store.projectAndAcknowledgeDelivery(
+        trigger.event_id, trigger.message_id, trigger.capability_token,
+      ),
     )
     if (!projection) throw new Error("unexpected_projection_outcome")
-    const acknowledged = await store.acknowledgeDelivery(
-      trigger.event_id, trigger.message_id, trigger.capability_token,
-    )
-    if (!acknowledged) throw new Error("acknowledgement_failed")
     try {
       await store.wakeNextDelivery()
     } catch (error) {

@@ -4,6 +4,7 @@ import type {
   SourceEvent,
   WorkerStore,
 } from "../src/types.ts"
+import { classifyProjectionOutcome } from "../src/classify_projection_outcome.ts"
 
 export const eventId = "83fb9d92-851b-4c30-9a12-b849d640b5b1"
 export const correlationId = "bd34cadc-9733-43a6-a5ba-fee19e26635c"
@@ -56,20 +57,19 @@ export class FakeStore implements WorkerStore {
     return Promise.resolve(this.sourceEvents.get(targetEventId) ?? null)
   }
 
-  projectToastEvent(targetEventId: string): Promise<unknown> {
-    this.calls.push(`project:${targetEventId}`)
-    const outcome = this.projectionOutcomes.get(targetEventId) ?? "projected"
-    return outcome instanceof Error ? Promise.reject(outcome) : Promise.resolve(outcome)
-  }
-
-  acknowledgeDelivery(
-    _eventId: string,
+  projectAndAcknowledgeDelivery(
+    targetEventId: string,
     messageId: string,
     token: string,
-  ): Promise<boolean> {
-    this.calls.push(`ack:${messageId}`)
-    this.lifecycleTokens.push(token)
-    return Promise.resolve(true)
+  ): Promise<unknown> {
+    this.calls.push(`project:${targetEventId}`)
+    const outcome = this.projectionOutcomes.get(targetEventId) ?? "projected"
+    if (outcome instanceof Error) return Promise.reject(outcome)
+    if (classifyProjectionOutcome(outcome)) {
+      this.calls.push(`ack:${messageId}`)
+      this.lifecycleTokens.push(token)
+    }
+    return Promise.resolve(outcome)
   }
 
   failDelivery(

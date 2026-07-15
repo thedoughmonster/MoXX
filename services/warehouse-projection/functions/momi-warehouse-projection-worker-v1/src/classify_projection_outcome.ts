@@ -5,7 +5,9 @@ export function classifyProjectionOutcome(
 ): ProjectionOutcome | null {
   if (
     input === "acquisition_enqueued" ||
-    input === "acquisition_already_enqueued"
+    input === "acquisition_already_enqueued" ||
+    input === "menu_refresh_enqueued" ||
+    input === "publication_not_advanced"
   ) return input
   return typeof input === "string" &&
       /^(projected(?:_[a-z0-9_]+)?|ignored_[a-z0-9_]+)$/.test(input)

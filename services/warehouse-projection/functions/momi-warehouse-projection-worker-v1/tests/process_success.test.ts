@@ -31,6 +31,16 @@ test("accepts the explicit stock observation projection result", async () => {
   assert.deepEqual(store.calls.slice(-2), ["ack:1", "wake:next"])
 })
 
+test("accepts menu refresh and unchanged publication outcomes", async () => {
+  for (const outcome of ["menu_refresh_enqueued", "publication_not_advanced"]) {
+    const store = new FakeStore()
+    store.projectionOutcomes.set(eventId, outcome)
+    const result = await processDelivery(deliveryTriggerFixture, store)
+    assert.equal(result.outcome, outcome)
+    assert.deepEqual(store.calls.slice(-2), ["ack:1", "wake:next"])
+  }
+})
+
 test("acknowledges a duplicate message without projecting again", async () => {
   const store = new FakeStore()
   store.beginOutcomes.set("1", false)

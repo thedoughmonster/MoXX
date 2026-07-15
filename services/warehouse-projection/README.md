@@ -27,8 +27,9 @@ wakes one next exact delivery after a successful acknowledgement.
 The service provides `momi.warehouse_projection.toast.consume.v1`. Its wake
 contains only the event ID, queue message ID, and delivery-owned capability;
 source records remain in private database schemas. Queuing a delivery only
-commits durable work. Successful workers hand off serially; advisory-locked
-recovery wakes one due delivery every three seconds only when none is running.
+commits durable work. Each worker consumes one short-lived exact reservation;
+the advisory-locked scheduler maintains a private concurrency limit. Projection
+and acknowledgement share one delivery-row-locked database transaction.
 
 ## Authority
 
