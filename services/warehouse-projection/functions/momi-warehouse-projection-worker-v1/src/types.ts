@@ -43,6 +43,20 @@ export type DeliveryResult = {
   error?: string
 }
 
+export type ProjectionWorkerSettings = {
+  worker_max_runtime_seconds: number
+  worker_max_deliveries: number
+  handoff_reserve_seconds: number
+  shutdown_margin_seconds: number
+}
+
+export type ProjectionContinuation = {
+  trigger: DeliveryTrigger
+  settings: ProjectionWorkerSettings
+  started_at_ms: number
+  completed_deliveries: number
+}
+
 export type WorkerStore = {
   beginDelivery: (
     eventId: string,
@@ -61,5 +75,6 @@ export type WorkerStore = {
     capabilityToken: string,
     error: string,
   ) => Promise<DeliveryFailure>
-  wakeNextDelivery: () => Promise<boolean>
+  readWorkerSettings: () => Promise<ProjectionWorkerSettings>
+  reserveNextDelivery: () => Promise<DeliveryTrigger | null>
 }

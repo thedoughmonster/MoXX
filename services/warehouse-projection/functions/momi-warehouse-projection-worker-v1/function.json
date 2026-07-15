@@ -22,6 +22,7 @@
     "begins_event_delivery",
     "projects_toast_event",
     "acknowledges_event_delivery",
+    "reserves_next_event_delivery",
     "schedules_delivery_retry",
     "dead_letters_delivery"
   ]

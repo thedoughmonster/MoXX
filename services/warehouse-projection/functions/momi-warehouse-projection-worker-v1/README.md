@@ -28,15 +28,17 @@ retry, dead-letter, duplicate, or failed outcome.
 2. Re-read and validate the source event in `momi_events.events`.
 3. Atomically project and acknowledge the locked delivery in the database.
 4. Accept projected, acquisition, menu-gate, and explicit `ignored_*` outcomes.
-5. Fill available exact-delivery reservations after acknowledgement.
-6. Fail the same token-bound delivery for every processing failure.
+5. Reserve at most one next exact delivery after acknowledgement.
+6. Continue one delivery at a time while the worker envelope remains safe.
+7. Fail the same token-bound delivery for every processing failure.
 
 A stock response is one delivery. Its archived item observations are projected
 in one database transaction and grouped under one canonical snapshot ID.
 An order presentation is derived from only that delivery's referenced payload.
 Delivery insertion only commits durable work. Successful workers continue one
-exact handoff; recovery fills due, token-bound reservations every three seconds
-up to the database-configured parallel-delivery limit.
+exact handoff at a time for no more than 400 seconds, with projection and
+shutdown reserves. Recovery fills due, token-bound reservations every three
+seconds up to the database-configured parallel-delivery limit.
 
 ## Side Effects
 

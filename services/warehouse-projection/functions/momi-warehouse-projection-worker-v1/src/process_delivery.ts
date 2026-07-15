@@ -30,11 +30,6 @@ export async function processDelivery(
       ),
     )
     if (!projection) throw new Error("unexpected_projection_outcome")
-    try {
-      await store.wakeNextDelivery()
-    } catch (error) {
-      console.error("next projection delivery could not be woken", error)
-    }
     return { message_id: trigger.message_id, event_id: trigger.event_id,
       outcome: projection }
   } catch (error) {

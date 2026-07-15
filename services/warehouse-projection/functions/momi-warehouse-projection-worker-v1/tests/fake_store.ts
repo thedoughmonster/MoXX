@@ -1,6 +1,7 @@
 import type {
   DeliveryTrigger,
   DeliveryFailure,
+  ProjectionWorkerSettings,
   SourceEvent,
   WorkerStore,
 } from "../src/types.ts"
@@ -40,7 +41,13 @@ export class FakeStore implements WorkerStore {
   calls: string[] = []
   failureErrors: string[] = []
   lifecycleTokens: string[] = []
-  wakeError: Error | null = null
+  reservedTriggers: DeliveryTrigger[] = []
+  workerSettings: ProjectionWorkerSettings = {
+    worker_max_runtime_seconds: 400,
+    worker_max_deliveries: 500,
+    handoff_reserve_seconds: 30,
+    shutdown_margin_seconds: 10,
+  }
 
   beginDelivery(
     _eventId: string,
@@ -84,8 +91,13 @@ export class FakeStore implements WorkerStore {
     return Promise.resolve(this.failureOutcomes.get(messageId) ?? "retry_wait")
   }
 
-  wakeNextDelivery(): Promise<boolean> {
-    this.calls.push("wake:next")
-    return this.wakeError ? Promise.reject(this.wakeError) : Promise.resolve(true)
+  readWorkerSettings(): Promise<ProjectionWorkerSettings> {
+    this.calls.push("settings:read")
+    return Promise.resolve(this.workerSettings)
+  }
+
+  reserveNextDelivery(): Promise<DeliveryTrigger | null> {
+    this.calls.push("reserve:next")
+    return Promise.resolve(this.reservedTriggers.shift() ?? null)
   }
 }

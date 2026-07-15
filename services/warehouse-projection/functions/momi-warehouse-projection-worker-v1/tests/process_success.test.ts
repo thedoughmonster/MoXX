@@ -18,7 +18,6 @@ test("projects and acknowledges a successful message", async () => {
     `source:${eventId}`,
     `project:${eventId}`,
     "ack:1",
-    "wake:next",
   ])
   assert.deepEqual(store.lifecycleTokens, [capabilityToken, capabilityToken])
 })
@@ -28,7 +27,7 @@ test("accepts the explicit stock observation projection result", async () => {
   store.projectionOutcomes.set(eventId, "projected_stock_observation")
   const result = await processDelivery(deliveryTriggerFixture, store)
   assert.equal(result.outcome, "projected_stock_observation")
-  assert.deepEqual(store.calls.slice(-2), ["ack:1", "wake:next"])
+  assert.equal(store.calls.at(-1), "ack:1")
 })
 
 test("accepts menu refresh and unchanged publication outcomes", async () => {
@@ -37,7 +36,7 @@ test("accepts menu refresh and unchanged publication outcomes", async () => {
     store.projectionOutcomes.set(eventId, outcome)
     const result = await processDelivery(deliveryTriggerFixture, store)
     assert.equal(result.outcome, outcome)
-    assert.deepEqual(store.calls.slice(-2), ["ack:1", "wake:next"])
+    assert.equal(store.calls.at(-1), "ack:1")
   }
 })
 
@@ -58,17 +57,12 @@ test("acks an unknown valid category only for an explicit ignored result", async
   store.projectionOutcomes.set(eventId, "ignored_raw_resource_pending_mapper")
   const result = await processDelivery(deliveryTriggerFixture, store)
   assert.equal(result.outcome, "ignored_raw_resource_pending_mapper")
-  assert.deepEqual(store.calls.slice(-2), ["ack:1", "wake:next"])
+  assert.equal(store.calls.at(-1), "ack:1")
 })
 
-test("keeps an acknowledged delivery successful when handoff fails", async () => {
+test("leaves continuation outside the exact delivery transaction", async () => {
   const store = new FakeStore()
-  store.wakeError = new Error("wake unavailable")
-  const originalError = console.error
-  console.error = () => undefined
   const result = await processDelivery(deliveryTriggerFixture, store)
-    .finally(() => { console.error = originalError })
   assert.equal(result.outcome, "projected")
-  assert.equal(store.calls.at(-1), "wake:next")
-  assert.equal(store.calls.includes("fail:1"), false)
+  assert.equal(store.calls.includes("reserve:next"), false)
 })

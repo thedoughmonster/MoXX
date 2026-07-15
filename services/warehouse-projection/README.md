@@ -19,8 +19,9 @@ so archive growth does not make each exact order projection rescan every order.
 ## Owned Function
 
 `momi-warehouse-projection-worker-v1` claims one exact capability-bound
-delivery, runs the Toast event projector, records its durable outcome, and
-wakes one next exact delivery after a successful acknowledgement.
+delivery, runs the Toast event projector, and records its durable outcome.
+After acknowledgement it may reserve one next exact delivery and continue in
+the same bounded worker, without ever holding multiple deliveries at once.
 
 ## Contracts
 
@@ -30,6 +31,8 @@ source records remain in private database schemas. Queuing a delivery only
 commits durable work. Each worker consumes one short-lived exact reservation;
 the advisory-locked scheduler maintains a private concurrency limit. Projection
 and acknowledgement share one delivery-row-locked database transaction.
+Continuations stop with a projection reserve and shutdown margin inside the
+400-second worker envelope.
 
 ## Authority
 

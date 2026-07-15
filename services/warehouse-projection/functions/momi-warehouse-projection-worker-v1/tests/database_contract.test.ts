@@ -10,7 +10,7 @@ test("uses one capability-bound event delivery lifecycle", () => {
   const begin = readSource("begin_delivery.ts")
   const projection = readSource("project_and_ack_delivery.ts")
   const failure = readSource("fail_delivery.ts")
-  const wake = readSource("wake_next_delivery.ts")
+  const reserve = readSource("reserve_next_delivery.ts")
   assert.equal(subscriptionKey, "warehouse-projection-toast-v1")
   assert.match(begin, /warehouse_projection\.begin_reserved_delivery/)
   assert.match(begin, /capabilityToken.*::uuid/s)
@@ -18,7 +18,7 @@ test("uses one capability-bound event delivery lifecycle", () => {
   assert.match(projection, /capabilityToken.*::uuid/s)
   assert.match(failure, /momi_events\.fail_delivery/)
   assert.match(failure, /capabilityToken.*::uuid/s)
-  assert.match(wake, /warehouse_projection\.wake_next_delivery/)
+  assert.match(reserve, /warehouse_projection\.reserve_internal_delivery/)
 })
 
 test("queries the source event and invokes only the database projector", () => {
