@@ -34,6 +34,11 @@ time zone, so activation cannot release an accumulated startup backlog.
 Windowed intervals remain due while closed and begin only when the captured
 online-ordering window plus configured buffers is open.
 
+Recovery releases at most five due jobs every fifteen seconds. Expired leases
+and live collection stay ahead of repair work, while historical backfill uses
+the remaining capacity. Payment detail discoveries enter this paced lane after
+a short delay instead of creating an immediate request burst.
+
 ## Authority
 
 The service may authenticate with the configured Toast source and issue the
