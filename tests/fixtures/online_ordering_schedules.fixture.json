@@ -29,6 +29,9 @@
         "timeRanges": []
       }
     ],
+    "acceptScheduledOrders": true,
+    "scheduledOrderMaxDays": 21,
+    "lastOrderConfiguration": "UNTIL_PREPTIME_CUTOFF",
     "timeZoneId": "America/New_York"
   },
   "webhookPayload": {
@@ -71,6 +74,8 @@
     "openOverrideDate": 20260720,
     "closedOverrideDate": 20260724,
     "wrappedDay": "FRIDAY",
+    "canonicalFulfillmentMode": "pickup",
+    "canonicalCutoffPolicy": "preparation_cutoff",
     "configuredBufferBeforeMinutes": 75,
     "configuredBufferAfterMinutes": 45
   },
