@@ -1,6 +1,8 @@
 import type { JSONValue } from "postgres"
 
 export const functionKey = "momi.orders.alert.evaluate.v1"
+export const canonicalOrderContractKey = "momi.orders.get_by_id.v1"
+export const legacyOrderContractKey = "momi.toast_orders.get_by_id.v1"
 
 export type WorkTriggerInput = {
   work_id: string
@@ -14,12 +16,17 @@ export type ClaimedWork = {
   invocation_id: string
   source_system: string
   source_version_id: string
-  location_id: string
+  location_id: string | null
   order_id: string
   api_contract_key: string
   api_contract_version: number
   api_route_path: string
   trigger_token: string
+}
+
+export type CanonicalReadCapability = {
+  work_id: string
+  capability_token: string
 }
 
 export type WorkClaim = ClaimedWork | {
@@ -55,6 +62,24 @@ export type OrderApiSuccess = {
   payload: JSONValue
   order_presentation: OrderPresentation
 }
+
+export type CanonicalOrderApiSuccess = {
+  ok: true
+  contract_key: typeof canonicalOrderContractKey
+  contract_version: number
+  trace_id: string
+  work_id: string
+  order_id: string
+  schema_version: number
+  order_document: Record<string, JSONValue>
+  order_presentation: OrderPresentation
+  provenance: Record<string, JSONValue>
+  freshness: Record<string, JSONValue>
+}
+
+export type ValidatedOrderResponse =
+  | OrderApiSuccess
+  | CanonicalOrderApiSuccess
 
 export type OrderPresentation = {
   presentation_version: 1

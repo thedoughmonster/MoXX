@@ -1,34 +1,50 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "momi://momi.orders.alert.evaluate.v1/output",
-  "title": "MoMi order alert evaluation result v1",
+  "title": "MoMi order alert worker result v1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["ok", "function_key", "work_id"],
+  "required": ["ok", "function_key"],
+  "anyOf": [
+    { "required": ["work_id"] },
+    { "required": ["event_id", "message_id", "outcome"] },
+    { "required": ["error"] }
+  ],
   "properties": {
     "ok": { "type": "boolean" },
     "function_key": { "const": "momi.orders.alert.evaluate.v1" },
     "work_id": { "type": "string" },
+    "event_id": { "type": "string", "format": "uuid" },
+    "message_id": { "type": "string", "pattern": "^[1-9][0-9]*$" },
     "replay": { "type": "boolean" },
     "outcome": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "work_found",
-        "order_matches",
-        "matched_count",
-        "ambiguous_count",
-        "claimed_count",
-        "candidate_ids"
-      ],
-      "properties": {
-        "work_found": { "type": "boolean" },
-        "order_matches": { "type": "boolean" },
-        "matched_count": { "type": "integer", "minimum": 0 },
-        "ambiguous_count": { "type": "integer", "minimum": 0 },
-        "claimed_count": { "type": "integer", "minimum": 0 },
-        "candidate_ids": { "type": "array", "items": { "type": "string" } }
-      }
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "work_found", "order_matches", "matched_count",
+            "ambiguous_count", "claimed_count", "candidate_ids"
+          ],
+          "properties": {
+            "work_found": { "type": "boolean" },
+            "order_matches": { "type": "boolean" },
+            "matched_count": { "type": "integer", "minimum": 0 },
+            "ambiguous_count": { "type": "integer", "minimum": 0 },
+            "claimed_count": { "type": "integer", "minimum": 0 },
+            "candidate_ids": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        {
+          "enum": [
+            "processed", "replay", "duplicate", "ignored_non_live_event",
+            "in_progress", "retry_wait", "dead_letter", "failed"
+          ]
+        }
+      ]
     },
     "error": { "type": "string" }
   }

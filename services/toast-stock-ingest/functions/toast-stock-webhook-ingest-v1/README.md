@@ -34,15 +34,15 @@ Successful POST responses return JSON with `ok: true` and whether the event was
 
 1. Read the exact body and validate the stock event envelope.
 2. Verify the Toast HMAC signature.
-3. Insert headers and the complete payload into
-   `toast_raw.stock_webhook_events`.
+3. Insert the complete payload and exact signed body into `toast_raw` without
+   retaining request headers.
 
 The event GUID makes a replay idempotent. A duplicate is acknowledged without
 creating another raw event row.
 
 ## Side Effects
 
-The only side effect is inserting the complete event and headers.
+The only side effect is inserting the complete event.
 
 ## Failure Handling
 

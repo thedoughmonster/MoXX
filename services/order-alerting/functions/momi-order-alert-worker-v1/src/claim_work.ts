@@ -1,5 +1,6 @@
 import { sql } from "./database.ts"
-import { functionKey } from "./types.ts"
+import { canonicalOrderContractKey, functionKey,
+  legacyOrderContractKey } from "./types.ts"
 import type { WorkClaim, WorkTriggerInput } from "./types.ts"
 
 export async function claimWork(
@@ -29,7 +30,14 @@ export async function claimWork(
           and trigger.active
           and trigger.trigger_type = 'durable_http'
           and upper(trigger.http_method) = 'POST'
-          and trigger.authentication_policy_key = 'durable.work_token.v1'
+          and (
+            (work.api_contract_key = ${canonicalOrderContractKey}
+              and trigger.authentication_policy_key =
+                'durable.read_capability.v1')
+            or (work.api_contract_key = ${legacyOrderContractKey}
+              and trigger.authentication_policy_key =
+                'durable.work_token.v1')
+          )
           and nullif(trigger.route_path, '') is not null
       ) as route
       where work.id = ${input.work_id}::bigint

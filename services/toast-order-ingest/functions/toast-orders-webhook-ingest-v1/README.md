@@ -35,8 +35,8 @@ idempotent duplicate. They never return the source payload.
 
 1. Read the exact body and validate the required event envelope.
 2. Verify the Toast HMAC signature.
-3. Insert headers and the complete payload into
-   `toast_raw.order_webhook_events`.
+3. Insert the complete payload and exact signed body into `toast_raw` without
+   retaining request headers.
 4. Let the database trigger evaluate mappings and create qualifying owned
    order alert work from the stored event.
 
@@ -45,8 +45,8 @@ creating another raw event or alert work row.
 
 ## Side Effects
 
-The only direct side effect is inserting the complete event and headers. A
-database trigger may then create durable owned alert work from configuration.
+The only direct side effect is inserting the complete event. A database trigger
+may then create durable owned alert work from configuration.
 
 ## Failure Handling
 

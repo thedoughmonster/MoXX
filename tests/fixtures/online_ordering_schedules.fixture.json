@@ -1,0 +1,78 @@
+{
+  "storedResponse": {
+    "servicePeriods": [
+      {
+        "diningOptionBehavior": "TAKE_OUT",
+        "dayPeriods": [
+          { "day": "MONDAY", "timeRanges": [{ "start": "09:30", "end": "18:00" }] },
+          { "day": "FRIDAY", "timeRanges": [{ "start": "20:00", "end": "02:00" }] }
+        ]
+      },
+      {
+        "diningOptionBehavior": "DELIVERY",
+        "dayPeriods": [
+          { "day": "MONDAY", "timeRanges": [{ "start": "10:00:00Z", "end": "17:00:00Z" }] }
+        ]
+      }
+    ],
+    "overrides": [
+      {
+        "description": "Override open",
+        "diningOptionBehavior": ["TAKE_OUT", "DELIVERY"],
+        "businessDate": 20260720,
+        "timeRanges": [{ "start": "12:00", "end": "19:00" }]
+      },
+      {
+        "description": "Override closed",
+        "diningOptionBehavior": ["TAKE_OUT", "DELIVERY"],
+        "businessDate": 20260724,
+        "timeRanges": []
+      }
+    ],
+    "timeZoneId": "America/New_York"
+  },
+  "webhookPayload": {
+    "timestamp": "2026-07-15T03:30:00Z",
+    "eventCategory": "ordering_schedule",
+    "eventType": "ordering_schedule_updated",
+    "guid": "schedule-event-1",
+    "details": {
+      "restaurantGuid": "restaurant-1",
+      "orderingSchedule": {
+        "servicePeriods": [
+          {
+            "diningOptionBehavior": "TAKE_OUT",
+            "dayPeriods": [
+              { "day": "MONDAY", "timeRanges": [{ "start": [8, 0], "end": [20, 0] }] },
+              { "day": "FRIDAY", "timeRanges": [{ "start": [20, 0], "end": [2, 0] }] }
+            ]
+          }
+        ],
+        "overrides": [
+          {
+            "description": "Override open",
+            "diningOptionBehavior": ["TAKE_OUT"],
+            "businessDate": 20260720,
+            "timeRanges": [{ "start": [12, 0], "end": [19, 0] }]
+          },
+          {
+            "description": "Override closed",
+            "diningOptionBehavior": ["TAKE_OUT"],
+            "businessDate": 20260724,
+            "timeRanges": []
+          }
+        ],
+        "timeZoneId": "America/New_York"
+      }
+    }
+  },
+  "expected": {
+    "recurringPeriodCount": 2,
+    "openOverrideDate": 20260720,
+    "closedOverrideDate": 20260724,
+    "wrappedDay": "FRIDAY",
+    "configuredBufferBeforeMinutes": 75,
+    "configuredBufferAfterMinutes": 45
+  },
+  "malformedTimes": [[24, 0], [12], ["12", 0], "25:00"]
+}

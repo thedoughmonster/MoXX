@@ -4,7 +4,7 @@
   "service_key": "toast-order-hydration",
   "purpose": "Hydrate durable Toast order work and preserve each complete source response before downstream use.",
   "kind": "source_adapter",
-  "lifecycle_status": "active",
+  "lifecycle_status": "retiring",
   "functions": ["toast-orders-fetch-by-guid-v1"],
   "contracts": {
     "provides": [

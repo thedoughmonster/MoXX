@@ -27,10 +27,15 @@
   "database_schemas": [
     "toast_raw",
     "toast_hydration",
+    "toast_acquisition",
     "momi_runtime",
     "momi_orders",
     "momi_api",
-    "momi_alerting"
+    "momi_alerting",
+    "momi_events",
+    "momi_warehouse",
+    "warehouse_projection",
+    "momi_archive"
   ],
   "policies": {
     "max_handwritten_lines": 120,

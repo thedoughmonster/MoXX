@@ -20,9 +20,9 @@ health check. Its public route remains unchanged.
 ## Contracts
 
 The service provides `toast.orders.webhook_ingest.v1` and
-`toast.order.webhook_alert_work.v1`. The complete source body and received
-headers remain in `toast_raw.order_webhook_events`; the handoff carries only
-stored event, order, location, and owned reader identity.
+`toast.order.webhook_alert_work.v1`. The complete source payload and exact
+signed body remain in `toast_raw`; request headers are intentionally discarded.
+The handoff carries only stored event, order, location, and owned reader identity.
 
 ## Authority
 

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://toast.data.acquisition.v1/output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ok", "disposition", "job_id"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "disposition": {
+      "enum": [
+        "completed",
+        "continued",
+        "already_succeeded",
+        "unavailable",
+        "retry_wait",
+        "dead_letter"
+      ]
+    },
+    "job_id": { "type": "string" },
+    "attempt_id": { "type": "string", "format": "uuid" },
+    "resource_count": { "type": "integer", "minimum": 0 },
+    "error": { "type": "string" }
+  }
+}

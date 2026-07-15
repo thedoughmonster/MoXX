@@ -4,59 +4,48 @@ Source-controlled backend services and database history for MoMi.
 
 ## Current Services
 
-`toast-orders-webhook-ingest-v1` receives Toast Orders webhook events,
-verifies Toast's signature, and preserves the complete event in Postgres.
-The hosted path was verified with signed in-store lifecycle events on
-2026-07-12. Configured database handoff exposes the complete stored
-`details.order` through MoMi's owned reader without another Toast request.
+Five boundaries make Toast replaceable:
 
-`toast-orders-fetch-by-guid-v1` remains the single approved Toast order fetch
-primitive for explicit reconciliation work; webhooks do not invoke it.
-`momi-toast-orders-get-by-id-v1` returns the complete Toast document and its
-view-derived, source-neutral order presentation.
-`momi-order-alert-worker-v1` evaluates any configured owned order response,
-and `slack-order-alert-delivery-v1` sends readable, GUID-free durable outcomes.
+- `toast-webhook-ingestion` authenticates and permanently stores Toast events.
+- `toast-data-acquisition` is the only active outbound Toast data caller.
+- `momi-event-routing` delivers reference-only events through durable queues.
+- `warehouse-projection` builds Dough Monster entities and source crosswalks.
+- `warehouse-read-api` serves versioned, source-neutral `momi.*` contracts.
 
-Private `momi_runtime`, `momi_orders`, and `momi_alerting` schemas own shared
-registries, source-neutral order work, independently controlled sources, rules,
-routes, destinations, and durable alert outcomes. Configuration is
-environment-owned and migrations contain no hardcoded business values.
+Orders, payments, menu entities, employees, schedules, stock observations, and
+related history are projected into the private canonical warehouse. Business
+services consume only `warehouse.*` events and the canonical reader. Inventory
+interpretation is intentionally outside this repository boundary; a separate
+service can consume canonical stock observations later.
+
+The legacy Toast order reader and one-order hydration path remain only for a
+measured alerting cutover. New collection and reconciliation work belongs to
+the central acquisition service, and the legacy paths retire after they have no
+consumers.
 
 ## Source Ownership
 
-The Toast webhook is retained unchanged as its own source record. Its current
-`details.order` object is a complete order snapshot and is sufficient for the
-operational alert path. A view exposes that exact object without copying it into
-the historical order table or changing its source structure.
+Exact webhook bodies and every acquisition request attempt, page, resource
+version, and observation are retained in private `toast_raw.*` storage. Secrets
+and authorization headers are never archived. Identical source content
+deduplicates without discarding repeated observations.
 
-`toast.orders.fetch_by_guid.v1` is the only primitive source function permitted
-to call Toast. It accepts deliberate durable reconciliation work, implements
-one explicit Toast operation, and is not a generic API proxy.
-
-Fetched records are permanent, source-faithful resource versions in
-resource-specific `toast_raw` tables. `toast_raw.orders` is separate from the
-webhook event log and receives complete order JSONB from approved historical
-reconciliation. Identical content is deduplicated by hash while fetch-attempt
-metadata is retained separately.
-
-Related and query-oriented projections must be rebuildable from owned raw
-resource versions with Toast unavailable. This is required because Toast will
-eventually be replaced by Square; Toast access cannot be a recovery strategy.
-Future bulk reconciliation must account for late webhook changes such as voids
-and refunds, but it is not a prerequisite for sending an operational alert.
+Canonical entities use Dough Monster UUIDs. Source links map Toast, Square, or
+another provider's identifiers to those stable entities, while provenance and
+freshness remain available on canonical reads. Projections are rebuildable from
+the archive with Toast unavailable.
 
 ## Module Boundaries
 
-- Ingestion authenticates and preserves source records.
-- Primitive source functions alone acquire vendor data for durable work.
-- Source-specific MoMi readers return complete owned warehouse documents.
-- Source-neutral eligibility evaluates those documents using configuration.
+- Ingestion authenticates and preserves source records without source calls.
+- Acquisition executes only registered read operations from durable work.
+- Raw source payloads never become business-service contracts.
+- Canonical readers expose stable Dough Monster documents and provenance.
+- `source.toast.*` events are internal; consumers receive `warehouse.*` events.
+- Queue delivery is at-least-once, leased, retried, and idempotent by event ID.
 - Delivery owns Slack formatting, retries, and delivery status.
-- Cross-source projections use explicit database views and contracts.
-- Supabase-native trigger adapters may wake allowlisted Edge Functions only
-  from committed durable work.
-- The only internal HTTP hop is the alert worker calling the exact owned reader
-  recorded on durable work and resolved through the active function registry.
+- Trigger adapters may wake allowlisted workers only from durable work using a
+  per-work capability token.
 
 ## Repository Map
 
@@ -85,15 +74,14 @@ After a change is committed on a clean feature branch, `pnpm release:dev`
 handles its PR, checks, migration, and GitHub deployment. From clean, current
 `dev`, `pnpm release:prod` performs the exact-commit production promotion.
 
-## Required Hosted Secret
+## Hosted Secrets
 
-`TOAST_ORDERS_WEBHOOK_SECRET` must contain the secret for the Orders webhook
-subscription. `TOAST_CLIENT_ID` and `TOAST_CLIENT_SECRET` authenticate the
-dedicated Toast source function. `SLACK_BOT_TOKEN` authorizes the destination
-adapter, and `MOMI_CODE_COMMIT_SHA` records the deployed revision on attempts.
-These values must never be committed.
+Each Toast webhook subscription has its own signature secret. Toast client
+credentials belong only to `toast-data-acquisition`. Destination credentials
+belong only to their delivery adapters, and database URLs belong only to the
+functions that declare them. Hosted values must never be committed.
 
 ## Verification
 
-Run `npm run check -- --service all` with Node.js 24. Hosted verification uses
-a controlled Toast event or Toast's event replay action after deployment.
+Run `pnpm check -- --service all` with Node.js 24. Archive verification also
+requires a checksum-valid clean restore using the pinned PostgreSQL 17 tools.

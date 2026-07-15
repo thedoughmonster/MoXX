@@ -1,0 +1,33 @@
+import { functionKey } from "./constants.ts";
+import { executeJob } from "./execute_job.ts";
+import { parseAcquisitionInput } from "./parse_request.ts";
+
+export async function handleRequest(request: Request): Promise<Response> {
+  if (request.method === "GET") {
+    return Response.json({ ok: true, function_key: functionKey });
+  }
+  if (request.method !== "POST") {
+    return new Response("method not allowed", {
+      status: 405,
+      headers: { allow: "GET, POST" },
+    });
+  }
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return new Response("invalid request", { status: 400 });
+  }
+  const input = parseAcquisitionInput(body);
+  if (!input) return new Response("invalid request", { status: 400 });
+  try {
+    const result = await executeJob(input.job_id, input.capability_token);
+    return Response.json(result.body, { status: result.status });
+  } catch (error) {
+    console.error("Toast data acquisition persistence failed", {
+      job_id: input.job_id,
+      error_name: error instanceof Error ? error.name : "UnknownError",
+    });
+    return new Response("persistence failed", { status: 500 });
+  }
+}

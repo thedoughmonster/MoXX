@@ -1,5 +1,8 @@
-import type { ClaimedWork, OrderApiSuccess } from "./types.ts"
+import type { CanonicalReadCapability, ClaimedWork } from "./types.ts"
 import { isValidOrderPresentation } from "./is_valid_order_presentation.ts"
+import { isValidCanonicalOrderResponse } from "./is_valid_canonical_order_response.ts"
+import { canonicalOrderContractKey } from "./types.ts"
+import type { ValidatedOrderResponse } from "./types.ts"
 
 const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
@@ -7,7 +10,13 @@ const uuidPattern =
 export function isValidOrderResponse(
   body: unknown,
   job: ClaimedWork,
-): body is OrderApiSuccess {
+  readCapability: CanonicalReadCapability | null = null,
+): body is ValidatedOrderResponse {
+  if (job.api_contract_key === canonicalOrderContractKey) {
+    return readCapability !== null &&
+      isValidCanonicalOrderResponse(body, job, readCapability)
+  }
+  if (readCapability !== null) return false
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return false
   }

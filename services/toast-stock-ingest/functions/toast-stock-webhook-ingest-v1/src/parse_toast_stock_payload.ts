@@ -1,3 +1,5 @@
+// service-owner: toast-stock-ingest
+
 import type { ToastStockWebhookPayload } from "./types.ts"
 
 const stockEventTypes = new Set(["in_stock", "low_quantity", "out_of_stock"])
@@ -19,6 +21,7 @@ export function parseToastStockPayload(
       payload.guid.length === 0 ||
       typeof payload.timestamp !== "string" ||
       payload.timestamp.length === 0 ||
+      !Number.isFinite(Date.parse(payload.timestamp)) ||
       payload.eventCategory !== "stock" ||
       typeof payload.eventType !== "string" ||
       !stockEventTypes.has(payload.eventType)

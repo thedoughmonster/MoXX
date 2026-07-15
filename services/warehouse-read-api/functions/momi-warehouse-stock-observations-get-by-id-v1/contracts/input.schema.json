@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://momi.stock_observations.get_latest.v1/input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["work_id", "item_id", "location_id", "capability_token"],
+  "properties": {
+    "work_id": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+    "item_id": { "type": "string", "format": "uuid" },
+    "location_id": { "type": "string", "format": "uuid" },
+    "capability_token": { "type": "string", "format": "uuid" }
+  }
+}

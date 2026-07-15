@@ -1,3 +1,5 @@
+// service-owner: toast-order-ingest
+
 import type { ToastWebhookPayload } from "./types.ts"
 
 export function parseToastPayload(rawBody: string): ToastWebhookPayload | null {
@@ -14,7 +16,8 @@ export function parseToastPayload(rawBody: string): ToastWebhookPayload | null {
       typeof payload.guid !== "string" ||
       payload.guid.length === 0 ||
       typeof payload.timestamp !== "string" ||
-      payload.timestamp.length === 0
+      payload.timestamp.length === 0 ||
+      !Number.isFinite(Date.parse(payload.timestamp))
     ) {
       return null
     }

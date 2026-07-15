@@ -9,8 +9,15 @@ export type DeploymentOptions = {
 
 export type HostedFunction = {
   slug: string
-  status: string
-  version: number
+  status: string | null
+  version: number | null
+  verify_jwt: boolean | null
+  entrypoint_path: string | null
+  ezbr_sha256: string | null
+}
+
+export type FunctionAttestation = HostedFunction & {
+  function_json_sha256: string
 }
 
 export type InventoryResult = {
@@ -21,6 +28,7 @@ export type InventoryResult = {
   missing: string[]
   unexpected: string[]
   expired: string[]
+  invalid_metadata: string[]
 }
 
 export type ProbeResult = {

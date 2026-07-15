@@ -18,8 +18,9 @@ and a health check.
 
 ## Contracts
 
-The service provides `toast.stock.webhook_ingest.v1`. The complete source body
-and received headers remain in `toast_raw.stock_webhook_events`.
+The service provides `toast.stock.webhook_ingest.v1`. The complete source
+payload and exact signed body remain in `toast_raw`; request headers are
+intentionally discarded.
 
 ## Authority
 

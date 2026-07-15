@@ -3,15 +3,27 @@ import type {
   ClaimedWork,
   DecisionOutcome,
   OrderApiResponse,
-  OrderApiSuccess,
+  ValidatedOrderResponse,
 } from "./types.ts"
 
 export async function completeWork(
   job: ClaimedWork,
   response: OrderApiResponse,
-  order: OrderApiSuccess,
+  order: ValidatedOrderResponse,
 ): Promise<DecisionOutcome> {
-  const metadata = {
+  const canonical = "order_document" in order
+  const payload = canonical ? order.order_document : order.payload
+  const metadata = canonical ? {
+    contract_key: order.contract_key,
+    contract_version: order.contract_version,
+    trace_id: order.trace_id,
+    read_work_id: order.work_id,
+    order_id: order.order_id,
+    schema_version: order.schema_version,
+    provenance: order.provenance,
+    freshness: order.freshness,
+    response_headers: response.response_headers,
+  } : {
     contract_key: order.contract_key,
     contract_version: order.contract_version,
     trace_id: order.trace_id,
@@ -26,7 +38,7 @@ export async function completeWork(
       select *
       from momi_alerting.claim_order_alert_candidates(
         ${job.work_id}::bigint,
-        ${sql.json(order.payload)},
+        ${sql.json(payload)},
         ${sql.json(order.order_presentation)}
       )
     ), attempt_update as (

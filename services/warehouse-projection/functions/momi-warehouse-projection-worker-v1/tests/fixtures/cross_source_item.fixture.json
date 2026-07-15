@@ -1,0 +1,23 @@
+{
+  "entity_id": "60000000-0000-4000-8000-000000000001",
+  "source_links": [
+    {
+      "source_system": "toast",
+      "resource_type": "menu_item",
+      "source_location_id": "10000000-0000-4000-8000-000000000001",
+      "source_id": "40000000-0000-4000-8000-000000000001",
+      "entity_id": "60000000-0000-4000-8000-000000000001"
+    },
+    {
+      "source_system": "square",
+      "resource_type": "catalog_item",
+      "source_location_id": "square-main",
+      "source_id": "SQ-CHEESE-PIZZA",
+      "entity_id": "60000000-0000-4000-8000-000000000001"
+    }
+  ],
+  "consumer_observation": {
+    "item_entity_id": "60000000-0000-4000-8000-000000000001",
+    "stock_state": "IN_STOCK"
+  }
+}

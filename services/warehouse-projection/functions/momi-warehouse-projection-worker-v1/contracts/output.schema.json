@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://momi.warehouse_projection.toast.consume.v1/output",
+  "title": "MoMi Toast warehouse projection delivery result v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ok", "function_key"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "function_key": {
+      "const": "momi.warehouse_projection.toast.consume.v1"
+    },
+    "event_id": { "type": "string", "format": "uuid" },
+    "message_id": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+    "outcome": {
+      "type": "string",
+      "pattern": "^(projected(_[a-z0-9_]+)?|acquisition_(enqueued|already_enqueued)|ignored_[a-z0-9_]+|duplicate|retry_wait|dead_letter|failed)$"
+    },
+    "error": { "type": "string" }
+  }
+}
