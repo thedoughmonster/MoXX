@@ -91,14 +91,18 @@ $$;
 
 create function warehouse_projection.staged_menu_relationships(p_entity_id uuid)
 returns jsonb
-language sql
+language plpgsql
 stable
 security invoker
 set search_path = ''
 as $$
+declare
+  relationships jsonb;
+begin
   select coalesce(jsonb_object_agg(
     grouped.relationship, grouped.child_ids order by grouped.relationship
   ), '{}'::jsonb)
+  into relationships
   from (
     select edge.relationship,
       jsonb_agg(edge.child_entity_id order by edge.child_entity_id) as child_ids
@@ -106,6 +110,8 @@ as $$
     where edge.parent_entity_id = p_entity_id
     group by edge.relationship
   ) as grouped;
+  return relationships;
+end;
 $$;
 
 revoke all on function warehouse_projection.build_toast_menu_edges()

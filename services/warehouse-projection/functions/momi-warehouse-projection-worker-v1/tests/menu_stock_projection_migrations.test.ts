@@ -6,7 +6,6 @@ const migrations = new URL(
   "../../../../../supabase/migrations/",
   import.meta.url,
 )
-
 const readMigration = (suffix: string) => {
   const name = readdirSync(migrations).find((entry) =>
     entry.endsWith(`_${suffix}.sql`)
@@ -27,6 +26,8 @@ test("flattens a Menus V2 document into DM-owned entities", () => {
   ]) assert.match(staging, new RegExp(`'${kind}'`))
   assert.match(staging, /with recursive group_tree/)
   assert.match(staging, /modifier_item_reference/)
+  assert.match(staging,
+    /staged_menu_relationships[\s\S]*language plpgsql/)
   assert.match(canonical, /momi_warehouse\.menu_universe_items/)
   assert.match(canonical, /warehouse_projection\.record_entity_version/)
   assert.match(canonical, /'entity_type', p_entity_kind/)
