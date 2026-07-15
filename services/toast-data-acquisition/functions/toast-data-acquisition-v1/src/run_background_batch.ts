@@ -1,4 +1,3 @@
-import { canContinueBatch } from "./can_continue_batch.ts";
 import { executeClaimedJob } from "./execute_claimed_job.ts";
 import type { ClaimedJob } from "./registry_types.ts";
 import type { BatchContinuation } from "./runtime_types.ts";
@@ -7,14 +6,16 @@ export async function runBackgroundBatch(
   continuation: BatchContinuation,
 ): Promise<void> {
   const startedAt = Date.now();
-  const deadline = startedAt + continuation.max_runtime_seconds * 1000;
   let current: ClaimedJob | null = continuation.job;
-  let processedJobs = 0;
+  let processedJobs = continuation.completed_jobs;
   try {
     while (current) {
-      const allowHandoff = processedJobs + 1 < continuation.max_jobs &&
-        canContinueBatch(deadline, Date.now());
-      const result = await executeClaimedJob(current, allowHandoff);
+      const batchTiming = {
+        started_at_ms: continuation.started_at_ms,
+        deadline_ms: continuation.deadline_ms,
+        completed_jobs: processedJobs,
+      };
+      const result = await executeClaimedJob(current, batchTiming);
       processedJobs += 1;
       current = result.continuation?.job ?? null;
     }

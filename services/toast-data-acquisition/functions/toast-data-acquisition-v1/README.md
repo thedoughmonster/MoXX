@@ -35,7 +35,9 @@ returned.
    GUID lists into registered detail jobs, and advance the durable lifecycle.
 6. For a batch-enabled exact-resource operation, atomically complete the current
    job and claim one next due job. The HTTP request returns after the first job;
-   Supabase background work continues for at most the configured safe lifetime.
+   Supabase background work uses the configured worker-lifetime envelope. A new
+   handoff is allowed only while one full source timeout, persistence reserve,
+   and platform shutdown reserve remain before the absolute invocation deadline.
    Internal handoffs do not impersonate external scheduler dispatches, allowing
    the configured worker pool to refill without weakening source-call pacing.
 
@@ -54,7 +56,9 @@ streak; expired leases still count durable crashes. Coverage records complete,
 empty, partial, gap, accepted-gap, and dead-letter outcomes. A kitchen
 fulfillment 204 is preserved as accepted gap coverage.
 An interrupted background worker leaves at most one leased job; normal lease
-recovery resumes it. Jobs are never pre-claimed in an in-memory batch.
+recovery resumes it. A durable reconciliation job closes any source-attempt row
+left open by platform termination after its job is no longer actively leased.
+Jobs are never pre-claimed in an in-memory batch.
 
 ## Configuration
 
@@ -62,9 +66,12 @@ recovery resumes it. Jobs are never pre-claimed in an in-memory batch.
 credential secret names, operation paths, and parameters come from the private
 registry. External dependencies are pinned by the Edge adapter `deno.json`.
 Batch enablement, worker lifetime, job ceiling, and active-worker capacity are
-private operation-registry settings. The hosted lifetime remains below
-Supabase's paid 400-second worker ceiling and returns before the 150-second
-request timeout.
+private operation-registry settings. The configured envelope may match
+Supabase's paid 400-second worker ceiling because handoff eligibility reserves
+the source timeout and shutdown budget rather than running to that hard cutoff.
+That ceiling belongs to the reusable worker instance, not an individual request,
+so lease recovery remains the correctness boundary. The payment-detail worker
+is capped at 500 jobs per invocation.
 The dispatcher materializes a small per-operation candidate rank before running
 source-pacing lookups, so queue depth does not lengthen its wake-up interval.
 

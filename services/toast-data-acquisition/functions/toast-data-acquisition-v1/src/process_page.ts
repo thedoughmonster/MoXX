@@ -17,15 +17,18 @@ import type {
 import { resolveNextCursor } from "./resolve_next_cursor.ts";
 import { resolveTokenConflictRestart } from "./resolve_token_conflict_restart.ts";
 import { restartTokenCursorJob } from "./restart_token_cursor_job.ts";
-import type { ArchivedPage, ExecutionResult } from "./runtime_types.ts";
+import type {
+  ArchivedPage,
+  BatchBudget,
+  ExecutionResult,
+} from "./runtime_types.ts";
 
 export async function processAcquiredPage(
   job: ClaimedJob,
   operation: RegisteredOperation,
   request: RegisteredRequest,
   page: ArchivedPage,
-  batchRuntimeSeconds: number | null,
-  batchMaxJobs: number | null,
+  batchBudget: BatchBudget | null,
 ): Promise<ExecutionResult> {
   if (isAcceptedNoContent(operation, page.status)) {
     await recordCoverage(
@@ -41,8 +44,7 @@ export async function processAcquiredPage(
       nextCursor,
       page.attempt_id,
       0,
-      batchRuntimeSeconds,
-      batchMaxJobs,
+      batchBudget,
     );
   }
   const restartCursor = resolveTokenConflictRestart(
@@ -112,7 +114,6 @@ export async function processAcquiredPage(
     nextCursor,
     page.attempt_id,
     resourceCount,
-    batchRuntimeSeconds,
-    batchMaxJobs,
+    batchBudget,
   );
 }

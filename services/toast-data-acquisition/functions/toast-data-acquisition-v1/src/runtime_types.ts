@@ -65,11 +65,21 @@ export type ExecutionResult = {
   continuation?: BatchContinuation;
 };
 
-export type BatchContinuation = {
-  job: ClaimedJob;
-  max_runtime_seconds: number;
-  max_jobs: number;
+export type BatchTiming = {
+  started_at_ms: number;
+  deadline_ms: number | null;
+  completed_jobs: number;
 };
+
+export type BatchBudget = {
+  started_at_ms: number;
+  deadline_ms: number;
+  max_jobs: number;
+  request_timeout_ms: number;
+  completed_jobs: number;
+};
+
+export type BatchContinuation = BatchBudget & { job: ClaimedJob };
 
 export type SuccessContext = {
   job: ClaimedJob;
