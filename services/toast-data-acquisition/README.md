@@ -28,6 +28,12 @@ Each source request inserts its archive attempt before transport and may
 finalize that attempt exactly once. Completed attempts, resource versions, and
 observations remain immutable.
 
+Recurring schedules initialize interval work as due immediately. Daily and
+monthly work initializes at its next configured wall-clock time in the row's
+time zone, so activation cannot release an accumulated startup backlog.
+Windowed intervals remain due while closed and begin only when the captured
+online-ordering window plus configured buffers is open.
+
 ## Authority
 
 The service may authenticate with the configured Toast source and issue the
