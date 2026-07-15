@@ -24,6 +24,8 @@ export async function processAcquiredPage(
   operation: RegisteredOperation,
   request: RegisteredRequest,
   page: ArchivedPage,
+  batchRuntimeSeconds: number | null,
+  batchMaxJobs: number | null,
 ): Promise<ExecutionResult> {
   if (isAcceptedNoContent(operation, page.status)) {
     await recordCoverage(
@@ -33,7 +35,15 @@ export async function processAcquiredPage(
       "Toast kitchen coverage unavailable",
     );
     const nextCursor = request.window.next_cursor;
-    return finalizePage(job, request, nextCursor, page.attempt_id, 0);
+    return finalizePage(
+      job,
+      request,
+      nextCursor,
+      page.attempt_id,
+      0,
+      batchRuntimeSeconds,
+      batchMaxJobs,
+    );
   }
   const restartCursor = resolveTokenConflictRestart(
     operation,
@@ -96,5 +106,13 @@ export async function processAcquiredPage(
   if (!paginationContinues) {
     await recordCoverage(job, request, "complete", null);
   }
-  return finalizePage(job, request, nextCursor, page.attempt_id, resourceCount);
+  return finalizePage(
+    job,
+    request,
+    nextCursor,
+    page.attempt_id,
+    resourceCount,
+    batchRuntimeSeconds,
+    batchMaxJobs,
+  );
 }

@@ -1,4 +1,5 @@
 import { completeJob } from "./complete_job.ts";
+import { completeJobAndClaimNext } from "./complete_job_and_claim_next.ts";
 import { continueJob } from "./continue_job.ts";
 import type { JsonObject } from "./json_types.ts";
 import { recordFailureCoverage } from "./record_failure_coverage.ts";
@@ -11,10 +12,22 @@ export async function finalizePage(
   nextCursor: JsonObject | null,
   attemptId: string,
   resourceCount: number,
+  batchRuntimeSeconds: number | null,
+  batchMaxJobs: number | null,
 ): Promise<ExecutionResult> {
   let disposition: "completed" | "continued" | "budget_exhausted" = "completed";
+  let continuation;
   if (nextCursor) disposition = await continueJob(job, nextCursor);
-  else await completeJob(job);
+  else if (batchRuntimeSeconds !== null && batchMaxJobs !== null) {
+    const nextJob = await completeJobAndClaimNext(job);
+    if (nextJob) {
+      continuation = {
+        job: nextJob,
+        max_runtime_seconds: batchRuntimeSeconds,
+        max_jobs: batchMaxJobs,
+      };
+    }
+  } else await completeJob(job);
   if (disposition === "budget_exhausted") {
     await recordFailureCoverage(
       job,
@@ -43,5 +56,6 @@ export async function finalizePage(
       attempt_id: attemptId,
       resource_count: resourceCount,
     },
+    continuation,
   };
 }

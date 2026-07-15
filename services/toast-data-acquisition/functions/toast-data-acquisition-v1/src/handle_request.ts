@@ -1,6 +1,11 @@
 import { functionKey } from "./constants.ts";
 import { executeJob } from "./execute_job.ts";
 import { parseAcquisitionInput } from "./parse_request.ts";
+import { runBackgroundBatch } from "./run_background_batch.ts";
+
+declare const EdgeRuntime: {
+  waitUntil(promise: Promise<unknown>): void;
+};
 
 export async function handleRequest(request: Request): Promise<Response> {
   if (request.method === "GET") {
@@ -22,6 +27,9 @@ export async function handleRequest(request: Request): Promise<Response> {
   if (!input) return new Response("invalid request", { status: 400 });
   try {
     const result = await executeJob(input.job_id, input.capability_token);
+    if (result.continuation) {
+      EdgeRuntime.waitUntil(runBackgroundBatch(result.continuation));
+    }
     return Response.json(result.body, { status: result.status });
   } catch (error) {
     console.error("Toast data acquisition persistence failed", {

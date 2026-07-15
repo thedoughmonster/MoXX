@@ -40,6 +40,9 @@ export type RegisteredOperation = {
   page_size: number | null;
   requires_window: boolean;
   exact_resource_only: boolean;
+  worker_batch_enabled: boolean;
+  worker_max_runtime_seconds: number | null;
+  worker_max_jobs: number | null;
   schema_version: number;
   api_base_url: string;
   client_id_secret_name: string;
