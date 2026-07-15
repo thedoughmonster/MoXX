@@ -23,6 +23,11 @@ Backfill orders, payments, cash, shifts, time entries, and kitchen data from the
 restaurant `firstBusinessDate`. Use resumable day or month windows and complete
 pagination. Never substitute a guessed opening date.
 
+Capture restaurant detail first so Toast supplies the archive anchor. Release
+at most five acquisition jobs every fifteen seconds, with expired leases and
+live collection ahead of repair and backfill work. Payment detail fanout must
+enter the same paced lane rather than wake every discovered payment at once.
+
 ## Coverage
 
 For every operation and expected date/window, record complete, empty, partial,
