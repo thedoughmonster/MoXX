@@ -40,6 +40,10 @@ backfill uses the remaining capacity. Historical bulk-order pages stay at least
 five seconds apart; every page and payment-detail discovery re-enters the same
 paced lane instead of creating an immediate request burst.
 
+Dispatch eligibility reads at most the latest 60 seconds of attempts and
+releases. The operation registry cannot configure a longer spacing interval,
+so older history cannot affect whether a request is currently eligible.
+
 Coverage policy `toast-exit-archive-v1` classifies every enabled operation as
 historical, current-only, or repair-only and records intentional exclusions.
 Each new coverage result links to its exact job, dimensions, terminal attempt,
