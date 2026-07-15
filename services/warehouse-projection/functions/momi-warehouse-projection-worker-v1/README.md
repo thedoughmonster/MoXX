@@ -33,6 +33,7 @@ retry, dead-letter, duplicate, or failed outcome.
 
 A stock response is one delivery. Its archived item observations are projected
 in one database transaction and grouped under one canonical snapshot ID.
+An order presentation is derived from only that delivery's referenced payload.
 Delivery insertion only commits durable work. Successful workers continue one
 serial handoff; recovery wakes one due delivery every three seconds only while
 no exact delivery is running.

@@ -13,6 +13,8 @@ their referenced records into canonical warehouse entities and observations.
 Stock polling is projected from one response-level event per acquisition job;
 all item observations retain individual provenance under one canonical snapshot
 ID, and consumers receive one `warehouse.stock_snapshot.observed` event.
+Order projection derives presentation from the one referenced immutable payload,
+so archive growth does not make each exact order projection rescan every order.
 
 ## Owned Function
 

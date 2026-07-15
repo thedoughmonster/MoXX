@@ -70,3 +70,22 @@ test("derives the optional customer label from stored Toast checks", async () =>
   assert.match(source, /toast_order_source_versions_v1/)
   assert.doesNotMatch(source, /toast_raw|http|fetch/)
 })
+
+test("derives one targeted order without materializing every source", async () => {
+  const helper = await readMigration(
+    "20260715122201_create_targeted_order_presentation.sql",
+  )
+  const views = await readMigration(
+    "20260715122209_use_targeted_order_projection_source.sql",
+  )
+
+  assert.match(helper, /toast_order_presentation_v1\(p_payload jsonb\)/)
+  assert.match(helper, /with recursive items/)
+  assert.match(helper, /modifier_tree/)
+  assert.match(helper, /customer_label/)
+  assert.match(views, /with \(security_invoker = true\)/)
+  assert.match(views,
+    /toast_order_presentation_v1\(source\.payload\)/)
+  assert.match(views, /toast_order_source_versions_v1/)
+  assert.doesNotMatch(views, /with recursive order_rows|join .*presentations/s)
+})
