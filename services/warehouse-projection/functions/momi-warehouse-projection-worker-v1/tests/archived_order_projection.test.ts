@@ -20,6 +20,7 @@ test("central order archives use normalized order presentation", () => {
   const route = readMigration("route_canonical_menu_stock_projection")
   const projector = readMigration("classify_canonical_order_events")
   const generic = readMigration("normalize_generic_resource_projection")
+  const lookup = readMigration("index_archived_order_source_version_lookup")
   assert.match(source, /toast_raw\.resource_versions/)
   assert.match(source, /toast_raw\.webhook_events/)
   assert.match(source, /event\.subscription_key = 'orders'/)
@@ -32,6 +33,10 @@ test("central order archives use normalized order presentation", () => {
   assert.match(projector, /source_order\.order_presentation/)
   assert.match(projector, /'presentation', source_order\.order_presentation/)
   assert.match(projector, /'source_id', source_order\.order_id/)
+  assert.match(lookup,
+    /\('archive:'::text \|\| resource_version_id::text\)/)
+  assert.match(lookup,
+    /source_system = 'toast' and resource_type = 'order'/)
 })
 
 test("backfilled orders cannot fan out to operational alerting", () => {
