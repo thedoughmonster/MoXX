@@ -15,6 +15,12 @@ capability token. `GET` is health only.
 The response contains the canonical schedule document, stable entity identity,
 schema version, provenance, and freshness. No source DTO or source ID is needed.
 
+Online-ordering documents contain a source-neutral time zone, scheduled-order
+policy, weekly periods, and date exceptions. Periods use numeric weekdays,
+`pickup` or `delivery` fulfillment modes, local `HH:MM:SS` times, and an
+explicit overnight flag. Date exceptions identify closures with an empty
+period list. Exact source fields remain available only in the private archive.
+
 ## Side Effects
 
 The supplied read capability is consumed exactly once.
