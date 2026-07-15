@@ -30,6 +30,9 @@ retry, dead-letter, duplicate, or failed outcome.
 4. Acknowledge projected, acquisition, and explicit `ignored_*` outcomes.
 5. Fail the same token-bound delivery for every processing failure.
 
+A stock response is one delivery. Its archived item observations are projected
+in one database transaction and grouped under one canonical snapshot ID.
+
 ## Side Effects
 
 The worker changes delivery state, projects canonical warehouse records, may
