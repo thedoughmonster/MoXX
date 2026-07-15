@@ -21,23 +21,31 @@ export async function recordFailureCoverage(
           where attempt.http_status between 200 and 299
             and attempt.error_code is null
         )::integer as page_count,
-        count(observation.observation_id)::bigint as record_count
+        count(observation.observation_id)::bigint as record_count,
+        (array_agg(attempt.attempt_id order by attempt.started_at desc))[1]
+          as terminal_attempt_id
       from toast_raw.api_request_attempts as attempt
       left join toast_raw.resource_observations as observation
         on observation.attempt_id = attempt.attempt_id
       where attempt.job_id = ${job.job_id}::bigint
+        and attempt.pagination_generation = ${job.pagination_generation}
         and attempt.request_cursor @> ${sql.json(cursorContext)}::jsonb
     )
     insert into toast_acquisition.coverage_windows (
       operation_key, restaurant_guid, window_start, window_end,
-      coverage_status, page_count, record_count, notes
+      coverage_status, page_count, record_count, notes, job_id,
+      coverage_policy_version, coverage_dimensions,
+      terminal_attempt_id, pagination_generation
     )
     select ${job.operation_key}, ${job.restaurant_guid},
       ${windowStart}::timestamptz, ${windowEnd}::timestamptz,
       case when ${disposition} = 'dead_letter' then 'dead_letter'
         when counts.page_count > 0 or counts.record_count > 0 then 'partial'
         else 'gap' end,
-      counts.page_count, counts.record_count, ${error}
+      counts.page_count, counts.record_count, ${error},
+      ${job.job_id}::bigint, ${job.coverage_policy_version},
+      ${sql.json(job.parameters)}::jsonb, counts.terminal_attempt_id,
+      ${job.pagination_generation}
     from counts
   `;
 }

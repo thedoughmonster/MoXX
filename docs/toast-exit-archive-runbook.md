@@ -38,6 +38,18 @@ gap, or accepted-gap status in `toast_acquisition.coverage_windows`. A 200 with
 no records is different from a missing attempt. Re-run partial windows until
 complete or explicitly accepted.
 
+Use `toast_acquisition.coverage_ledger_v1` as the job-level ledger. Its
+obligation key, parameters, selector, source window, terminal attempt, and
+pagination generation distinguish repeated snapshots and all three payment
+date selectors. `toast_acquisition.operation_coverage_v1` must list every
+enabled bulk-capable operation with an active schedule; repair-only operations
+must remain unscheduled.
+
+Archive acceptance requires zero rows from
+`toast_acquisition.archive_integrity_findings_v1`. This verifies source-response
+hashes and relationships and blocks unresolved processing failures or dead
+letters without copying response payloads out of `toast_raw`.
+
 ## Manual Exports
 
 Register every enabled product without API coverage in

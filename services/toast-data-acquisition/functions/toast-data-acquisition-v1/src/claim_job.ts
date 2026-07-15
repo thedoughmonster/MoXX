@@ -16,6 +16,8 @@ export async function claimJob(
       claimed.window_end::text,
       claimed.cursor,
       claimed.parameters,
+      claimed.coverage_policy_version,
+      claimed.pagination_generation,
       claimed.correlation_id::text,
       claimed.capability_token::text
     from toast_acquisition.claim_job(

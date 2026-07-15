@@ -15,6 +15,8 @@ export type ClaimedJob = {
   window_end: string | null;
   cursor: JsonObject;
   parameters: JsonObject;
+  coverage_policy_version: string;
+  pagination_generation: number;
   correlation_id: string;
   capability_token: string;
 };

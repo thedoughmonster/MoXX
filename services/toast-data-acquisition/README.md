@@ -34,10 +34,18 @@ time zone, so activation cannot release an accumulated startup backlog.
 Windowed intervals remain due while closed and begin only when the captured
 online-ordering window plus configured buffers is open.
 
-Recovery releases one due job every five seconds. Expired leases and live
-collection stay ahead of repair work, while historical backfill uses the
-remaining capacity. Payment detail discoveries enter this paced lane after a
-short delay instead of creating an immediate request burst.
+The central dispatcher releases one due source request per second. Expired
+leases and live collection stay ahead of repair work, while historical
+backfill uses the remaining capacity. Historical bulk-order pages stay at least
+five seconds apart; every page and payment-detail discovery re-enters the same
+paced lane instead of creating an immediate request burst.
+
+Coverage policy `toast-exit-archive-v1` classifies every enabled operation as
+historical, current-only, or repair-only and records intentional exclusions.
+Each new coverage result links to its exact job, dimensions, terminal attempt,
+and pagination generation. Private ledger and integrity views expose missing
+attempts, gaps, dead letters, and invalid response hashes without exposing raw
+payloads.
 
 ## Authority
 

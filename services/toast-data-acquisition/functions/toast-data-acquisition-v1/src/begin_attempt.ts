@@ -16,6 +16,7 @@ export async function beginApiAttempt(
       request_url,
       request_headers,
       request_cursor,
+      pagination_generation,
       started_at,
       correlation_id
     ) values (
@@ -25,6 +26,7 @@ export async function beginApiAttempt(
       ${request.url},
       ${sql.json(requestHeaders)},
       ${sql.json(request.request_cursor)},
+      ${job.pagination_generation},
       now(),
       ${job.correlation_id}::uuid
     )

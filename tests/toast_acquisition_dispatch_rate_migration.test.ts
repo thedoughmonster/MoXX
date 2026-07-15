@@ -1,0 +1,41 @@
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import test from "node:test";
+
+const root = new URL("../supabase/migrations/", import.meta.url);
+const migration = await readFile(
+  new URL("20260715131907_accelerate_toast_acquisition_dispatch.sql", root),
+  "utf8",
+);
+const lifecycle = await readFile(
+  new URL("20260715132150_route_toast_pagination_through_dispatch.sql", root),
+  "utf8",
+);
+
+test("paces the central Toast dispatcher once per second", () => {
+  assert.match(migration, /schedule := '1 second'/);
+  assert.match(migration, /limit 1 for update of job skip locked/);
+  assert.match(migration, /last_dispatched_at = now\(\)/);
+  assert.match(migration, /interval '30 seconds'/);
+});
+
+test("keeps historical bulk orders five seconds apart", () => {
+  assert.match(migration, /minimum_dispatch_spacing_seconds/);
+  assert.match(migration, /minimum_dispatch_spacing_seconds = 5/);
+  assert.match(migration, /operation_key = 'toast\.orders\.bulk\.v1'/);
+  assert.match(migration, /dispatched\.last_dispatched_at > now\(\)/);
+  assert.match(migration, /attempt\.started_at > now\(\)/);
+});
+
+test("routes new and continued work through the dispatcher", () => {
+  assert.match(
+    migration,
+    /after update of capability_token[\s\S]*new\.status = 'retry_wait'/,
+  );
+  assert.match(migration, /drop trigger wake_acquisition_worker/);
+  assert.match(lifecycle, /continue_job[\s\S]*last_dispatched_at = null/);
+  assert.match(
+    lifecycle,
+    /restart_token_cursor_job[\s\S]*last_dispatched_at = null/,
+  );
+});
