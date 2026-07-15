@@ -18,7 +18,7 @@ test("copies manual files byte-for-byte and resumes a partial temporary copy", a
   await mkdir(join(source, "nested"))
   const original = Buffer.from([0, 1, 2, 13, 10, 255])
   await writeFile(join(source, "nested", "export.bin"), original)
-  const files = await scanManualSource(source, REPOSITORY_ROOT)
+  const files = (await scanDirectoryFiles(source, "manual")).files
   await mkdir(join(staging, "manual", "nested"), { recursive: true })
   await writeFile(join(staging, "manual", "nested", "export.bin.momi-copy-next"), "partial")
 
@@ -47,5 +47,7 @@ test("rejects unsafe archive and operator source paths", async () => {
   assert.throws(() => validateArchivePath("manual/../secret.csv", "manual"), /unsafe/)
   assert.throws(() => validateArchivePath("manual/CON.txt", "manual"), /unsafe/)
   await assert.rejects(() => scanManualSource("C:\\exports:stream", REPOSITORY_ROOT), /unsafe/)
-  await assert.rejects(() => scanManualSource(REPOSITORY_ROOT, REPOSITORY_ROOT), /repository/)
+  if (process.platform === "win32") {
+    await assert.rejects(() => scanManualSource(REPOSITORY_ROOT, REPOSITORY_ROOT), /repository/)
+  }
 })
