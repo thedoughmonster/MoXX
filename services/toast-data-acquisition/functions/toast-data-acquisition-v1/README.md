@@ -65,6 +65,8 @@ Batch enablement, worker lifetime, job ceiling, and active-worker capacity are
 private operation-registry settings. The hosted lifetime remains below
 Supabase's paid 400-second worker ceiling and returns before the 150-second
 request timeout.
+The dispatcher materializes a small per-operation candidate rank before running
+source-pacing lookups, so queue depth does not lengthen its wake-up interval.
 
 ## Authority Boundary
 
