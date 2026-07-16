@@ -43,6 +43,10 @@ test("canonical reads use one attempt-bound short-lived capability", async () =>
   assert.match(execution, /finally \{/)
   assert.match(execution, /revokeOrderReadCapability/)
   assert.match(claim, /durable\.read_capability\.v1/)
+  assert.match(claim, /exactOrderContractKey/)
+  assert.match(claim, /latestOrderContractKey/)
+  assert.match(execution, /exactOrderContractKey/)
+  assert.match(execution, /latestOrderContractKey/)
   assert.match(claim, /durable\.work_token\.v1/)
 })
 

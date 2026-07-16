@@ -21,7 +21,7 @@ const job: ClaimedWork = {
 
 const response: OrderApiSuccess = {
   ok: true,
-  contract_key: job.api_contract_key,
+  contract_key: legacyOrderContractKey,
   contract_version: job.api_contract_version,
   trace_id: "8de3df64-33f5-4d1f-9569-f6786798f182",
   work_id: job.work_id,
@@ -53,6 +53,26 @@ test("accepts an owned response bound to the claimed work", () => {
     ...response,
     order_presentation: presentation,
   }, job), true)
+})
+
+test("keeps v1 timing optional and validates it when supplied", () => {
+  assert.equal(isValidOrderResponse(response, job), true)
+  for (const fulfillment_timing of ["scheduled", "asap", "unknown"] as const) {
+    assert.equal(isValidOrderResponse({
+      ...response,
+      order_presentation: { ...response.order_presentation,
+        fulfillment_timing },
+    }, job), true)
+  }
+  for (const order_presentation of [
+    { ...response.order_presentation, fulfillment_timing: "ASAP" },
+    { ...response.order_presentation, fulfillment_timing: "later" },
+    { ...response.order_presentation, fulfillment_timing: null },
+  ]) {
+    assert.equal(isValidOrderResponse({
+      ...response, order_presentation,
+    }, job), false)
+  }
 })
 
 test("rejects contract, source, order, and version mismatches", () => {

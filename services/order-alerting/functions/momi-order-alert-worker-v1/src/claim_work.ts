@@ -1,5 +1,5 @@
 import { sql } from "./database.ts"
-import { canonicalOrderContractKey, functionKey,
+import { exactOrderContractKey, functionKey, latestOrderContractKey,
   legacyOrderContractKey } from "./types.ts"
 import type { WorkClaim, WorkTriggerInput } from "./types.ts"
 
@@ -31,7 +31,8 @@ export async function claimWork(
           and trigger.trigger_type = 'durable_http'
           and upper(trigger.http_method) = 'POST'
           and (
-            (work.api_contract_key = ${canonicalOrderContractKey}
+            (work.api_contract_key in (
+                ${exactOrderContractKey}, ${latestOrderContractKey})
               and trigger.authentication_policy_key =
                 'durable.read_capability.v1')
             or (work.api_contract_key = ${legacyOrderContractKey}

@@ -6,9 +6,11 @@ import { issueOrderReadCapability } from "./issue_order_read_capability.ts"
 import { readPublishableKey } from "./read_publishable_key.ts"
 import { recordFailure } from "./record_failure.ts"
 import { revokeOrderReadCapability } from "./revoke_order_read_capability.ts"
-import { canonicalOrderContractKey, functionKey } from "./types.ts"
+import { exactOrderContractKey, functionKey,
+  latestOrderContractKey } from "./types.ts"
 import type { DeliveryTrigger } from "./delivery_types.ts"
-import type { ExecutionResult, WorkTriggerInput } from "./types.ts"
+import type { CanonicalReadCapability, ExecutionResult,
+  WorkTriggerInput } from "./types.ts"
 
 export async function executeWork(
   input: WorkTriggerInput,
@@ -38,15 +40,17 @@ export async function executeWork(
       work_id: input.work_id, replay: true } }
   }
   try {
-    if (job.api_contract_key === canonicalOrderContractKey && !delivery) {
-      throw new Error("Canonical read requires exact delivery authority")
-    }
-    if (job.api_contract_key !== canonicalOrderContractKey && delivery) {
+    const canonical = job.api_contract_key === exactOrderContractKey ||
+      job.api_contract_key === latestOrderContractKey
+    let readCapability: CanonicalReadCapability | null = null
+    if (canonical) {
+      if (!delivery) {
+        throw new Error("Canonical read requires exact delivery authority")
+      }
+      readCapability = await issueOrderReadCapability(job, delivery)
+    } else if (delivery) {
       throw new Error("Legacy read cannot use delivery authority")
     }
-    const readCapability = delivery
-      ? await issueOrderReadCapability(job, delivery)
-      : null
     let response
     try {
       response = await callOrderApi(

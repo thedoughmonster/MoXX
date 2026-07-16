@@ -31,6 +31,10 @@
       {
         "service": "warehouse-read-api",
         "contract": "momi.orders.get_by_id.v1"
+      },
+      {
+        "service": "warehouse-read-api",
+        "contract": "momi.orders.get_by_version.v1"
       }
     ]
   },

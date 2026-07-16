@@ -1,4 +1,5 @@
-import { canonicalOrderContractKey, legacyOrderContractKey } from "./types.ts"
+import { exactOrderContractKey, latestOrderContractKey,
+  legacyOrderContractKey } from "./types.ts"
 import type {
   CanonicalReadCapability,
   ClaimedWork,
@@ -26,13 +27,24 @@ export async function callOrderApi(
     throw new Error("Registered Order API route must be an exact same-origin Edge Function path")
   }
   let requestBody: Record<string, string>
-  if (job.api_contract_key === canonicalOrderContractKey) {
+  const canonical = job.api_contract_key === exactOrderContractKey ||
+    job.api_contract_key === latestOrderContractKey
+  if (canonical) {
     if (!readCapability || !/^[1-9][0-9]*$/.test(readCapability.work_id) ||
-      !uuidPattern.test(readCapability.capability_token)) {
+      !uuidPattern.test(readCapability.capability_token) ||
+      readCapability.contract_key !== job.api_contract_key) {
       throw new Error("Canonical Order API requires an exact read capability")
+    }
+    if (!uuidPattern.test(job.order_id) ||
+      (job.api_contract_key === exactOrderContractKey &&
+        !uuidPattern.test(job.source_version_id))) {
+      throw new Error("Canonical Order API identity is invalid")
     }
     requestBody = { work_id: readCapability.work_id, order_id: job.order_id,
       capability_token: readCapability.capability_token }
+    if (job.api_contract_key === exactOrderContractKey) {
+      requestBody.order_version_id = job.source_version_id
+    }
   } else if (job.api_contract_key === legacyOrderContractKey) {
     if (readCapability) {
       throw new Error("Legacy Order API cannot receive a read capability")

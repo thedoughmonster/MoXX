@@ -7,6 +7,7 @@
   "lifecycle_status": "active",
   "functions": [
     "momi-orders-get-by-id-v1",
+    "momi-orders-get-by-version-v1",
     "momi-warehouse-payments-get-by-id-v1",
     "momi-warehouse-menu-entities-get-by-id-v1",
     "momi-warehouse-employees-get-by-id-v1",
@@ -16,6 +17,7 @@
   "contracts": {
     "provides": [
       "momi.orders.get_by_id.v1",
+      "momi.orders.get_by_version.v1",
       "momi.payments.get_by_id.v1",
       "momi.menu_entities.get_by_id.v1",
       "momi.employees.get_by_id.v1",
