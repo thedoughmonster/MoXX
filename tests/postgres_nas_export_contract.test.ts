@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import { readFile } from "node:fs/promises"
 import test from "node:test"
 
-test("exposes only the three manual local package commands", async () => {
+test("exposes the manual local database commands", async () => {
   const source = await readFile(new URL("../package.json", import.meta.url), "utf8")
   const scripts = (JSON.parse(source) as { scripts: Record<string, string> }).scripts
   assert.equal(scripts["local:db-export"],
@@ -11,6 +11,8 @@ test("exposes only the three manual local package commands", async () => {
     "node local-tools/postgres-nas-export/verify.ts")
   assert.equal(scripts["local:db-restore-drill"],
     "node local-tools/postgres-nas-export/restore_drill.ts")
+  assert.equal(scripts["local:legacy-recipe-import"],
+    "node local-tools/legacy-recipe-import/main.ts")
 })
 
 test("ignores database dumps and local export control state", async () => {

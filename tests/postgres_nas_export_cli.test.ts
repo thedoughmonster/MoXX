@@ -19,6 +19,7 @@ const workspace: WorkspaceConfig = {
   environments: { dev: { project_ref: "tsrqponmlkjihgfedcba" }, prod: { project_ref: projectRef } },
   database_schemas: [
     "toast_raw", "toast_acquisition", "momi_runtime", "momi_warehouse", "momi_archive",
+    "legacy_recipe_staging",
   ],
 }
 
@@ -65,7 +66,9 @@ test("builds a compressed schema-only custom dump command", () => {
 test("builds compressed portable source and canonical warehouse SQL", () => {
   const schemas = selectPortableSchemas(workspace.database_schemas)
   assert.deepEqual(schemas, {
-    source: ["toast_raw", "toast_acquisition", "momi_archive"],
+    source: [
+      "toast_raw", "toast_acquisition", "momi_archive", "legacy_recipe_staging",
+    ],
     warehouse: ["momi_warehouse"],
   })
   const args = buildPortableDumpArgs("X:\\stage\\source.sql.gz", schemas.source)
@@ -76,6 +79,7 @@ test("builds compressed portable source and canonical warehouse SQL", () => {
   ])
   assert.deepEqual(args.slice(9), [
     "--schema", "toast_raw", "--schema", "toast_acquisition", "--schema", "momi_archive",
+    "--schema", "legacy_recipe_staging",
   ])
   assert.equal(args.some((value) => /password|postgresql:\/\//i.test(value)), false)
 })

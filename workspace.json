@@ -35,6 +35,7 @@
     "momi_events",
     "momi_warehouse",
     "warehouse_projection",
+    "legacy_recipe_staging",
     "momi_archive",
     "momi_communications"
   ],
