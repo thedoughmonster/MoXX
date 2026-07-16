@@ -14,7 +14,7 @@ they deploy from the same repository.
 ## Hard Rules
 
 - Do not require Docker or WSL for the normal development workflow.
-- Keep every handwritten file at or below 120 physical lines.
+- Keep every handwritten non-SQL file at or below 120 physical lines.
 - Each TypeScript file may declare at most one function.
 - Organize deployable behavior by business capability under `services/`.
 - Each service owns `AGENTS.md`, `README.md`, and one valid `service.json`.

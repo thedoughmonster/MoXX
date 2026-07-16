@@ -1,9 +1,16 @@
 import type { JSONValue } from "postgres"
+import type { ExactOrderPresentation,
+  TransitionalOrderPresentation } from "./order_presentation_types.ts"
+
+export type { ExactOrderPresentation, FulfillmentTiming, OrderPresentation,
+  TransitionalOrderPresentation } from "./order_presentation_types.ts"
 
 export const functionKey = "momi.orders.alert.evaluate.v1"
-export const canonicalOrderContractKey = "momi.orders.get_by_id.v1"
+export const exactOrderContractKey = "momi.orders.get_by_version.v1"
+export const latestOrderContractKey = "momi.orders.get_by_id.v1"
 export const legacyOrderContractKey = "momi.toast_orders.get_by_id.v1"
-
+export type CanonicalOrderContractKey = typeof exactOrderContractKey |
+  typeof latestOrderContractKey
 export type WorkTriggerInput = {
   work_id: string
   trigger_token: string
@@ -25,6 +32,7 @@ export type ClaimedWork = {
 }
 
 export type CanonicalReadCapability = {
+  contract_key: CanonicalOrderContractKey
   work_id: string
   capability_token: string
 }
@@ -48,7 +56,7 @@ export type OrderApiResponse = {
 
 export type OrderApiSuccess = {
   ok: true
-  contract_key: string
+  contract_key: typeof legacyOrderContractKey
   contract_version: number
   trace_id: string
   work_id: string
@@ -60,45 +68,42 @@ export type OrderApiSuccess = {
   retrieved_at: string
   content_hash: string
   payload: JSONValue
-  order_presentation: OrderPresentation
+  order_presentation: TransitionalOrderPresentation
 }
 
-export type CanonicalOrderApiSuccess = {
+export type LatestOrderApiSuccess = {
   ok: true
-  contract_key: typeof canonicalOrderContractKey
+  contract_key: typeof latestOrderContractKey
   contract_version: number
   trace_id: string
   work_id: string
   order_id: string
   schema_version: number
   order_document: Record<string, JSONValue>
-  order_presentation: OrderPresentation
+  order_presentation: TransitionalOrderPresentation
+  provenance: Record<string, JSONValue>
+  freshness: Record<string, JSONValue>
+}
+
+export type ExactOrderApiSuccess = {
+  ok: true
+  contract_key: typeof exactOrderContractKey
+  contract_version: number
+  trace_id: string
+  work_id: string
+  order_id: string
+  order_version_id: string
+  schema_version: 2
+  order_document: Record<string, JSONValue>
+  order_presentation: ExactOrderPresentation
   provenance: Record<string, JSONValue>
   freshness: Record<string, JSONValue>
 }
 
 export type ValidatedOrderResponse =
   | OrderApiSuccess
-  | CanonicalOrderApiSuccess
-
-export type OrderPresentation = {
-  presentation_version: 1
-  display_number: string
-  customer_label?: string | null
-  fulfillment_at: string | null
-  fulfillment_epoch: number | null
-  item_count: number
-  total_amount: number | null
-  items: Array<{
-    name: string
-    quantity: number
-    modifiers: Array<{
-      name: string
-      quantity: number
-      depth: number
-    }>
-  }>
-}
+  | LatestOrderApiSuccess
+  | ExactOrderApiSuccess
 
 export type DecisionOutcome = {
   work_found: boolean

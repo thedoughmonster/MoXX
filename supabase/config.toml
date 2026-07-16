@@ -58,6 +58,9 @@ verify_jwt = false
 [functions.momi-orders-get-by-id-v1]
 verify_jwt = false
 
+[functions.momi-orders-get-by-version-v1]
+verify_jwt = false
+
 [functions.momi-warehouse-payments-get-by-id-v1]
 verify_jwt = false
 

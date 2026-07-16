@@ -15,16 +15,17 @@ claims, destination fan-out, presentation snapshots, and durable delivery work.
 
 `momi-order-alert-worker-v1` claims one capability-authorized event delivery,
 creates one canonical API work row for exact `warehouse.order.observed`, and
-invokes only the registered `momi.orders.get_by_id.v1` route.
+invokes only the registered `momi.orders.get_by_version.v1` route.
 Each canonical attempt mints a short-lived capability scoped to that order and
 revokes it before evaluating the response; delivery and alert work tokens are
 never forwarded as canonical reader authority.
 
 ## Contracts
 
-The active business path consumes the event delivery lifecycle and
-`momi.orders.get_by_id.v1`. The old `momi.toast_orders.get_by_id.v1` work path
-remains available only for dual-run compatibility. It provides
+The active business path consumes the event delivery lifecycle and exact
+`momi.orders.get_by_version.v1`. The latest-version canonical reader and old
+`momi.toast_orders.get_by_id.v1` work path remain available only for dual-run
+compatibility. It provides
 `momi.order_alert.delivery_work.v1` for destination adapters.
 
 ## Dual-Run Safety

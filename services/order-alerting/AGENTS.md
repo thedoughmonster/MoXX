@@ -7,5 +7,6 @@
 - Validate reader identity, complete payload, and common presentation.
 - Never read raw source tables or call Toast, Square, Slack, or another vendor.
 - Persist attempts, alert claims, presentation snapshots, and delivery work.
-- Keep alert identity source-system, order-id, and alert-kind based.
+- Key canonical alerts by Dough Monster order ID, alert kind, and destination.
+- Preserve the source-key identity only for transitional legacy work.
 - Never log work tokens or order payloads.

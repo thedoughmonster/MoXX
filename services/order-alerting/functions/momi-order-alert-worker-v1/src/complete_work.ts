@@ -1,4 +1,5 @@
 import { sql } from "./database.ts"
+import { exactOrderContractKey, legacyOrderContractKey } from "./types.ts"
 import type {
   ClaimedWork,
   DecisionOutcome,
@@ -11,7 +12,11 @@ export async function completeWork(
   response: OrderApiResponse,
   order: ValidatedOrderResponse,
 ): Promise<DecisionOutcome> {
-  const canonical = "order_document" in order
+  if (order.contract_key !== job.api_contract_key) {
+    throw new Error("Validated order contract does not match claimed work")
+  }
+  const exact = order.contract_key === exactOrderContractKey
+  const canonical = order.contract_key !== legacyOrderContractKey
   const payload = canonical ? order.order_document : order.payload
   const metadata = canonical ? {
     contract_key: order.contract_key,
@@ -20,6 +25,7 @@ export async function completeWork(
     read_work_id: order.work_id,
     order_id: order.order_id,
     schema_version: order.schema_version,
+    ...(exact ? { order_version_id: order.order_version_id } : {}),
     provenance: order.provenance,
     freshness: order.freshness,
     response_headers: response.response_headers,
@@ -33,13 +39,17 @@ export async function completeWork(
     order_id: order.order_id,
     response_headers: response.response_headers,
   }
+  const claimArguments = exact
+    ? sql`${job.work_id}::bigint, ${order.order_version_id}::uuid,
+        ${sql.json(order.order_document)},
+        ${sql.json(order.order_presentation)}, ${sql.json(order.provenance)}`
+    : sql`${job.work_id}::bigint, ${sql.json(payload)},
+        ${sql.json(order.order_presentation)}`
   const rows = await sql<DecisionOutcome[]>`
     with decision as (
       select *
       from momi_alerting.claim_order_alert_candidates(
-        ${job.work_id}::bigint,
-        ${sql.json(payload)},
-        ${sql.json(order.order_presentation)}
+        ${claimArguments}
       )
     ), attempt_update as (
       update momi_orders.api_invocation_attempts as attempt

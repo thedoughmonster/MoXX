@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://momi.orders.get_by_version.v1/input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["work_id", "order_id", "order_version_id", "capability_token"],
+  "properties": {
+    "work_id": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+    "order_id": { "type": "string", "format": "uuid" },
+    "order_version_id": { "type": "string", "format": "uuid" },
+    "capability_token": { "type": "string", "format": "uuid" }
+  }
+}

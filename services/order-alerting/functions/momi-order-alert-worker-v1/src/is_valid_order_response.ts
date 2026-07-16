@@ -1,7 +1,9 @@
 import type { CanonicalReadCapability, ClaimedWork } from "./types.ts"
 import { isValidOrderPresentation } from "./is_valid_order_presentation.ts"
 import { isValidCanonicalOrderResponse } from "./is_valid_canonical_order_response.ts"
-import { canonicalOrderContractKey } from "./types.ts"
+import { isValidLatestOrderResponse } from "./is_valid_latest_order_response.ts"
+import { exactOrderContractKey, latestOrderContractKey,
+  legacyOrderContractKey } from "./types.ts"
 import type { ValidatedOrderResponse } from "./types.ts"
 
 const uuidPattern =
@@ -12,11 +14,18 @@ export function isValidOrderResponse(
   job: ClaimedWork,
   readCapability: CanonicalReadCapability | null = null,
 ): body is ValidatedOrderResponse {
-  if (job.api_contract_key === canonicalOrderContractKey) {
+  if (readCapability &&
+    readCapability.contract_key !== job.api_contract_key) return false
+  if (job.api_contract_key === exactOrderContractKey) {
     return readCapability !== null &&
       isValidCanonicalOrderResponse(body, job, readCapability)
   }
-  if (readCapability !== null) return false
+  if (job.api_contract_key === latestOrderContractKey) {
+    return readCapability !== null &&
+      isValidLatestOrderResponse(body, job, readCapability)
+  }
+  if (job.api_contract_key !== legacyOrderContractKey ||
+    readCapability !== null) return false
   if (typeof body !== "object" || body === null || Array.isArray(body)) {
     return false
   }
@@ -35,5 +44,5 @@ export function isValidOrderResponse(
     typeof value.content_hash === "string" &&
     /^[0-9a-f]{64}$/.test(value.content_hash) &&
     typeof payload === "object" && payload !== null && !Array.isArray(payload) &&
-    isValidOrderPresentation(value.order_presentation)
+    isValidOrderPresentation(value.order_presentation, 1)
 }

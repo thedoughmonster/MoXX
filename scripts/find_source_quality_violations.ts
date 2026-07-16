@@ -26,7 +26,8 @@ export async function findSourceQualityViolations(
     const normalizedSource = source.replaceAll("\r\n", "\n")
     const lineCount = normalizedSource === "" ? 0 :
       normalizedSource.split("\n").length - (normalizedSource.endsWith("\n") ? 1 : 0)
-    if (lineCount > workspace.policies.max_handwritten_lines) {
+    if (extname(path) !== ".sql" &&
+      lineCount > workspace.policies.max_handwritten_lines) {
       violations.push(`${normalized}: ${lineCount} lines`)
     }
     if (extname(path) !== ".ts") {

@@ -33,12 +33,13 @@ returns an order payload or capability token.
    worker never reads a PGMQ batch or accepts queue message content.
 3. Acknowledge archived, reconciled, and other non-live events without work.
 4. Bridge exact `warehouse.order.observed` idempotently to
-   `momi.orders.get_by_id.v1` work.
+   `momi.orders.get_by_version.v1` work.
 5. Claim eligible work and record an attempt in `momi_orders`.
 6. Resolve its active read contract and one active HTTP route from
    `momi_runtime`.
 7. For the canonical route, mint one 30-second read capability scoped to the
-   exact order and send its `work_id`, `order_id`, and `capability_token`.
+   exact order version and send its `work_id`, `order_id`,
+   `order_version_id`, and `capability_token`.
    The legacy route alone receives the alert `work_id` and `trigger_token`.
 8. Revoke the canonical read capability before validating the response.
 9. Validate identity, the canonical document, provenance, and presentation.
@@ -63,7 +64,7 @@ reconciliation rotate the delivery capability before another wake.
 
 ## Authority Boundary
 
-New event work is fixed to `momi.orders.get_by_id.v1`; its exact owned route is
+New event work is fixed to `momi.orders.get_by_version.v1`; its owned route is
 resolved from runtime configuration and requires an expiring canonical read
 capability. The `work_id`/`trigger_token` reader body exists only for legacy
 Toast work created before cutover. The worker never reads `toast_raw`, uses a

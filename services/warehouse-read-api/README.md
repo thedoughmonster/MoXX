@@ -19,6 +19,10 @@ source-neutral provenance, and freshness. `canonical-resource-v2` responses use
 DM-owned identity and vocabulary; source DTOs and source identifiers never
 become request requirements or canonical document fields.
 
+`momi.orders.get_by_version.v1` additionally binds the token and request to one
+immutable canonical order-version UUID. Event consumers can therefore decide
+the exact observation that triggered them even if a newer version arrives.
+
 ## Version Selection
 
 `momi_api.warehouse_entities_by_id_v1` normally selects the newest observation,
