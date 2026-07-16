@@ -64,6 +64,17 @@ test("captures OpenAI messages through an idempotent structured RPC", async () =
   assert.match(sql, /idempotency_item_id <> source_item_id/)
 })
 
+test("qualifies the evaluation queue replay constraint", async () => {
+  const sql = await readFile(new URL(
+    "20260716172256_fix_communications_capture_conflict_target.sql",
+    migrations,
+  ), "utf8")
+
+  assert.match(sql, /create or replace function momi_communications\.capture_openai_message_v1/)
+  assert.match(sql, /on conflict on constraint evaluation_jobs_archive_unique do nothing/)
+  assert.doesNotMatch(sql, /on conflict \(archive_item_id\) do nothing/)
+})
+
 test("locks down direct table access and exposes only the service role RPC", async () => {
   const sql = await readFile(new URL(
     "20260716164646_grant_communications_archive_access.sql",
