@@ -1,5 +1,6 @@
 import assert from "node:assert/strict"
 import { access } from "node:fs/promises"
+import { join } from "node:path"
 import test from "node:test"
 
 import { loadPackage } from
@@ -22,7 +23,9 @@ test("dry run emits SQL without reading PostgreSQL credentials", async () => {
       "--source", fixture.root,
     ], fixture.trust)
     const pkg = await loadPackage(fixture.root, fixture.trust)
-    await assert.doesNotReject(access(`${planRoot()}\\${pkg.importRunId}\\plan.json`))
+    await assert.doesNotReject(access(join(
+      planRoot(), pkg.importRunId, "plan.json",
+    )))
   } finally {
     for (const [key, value] of previous) {
       if (value === undefined) delete process.env[key]
