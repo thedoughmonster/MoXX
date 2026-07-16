@@ -2,8 +2,7 @@
 
 ## Deadline
 
-The self-sufficient archive must be complete by November 29, 2026. Continued
-Toast access after that date is a reconciliation window, not a dependency.
+The archive must be self-sufficient by November 29, 2026; later Toast access is reconciliation only.
 
 ## Collection
 
@@ -23,13 +22,13 @@ Backfill orders, payments, cash, shifts, time entries, and kitchen data from the
 restaurant `firstBusinessDate`. Use resumable day or month windows and complete
 pagination. Never substitute a guessed opening date.
 
-Capture restaurant detail first so Toast supplies the archive anchor. Release
-one acquisition job every five seconds, with expired leases and live collection
-ahead of repair and backfill work. Payment detail fanout must enter the same
-paced lane rather than wake every discovered payment at once. New events and
-deliveries only create durable work; routing and projection each wake one item
-every three seconds. Database-backed Edge adapters release idle sessions after
-two seconds and rotate every connection within one minute.
+Capture restaurant detail first. Release one job every five seconds; keep expired leases and live collection
+ahead of repair/backfill, and pace payment detail fanout in the same lane. New
+events and deliveries only create durable work. Routing keeps its existing wake
+path. Every three seconds, projection processes up to six independently
+committed deliveries within 60 seconds; its Edge trigger and HTTP wake are inactive. Remaining Edge
+adapters release idle sessions after two seconds and rotate connections within
+one minute. Toast acquisition and webhook HTTP boundaries are unchanged.
 
 ## Coverage
 
@@ -57,6 +56,11 @@ Archive acceptance requires zero rows from
 hashes and relationships, expected jobs, schedules, and backfill anchors, and
 blocks unresolved processing failures or dead letters without copying response
 payloads out of `toast_raw`.
+
+Replay `canonical-resource-v2` from immutable raw versions and observations with
+set-based, append-only writes that add idempotent v2 versions, link
+every observation, emit one event per version, and preserve v1 history. Verify
+published menu versions win reads over later sparse snapshots.
 
 ## Manual Exports
 
@@ -105,14 +109,12 @@ the restore target.
 
 ## Safe Activation
 
-The first release creates schemas, functions, schedules, subscriptions, and
-durable work in an inactive state because database migrations finish before the
-matching Edge deployment. After all hosted function metadata is verified, run
-controlled POST canaries for acquisition, routing, projection, canonical read,
-and alert acknowledgement. A separate activation migration may then enable the
-acquisition route and capture one real ordering schedule. Enable recurring
-schedules only after its configured buffers produce active capture windows. A
-second stage enables event routing, Toast projection, canonical readers, and
-their recovery jobs while order-alert event delivery remains inactive. Legacy
-hydration and reading remain active until their queues are drained and that
-activation has soaked.
+The first release keeps all resources and durable work inactive because migrations precede Edge deployment.
+After hosted metadata is verified, run POST canaries for
+acquisition, routing, canonical read, and alert acknowledgement. Enqueue one
+projection delivery and verify database begin/ack/fail/retry state. A separate
+migration may enable acquisition and capture one ordering schedule; enable
+recurrence only after configured buffers create active windows. Stage two
+enables routing, database-native Toast projection, canonical readers, and
+recovery while order-alert delivery remains inactive. Keep legacy hydration and
+reading active until their queues drain and activation has soaked.

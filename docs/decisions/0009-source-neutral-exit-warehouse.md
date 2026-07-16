@@ -6,63 +6,91 @@
 
 ## Context
 
-Dough Monster plans to leave Toast. Operational services must keep working when
-another point-of-sale system becomes active, and the historical archive must be
-reconstructable without continued vendor access.
+Dough Monster plans to leave Toast. Operational services must survive a new
+point-of-sale system, and history must remain reconstructable without vendor
+access. Source DTOs and IDs had reached order alerts; independent pollers would
+also repeat calls and leave uneven raw history. Webhooks do not cover every
+payment, cash, labor, configuration, kitchen, device, or historical resource.
 
-Source DTOs and IDs had reached the order alert read contract. Independent
-pollers would also repeat API calls, consume rate limits, and leave uneven raw
-history. Webhooks alone do not cover payments, cash, labor, configuration,
-kitchen, devices, or historical reconciliation.
+## Source Boundaries
 
-## Decision
-
-Toast names and schemas stop at three source boundaries:
+Toast names and schemas stop at three boundaries:
 
 1. `toast-webhook-ingestion` authenticates and stores complete inbound events.
-2. `toast-data-acquisition` is the only Toast credential holder and caller.
-3. `toast_raw` stores exact source attempts, responses, versions, and observations.
+2. `toast-data-acquisition` is the only Toast credential holder and API caller.
+3. `toast_raw` stores exact attempts, responses, versions, and observations.
+
+This decision does not change either external HTTP edge: Toast still sends
+webhooks to ingestion, and acquisition still calls Toast. Projection never
+crosses a source network boundary.
+
+## Durable Events
 
 `momi-event-routing` stores append-only `source.toast.*` and `warehouse.*` event
-metadata, then sends reference-only messages to one private PGMQ queue per
-subscriber. Delivery is at-least-once with a 120-second lease, exponential
-retry from 15 seconds to one hour, and dead-lettering after 12 attempts.
+metadata, then sends reference-only messages to a private PGMQ queue per
+subscriber. Delivery remains at-least-once with an exact event/message/token
+claim, a 120-second lease, retry from 15 seconds to one hour, and dead-lettering
+on attempt 12. Business services may subscribe only to `warehouse.*`.
 
-Warehouse projections assign stable DM UUIDs. A source crosswalk maps any
-vendor's resource key to a DM entity, so Toast and a successor can describe the
-same location, item, employee, or other entity. Canonical versions keep
-provenance and freshness but never require a source DTO or source identifier.
+## Canonical Projection
 
-`warehouse-read-api` is a core capability. Versioned `momi.*` contracts expose
-canonical orders, payments, menu entities, employees, schedules, and stock
-observations. Exact source reconstruction remains a privileged archive concern.
+Stable DM UUIDs are linked to source keys through the crosswalk. Resource types
+normalize as follows: restaurant/location to location; menu configuration to
+menu; stock/catalog items to menu item; pre-modifier types to modifier types;
+ordering schedule/shift to schedule; and menu reference suffixes to their base
+menu types.
 
-The durable event command and queue envelope contain identity and references,
-not source payloads. Business services may subscribe only to `warehouse.*`.
+`canonical-resource-v2` stores DM identity and maps source vocabulary into:
+
+- name/description plus normalized status, active, and archived state;
+- payment amount, tip, dates, void state, payment type, and card type;
+- person identity and contact fields;
+- schedule/labor dates, hours, wages, clock-out, job, tip, and report fields;
+- dining behavior/curbside; and
+- rich menu names, media, channels, tags, pricing, SKU/PLU, nutrition,
+  selection rules, sort order, deleted state, and online-orderable state.
+
+Nulls are omitted. Source identity, content hash, raw observation reference,
+freshness, and `projection_contract` remain in provenance, not the canonical
+document. Revision-two versions and events use schema version 2.
+
+## Replay And Reads
+
+Revision-two replay is append-only and set-based. It derives documents from
+immutable raw versions and observations, inserts idempotent canonical versions
+by content identity, links every observation, and emits one reconciliation
+event per version. It neither refetches Toast nor deletes or rewrites v1 history.
+
+Canonical reads normally choose the latest version. For the menu family, a
+complete published menu document with provenance `resource_type = menu` ranks
+ahead of sparse configuration/reference snapshots before recency is considered.
+Exact source reconstruction remains a privileged archive concern.
+
+## Projection Scheduling
+
+Projection no longer uses a delivery trigger, `pg_net` HTTP post, or Edge
+recovery wakeup. Every three seconds, a database procedure processes up to six
+due deliveries within a 60-second budget. Each iteration locks and claims one
+delivery, commits its lease, then independently commits projection/acknowledgment
+or failure. An `edge`/`database` mode fences reservations during cutover.
+Existing capability rotation, retry, lease, and dead-letter semantics remain.
+
+Database configuration still owns source capture windows and cadence. Cron
+creates or reconciles durable work. ADR 0004 remains unchanged for other
+allowlisted internal adapters; it is no longer used to wake projection.
 
 ## Compatibility
 
-`momi.toast_orders.get_by_id.v1` remains during migration.
-`momi.orders.get_by_id.v1` is the replacement. Order alerting moves to canonical
-order events and the new reader before the old source reader is retired.
-
-## Scheduling
-
-Database configuration owns capture windows and cadence. Online ordering hours
-plus buffers determine live polling. Cron creates or reconciles durable work;
-`pg_net` only wakes exact registered workers after work is committed.
+`momi.toast_orders.get_by_id.v1` remains during migration;
+`momi.orders.get_by_id.v1` replaces it. Order alerting moves to canonical order
+events and the new reader before the source reader is retired.
 
 ## Consequences
 
-Raw and canonical storage grow independently, which is intentional. Projection
-bugs can be repaired from immutable source versions. Consumer contracts survive
-the POS switch, while source adapters and mappings can be replaced separately.
+Raw and canonical storage grow independently. Projection bugs can be repaired
+from immutable source history without source access. Consumer contracts survive
+the POS switch, while adapters and mappings can change independently.
 
-The archive still has accepted historical gaps for current-only APIs, deleted
-configuration, and unavailable kitchen fulfillment. Those gaps and every manual
-export are recorded explicitly.
-
-Accepted gaps are durable register entries, not prose-only caveats. A null
-export cadence means no known operator export can repair the historical gap;
-API-uncovered enabled products are registered separately with their actual
-monthly export procedure and immutable run evidence.
+Accepted historical gaps and every manual export remain explicit durable
+records. A null export cadence means no operator export can repair that gap;
+API-uncovered enabled products record their actual recurring export procedure.
