@@ -7,6 +7,10 @@ const migration = new URL(
   "supabase/migrations/20260716164649_create_communications_operational_note_capture.sql",
   root,
 )
+const replayMigration = new URL(
+  "supabase/migrations/20260716173245_fix_operational_note_replay_timestamp.sql",
+  root,
+)
 const contract = new URL(
   "services/communications-archive/contracts/operational-note-v1.schema.json",
   root,
@@ -68,4 +72,14 @@ test("keeps the plugin action private and RPC-only", async () => {
   assert.match(sql, /revoke all on function[\s\S]*from public, anon, authenticated/)
   assert.match(sql, /grant execute on function[\s\S]*to service_role/)
   assert.doesNotMatch(sql, /grant execute[\s\S]*to authenticated/)
+})
+
+test("reuses the first occurrence time when an operational note is retried", async () => {
+  const sql = await readFile(replayMigration, "utf8")
+
+  assert.match(sql, /create or replace function momi_communications\.capture_operational_note_v1/)
+  assert.match(sql, /note_occurred_at := nullif\(p_note ->> 'occurred_at', ''\)::timestamptz/)
+  assert.match(sql, /if note_occurred_at is null then[\s\S]*select item\.occurred_at/)
+  assert.match(sql, /item\.idempotency_key = 'operational-note:v1:' \|\| capture_fingerprint/)
+  assert.match(sql, /'assistant', note_occurred_at/)
 })
