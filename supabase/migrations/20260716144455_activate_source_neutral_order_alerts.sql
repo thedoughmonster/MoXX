@@ -1,6 +1,9 @@
 -- service-owner: order-alerting
 
-create function momi_alerting.prevent_cross_path_order_alert_duplicate()
+begin;
+
+create or replace function
+  momi_alerting.prevent_cross_path_order_alert_duplicate()
 returns trigger
 language plpgsql
 security invoker
@@ -38,6 +41,9 @@ begin
 end;
 $$;
 
+drop trigger if exists prevent_cross_path_order_alert_duplicate
+  on momi_alerting.order_alert_candidates;
+
 create trigger prevent_cross_path_order_alert_duplicate
 before insert on momi_alerting.order_alert_candidates
 for each row execute function
@@ -61,7 +67,13 @@ declare
   activation_floor timestamptz := clock_timestamp() - interval '1 minute';
   preorder_destination text;
   enabled_environment_count integer;
+  legacy_gate_count integer;
+  already_active boolean;
 begin
+  select active into strict already_active
+  from momi_events.subscriptions
+  where subscription_key = 'order-alerting-v1';
+
   select count(*), min(replace(destination_key, 'all_orders', 'preorders'))
   into enabled_environment_count, preorder_destination
   from momi_alerting.slack_destinations
@@ -112,10 +124,13 @@ begin
     raise exception 'Legacy order alert work is not terminal';
   end if;
 
-  if (select count(*) from toast_hydration.webhook_order_mappings
+  select count(*) into legacy_gate_count
+  from toast_hydration.webhook_order_mappings
     where downstream_api_contract_key = 'momi.toast_orders.get_by_id.v1'
-      and is_enabled) <> 1
-  then
+      and is_enabled;
+
+  if legacy_gate_count > 1
+    or (legacy_gate_count = 0 and not already_active) then
     raise exception 'Legacy order alert producer gate is not ready';
   end if;
 
@@ -154,7 +169,8 @@ begin
 
   update momi_events.subscriptions
   set event_pattern = 'warehouse.order.observed',
-      minimum_recorded_at = activation_floor,
+      minimum_recorded_at = case when active
+        then minimum_recorded_at else activation_floor end,
       active = true
   where subscription_key = 'order-alerting-v1'
     and consumer_service = 'order-alerting'
@@ -172,6 +188,7 @@ begin
   where event.event_id = work.event_id
     and event.event_name = 'warehouse.order.observed'
     and event.recorded_at >= activation_floor
+    and not already_active
     and work.status = 'succeeded'
     and not exists (
       select 1 from momi_events.deliveries as delivery
@@ -183,7 +200,7 @@ begin
     select 1 from momi_events.subscriptions
     where subscription_key = 'order-alerting-v1'
       and event_pattern = 'warehouse.order.observed' and active
-      and minimum_recorded_at = activation_floor
+      and minimum_recorded_at <= activation_floor
   ) or (select count(*) from cron.job
     where jobname = 'momi-order-alert-event-wakeup-v1' and active) <> 1
   then
@@ -209,3 +226,5 @@ begin
   end if;
 end;
 $$;
+
+commit;
