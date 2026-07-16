@@ -7,6 +7,7 @@ identify deployment location but do not define business purpose.
 
 | Capability | Function key | Purpose | Service | Kind | Boundary | Route |
 | --- | --- | --- | --- | --- | --- | --- |
+| ingest | `momi.communications.capture_openai_message.v1` | Capture one OpenAI or ChatGPT source message into the immutable communications archive. | `communications-archive` | core_capability | momi_internal | `/functions/v1/momi-communications-capture-openai-message-v1` |
 | ingest | `momi.warehouse_projection.toast.consume.v1` | Claim one capability-bound Toast event delivery and project its referenced source record. | `warehouse-projection` | core_capability | momi_internal | `/functions/v1/momi-warehouse-projection-worker-v1` |
 | ingest | `toast.orders.webhook_ingest.v1` | Authenticate and preserve one Toast Orders webhook event before durable alert handoff. | `toast-order-ingest` | source_adapter | toast_inbound | `/functions/v1/toast-orders-webhook-ingest-v1` |
 | ingest | `toast.stock.webhook_ingest.v1` | Authenticate and preserve one Toast stock webhook event. | `toast-stock-ingest` | source_adapter | toast_inbound | `/functions/v1/toast-stock-webhook-ingest-v1` |

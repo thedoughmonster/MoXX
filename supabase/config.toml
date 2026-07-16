@@ -75,3 +75,6 @@ verify_jwt = false
 
 [functions.momi-warehouse-stock-observations-get-by-id-v1]
 verify_jwt = false
+
+[functions.momi-communications-capture-openai-message-v1]
+verify_jwt = true

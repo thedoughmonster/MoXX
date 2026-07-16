@@ -7,6 +7,8 @@ import test from "node:test"
 import type { LoadedFunction } from "../scripts/architecture/types.ts"
 import { buildFunctionAttestations } from
   "../scripts/deploy/build_function_attestations.ts"
+import { isAcceptableProbeStatus } from
+  "../scripts/deploy/is_acceptable_probe_status.ts"
 import { parseFunctionVerifyJwt } from
   "../scripts/deploy/parse_function_verify_jwt.ts"
 import { parseHostedFunctions } from "../scripts/deploy/parse_hosted_functions.ts"
@@ -56,6 +58,15 @@ verify_jwt = true
 verify_jwt = true # explicit
 `)
   assert.deepEqual([...settings], [["alpha-v1", false], ["beta-v1", true]])
+})
+
+test("accepts an authorization challenge only for JWT-protected probes", () => {
+  assert.equal(isAcceptableProbeStatus(200, false), true)
+  assert.equal(isAcceptableProbeStatus(401, true), true)
+  assert.equal(isAcceptableProbeStatus(403, true), true)
+  assert.equal(isAcceptableProbeStatus(401, false), false)
+  assert.equal(isAcceptableProbeStatus(404, true), false)
+  assert.equal(isAcceptableProbeStatus(500, true), false)
 })
 
 test("pairs hosted bundle metadata with a deterministic function manifest digest", async (t) => {
