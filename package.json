@@ -20,6 +20,8 @@
     "local:db-export": "node local-tools/postgres-nas-export/export.ts",
     "local:db-restore-drill": "node local-tools/postgres-nas-export/restore_drill.ts",
     "local:db-verify": "node local-tools/postgres-nas-export/verify.ts",
+    "local:legacy-recipe-import": "node local-tools/legacy-recipe-import/main.ts",
+    "test:legacy-recipe-postgres": "node tests/run_legacy_recipe_postgres_integration.ts",
     "migration:check": "node scripts/check_migrations.ts",
     "quality:check": "node scripts/check_source_quality.ts && node scripts/check_quality_report.ts",
     "quality:generate": "node scripts/generate_quality_report.ts",

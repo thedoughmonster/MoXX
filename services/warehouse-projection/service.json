@@ -17,6 +17,7 @@
   },
   "database": {
     "read": [
+      "legacy_recipe_staging",
       "momi_api",
       "momi_events",
       "toast_acquisition",
@@ -24,6 +25,7 @@
       "warehouse_projection"
     ],
     "write": [
+      "legacy_recipe_staging",
       "momi_events",
       "momi_warehouse",
       "toast_acquisition",

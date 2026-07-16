@@ -81,6 +81,13 @@ overwrite canonical documents, delete v1 history, or refetch Toast.
 The service may read private durable events and raw references and invoke its
 owned database procedures. It has no network authority or Toast credentials.
 
+## Legacy Recipe Staging
+
+This capability also owns the private `legacy_recipe_staging` preservation
+schema accepted by ADR `0011`. A manual development-only importer may place
+verified legacy recipe rows and repair evidence there. Runtime projection does
+not consume that schema, select canonical recipe versions, or publish recipes.
+
 ## Verification
 
 Run `npm run check -- --service warehouse-projection` with Node.js 24.
