@@ -19,4 +19,8 @@ the same database session. Every event retains an independent capability,
 idempotent subscriber deliveries, and exponential retry state. Consumer
 failures are handled by the separate delivery lifecycle functions.
 
+Canonical replay events with no matching active subscriber and no delivery are
+completed set-wise. Source events, subscribed events, and running leases always
+remain on the standard capability-bound router.
+
 Run `pnpm check` from the repository root.
