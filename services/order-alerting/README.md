@@ -36,13 +36,12 @@ the existing candidate uniqueness key deduplicates old and new paths. Only
 `warehouse.order.observed` is operational; archived, reconciled, and unknown
 order events are acknowledged without creating work or alerts.
 
-This release stages `order-alerting-v1` with the exact event name and leaves it
-inactive because migrations deploy before worker code. The readiness view
-`momi_alerting.order_event_cutover_readiness_v1` checks the canonical reader,
-worker route, configured rule paths, duplicate constraint, and token-fenced
-delivery lifecycle.
-A follow-up migration may activate the subscription only after the deployed
-worker is verified and every readiness flag is true.
+The initial release stages `order-alerting-v1` inactive because migrations
+deploy before worker code. The activation migration verifies the hosted exact
+reader and worker, fences duplicates across the transitional and canonical
+paths, disables new legacy work, and starts the subscription at a bounded
+handoff watermark. Existing terminal legacy records remain available for
+repair while every new alert starts from the canonical warehouse event.
 
 ## Authority
 
