@@ -35,7 +35,8 @@
     "momi_events",
     "momi_warehouse",
     "warehouse_projection",
-    "momi_archive"
+    "momi_archive",
+    "momi_communications"
   ],
   "policies": {
     "max_handwritten_lines": 120,

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://communications.capture_openai_message.v1/input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_account_key",
+    "source_user_key",
+    "source_conversation_key",
+    "source_message_key",
+    "sender_role",
+    "occurred_at",
+    "payload",
+    "idempotency_key"
+  ],
+  "properties": {
+    "source_account_key": { "type": "string", "minLength": 1 },
+    "source_user_key": { "type": "string", "minLength": 1 },
+    "source_conversation_key": { "type": "string", "minLength": 1 },
+    "source_message_key": { "type": "string", "minLength": 1 },
+    "source_parent_message_key": { "type": ["string", "null"] },
+    "sender_role": { "type": "string", "minLength": 1 },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "captured_at": { "type": "string", "format": "date-time" },
+    "source_metadata": { "type": "object" },
+    "payload": { "type": ["object", "array"] },
+    "raw_text": { "type": ["string", "null"] },
+    "idempotency_key": { "type": "string", "minLength": 1 },
+    "capture_actor": { "type": ["string", "null"] },
+    "tool_version": { "type": ["string", "null"] },
+    "model_version": { "type": ["string", "null"] },
+    "prompt_version": { "type": ["string", "null"] }
+  }
+}

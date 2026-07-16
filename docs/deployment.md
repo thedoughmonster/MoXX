@@ -31,6 +31,8 @@ after the promotion workflow fast-forwards `prod`.
 The apply entry point deploys manifest-owned functions with the pinned CLI and
 `--use-api`, checks inventory, probes functions, reads advisors, and writes a
 release artifact. It never uses Docker, `--prune`, or implicit discovery.
+An unauthenticated probe must return success for public functions; a configured
+JWT-protected function may instead prove reachability with `401` or `403`.
 
 ## Migration Boundary
 
