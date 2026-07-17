@@ -9,13 +9,24 @@ import { findAuthorityViolations } from "./find_authority_violations.ts"
 import { findDependencyViolations } from "./find_dependency_violations.ts"
 import { findAdapterViolations } from "./find_adapter_violations.ts"
 import { loadRetirements } from "./load_retirements.ts"
+import { findFunctionInventoryViolations } from
+  "./find_function_inventory_violations.ts"
 
 export async function validateArchitecture(): Promise<Architecture> {
   const workspace = await loadWorkspace()
   const services = await discoverServices(workspace.paths.services)
+  const retirements = await loadRetirements(workspace.paths.retirements, services)
+  const inventoryViolations = await findFunctionInventoryViolations(
+    workspace,
+    services,
+  )
+  if (inventoryViolations.length > 0) {
+    throw new Error(
+      `Architecture violations:\n- ${inventoryViolations.join("\n- ")}`,
+    )
+  }
   const functions = await loadFunctions(workspace, services)
   const modules = await loadSourceModules(functions)
-  const retirements = await loadRetirements(workspace.paths.retirements, services)
   const violations = [
     ...findServiceGraphViolations(services),
     ...findImportBoundaryViolations(modules, services),

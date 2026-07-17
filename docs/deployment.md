@@ -41,11 +41,15 @@ session pooler on port 5432, previews `db push`, applies it, and compares every
 local migration version with hosted history. GitHub workflows never apply
 migrations and local code never deploys Edge Functions.
 
-Files already present on `prod` are immutable. A new migration begins with:
+Files already present on `prod` are immutable. A migration not present in the
+production baseline has exactly one ownership header on physical line 1:
 
 ```sql
 -- service-owner: <service-key>
 ```
+
+`supabase/migrations/` is flat and contains only its `AGENTS.md` plus regular,
+non-executable `.sql` files.
 
 ## Credentials
 

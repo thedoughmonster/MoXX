@@ -27,12 +27,15 @@
       "type": "object", "additionalProperties": false,
       "required": ["dataset_key", "private_relations"],
       "properties": {
-        "dataset_key": { "type": "string", "pattern": "^[a-z][a-z0-9_.]+$" },
+        "dataset_key": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+        },
         "private_schema": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
-        "private_relations": { "$ref": "#/$defs/string_set" },
-        "public_reads": { "$ref": "#/$defs/string_set" },
-        "public_commands": { "$ref": "#/$defs/string_set" },
-        "emitted_events": { "$ref": "#/$defs/string_set" },
+        "private_relations": { "$ref": "#/$defs/qualified_relation_set" },
+        "public_reads": { "$ref": "#/$defs/versioned_contract_set" },
+        "public_commands": { "$ref": "#/$defs/versioned_contract_set" },
+        "emitted_events": { "$ref": "#/$defs/event_key_set" },
         "db_role": { "type": "string", "pattern": "^svc_[a-z][a-z0-9_]*$" }
       }
     },
@@ -46,11 +49,10 @@
       "required": ["provides", "consumes"],
       "properties": {
         "provides": {
-          "type": "array", "uniqueItems": true,
-          "items": { "type": "string", "pattern": "^[a-z][a-z0-9_.]+\\.v[0-9]+$" }
+          "$ref": "#/$defs/versioned_contract_set"
         },
         "consumes": {
-          "type": "array",
+          "type": "array", "uniqueItems": true,
           "items": { "$ref": "#/$defs/consumed_contract" }
         }
       }
@@ -77,12 +79,34 @@
       "type": "array", "uniqueItems": true,
       "items": { "type": "string", "minLength": 1 }
     },
+    "qualified_relation_set": {
+      "type": "array", "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"
+      }
+    },
+    "event_key_set": {
+      "type": "array", "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
+      }
+    },
+    "versioned_contract_set": {
+      "type": "array", "uniqueItems": true,
+      "items": { "$ref": "#/$defs/versioned_contract" }
+    },
+    "versioned_contract": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*\\.v[1-9][0-9]*$"
+    },
     "consumed_contract": {
       "type": "object", "additionalProperties": false,
       "required": ["service", "contract"],
       "properties": {
         "service": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
-        "contract": { "type": "string", "pattern": "^[a-z][a-z0-9_.]+\\.v[0-9]+$" }
+        "contract": { "$ref": "#/$defs/versioned_contract" }
       }
     }
   }
