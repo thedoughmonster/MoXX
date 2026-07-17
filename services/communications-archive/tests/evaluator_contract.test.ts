@@ -85,6 +85,20 @@ test("activates only the evaluator canary route", async () => {
     /cron\.alter_job\(job_id := jobid, active := true\)/)
 })
 
+test("disables the evaluator after a failed canary", async () => {
+  const sql = await readFile(new URL(
+    "20260717121345_disable_communications_evaluator_after_canary_failure.sql",
+    migrations,
+  ), "utf8")
+  assert.match(sql, /update momi_runtime\.function_trigger_registry/)
+  assert.match(sql, /update momi_runtime\.function_registry/)
+  assert.match(sql, /set active = false/g)
+  assert.match(sql, /cron\.alter_job\(job_id := jobid, active := false\)/)
+  assert.match(sql, /not active and schedule = '30 seconds'/)
+  assert.doesNotMatch(sql,
+    /momi_communications\.(archive_items|evaluation_jobs)/)
+})
+
 test("limits evaluator network authority to the OpenAI Responses API", async () => {
   const service = JSON.parse(await readFile(new URL("../service.json", import.meta.url),
     "utf8")) as Record<string, Record<string, string[]>>
