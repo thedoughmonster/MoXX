@@ -4,7 +4,7 @@
 
 This service saves source communications exactly as received and can also save
 an agent-authored candidate memory when raw turns are unavailable. Every item
-gets a small evaluation ticket for later review.
+gets a durable evaluation ticket for model-backed review.
 
 ## Boundary
 
@@ -30,8 +30,24 @@ Replays return the existing item and do not duplicate evaluator work.
 ## Evaluation
 
 Every newly captured item inserts one `pending` row in
-`momi_communications.evaluation_jobs`. A future evaluator claims that durable
-job and writes classifier outputs to `communication_evaluations`.
+`momi_communications.evaluation_jobs`. The scheduled dispatcher wakes no worker
+when the queue is empty. When work is due, it sends only one job identity and
+capability token to `momi-communications-evaluate-item-v1`.
+
+The evaluator claims a short lease before reading the candidate through a
+structured database function. It calls the configured OpenAI model with a
+strict output schema, then atomically appends an evaluation, optional derived
+records, and audit evidence. Failures retry with backoff and eventually become
+dead letters. ClickUp and GitHub delivery are intentionally separate.
+
+The registry route and schedule ship inactive. After the hosted function has
+the `OPENAI_API_KEY` and `MOMI_COMMUNICATIONS_EVALUATOR_MODEL` secrets, activate
+them through a later owned migration.
+
+`dispatch_evaluation_job_v1` wakes one exact due job for a controlled canary.
+`get_evaluation_job_status_v1` and `get_evaluation_queue_status_v1` expose only
+processing state and counts. All three contracts are service-role-only and
+never return source content or capability tokens.
 
 ## Tests
 

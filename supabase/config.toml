@@ -78,3 +78,6 @@ verify_jwt = false
 
 [functions.momi-communications-capture-openai-message-v1]
 verify_jwt = true
+
+[functions.momi-communications-evaluate-item-v1]
+verify_jwt = false

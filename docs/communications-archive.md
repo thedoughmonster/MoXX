@@ -93,6 +93,13 @@ identity, evaluator contract key, capability token, status, and processing
 metadata. Classifier output, flags, urgency, confidence, archive/noise
 decisions, and merge suggestions belong in `communication_evaluations`.
 
+The evaluator makes no Edge or model request when no work is due. Health fails
+with a redacted `503` when runtime configuration is incomplete. A service-role
+operator may dispatch one exact canary job and read redacted job or queue
+status; these RPCs never return source content or capability tokens.
+Exact input, model output, leases, retries, activation, and neutral routing are
+documented in the [`evaluator function guide`](../services/communications-archive/functions/momi-communications-evaluate-item-v1/README.md).
+
 ## Corrections And Derived Work
 
 Tasks, knowledge, incidents, alerts, and other derived records are appended to
@@ -103,13 +110,10 @@ Neither table rewrites the immutable source archive.
 
 Add a new source by inserting a `source_types` row, adding a source-specific
 capture RPC or wrapper, and mapping its account/user/thread/message identity
-into `archive_items`. Operational notes currently retain OpenAI provenance.
-Do not add Slack, email, SMS, ClickUp, or hardware adapters in this slice.
+into `archive_items`. Operational notes retain OpenAI provenance. Do not add
+Slack, email, SMS, ClickUp, or hardware adapters in this slice.
 
 ## Tests
-
-Run:
-
 ```text
 pnpm run test -- --service communications-archive
 ```
