@@ -16,21 +16,16 @@
     "kind": {
       "enum": ["source_adapter", "core_capability", "destination_adapter"]
     },
-    "service_type": {
-      "enum": [
-        "procurement_adapter", "transform", "raw_evidence_archive",
-        "event_router", "dataset_owner", "read_facade",
-        "destination_adapter"
-      ]
-    },
+    "service_type": { "enum": [
+      "procurement_adapter", "transform", "raw_evidence_archive",
+      "event_router", "dataset_owner", "read_facade", "destination_adapter"
+    ] },
     "owned_dataset": {
       "type": "object", "additionalProperties": false,
       "required": ["dataset_key", "private_relations"],
       "properties": {
-        "dataset_key": {
-          "type": "string",
-          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
-        },
+        "dataset_key": { "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$" },
         "private_schema": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
         "private_relations": { "$ref": "#/$defs/qualified_relation_set" },
         "public_reads": { "$ref": "#/$defs/versioned_contract_set" },
@@ -41,7 +36,7 @@
     },
     "lifecycle_status": { "enum": ["active", "retiring", "retired"] },
     "functions": {
-      "type": "array", "minItems": 1, "uniqueItems": true,
+      "type": "array", "uniqueItems": true,
       "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]+-v[0-9]+$" }
     },
     "contracts": {
@@ -71,6 +66,8 @@
       "properties": { "outbound_hosts": { "$ref": "#/$defs/string_set" } }
     },
     "secrets": { "$ref": "#/$defs/string_set" },
+    "configuration": { "$ref": "#/$defs/string_set" },
+    "deployment": { "$ref": "#/$defs/deployment" },
     "runtime_dependencies": { "$ref": "#/$defs/string_set" },
     "approved_packages": { "$ref": "#/$defs/string_set" }
   },
@@ -79,27 +76,36 @@
       "type": "array", "uniqueItems": true,
       "items": { "type": "string", "minLength": 1 }
     },
-    "qualified_relation_set": {
-      "type": "array", "uniqueItems": true,
-      "items": {
-        "type": "string",
-        "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$"
-      }
-    },
-    "event_key_set": {
-      "type": "array", "uniqueItems": true,
-      "items": {
-        "type": "string",
-        "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$"
-      }
-    },
+    "qualified_relation_set": { "type": "array", "uniqueItems": true,
+      "items": { "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$" } },
+    "event_key_set": { "type": "array", "uniqueItems": true,
+      "items": { "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$" } },
     "versioned_contract_set": {
       "type": "array", "uniqueItems": true,
       "items": { "$ref": "#/$defs/versioned_contract" }
     },
-    "versioned_contract": {
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*\\.v[1-9][0-9]*$"
+    "versioned_contract": { "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*\\.v[1-9][0-9]*$" },
+    "deployment": {
+      "type": "object", "additionalProperties": false,
+      "required": ["owns", "depends_on"],
+      "properties": {
+        "owns": { "$ref": "#/$defs/typed_unit_set" },
+        "depends_on": { "$ref": "#/$defs/typed_unit_set" }
+      }
+    },
+    "typed_unit_set": { "type": "array", "uniqueItems": true,
+      "items": { "$ref": "#/$defs/typed_unit" } },
+    "typed_unit": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "key"],
+      "properties": {
+        "kind": { "enum": ["database_processor", "cron_job", "queue",
+          "event_subscription", "postgres_extension", "vault_secret"] },
+        "key": { "type": "string", "pattern": "^[a-z][a-z0-9_.:-]+$" }
+      }
     },
     "consumed_contract": {
       "type": "object", "additionalProperties": false,

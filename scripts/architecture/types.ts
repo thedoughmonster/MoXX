@@ -1,4 +1,8 @@
-import type { OwnedDataset, ServiceType } from "./service_manifest_types.ts"
+import type {
+  OwnedDataset,
+  ServiceDeployment,
+  ServiceType,
+} from "./service_manifest_types.ts"
 
 export type WorkspaceConfig = {
   schema_version: 1
@@ -49,6 +53,8 @@ export type ServiceManifest = {
   }
   network: { outbound_hosts: string[] }
   secrets: string[]
+  configuration?: string[]
+  deployment?: ServiceDeployment
   runtime_dependencies: string[]
   approved_packages: string[]
   owned_dataset?: OwnedDataset

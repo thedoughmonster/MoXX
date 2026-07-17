@@ -1,6 +1,11 @@
 import type { LoadedService } from "../architecture/types.ts"
 import type { ConstitutionFindingInput } from "./types.ts"
 
+const ownedUnitKinds = new Set([
+  "database_processor", "cron_job", "queue", "event_subscription",
+])
+const dependencyKinds = new Set(["postgres_extension", "vault_secret"])
+
 export function findServiceDeclarationFindings(
   services: LoadedService[],
 ): ConstitutionFindingInput[] {
@@ -74,6 +79,26 @@ export function findServiceDeclarationFindings(
         subject: `contract:${contract}`,
         evidence: { contract, contract_kind: contractKind, service_key: key },
         summary: `${key} does not provide its dataset contract ${contract}.`,
+      })
+    }
+    for (const unit of manifest.deployment?.owns ?? []) {
+      if (ownedUnitKinds.has(unit.kind)) continue
+      findings.push({
+        rule_version: 1,
+        rule_id: "deployment_owned_kind_invalid",
+        subject,
+        evidence: { service_key: key, unit_kind: unit.kind, unit_key: unit.key },
+        summary: `${key} cannot own infrastructure dependency ${unit.kind}.`,
+      })
+    }
+    for (const unit of manifest.deployment?.depends_on ?? []) {
+      if (dependencyKinds.has(unit.kind)) continue
+      findings.push({
+        rule_version: 1,
+        rule_id: "deployment_dependency_kind_invalid",
+        subject,
+        evidence: { service_key: key, unit_kind: unit.kind, unit_key: unit.key },
+        summary: `${key} must own rather than depend on ${unit.kind}.`,
       })
     }
   }
