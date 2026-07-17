@@ -1,3 +1,5 @@
+import type { OwnedDataset, ServiceType } from "./service_manifest_types.ts"
+
 export type WorkspaceConfig = {
   schema_version: 1
   layout: "transition" | "service_workspaces"
@@ -34,6 +36,7 @@ export type ServiceManifest = {
   service_key: string
   purpose: string
   kind: "source_adapter" | "core_capability" | "destination_adapter"
+  service_type?: ServiceType
   lifecycle_status: "active" | "retiring" | "retired"
   functions: string[]
   contracts: {
@@ -48,6 +51,7 @@ export type ServiceManifest = {
   secrets: string[]
   runtime_dependencies: string[]
   approved_packages: string[]
+  owned_dataset?: OwnedDataset
 }
 
 export type FunctionManifest = {

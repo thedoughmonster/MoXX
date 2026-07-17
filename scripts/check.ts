@@ -6,7 +6,9 @@ import { readOption } from "./read_option.ts"
 
 const service = readOption("service", "all")
 const scripts = [
+  "check_dev_branch_clean.ts",
   "check_architecture.ts",
+  "check_service_constitution.ts",
   "check_catalog.ts",
   "check_source_quality.ts",
   "check_quality_report.ts",

@@ -12,6 +12,8 @@
     "catalog:generate": "node scripts/generate_function_catalog.ts",
     "catalog:check": "node scripts/check_catalog.ts",
     "check": "node scripts/check.ts",
+    "dev:guard": "node scripts/check_dev_branch_clean.ts",
+    "constitution:check": "node scripts/check_service_constitution.ts",
     "database-access:renew": "node scripts/run_renew_database_access.ts",
     "deploy:apply": "node scripts/run_deploy_apply.ts",
     "deploy:plan": "node scripts/run_deploy_plan.ts",
