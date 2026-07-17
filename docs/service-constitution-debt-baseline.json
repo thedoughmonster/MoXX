@@ -1,0 +1,70 @@
+{
+  "$schema": "https://momi.local/schemas/service-constitution-debt-baseline-v1.schema.json",
+  "schema_version": 1,
+  "generated_from": "dev@8c6eb4f",
+  "notes": [
+    "Baseline records known pre-constitution gaps. CI should fail on new findings and may pass unchanged legacy debt."
+  ],
+  "findings": [
+    {
+      "rule_id": "service_type_missing",
+      "subject": "services/communications-archive/service.json",
+      "summary": "Service manifest does not yet declare service_type."
+    },
+    {
+      "rule_id": "service_type_missing",
+      "subject": "services/momi-event-routing/service.json",
+      "summary": "Service manifest does not yet declare service_type."
+    },
+    {
+      "rule_id": "service_type_missing",
+      "subject": "services/order-alerting/service.json",
+      "summary": "Service manifest does not yet declare service_type."
+    },
+    {
+      "rule_id": "service_type_missing",
+      "subject": "services/slack-order-delivery/service.json",
+      "summary": "Service manifest does not yet declare service_type."
+    },
+    {
+      "rule_id": "service_type_missing",
+      "subject": "services/toast-data-acquisition/service.json",
+      "summary": "Service manifest does not yet declare service_type."
+    },
+    {
+      "rule_id": "service_type_missing",
+      "subject": "services/toast-order-hydration/service.json",
+      "summary": "Service manifest does not yet declare service_type."
+    },
+    {
+      "rule_id": "service_type_missing",
+      "subject": "services/toast-order-ingest/service.json",
+      "summary": "Service manifest does not yet declare service_type."
+    },
+    {
+      "rule_id": "service_type_missing",
+      "subject": "services/toast-order-read-api/service.json",
+      "summary": "Service manifest does not yet declare service_type."
+    },
+    {
+      "rule_id": "service_type_missing",
+      "subject": "services/toast-stock-ingest/service.json",
+      "summary": "Service manifest does not yet declare service_type."
+    },
+    {
+      "rule_id": "service_type_missing",
+      "subject": "services/toast-webhook-ingestion/service.json",
+      "summary": "Service manifest does not yet declare service_type."
+    },
+    {
+      "rule_id": "service_type_missing",
+      "subject": "services/warehouse-projection/service.json",
+      "summary": "Service manifest does not yet declare service_type."
+    },
+    {
+      "rule_id": "service_type_missing",
+      "subject": "services/warehouse-read-api/service.json",
+      "summary": "Service manifest does not yet declare service_type."
+    }
+  ]
+}

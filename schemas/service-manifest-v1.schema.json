@@ -16,6 +16,26 @@
     "kind": {
       "enum": ["source_adapter", "core_capability", "destination_adapter"]
     },
+    "service_type": {
+      "enum": [
+        "procurement_adapter", "transform", "raw_evidence_archive",
+        "event_router", "dataset_owner", "read_facade",
+        "destination_adapter"
+      ]
+    },
+    "owned_dataset": {
+      "type": "object", "additionalProperties": false,
+      "required": ["dataset_key", "private_relations"],
+      "properties": {
+        "dataset_key": { "type": "string", "pattern": "^[a-z][a-z0-9_.]+$" },
+        "private_schema": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "private_relations": { "$ref": "#/$defs/string_set" },
+        "public_reads": { "$ref": "#/$defs/string_set" },
+        "public_commands": { "$ref": "#/$defs/string_set" },
+        "emitted_events": { "$ref": "#/$defs/string_set" },
+        "db_role": { "type": "string", "pattern": "^svc_[a-z][a-z0-9_]*$" }
+      }
+    },
     "lifecycle_status": { "enum": ["active", "retiring", "retired"] },
     "functions": {
       "type": "array", "minItems": 1, "uniqueItems": true,

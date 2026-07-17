@@ -30,6 +30,15 @@ they deploy from the same repository.
 - Never place two independently deployable services in the same directory.
 - Keep adapter `index.ts` as registration only; behavior belongs to its service.
 - Keep module behavior and tests independently understandable and deployable.
+- Never dirty `dev`; all work happens on feature branches or feature worktrees.
+- Follow ADR `0013` before adding services, datasets, source calls, transforms,
+  subscriptions, public contracts, or permissions.
+- Every dataset has exactly one owning service. Other services may read or write
+  that dataset only through the owner's versioned public contracts.
+- Procurement services may call external sources but may not call MoMi-owned
+  services or write domain datasets.
+- Dataset ownership includes database permissions; private tables must become
+  inaccessible to non-owner runtime roles as enforcement hardens.
 - Services may import declared public contracts, never another implementation.
 - Do not create catch-all utility folders or generic shared packages.
 - Extract shared code only for three stable consumers or a security-critical
