@@ -50,6 +50,6 @@ messages only, never source content, model output, credentials, or work tokens.
 
 ## Tests
 
-Run `pnpm run test -- --service communications-archive`. Tests prove exact
+Run `pnpm run test -- --service communications-evaluation`. Tests prove exact
 request parsing, zero model calls without a claim, strict model output,
 idempotent lifecycle RPCs, redacted health/status, and no-work scheduling.

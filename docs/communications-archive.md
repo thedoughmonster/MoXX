@@ -99,7 +99,7 @@ operator may dispatch one exact canary job and read redacted job or queue
 status; these RPCs never return source content or capability tokens.
 Canary activation enables only the exact HTTP route; scheduling stays inactive until both canaries pass.
 Exact input, model output, leases, retries, activation, and neutral routing are
-documented in the [`evaluator function guide`](../services/communications-archive/functions/momi-communications-evaluate-item-v1/README.md).
+documented in the [`evaluator function guide`](../services/communications-evaluation/functions/momi-communications-evaluate-item-v1/README.md).
 
 ## Corrections And Derived Work
 

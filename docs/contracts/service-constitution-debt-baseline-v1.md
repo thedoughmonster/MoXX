@@ -1,14 +1,15 @@
 # Service Constitution Debt Baseline v1
 
-`docs/service-constitution-debt-baseline.json` is the removal-only bootstrap
-allowance for the 12 service manifests that predate ADR `0013`. Its schema is
-`schemas/service-constitution-debt-baseline-v1.schema.json`.
+`docs/service-constitution-debt-baseline.json` was the removal-only bootstrap
+allowance for the 12 service manifests that predated ADR `0013`. Its finding
+set is now empty. The schema retains those historical identities so recurrence
+remains mechanically detectable.
 
 ## Scope
 
-Version 1 accepts only `service_type_missing` for the 12 paths already recorded
-at the constitution cutoff. A new service or a different rule cannot be added.
-Future temporary exceptions require their own explicit, expiring contract.
+Version 1 can describe only the historical `service_type_missing` identities.
+None is currently accepted. A new service or a different rule cannot be added;
+future temporary exceptions require their own explicit, expiring contract.
 
 ## Identity
 

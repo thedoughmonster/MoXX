@@ -2,32 +2,49 @@
   "$schema": "../../schemas/service-manifest-v1.schema.json",
   "schema_version": 1,
   "service_key": "toast-order-hydration",
-  "purpose": "Hydrate durable Toast order work and preserve each complete source response before downstream use.",
+  "purpose": "Hydrate legacy Toast order work and own its transitional control state.",
   "kind": "source_adapter",
+  "service_type": "procurement_adapter",
   "lifecycle_status": "retiring",
   "functions": ["toast-orders-fetch-by-guid-v1"],
   "contracts": {
-    "provides": [
-      "toast.orders.fetch_by_guid.v1",
-      "momi.order_api.invocation_work.v1"
-    ],
-    "consumes": []
+    "provides": ["toast.orders.fetch_by_guid.v1"],
+    "consumes": [
+      { "service": "order-alerting", "contract": "momi.order_api.invocation_work.v1" }
+    ]
   },
   "database": {
     "read": ["toast_hydration", "momi_runtime"],
     "write": ["toast_hydration", "toast_raw", "momi_orders"]
   },
   "network": { "outbound_hosts": ["configured:toast.api_base_url"] },
-  "secrets": [
-    "SUPABASE_DB_URL",
-    "TOAST_CLIENT_ID",
-    "TOAST_CLIENT_SECRET",
-    "MOMI_CODE_COMMIT_SHA",
-    "DENO_DEPLOYMENT_ID"
-  ],
+  "secrets": ["SUPABASE_DB_URL", "TOAST_CLIENT_ID", "TOAST_CLIENT_SECRET"],
+  "configuration": ["MOMI_CODE_COMMIT_SHA", "DENO_DEPLOYMENT_ID"],
+  "deployment": {
+    "owns": [],
+    "depends_on": [
+      { "kind": "postgres_extension", "key": "pg_net" },
+      { "kind": "vault_secret", "key": "momi_project_url" },
+      { "kind": "vault_secret", "key": "momi_publishable_key" }
+    ]
+  },
   "runtime_dependencies": [
     "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
     "npm:postgres@3.4.3"
   ],
-  "approved_packages": []
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "toast.legacy_order_hydration_control",
+    "private_schema": "toast_hydration",
+    "private_relations": [
+      "toast_hydration.api_sources",
+      "toast_hydration.order_hydration_attempts",
+      "toast_hydration.order_hydration_jobs",
+      "toast_hydration.restaurants",
+      "toast_hydration.webhook_order_mappings"
+    ],
+    "public_reads": [],
+    "public_commands": ["toast.orders.fetch_by_guid.v1"],
+    "emitted_events": []
+  }
 }

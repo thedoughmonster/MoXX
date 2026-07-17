@@ -2,7 +2,7 @@
   "function_key": "momi.communications.evaluate_item.v1",
   "contract_version": 1,
   "purpose": "Evaluate one durable communication archive item with a configured model.",
-  "owner_service": "communications-archive",
+  "owner_service": "communications-evaluation",
   "function_type": "coordinator",
   "capability": "decide",
   "boundary": "momi_internal",

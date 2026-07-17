@@ -2,8 +2,9 @@
   "$schema": "../../schemas/service-manifest-v1.schema.json",
   "schema_version": 1,
   "service_key": "momi-event-routing",
-  "purpose": "Route durable source and warehouse event references to one private queue per subscriber.",
+  "purpose": "Route durable event references through owned subscriptions and delivery queues.",
   "kind": "core_capability",
+  "service_type": "event_router",
   "lifecycle_status": "active",
   "functions": ["momi-event-router-v1"],
   "contracts": {
@@ -16,9 +17,46 @@
   },
   "network": { "outbound_hosts": [] },
   "secrets": ["SUPABASE_DB_URL"],
+  "configuration": [],
+  "deployment": {
+    "owns": [
+      { "kind": "cron_job", "key": "momi-event-delivery-retries-v1" },
+      { "kind": "cron_job", "key": "momi-event-routing-wakeup-v1" },
+      { "kind": "cron_job", "key": "momi-expired-delivery-reconcile-v1" },
+      { "kind": "event_subscription", "key": "order-alerting-v1" },
+      { "kind": "event_subscription", "key": "warehouse-projection-toast-v1" },
+      { "kind": "queue", "key": "order_alerting_v1" },
+      { "kind": "queue", "key": "order_alerting_v1_dead_letter" },
+      { "kind": "queue", "key": "warehouse_projection_toast_v1" },
+      { "kind": "queue", "key": "warehouse_projection_toast_v1_dead_letter" }
+    ],
+    "depends_on": [
+      { "kind": "postgres_extension", "key": "pg_cron" },
+      { "kind": "postgres_extension", "key": "pg_net" },
+      { "kind": "postgres_extension", "key": "pgmq" },
+      { "kind": "vault_secret", "key": "momi_project_url" },
+      { "kind": "vault_secret", "key": "momi_publishable_key" }
+    ]
+  },
   "runtime_dependencies": [
     "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
     "npm:postgres@3.4.3"
   ],
-  "approved_packages": []
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "momi.event_routing",
+    "private_schema": "momi_events",
+    "private_relations": [
+      "momi_events.deliveries",
+      "momi_events.events",
+      "momi_events.routing_work",
+      "momi_events.subscriptions"
+    ],
+    "public_reads": [],
+    "public_commands": [
+      "momi.events.delivery_lifecycle.v1",
+      "momi.events.route.v1"
+    ],
+    "emitted_events": []
+  }
 }

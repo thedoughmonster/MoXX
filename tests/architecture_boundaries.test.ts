@@ -9,6 +9,8 @@ import { findServiceGraphViolations } from "../scripts/architecture/find_service
 import { findAuthorityViolations } from "../scripts/architecture/find_authority_violations.ts"
 import { loadWorkspace } from "../scripts/architecture/load_workspace.ts"
 
+const workspace = await loadWorkspace()
+
 function service(
   key: string,
   provides: string[],
@@ -76,8 +78,7 @@ test("rejects contract cycles", () => {
   assert.match(findServiceGraphViolations([alpha, beta]).join("\n"), /cycle/)
 })
 
-test("rejects outbound HTTP without declared authority", async () => {
-  const workspace = await loadWorkspace()
+test("rejects outbound HTTP without declared authority", () => {
   const ingest = service("ingest-service", [])
   const violations = findAuthorityViolations(workspace, [ingest], [{
     path: join(ingest.directory, "src", "send.ts"),
@@ -87,4 +88,17 @@ test("rejects outbound HTTP without declared authority", async () => {
   }])
 
   assert.match(violations.join("\n"), /outbound HTTP is not declared/)
+})
+
+test("accepts declared non-secret runtime configuration", () => {
+  const configured = service("configured-service", [])
+  configured.manifest.configuration = ["MOMI_RUNTIME_MODE"]
+  const violations = findAuthorityViolations(workspace, [configured], [{
+    path: join(configured.directory, "src", "mode.ts"),
+    service_key: "configured-service",
+    source: 'Deno.env.get("MOMI_RUNTIME_MODE")',
+    imports: [],
+  }])
+
+  assert.deepEqual(violations, [])
 })

@@ -1,5 +1,4 @@
 import assert from "node:assert/strict"
-import { createHash } from "node:crypto"
 import { readFile } from "node:fs/promises"
 import test from "node:test"
 
@@ -24,7 +23,7 @@ test("claims, completes, and retries evaluator work through structured RPCs", as
   assert.match(sql, /grant execute on function momi_communications\.claim_evaluation_job_v1/)
 })
 
-test("registers exact dormant evaluator work", async () => {
+test("preserves historical registration while repository ownership moves", async () => {
   const sql = await readFile(new URL(
     "20260717083725_register_communications_evaluator.sql", migrations,
   ), "utf8")
@@ -32,14 +31,15 @@ test("registers exact dormant evaluator work", async () => {
     "../functions/momi-communications-evaluate-item-v1/function.json",
     import.meta.url,
   ), "utf8")
-  const manifestHash = createHash("sha256").update(manifest).digest("hex")
+  const current = JSON.parse(manifest) as { owner_service: string }
   assert.match(sql, /'momi\.communications\.evaluate_item\.v1'/)
   assert.match(sql,
     /'evaluation_job_id',\s*'evaluation_job_id', 'body', true, 'bigint'/)
   assert.match(sql,
     /'capability_token',\s*'capability_token', 'body', true, 'uuid'/)
   assert.match(sql, /'durable\.work_token\.v1', false, 'communications-archive'/)
-  assert.equal(sql.includes(manifestHash), true)
+  assert.equal(current.owner_service, "communications-evaluation")
+  assert.doesNotMatch(sql, /communications-evaluation/)
 })
 
 test("empty scheduled checks cannot invoke the evaluator", async () => {

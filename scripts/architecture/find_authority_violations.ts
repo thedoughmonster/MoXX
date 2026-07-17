@@ -43,9 +43,13 @@ export function findAuthorityViolations(
       continue
     }
     const authority = service.manifest
+    const environment = new Set([
+      ...authority.secrets,
+      ...(authority.configuration ?? []),
+    ])
     for (const match of module.source.matchAll(/Deno\.env\.get\(["']([^"']+)["']\)/g)) {
-      if (!authority.secrets.includes(match[1])) {
-        violations.push(`${module.path}: undeclared secret ${match[1]}`)
+      if (!environment.has(match[1])) {
+        violations.push(`${module.path}: undeclared environment variable ${match[1]}`)
       }
     }
     for (const schema of workspace.database_schemas) {

@@ -17,8 +17,8 @@ for one cohesive capability. It is validated against
 The legacy `kind` remains deployment/catalog metadata. A
 `procurement_adapter` uses `source_adapter`, a `destination_adapter` uses
 `destination_adapter`, and every other `service_type` uses `core_capability`.
-The 12 manifests named by the removal-only constitution debt baseline may omit
-`service_type`; every new service must declare it.
+Every service declares `service_type`; the historical bootstrap allowance is
+empty and recurrence is rejected.
 
 ## Dataset Authority
 
@@ -39,6 +39,13 @@ relation cannot be claimed inside another service's declared private schema.
 Every public read or command must also appear in the owner's
 `contracts.provides`. Database roles are validated when present but become
 mandatory only with the later role-and-grant migration.
+
+The constitution replays ordered migration DDL and requires every current
+application table and view to appear in exactly one `private_relations` set.
+Renames, schema moves, drops, and replacements are applied in migration order.
+This proves declaration completeness and uniqueness. It does not attest hosted
+roles, grants, or removal of the transition-period direct accesses identified
+by ADR `0014`.
 
 ## Contracts
 
