@@ -1,94 +1,9 @@
 {
   "$schema": "https://momi.local/schemas/service-constitution-debt-baseline-v1.schema.json",
   "schema_version": 1,
-  "generated_from": "dev@8c6eb4f",
+  "generated_from": "dev@e53afcf",
   "notes": [
-    "Removal-only baseline for the exact services that predate constitution declarations."
+    "The historical declaration bootstrap is complete; no constitution finding is exempt."
   ],
-  "findings": [
-    {
-      "rule_version": 1, "rule_id": "service_type_missing",
-      "subject": "services/communications-archive/service.json",
-      "evidence": { "service_key": "communications-archive" },
-      "fingerprint": "sha256:e7bb1ff4214acfe2cbc4d583b9ec21f8137cadca091ee12b570a30d9a99a57e6",
-      "summary": "Service manifest does not declare service_type."
-    },
-    {
-      "rule_version": 1, "rule_id": "service_type_missing",
-      "subject": "services/momi-event-routing/service.json",
-      "evidence": { "service_key": "momi-event-routing" },
-      "fingerprint": "sha256:4bb065995ef400e0a6b98a79580143b36485a3ca865290def983f9c7ce3c528d",
-      "summary": "Service manifest does not declare service_type."
-    },
-    {
-      "rule_version": 1, "rule_id": "service_type_missing",
-      "subject": "services/order-alerting/service.json",
-      "evidence": { "service_key": "order-alerting" },
-      "fingerprint": "sha256:7da984aa84694dbfabb8e7bfa0f8b3750f8575078ac8af1a893ab6d9e2399ba6",
-      "summary": "Service manifest does not declare service_type."
-    },
-    {
-      "rule_version": 1, "rule_id": "service_type_missing",
-      "subject": "services/slack-order-delivery/service.json",
-      "evidence": { "service_key": "slack-order-delivery" },
-      "fingerprint": "sha256:72b1d03471cd0a252b2f93f4295f785dc35b4afd2ccdb39d449a21d26b23f6a2",
-      "summary": "Service manifest does not declare service_type."
-    },
-    {
-      "rule_version": 1, "rule_id": "service_type_missing",
-      "subject": "services/toast-data-acquisition/service.json",
-      "evidence": { "service_key": "toast-data-acquisition" },
-      "fingerprint": "sha256:55794690afb6b37ecab149c633cd7a84368f3415edd4ebba71dca41e2cad877b",
-      "summary": "Service manifest does not declare service_type."
-    },
-    {
-      "rule_version": 1, "rule_id": "service_type_missing",
-      "subject": "services/toast-order-hydration/service.json",
-      "evidence": { "service_key": "toast-order-hydration" },
-      "fingerprint": "sha256:b96286fa3189c839a882fd47187469e1053379dd948bdd862c05cb37e829dbf2",
-      "summary": "Service manifest does not declare service_type."
-    },
-    {
-      "rule_version": 1, "rule_id": "service_type_missing",
-      "subject": "services/toast-order-ingest/service.json",
-      "evidence": { "service_key": "toast-order-ingest" },
-      "fingerprint": "sha256:61f654a0200f12a1c199f66009d9cc923fc13655060b5d447b93cd0dfd2bd338",
-      "summary": "Service manifest does not declare service_type."
-    },
-    {
-      "rule_version": 1, "rule_id": "service_type_missing",
-      "subject": "services/toast-order-read-api/service.json",
-      "evidence": { "service_key": "toast-order-read-api" },
-      "fingerprint": "sha256:03f1e1b6e4e932c01db81045e93d40dde67e4d031919c8e66c09ff2886edf260",
-      "summary": "Service manifest does not declare service_type."
-    },
-    {
-      "rule_version": 1, "rule_id": "service_type_missing",
-      "subject": "services/toast-stock-ingest/service.json",
-      "evidence": { "service_key": "toast-stock-ingest" },
-      "fingerprint": "sha256:26535cb553f4b80da98630d91733fe75a39ec3fb4fcc723cabacab5d8b6e1014",
-      "summary": "Service manifest does not declare service_type."
-    },
-    {
-      "rule_version": 1, "rule_id": "service_type_missing",
-      "subject": "services/toast-webhook-ingestion/service.json",
-      "evidence": { "service_key": "toast-webhook-ingestion" },
-      "fingerprint": "sha256:ad37ee7a3e858462904b3c11bfb9251763d50aa23774a90ddf21e3c4f267c407",
-      "summary": "Service manifest does not declare service_type."
-    },
-    {
-      "rule_version": 1, "rule_id": "service_type_missing",
-      "subject": "services/warehouse-projection/service.json",
-      "evidence": { "service_key": "warehouse-projection" },
-      "fingerprint": "sha256:7423605e10cea29eb72fe554daa9c163bf34dbe29c2eb3bc174800f79aa2beac",
-      "summary": "Service manifest does not declare service_type."
-    },
-    {
-      "rule_version": 1, "rule_id": "service_type_missing",
-      "subject": "services/warehouse-read-api/service.json",
-      "evidence": { "service_key": "warehouse-read-api" },
-      "fingerprint": "sha256:b4311a4277a7a0a5da7c6da4abf31230ca21d8f7a43aece10b2a7d63a92975e5",
-      "summary": "Service manifest does not declare service_type."
-    }
-  ]
+  "findings": []
 }

@@ -2,41 +2,81 @@
   "$schema": "../../schemas/service-manifest-v1.schema.json",
   "schema_version": 1,
   "service_key": "warehouse-projection",
-  "purpose": "Project durable Toast source events into canonical warehouse records.",
+  "purpose": "Own the canonical warehouse and project durable raw evidence into it.",
   "kind": "core_capability",
+  "service_type": "dataset_owner",
   "lifecycle_status": "active",
   "functions": ["momi-warehouse-projection-worker-v1"],
   "contracts": {
     "provides": ["momi.warehouse_projection.toast.consume.v1"],
     "consumes": [
-      {
-        "service": "momi-event-routing",
-        "contract": "momi.events.delivery_lifecycle.v1"
-      }
+      { "service": "momi-event-routing", "contract": "momi.events.delivery_lifecycle.v1" }
     ]
   },
   "database": {
     "read": [
-      "legacy_recipe_staging",
-      "momi_api",
-      "momi_events",
-      "toast_acquisition",
-      "toast_raw",
-      "warehouse_projection"
+      "legacy_recipe_staging", "momi_api", "momi_events", "toast_acquisition",
+      "toast_raw", "warehouse_projection"
     ],
     "write": [
-      "legacy_recipe_staging",
-      "momi_events",
-      "momi_warehouse",
-      "toast_acquisition",
-      "warehouse_projection"
+      "legacy_recipe_staging", "momi_events", "momi_warehouse",
+      "toast_acquisition", "warehouse_projection"
     ]
   },
   "network": { "outbound_hosts": [] },
   "secrets": ["SUPABASE_DB_URL"],
+  "configuration": [],
+  "deployment": {
+    "owns": [
+      { "kind": "cron_job", "key": "momi-warehouse-projection-database-v1" },
+      { "kind": "cron_job", "key": "momi-warehouse-projection-wakeup-v1" },
+      { "kind": "database_processor", "key": "warehouse_projection.process_delivery_batch" }
+    ],
+    "depends_on": [
+      { "kind": "postgres_extension", "key": "pg_cron" },
+      { "kind": "postgres_extension", "key": "pg_net" },
+      { "kind": "postgres_extension", "key": "pgmq" },
+      { "kind": "vault_secret", "key": "momi_project_url" },
+      { "kind": "vault_secret", "key": "momi_publishable_key" }
+    ]
+  },
   "runtime_dependencies": [
     "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
     "npm:postgres@3.4.3"
   ],
-  "approved_packages": []
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "momi.canonical_warehouse",
+    "private_relations": [
+      "momi_api.employees_by_id_v1",
+      "momi_api.menu_entities_by_id_v1",
+      "momi_api.order_versions_by_id_v1",
+      "momi_api.orders_by_id_v1",
+      "momi_api.payments_by_id_v1",
+      "momi_api.schedules_by_id_v1",
+      "momi_api.stock_observations_latest_v1",
+      "momi_api.toast_order_alert_presentations_v1",
+      "momi_api.toast_order_source_versions_v1",
+      "momi_api.toast_orders_by_id_v1",
+      "momi_api.warehouse_entities_by_id_v1",
+      "momi_warehouse.entities",
+      "momi_warehouse.entity_versions",
+      "momi_warehouse.menu_universe_items",
+      "momi_warehouse.menu_universe_observations",
+      "momi_warehouse.menu_universe_versions",
+      "momi_warehouse.source_links",
+      "momi_warehouse.stock_observations",
+      "momi_warehouse.version_observations",
+      "warehouse_projection.canonical_resource_replay_v2",
+      "warehouse_projection.delivery_reservations",
+      "warehouse_projection.worker_settings"
+    ],
+    "public_reads": [],
+    "public_commands": ["momi.warehouse_projection.toast.consume.v1"],
+    "emitted_events": [
+      "warehouse.order.archived",
+      "warehouse.order.observed",
+      "warehouse.order.reconciled"
+    ]
+  }
 }

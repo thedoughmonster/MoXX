@@ -20,9 +20,10 @@ webhook-to-Slack path and accepts no new acquisition responsibilities.
 
 ## Contracts
 
-The service provides the complete source operation plus
-`momi.order_api.invocation_work.v1` after persistence. Its durable jobs are
-created only by a separately approved reconciliation or operator workflow.
+The service provides the complete source operation and consumes the
+order-alerting owner's `momi.order_api.invocation_work.v1` handoff. Its durable
+jobs are created only by a separately approved reconciliation or operator
+workflow.
 
 ## Authority
 

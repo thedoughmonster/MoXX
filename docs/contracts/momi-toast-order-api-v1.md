@@ -2,10 +2,11 @@
 
 ## Purpose
 
-This is MoMi's Toast-specific owned read boundary. It returns one exact,
-complete Toast order version already saved in the warehouse. The version may
-come from a webhook or approved hydration. The API never calls Toast, chooses
-alert behavior, or reads a raw table directly.
+This is MoMi's retiring Toast-specific read facade. It returns one exact,
+complete Toast order version already captured by MoMi. The version may come
+from a webhook or approved hydration. The API owns authorization and routing,
+not the source or projection dataset; it never calls Toast, chooses alert
+behavior, or reads a raw table directly.
 
 The Toast name is intentional: the response payload is Toast's complete order
 document. A future Square reader will have its own contract while sharing the
@@ -29,11 +30,12 @@ never an order document received directly from Toast.
 
 ## Warehouse Contract
 
-The function reads `momi_api.toast_orders_by_id_v1`, whose active registration
-must match this contract. The row must match the immutable source version and
-location recorded on `momi_orders.api_invocation_work`. The underlying approved
-view can expose a complete webhook `details.order` object or a complete
-hydrated resource without changing this API contract.
+The function reads the warehouse-projection-owned
+`momi_api.toast_orders_by_id_v1`, whose active registration must match this
+contract. The row must match the immutable source version and location recorded
+on `momi_orders.api_invocation_work`. The underlying approved view can expose a
+complete webhook `details.order` object or a complete hydrated resource without
+changing this API contract.
 
 The view reads a complete Toast order resource version and exposes:
 

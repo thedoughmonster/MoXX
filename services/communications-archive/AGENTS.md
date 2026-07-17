@@ -1,16 +1,13 @@
 # Communications Archive Rules
 
-- Own channel-neutral communication capture and durable evaluation only.
+- Own immutable generic JSON evidence and source provenance only.
 - Preserve complete source payloads and source metadata before evaluation.
 - Treat archive items as immutable after insert.
-- Keep corrections, evaluations, and derived records separate from source items.
+- Keep evaluation and derived records under `communications-evaluation`.
 - Do not implement source adapters beyond the OpenAI/ChatGPT capture contract.
 - Capture functions must not call models, source APIs, or destination APIs.
-- Only the evaluator may call `api.openai.com`, and only after claiming exact
-  durable work with its capability token.
+- Never call a model, source API, or destination API.
 - Do not call Slack, ClickUp, GitHub, email, SMS, hardware, or destination APIs.
 - Use structured capture functions; do not grant agents direct table writes.
-- Queue evaluator work durably and idempotently from the capture transaction.
-- An empty evaluator dispatch must make no Edge Function or model request.
-- Keep routing recommendations destination-neutral; delivery belongs elsewhere.
+- Hand evaluation work to the evaluation owner's versioned contract.
 - Mark operational notes as conversation syntheses; never present them as raw turns.

@@ -1,0 +1,61 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "communications-evaluation",
+  "purpose": "Evaluate immutable communication evidence into durable structured decisions.",
+  "kind": "core_capability",
+  "service_type": "dataset_owner",
+  "lifecycle_status": "active",
+  "functions": ["momi-communications-evaluate-item-v1"],
+  "contracts": {
+    "provides": [
+      "momi.communications.dispatch_evaluation_job.v1",
+      "momi.communications.evaluate_item.v1",
+      "momi.communications.get_evaluation_job_status.v1",
+      "momi.communications.get_evaluation_queue_status.v1"
+    ],
+    "consumes": []
+  },
+  "database": {
+    "read": ["momi_communications"],
+    "write": ["momi_communications"]
+  },
+  "network": { "outbound_hosts": ["api.openai.com"] },
+  "secrets": ["SUPABASE_DB_URL", "OPENAI_API_KEY"],
+  "configuration": ["MOMI_COMMUNICATIONS_EVALUATOR_MODEL"],
+  "deployment": {
+    "owns": [
+      { "kind": "cron_job", "key": "momi-communications-evaluator-wakeup-v1" }
+    ],
+    "depends_on": [
+      { "kind": "postgres_extension", "key": "pg_cron" },
+      { "kind": "postgres_extension", "key": "pg_net" },
+      { "kind": "vault_secret", "key": "momi_project_url" },
+      { "kind": "vault_secret", "key": "momi_publishable_key" }
+    ]
+  },
+  "runtime_dependencies": [
+    "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
+    "npm:postgres@3.4.3"
+  ],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "momi.communication_evaluation",
+    "private_relations": [
+      "momi_communications.audit_events",
+      "momi_communications.communication_evaluations",
+      "momi_communications.corrections",
+      "momi_communications.derived_records",
+      "momi_communications.evaluation_jobs"
+    ],
+    "public_reads": [
+      "momi.communications.get_evaluation_job_status.v1",
+      "momi.communications.get_evaluation_queue_status.v1"
+    ],
+    "public_commands": [
+      "momi.communications.dispatch_evaluation_job.v1",
+      "momi.communications.evaluate_item.v1"
+    ],
+    "emitted_events": []
+  }
+}
