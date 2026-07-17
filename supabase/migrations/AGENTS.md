@@ -2,6 +2,11 @@
 
 - Create migration files with `supabase migration new`; never invent timestamps.
 - Applied migrations are immutable.
+- Keep this directory flat. Only this `AGENTS.md` and migration SQL belong here.
+- Put exactly one `-- service-owner: <service-key>` header on physical line 1
+  of each migration not present in the production baseline; never rewrite
+  legacy history to add one.
+- Keep migration paths as regular, non-executable `.sql` files.
 - One data source owns one raw schema; Toast owns `toast_raw`.
 - Raw schemas contain source-preserving records and ingestion metadata only.
 - Do not create cross-source foreign keys.

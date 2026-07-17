@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://momi.local/schemas/service-constitution-debt-baseline-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema", "schema_version", "generated_from", "notes", "findings"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "https://momi.local/schemas/service-constitution-debt-baseline-v1.schema.json"
+    },
+    "schema_version": { "const": 1 },
+    "generated_from": { "type": "string", "pattern": "^dev@[0-9a-f]{7,40}$" },
+    "notes": {
+      "type": "array", "minItems": 1,
+      "items": { "type": "string", "minLength": 20 }
+    },
+    "findings": {
+      "type": "array", "maxItems": 12,
+      "items": { "$ref": "#/$defs/finding" }
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "rule_version", "rule_id", "subject", "evidence", "fingerprint", "summary"
+      ],
+      "properties": {
+        "rule_version": { "const": 1 },
+        "rule_id": { "const": "service_type_missing" },
+        "subject": {
+          "enum": [
+            "services/communications-archive/service.json",
+            "services/momi-event-routing/service.json",
+            "services/order-alerting/service.json",
+            "services/slack-order-delivery/service.json",
+            "services/toast-data-acquisition/service.json",
+            "services/toast-order-hydration/service.json",
+            "services/toast-order-ingest/service.json",
+            "services/toast-order-read-api/service.json",
+            "services/toast-stock-ingest/service.json",
+            "services/toast-webhook-ingestion/service.json",
+            "services/warehouse-projection/service.json",
+            "services/warehouse-read-api/service.json"
+          ]
+        },
+        "evidence": {
+          "type": "object", "additionalProperties": false,
+          "required": ["service_key"],
+          "properties": {
+            "service_key": {
+              "enum": [
+                "communications-archive", "momi-event-routing", "order-alerting",
+                "slack-order-delivery", "toast-data-acquisition",
+                "toast-order-hydration", "toast-order-ingest",
+                "toast-order-read-api", "toast-stock-ingest",
+                "toast-webhook-ingestion", "warehouse-projection", "warehouse-read-api"
+              ]
+            }
+          }
+        },
+        "fingerprint": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "summary": { "type": "string", "minLength": 10 }
+      }
+    }
+  }
+}

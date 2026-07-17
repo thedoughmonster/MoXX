@@ -1,23 +1,50 @@
 # Service Manifest v1
 
 Each `services/<service-key>/service.json` is the enforceable authority record
-for one cohesive business capability. It is validated against
+for one cohesive capability. It is validated against
 `schemas/service-manifest-v1.schema.json`.
 
 ## Identity
 
 - `service_key` is the stable directory and ownership key.
 - `purpose` explains the capability in one sentence.
-- `kind` is `source_adapter`, `core_capability`, or `destination_adapter`.
 - `lifecycle_status` is `active`, `retiring`, or `retired`.
 - `functions` lists every Edge Function slug owned by the service.
+- `service_type` uses the seven types accepted by ADR `0013`.
+
+The legacy `kind` remains deployment/catalog metadata. A
+`procurement_adapter` uses `source_adapter`, a `destination_adapter` uses
+`destination_adapter`, and every other `service_type` uses `core_capability`.
+The 12 manifests named by the removal-only constitution debt baseline may omit
+`service_type`; every new service must declare it.
+
+## Dataset Authority
+
+A service may declare `owned_dataset` as one object rather than a list, but it
+must first declare `service_type`. A `dataset_owner` must declare the object;
+other state-owning types may use it for their constitution-defined state. It has:
+
+- one canonical dotted `dataset_key`;
+- optional `private_schema` and `db_role` declarations;
+- exact `schema.relation` entries in `private_relations`;
+- versioned contract keys ending in `.vN` for `public_reads` and
+  `public_commands`;
+- exact event keys in `emitted_events`.
+
+Dataset keys, database roles, private schemas, private relations, contract
+providers, and event producers are globally unique when declared. A private
+relation cannot be claimed inside another service's declared private schema.
+Every public read or command must also appear in the owner's
+`contracts.provides`. Database roles are validated when present but become
+mandatory only with the later role-and-grant migration.
 
 ## Contracts
 
 `contracts.provides` lists versioned public contracts owned by the service.
 `contracts.consumes` identifies both provider and contract. Consumers may
 import only a provider's declared public contract files, never implementation.
-The architecture check rejects missing providers and dependency cycles.
+The checks reject duplicate providers, missing providers, and dependency
+cycles.
 
 ## Authority
 
@@ -33,5 +60,6 @@ cross-service contracts require an accepted ADR.
 
 ## Verification
 
-Run `npm run check -- --service <service-key>` after changing a service or its
-manifest. Run `npm run catalog:generate` when identity or ownership changes.
+Run `pnpm constitution:check` for the ownership law and
+`npm run check -- --service <service-key>` for the complete service gate. Run
+`npm run catalog:generate` when identity or function ownership changes.

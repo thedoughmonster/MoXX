@@ -33,6 +33,7 @@ they deploy from the same repository.
 - Never dirty `dev`; all work happens on feature branches or feature worktrees.
 - Follow ADR `0013` before adding services, datasets, source calls, transforms,
   subscriptions, public contracts, or permissions.
+- Never add new findings to the constitution debt baseline; remove fixed entries.
 - Every dataset has exactly one owning service. Other services may read or write
   that dataset only through the owner's versioned public contracts.
 - Procurement services may call external sources but may not call MoMi-owned
@@ -48,7 +49,8 @@ they deploy from the same repository.
 - Keep one ordered Supabase migration history in this repository.
 - Do not split migrations into a repository separate from the code they support.
 - Never modify or delete a migration already present on `prod`.
-- Begin every new migration with `-- service-owner: <service-key>`.
+- Keep `supabase/migrations/` flat; only `AGENTS.md` and migration SQL belong there.
+- Start each migration absent from production with one `-- service-owner: <service-key>` header.
 - Never deploy with `--prune`; retire hosted functions through an expiring
   manifest and explicit caller-verified removal.
 - GitHub Actions is the sole authority for repository code and Edge Function

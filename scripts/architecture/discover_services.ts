@@ -8,15 +8,20 @@ import { serviceSchemaPath, workspaceRoot } from "./paths.ts"
 
 export async function discoverServices(
   servicesPath: string,
+  rootPath = workspaceRoot,
 ): Promise<LoadedService[]> {
-  const root = join(workspaceRoot, servicesPath)
+  const root = join(rootPath, servicesPath)
   const entries = await readdir(root, { withFileTypes: true })
   const schema = await readJson<object>(serviceSchemaPath)
   const services: LoadedService[] = []
 
   for (const entry of entries) {
+    const subject = `${servicesPath}/${entry.name}`
+    if (entry.isSymbolicLink()) {
+      throw new Error(`${subject}: service directory must not be a symlink`)
+    }
     if (!entry.isDirectory()) {
-      continue
+      throw new Error(`${subject}: services may contain only service directories`)
     }
     const directory = join(root, entry.name)
     const manifest = await readJson<ServiceManifest>(

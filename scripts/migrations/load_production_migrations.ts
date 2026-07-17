@@ -1,29 +1,22 @@
-import { execFileSync } from "node:child_process"
+import { spawnSync } from "node:child_process"
+
+import { parseProductionMigrationTree } from
+  "./parse_production_migration_tree.ts"
 
 export function loadProductionMigrations(
   migrationPath: string,
 ): Map<string, string> {
   const requested = process.env.MOMI_PROD_REF
-  const candidates = requested ? [requested] : ["origin/prod", "prod"]
-  for (const reference of candidates) {
-    try {
-      const output = execFileSync(
-        "git",
-        ["ls-tree", "-r", "--name-only", reference, "--", migrationPath],
-        { encoding: "utf8" },
-      )
-      const files = output.split(/\r?\n/).filter((path) => path.endsWith(".sql"))
-      const sources = new Map<string, string>()
-      for (const path of files) {
-        const source = execFileSync("git", ["show", `${reference}:${path}`], {
-          encoding: "utf8",
-        })
-        sources.set(path.split("/").at(-1)!, source)
-      }
-      return sources
-    } catch {
-      continue
-    }
+  if (requested && requested !== "origin/prod") {
+    throw new Error("MOMI_PROD_REF must be origin/prod")
   }
-  throw new Error("Unable to read the production migration baseline")
+  const result = spawnSync(
+    "git",
+    ["ls-tree", "-r", "origin/prod", "--", migrationPath],
+    { encoding: "utf8", maxBuffer: 8 * 1024 * 1024 },
+  )
+  if (result.status !== 0 || !result.stdout) {
+    throw new Error("Unable to read the production migration baseline")
+  }
+  return parseProductionMigrationTree(result.stdout, migrationPath)
 }
