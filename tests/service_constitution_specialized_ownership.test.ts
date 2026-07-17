@@ -87,3 +87,28 @@ test("a specialized service cannot declare multiple owned datasets", async () =>
     owned_dataset: [manifest.owned_dataset, manifest.owned_dataset],
   }, "fixture"))
 })
+
+test("operational units have one owner and typed dependency direction", () => {
+  const router = specializedService("router-owner", "event_router", "fixture.router")
+  const destination = specializedService(
+    "destination-owner", "destination_adapter", "fixture.destination",
+  )
+  router.manifest.deployment = {
+    owns: [{ kind: "queue", key: "shared_work" }],
+    depends_on: [{ kind: "queue", key: "wrong_direction" }],
+  }
+  destination.manifest.deployment = {
+    owns: [
+      { kind: "queue", key: "shared_work" },
+      { kind: "postgres_extension", key: "pgmq" },
+    ],
+    depends_on: [],
+  }
+  const rules = findServiceConstitutionFindings([router, destination])
+    .map((finding) => finding.rule_id)
+  assert.deepEqual(rules, [
+    "deployment_dependency_kind_invalid",
+    "deployment_owned_kind_invalid",
+    "operational_unit_owner_duplicate",
+  ])
+})

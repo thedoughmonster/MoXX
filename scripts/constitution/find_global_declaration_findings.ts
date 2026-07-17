@@ -14,6 +14,7 @@ export function findGlobalDeclarationFindings(
   const relations: ConstitutionDeclaration[] = []
   const contracts: ConstitutionDeclaration[] = []
   const events: ConstitutionDeclaration[] = []
+  const operationalUnits: ConstitutionDeclaration[] = []
   for (const service of services) {
     const key = service.manifest.service_key
     const dataset = service.manifest.owned_dataset
@@ -33,6 +34,9 @@ export function findGlobalDeclarationFindings(
     for (const value of service.manifest.contracts.provides) {
       contracts.push({ service_key: key, value })
     }
+    for (const unit of service.manifest.deployment?.owns ?? []) {
+      operationalUnits.push({ service_key: key, value: `${unit.kind}:${unit.key}` })
+    }
   }
   const findings = [
     ...findDuplicateDeclarations("dataset_key_duplicate", "dataset", "Dataset", datasets),
@@ -41,6 +45,12 @@ export function findGlobalDeclarationFindings(
     ...findDuplicateDeclarations("private_relation_duplicate", "relation", "Private relation", relations),
     ...findDuplicateDeclarations("contract_provider_duplicate", "contract", "Contract", contracts),
     ...findDuplicateDeclarations("event_producer_duplicate", "event", "Event", events),
+    ...findDuplicateDeclarations(
+      "operational_unit_owner_duplicate",
+      "operational-unit",
+      "Operational unit",
+      operationalUnits,
+    ),
   ]
   const schemaOwners = new Map<string, Set<string>>()
   for (const declaration of schemas) {

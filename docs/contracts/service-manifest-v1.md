@@ -12,6 +12,8 @@ for one cohesive capability. It is validated against
 - `functions` lists every Edge Function slug owned by the service.
 - `service_type` uses the seven types accepted by ADR `0013`.
 
+`functions` may be empty for a database-only owner or a fully retired service.
+
 The legacy `kind` remains deployment/catalog metadata. A
 `procurement_adapter` uses `source_adapter`, a `destination_adapter` uses
 `destination_adapter`, and every other `service_type` uses `core_capability`.
@@ -57,6 +59,19 @@ cycles.
 Empty authority arrays are deliberate and must remain present. New external
 network authority, schema ownership, shared packages, services, and
 cross-service contracts require an accepted ADR.
+
+## Deployment And Configuration
+
+`deployment.owns` declares exact operational units owned by the service:
+database processors, cron jobs, queues, and event subscriptions. Each declared
+unit has a typed `kind` and stable `key`, and no two services may own the same
+unit. `deployment.depends_on` declares shared PostgreSQL extensions and exact
+Vault secret names without assigning ownership of that infrastructure.
+
+`configuration` lists non-secret runtime settings separately from `secrets`.
+These fields remain optional during the constitution bootstrap, but a new
+database-only service uses an empty `functions` list and declares its owned
+operational units before implementation.
 
 ## Verification
 

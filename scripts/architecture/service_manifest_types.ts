@@ -16,3 +16,21 @@ export type OwnedDataset = {
   emitted_events?: string[]
   db_role?: string
 }
+
+export type DeploymentUnitKind =
+  | "database_processor"
+  | "cron_job"
+  | "queue"
+  | "event_subscription"
+  | "postgres_extension"
+  | "vault_secret"
+
+export type DeploymentUnit = {
+  kind: DeploymentUnitKind
+  key: string
+}
+
+export type ServiceDeployment = {
+  owns: DeploymentUnit[]
+  depends_on: DeploymentUnit[]
+}
