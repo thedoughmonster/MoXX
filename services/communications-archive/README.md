@@ -41,8 +41,9 @@ records, and audit evidence. Failures retry with backoff and eventually become
 dead letters. ClickUp and GitHub delivery are intentionally separate.
 
 The registry route and schedule ship inactive. After the hosted function has
-the `OPENAI_API_KEY` and `MOMI_COMMUNICATIONS_EVALUATOR_MODEL` secrets, activate
-them through a later owned migration.
+the `OPENAI_API_KEY` and `MOMI_COMMUNICATIONS_EVALUATOR_MODEL` secrets, the
+canary migration activates only the exact route. It explicitly leaves the
+30-second schedule inactive until controlled canaries pass.
 
 `dispatch_evaluation_job_v1` wakes one exact due job for a controlled canary.
 `get_evaluation_job_status_v1` and `get_evaluation_queue_status_v1` expose only

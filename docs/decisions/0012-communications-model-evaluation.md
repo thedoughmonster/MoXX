@@ -42,6 +42,10 @@ The function registry entry, trigger route, and schedule are created inactive.
 They may be activated only after the matching hosted function and required
 secrets have been deployed and probed in that environment.
 
+Activation uses separate migrations. The first enables only the function and
+exact HTTP trigger for service-role canaries and keeps the cron job inactive.
+Scheduling may be enabled only after those canaries pass.
+
 Health fails closed when runtime settings are absent. Service-role operators
 may dispatch one exact due job and read redacted job or queue state for canary
 verification; these contracts never return source content or work tokens.

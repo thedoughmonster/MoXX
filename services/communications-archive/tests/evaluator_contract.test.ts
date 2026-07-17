@@ -72,6 +72,19 @@ test("exposes only redacted service-role evaluator operations", async () => {
   assert.doesNotMatch(statusSql, /raw_text|payload|source_metadata/)
 })
 
+test("activates only the evaluator canary route", async () => {
+  const sql = await readFile(new URL(
+    "20260717115647_activate_communications_evaluator_canary_route.sql", migrations,
+  ), "utf8")
+  assert.match(sql, /update momi_runtime\.function_registry/)
+  assert.match(sql, /update momi_runtime\.function_trigger_registry/)
+  assert.match(sql, /'momi\.communications\.evaluate_item\.http\.v1'/)
+  assert.match(sql, /cron\.alter_job\(job_id := jobid, active := false\)/)
+  assert.match(sql, /not active and schedule = '30 seconds'/)
+  assert.doesNotMatch(sql,
+    /cron\.alter_job\(job_id := jobid, active := true\)/)
+})
+
 test("limits evaluator network authority to the OpenAI Responses API", async () => {
   const service = JSON.parse(await readFile(new URL("../service.json", import.meta.url),
     "utf8")) as Record<string, Record<string, string[]>>
