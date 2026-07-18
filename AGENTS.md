@@ -103,8 +103,8 @@ they deploy from the same repository.
 - Do not add relationship columns solely to make joins easier.
 - Build joins and projections as explicitly named, versioned database views.
 - Treat the Toast event GUID as the delivery idempotency key.
-- Store runtime secrets in Supabase, deployment secrets in GitHub, and local
-  CLI credentials in Windows Credential Manager. Never duplicate them in Git.
+- Store runtime secrets in Supabase, deployment secrets in GitHub, and local CLI credentials in the approved release host's credential store.
+- Expose the database password only as `SUPABASE_DB_PASSWORD` during a release; never duplicate credentials in Git.
 
 ## Change Sequence
 

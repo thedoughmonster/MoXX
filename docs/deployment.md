@@ -11,10 +11,11 @@ pnpm release:dev
 pnpm release:prod
 ```
 
-Both commands require a clean worktree and secure CLI sign-in. Development may
-start on a committed feature branch based on current `dev`, or on `dev` when
-resuming an already merged release. Production must start on clean, current
-`dev`. Neither command commits unknown work.
+Both commands require a clean worktree, secure CLI sign-in, access to the exact
+target project, and a transient `SUPABASE_DB_PASSWORD`. Development may start
+on a committed feature branch based on current `dev`, or on `dev` when resuming
+an already merged release. Production must start on clean, current `dev`.
+Neither command commits unknown work.
 
 The development command owns feature PR creation and merge, exact-commit
 validation, migration preview/apply/parity, and GitHub workflow dispatch. The
@@ -67,10 +68,12 @@ non-executable `.sql` files.
 
 ## Credentials
 
-The permanent local Supabase CLI token is stored by the CLI in Windows
-Credential Manager. GitHub environment secrets authorize GitHub's function
-deployment. Supabase project secrets authorize runtime integrations. No token
-value belongs in a repository file, `.env`, command log, or release record.
+The permanent local Supabase CLI token is stored by the CLI on the approved
+release host. The database password is supplied only through the release
+process's `SUPABASE_DB_PASSWORD` environment. GitHub environment secrets
+authorize GitHub's function deployment. Supabase project secrets authorize
+runtime integrations. No credential value belongs in a repository file,
+`.env`, command log, or release record.
 
 ## Retirement
 

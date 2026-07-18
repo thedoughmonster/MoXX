@@ -2,6 +2,8 @@
 
 - Status: accepted
 - Date: 2026-07-14
+- Amendment: the authoritative Linux release host must use an exact-project
+  account token and password-authenticated IPv4 session-pooler connection.
 
 ## Context
 
@@ -29,6 +31,12 @@ The local account token stays in Windows Credential Manager. GitHub deployment
 tokens stay in protected GitHub secrets, and runtime secrets stay in Supabase.
 The local token is not duplicated into Supabase because doing so is circular and
 would expose account-management authority to project runtime.
+
+On the authoritative Linux release host, the account token stays in the
+Supabase CLI credential store and the database password is injected only as
+`SUPABASE_DB_PASSWORD` for the release process. Preflight must prove that the
+account can enumerate the exact target project. The password forces the normal
+TLS session-pooler path and prevents fallback to a temporary CLI login role.
 
 This supersedes ADR `0006` only where it paused migrations and required the
 development function workflow itself to use a push event.

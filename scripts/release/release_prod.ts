@@ -7,7 +7,7 @@ import { waitForPullRequest } from "./wait_for_pull_request.ts"
 import { waitForWorkflow } from "./wait_for_workflow.ts"
 
 export async function releaseProd(): Promise<void> {
-  const preflight = assertReleasePreflight("prod")
+  const preflight = await assertReleasePreflight("prod")
   const productionBefore = runCommand("git", ["rev-parse", "origin/prod"], {
     capture: true,
   }).stdout.trim()
