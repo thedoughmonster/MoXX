@@ -7,29 +7,30 @@ import { linkProject } from "../deploy/link_project.ts"
 import { runSupabase } from "../deploy/run_supabase.ts"
 import type { EnvironmentKey } from "../deploy/types.ts"
 import { assertMigrationParity } from "./assert_migration_parity.ts"
+import { assertSupabaseDbPassword } from "./assert_supabase_db_password.ts"
+import { migrationDatabaseUrl } from "./migration_database_url.ts"
 
 export async function applyMigrations(environment: EnvironmentKey): Promise<void> {
   const workspace = await loadWorkspace()
   const projectRef = workspace.environments[environment].project_ref
+  const databasePassword = assertSupabaseDbPassword()
   console.log(`Linking ${environment} database through the IPv4 session pooler...`)
   linkProject(projectRef)
-  const pooler = readFileSync(
+  const databaseUrl = migrationDatabaseUrl(readFileSync(
     join(workspaceRoot, "supabase", ".temp", "pooler-url"),
     "utf8",
-  ).trim()
-  if (!/\.pooler\.supabase\.com:5432\/postgres$/.test(pooler)) {
-    throw new Error("Supabase did not select the IPv4 session pooler")
-  }
+  ).trim(), projectRef)
   runSupabase([
-    "db", "push", "--linked", "--dry-run", "--yes",
+    "db", "push", "--db-url", databaseUrl, "--dry-run", "--yes",
     "--workdir", workspaceRoot,
-  ])
+  ], false, databasePassword)
   runSupabase([
-    "db", "push", "--linked", "--yes", "--workdir", workspaceRoot,
-  ])
-  const linked = runSupabase([
-    "db", "query", "--linked", "--workdir", workspaceRoot, "--output", "json",
+    "db", "push", "--db-url", databaseUrl, "--yes", "--workdir", workspaceRoot,
+  ], false, databasePassword)
+  const hosted = runSupabase([
+    "db", "query", "--db-url", databaseUrl,
+    "--workdir", workspaceRoot, "--output", "json",
     "select version from supabase_migrations.schema_migrations order by version",
-  ], true)
-  assertMigrationParity(linked)
+  ], true, databasePassword)
+  assertMigrationParity(hosted)
 }

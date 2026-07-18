@@ -60,7 +60,10 @@ GitHub, the repository, commands, or logs.
 ## Database Controls
 
 - `scripts/release/apply_migrations.ts` is the sole normal `db push` caller.
-- The pinned CLI must select `*.pooler.supabase.com:5432`; direct IPv6 is rejected.
+- Preview, apply, and parity use one validated password-free
+  `*.pooler.supabase.com:5432` URL with verified TLS; direct IPv6 is rejected.
+- Only database children receive the password, as `PGPASSWORD`; it must never
+  appear in a URL, argument, log, file, or release record.
 - The coordinator rejects the Supabase CLI `--debug` flag because debug mode
   changes the database transport and cannot prove normal TLS connectivity.
 - Every apply starts with a dry preview and ends with exact history parity.

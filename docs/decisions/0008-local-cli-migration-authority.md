@@ -19,7 +19,8 @@ A pinned Node 24 coordinator provides `pnpm release:dev` and
 use the authenticated pinned CLI through the IPv4 session pooler on port 5432.
 
 Each migration apply is previewed, ordered, noninteractive, and followed by an
-exact comparison of local and hosted migration versions. Migrations must remain
+exact comparison of local and hosted migration versions through the same
+validated, password-free session-pooler URL. Migrations must remain
 backward-compatible because schema can precede code while GitHub completes.
 
 GitHub Actions remains the sole Edge Function deployment authority. Development
@@ -27,16 +28,19 @@ function deployment changes from an automatic push to exact-SHA dispatch after
 the coordinator proves migration parity. Production uses an exact-SHA
 fast-forward followed by an explicit exact-SHA production dispatch.
 
-The local account token stays in Windows Credential Manager. GitHub deployment
-tokens stay in protected GitHub secrets, and runtime secrets stay in Supabase.
-The local token is not duplicated into Supabase because doing so is circular and
-would expose account-management authority to project runtime.
+The local account token stays in the approved release host's CLI credential
+store. GitHub deployment tokens stay in protected GitHub secrets, and runtime
+secrets stay in Supabase. The local token is not duplicated into Supabase
+because doing so is circular and would expose account-management authority to
+project runtime.
 
 On the authoritative Linux release host, the account token stays in the
 Supabase CLI credential store and the database password is injected only as
 `SUPABASE_DB_PASSWORD` for the release process. Preflight must prove that the
-account can enumerate the exact target project. The password forces the normal
-TLS session-pooler path and prevents fallback to a temporary CLI login role.
+account can enumerate the exact target project. Only the three database children
+receive that password, mapped to `PGPASSWORD`; their validated URL contains no
+secret and requires verified TLS on port 5432. This explicit path prevents
+fallback to a temporary CLI login role or another database transport.
 
 This supersedes ADR `0006` only where it paused migrations and required the
 development function workflow itself to use a push event.
