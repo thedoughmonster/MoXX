@@ -69,7 +69,11 @@ test("requires migration completion before development deployment", async () => 
   assert.match(workflow, /expected_sha:/)
   assert.match(workflow, /ref: dev/)
   assert.match(workflow, /MOMI_EXPECTED_SHA" = "\$GITHUB_SHA/)
-  assert.ok(release.indexOf("applyMigrations") < release.indexOf("deploy-dev.yml"))
+  const validation = release.indexOf("await waitForWorkflow")
+  const apply = release.indexOf('await applyMigrations("dev")')
+  const deploy = release.indexOf('await ensureDispatchedWorkflow("deploy-dev.yml"')
+  assert.ok(validation >= 0 && validation < apply)
+  assert.ok(apply >= 0 && apply < deploy)
 })
 
 test("dispatches production only after promotion", async () => {
@@ -81,9 +85,24 @@ test("dispatches production only after promotion", async () => {
     new URL("../scripts/release/release_prod.ts", import.meta.url),
     "utf8",
   )
+  const resolver = await readFile(
+    new URL("../scripts/release/resolve_development_baseline.ts", import.meta.url),
+    "utf8",
+  )
   assert.match(workflow, /workflow_dispatch:/)
   assert.match(workflow, /ref: prod/)
   assert.match(workflow, /MOMI_EXPECTED_SHA" = "\$GITHUB_SHA/)
-  assert.ok(release.indexOf("promote-prod.yml") < release.indexOf("deploy-prod.yml"))
+  const apply = release.indexOf('await applyMigrations("prod")')
+  const promote = release.indexOf('"promote-prod.yml"')
+  const deploy = release.indexOf('"deploy-prod.yml"')
+  assert.ok(release.indexOf("await waitForWorkflow") < apply)
+  assert.ok(apply >= 0 && apply < promote)
+  assert.ok(promote < release.lastIndexOf("await waitForWorkflow"))
+  assert.ok(release.lastIndexOf("await waitForWorkflow") < deploy)
   assert.match(release, /productionBefore !== preflight\.headSha/)
+  assert.match(release, /undefined, "dev"/)
+  assert.match(release, /undefined, "prod"/)
+  assert.match(resolver, /--branch", "dev"/)
+  assert.match(resolver, /run\.conclusion === "success"/)
+  assert.match(resolver, /merge-base", "--is-ancestor"/)
 })

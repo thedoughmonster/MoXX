@@ -31,7 +31,7 @@ export async function releaseDev(): Promise<void> {
       capture: true,
     }).stdout.trim()
   }
-  await waitForWorkflow("validate.yml", "push", releaseSha)
+  await waitForWorkflow("validate.yml", "push", releaseSha, undefined, "dev")
   await applyMigrations("dev")
   await ensureDispatchedWorkflow("deploy-dev.yml", "dev", releaseSha)
   console.log(`Development release complete at ${releaseSha}`)

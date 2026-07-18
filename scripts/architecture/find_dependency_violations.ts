@@ -16,6 +16,11 @@ export async function findDependencyViolations(
     )
     const declared = loadedFunction.service.manifest.runtime_dependencies
     for (const dependency of Object.values(config.imports ?? {})) {
+      if (!/^(?:npm:(?:@[^/]+\/)?[^@/]+|jsr:@[^/]+\/[^@/]+)@\d+\.\d+\.\d+(?:\/.*)?$/.test(
+        dependency,
+      ) || dependency.split("/").includes("..")) {
+        violations.push(`${loadedFunction.slug}: unsafe dependency target ${dependency}`)
+      }
       if (!declared.includes(dependency)) {
         violations.push(`${loadedFunction.slug}: undeclared dependency ${dependency}`)
       }

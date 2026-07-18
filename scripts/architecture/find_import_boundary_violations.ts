@@ -1,5 +1,6 @@
 import { dirname, resolve, sep } from "node:path"
 
+import { computedImportSpecifier } from "./extract_imports.ts"
 import type { LoadedService, SourceModule } from "./types.ts"
 
 export function findImportBoundaryViolations(
@@ -20,11 +21,38 @@ export function findImportBoundaryViolations(
       violations.push(`${module.path}: unknown owning service`)
       continue
     }
+    const sourceIsTest = normalizedModule.includes("/tests/") ||
+      normalizedModule.endsWith(".test.ts")
+    if (!sourceIsTest && /\bDeno\.(?:open|readFile|readTextFile)(?:Sync)?\s*\(/.test(
+      module.source,
+    )) {
+      violations.push(`${module.path}: runtime source must not load source files dynamically`)
+    }
     for (const specifier of module.imports) {
+      if (specifier === computedImportSpecifier) {
+        violations.push(`${module.path}: computed dynamic imports are forbidden`)
+        continue
+      }
       if (!specifier.startsWith(".")) {
+        const external = consumer.manifest.runtime_dependencies.some((dependency) => {
+          if (dependency === specifier) return true
+          const npmName = dependency.match(/^npm:((?:@[^/]+\/)?[^@/]+)@/)?.[1]
+          return npmName === specifier || specifier.startsWith(`${npmName}/`)
+        })
+        if (!(sourceIsTest && specifier.startsWith("node:")) && !external) {
+          violations.push(`${module.path}: bare import ${specifier} is not an approved external`)
+        }
+        continue
+      }
+      if (!specifier.endsWith(".ts")) {
+        violations.push(`${module.path}: relative imports must name a TypeScript source file`)
         continue
       }
       const target = resolve(dirname(module.path), specifier).replaceAll(sep, "/")
+      const targetIsTest = target.includes("/tests/") || target.endsWith(".test.ts")
+      if (!sourceIsTest && targetIsTest) {
+        violations.push(`${module.path}: runtime source must not import test code`)
+      }
       const provider = services.find((candidate) =>
         target.startsWith(candidate.directory.replaceAll(sep, "/") + "/")
       )

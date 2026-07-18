@@ -9,9 +9,7 @@
   "functions": ["toast-orders-webhook-ingest-v1"],
   "contracts": {
     "provides": ["toast.orders.webhook_ingest.v1"],
-    "consumes": [
-      { "service": "order-alerting", "contract": "toast.order.webhook_alert_work.v1" }
-    ]
+    "consumes": []
   },
   "database": {
     "read": ["toast_hydration", "momi_api"],

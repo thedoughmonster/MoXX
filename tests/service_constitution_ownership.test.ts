@@ -6,7 +6,6 @@ import { workspaceRoot } from "../scripts/architecture/paths.ts"
 import type { LoadedService } from "../scripts/architecture/types.ts"
 import { findServiceConstitutionFindings } from
   "../scripts/constitution/find_service_constitution_findings.ts"
-
 function service(key: string, datasetKey = `${key}.records`): LoadedService {
   const contract = "fixture.records.read.v1"
   return {
@@ -27,9 +26,13 @@ function service(key: string, datasetKey = `${key}.records`): LoadedService {
       approved_packages: [],
       owned_dataset: {
         dataset_key: datasetKey,
+        dataset_class: "domain",
         private_schema: "fixture_records",
         private_relations: ["fixture_records.items"],
+        private_routines: [`fixture_records.${key.replaceAll("-", "_")}_read`],
         public_reads: [contract],
+        public_routine_reads: [{ contract,
+          routine: `fixture_records.${key.replaceAll("-", "_")}_read` }],
         public_commands: [],
         emitted_events: ["fixture.records.changed"],
         db_role: "svc_fixture_records",
@@ -37,7 +40,6 @@ function service(key: string, datasetKey = `${key}.records`): LoadedService {
     },
   }
 }
-
 test("rejects duplicate global ownership and producer declarations", () => {
   const findings = findServiceConstitutionFindings([
     service("alpha-owner", "fixture.shared"),
@@ -53,7 +55,6 @@ test("rejects duplicate global ownership and producer declarations", () => {
     "event_producer_duplicate",
   ]) assert.ok(rules.has(rule), rule)
 })
-
 test("rejects contradictory type, dataset, and kind declarations", () => {
   const missing = service("missing-owner")
   delete missing.manifest.owned_dataset
@@ -65,7 +66,7 @@ test("rejects contradictory type, dataset, and kind declarations", () => {
     findServiceConstitutionFindings([missing, untyped, wrongKind])
       .map((finding) => finding.rule_id),
   )
-  assert.ok(rules.has("dataset_owner_missing_dataset"))
+  assert.ok(rules.has("service_type_missing_dataset"))
   assert.ok(rules.has("owned_dataset_type_conflict"))
   assert.ok(rules.has("service_kind_type_conflict"))
 })
@@ -114,5 +115,6 @@ test("accepts one complete unique dataset declaration", () => {
 test("accepts specialized state ownership declared by the constitution", () => {
   const archive = service("archive-owner")
   archive.manifest.service_type = "raw_evidence_archive"
+  archive.manifest.owned_dataset!.dataset_class = "raw_evidence"
   assert.deepEqual(findServiceConstitutionFindings([archive]), [])
 })

@@ -58,6 +58,9 @@ payloads.
 The service may authenticate with the configured Toast source and issue the
 registered GET. It may write acquisition state and `toast_raw` archive records;
 it may not project data, make decisions, or call another service.
+The stock-snapshot completion event meaning belongs to this producer. Its
+historical direct routing-table insert is removal-only constitution debt, not
+permission for a new MoMi service call in the procurement request path.
 
 ## Verification
 

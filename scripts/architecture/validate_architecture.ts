@@ -26,7 +26,7 @@ export async function validateArchitecture(): Promise<Architecture> {
     )
   }
   const functions = await loadFunctions(workspace, services)
-  const modules = await loadSourceModules(functions)
+  const modules = await loadSourceModules(services)
   const violations = [
     ...findServiceGraphViolations(services),
     ...findImportBoundaryViolations(modules, services),

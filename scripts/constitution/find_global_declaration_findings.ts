@@ -12,6 +12,7 @@ export function findGlobalDeclarationFindings(
   const roles: ConstitutionDeclaration[] = []
   const schemas: ConstitutionDeclaration[] = []
   const relations: ConstitutionDeclaration[] = []
+  const routines: ConstitutionDeclaration[] = []
   const contracts: ConstitutionDeclaration[] = []
   const events: ConstitutionDeclaration[] = []
   const operationalUnits: ConstitutionDeclaration[] = []
@@ -24,8 +25,14 @@ export function findGlobalDeclarationFindings(
       if (dataset.private_schema) {
         schemas.push({ service_key: key, value: dataset.private_schema })
       }
+      for (const value of dataset.private_schemas ?? []) {
+        schemas.push({ service_key: key, value })
+      }
       for (const value of dataset.private_relations) {
         relations.push({ service_key: key, value })
+      }
+      for (const value of dataset.private_routines ?? []) {
+        routines.push({ service_key: key, value })
       }
       for (const value of dataset.emitted_events ?? []) {
         events.push({ service_key: key, value })
@@ -43,6 +50,7 @@ export function findGlobalDeclarationFindings(
     ...findDuplicateDeclarations("db_role_duplicate", "db-role", "Database role", roles),
     ...findDuplicateDeclarations("private_schema_duplicate", "schema", "Private schema", schemas),
     ...findDuplicateDeclarations("private_relation_duplicate", "relation", "Private relation", relations),
+    ...findDuplicateDeclarations("private_routine_duplicate", "routine", "Private routine", routines),
     ...findDuplicateDeclarations("contract_provider_duplicate", "contract", "Contract", contracts),
     ...findDuplicateDeclarations("event_producer_duplicate", "event", "Event", events),
     ...findDuplicateDeclarations(
@@ -72,6 +80,23 @@ export function findGlobalDeclarationFindings(
         schema_owners: foreignOwners.join(","),
       },
       summary: `${relation.service_key} claims a relation in ${schema}, owned by ${foreignOwners.join(", ")}.`,
+    })
+  }
+  for (const routine of routines) {
+    const schema = routine.value.split(".", 1)[0]
+    const foreignOwners = [...(schemaOwners.get(schema) ?? [])]
+      .filter((owner) => owner !== routine.service_key).sort()
+    if (foreignOwners.length === 0) continue
+    findings.push({
+      rule_version: 1,
+      rule_id: "private_routine_schema_conflict",
+      subject: `routine:${routine.value}`,
+      evidence: {
+        routine_owner: routine.service_key,
+        schema_owners: foreignOwners.join(","),
+      },
+      summary: `${routine.service_key} claims a routine in ${schema}, ` +
+        `owned by ${foreignOwners.join(", ")}.`,
     })
   }
   return findings

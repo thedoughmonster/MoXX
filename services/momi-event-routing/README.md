@@ -19,6 +19,12 @@ the same database session. Every event retains an independent capability,
 idempotent subscriber deliveries, and exponential retry state. Consumer
 failures are handled by the separate delivery lifecycle functions.
 
+`momi.events.delivery_lifecycle.v1` maps the exact private routing commands
+`momi_events.begin_delivery`, `ack_delivery`, and `fail_delivery`. Repository
+checks permit consumer source to call only those mapped routine names under the
+declared provider contract. Hosted role/grant isolation is still deferred;
+routing tables are private by declaration, not yet by runtime attestation.
+
 Canonical replay events with no matching active subscriber and no delivery are
 completed set-wise. Source events, subscribed events, and running leases always
 remain on the standard capability-bound router.

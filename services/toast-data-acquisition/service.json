@@ -37,6 +37,7 @@
   "approved_packages": [],
   "owned_dataset": {
     "dataset_key": "toast.acquisition_control",
+    "dataset_class": "operational",
     "private_schema": "toast_acquisition",
     "private_relations": [
       "toast_acquisition.archive_acceptance_findings_v1",
@@ -62,6 +63,26 @@
       "toast_acquisition.schedules",
       "toast_acquisition.source_exclusions",
       "toast_acquisition.sources"
+    ],
+    "private_routines": [
+      "toast_acquisition.assert_capture_window_schedule_ready",
+      "toast_acquisition.capture_first_business_date", "toast_acquisition.capture_window_is_open",
+      "toast_acquisition.capture_window_policy_ready", "toast_acquisition.claim_job",
+      "toast_acquisition.complete_job", "toast_acquisition.complete_job_and_claim_next",
+      "toast_acquisition.continue_job", "toast_acquisition.enqueue_due_schedules",
+      "toast_acquisition.enqueue_historical_backfill",
+      "toast_acquisition.enqueue_management_group_discovery",
+      "toast_acquisition.enqueue_menu_metadata_refresh", "toast_acquisition.enqueue_menu_publication",
+      "toast_acquisition.enqueue_payment_detail_jobs",
+      "toast_acquisition.expand_management_group_restaurant", "toast_acquisition.fail_job",
+      "warehouse_projection.emit_daily_stock_snapshot_event",
+      "toast_acquisition.ordering_schedule_array", "toast_acquisition.ordering_schedule_scalar",
+      "toast_acquisition.plan_backfill_after_first_business_date",
+      "toast_acquisition.reconcile_stale_api_attempts", "toast_acquisition.reject_coverage_mutation",
+      "toast_acquisition.require_repair_for_exact_resource",
+      "toast_acquisition.restart_token_cursor_job", "toast_acquisition.resync_ordering_schedule_policy",
+      "toast_acquisition.seed_restaurant_schedules", "toast_acquisition.sync_online_ordering_hours",
+      "toast_acquisition.sync_ordering_schedule_raw_row", "toast_acquisition.wake_acquisition_worker"
     ],
     "public_reads": [],
     "public_commands": ["toast.data.acquisition.v1"],

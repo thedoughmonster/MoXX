@@ -17,6 +17,7 @@
   "approved_packages": [],
   "owned_dataset": {
     "dataset_key": "momi.runtime_registry",
+    "dataset_class": "operational",
     "private_schema": "momi_runtime",
     "private_relations": [
       "momi_runtime.function_parameter_map",

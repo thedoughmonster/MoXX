@@ -18,8 +18,18 @@ resuming an already merged release. Production must start on clean, current
 
 The development command owns feature PR creation and merge, exact-commit
 validation, migration preview/apply/parity, and GitHub workflow dispatch. The
-production command owns the promotion PR, production migration, exact-SHA
-promotion, and hosted completion proof.
+production command owns the promotion PR, exact-SHA promotion, production
+migration, and hosted completion proof. Production establishes and verifies the
+approved `prod` SHA before applying its migration, then dispatches deployment.
+
+Validation resolves the exact successful `dev` push used as its debt baseline.
+A production push uses its own already validated SHA rather than a moving
+`origin/dev`; production waits for that development validation before any
+migration apply. This private personal repository cannot enforce a server-side
+ruleset protecting the validation workflow itself. Until it moves to a plan
+with enforceable branch rules, operator review of workflow changes remains a
+required trust boundary; a successful run is not a self-authenticating proof of
+the workflow code that produced it.
 
 ## Deployment Boundary
 

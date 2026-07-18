@@ -23,9 +23,15 @@ export function service(key: string): LoadedService {
       approved_packages: [],
       owned_dataset: {
         dataset_key: `${key}.records`,
+        dataset_class: "domain",
         private_schema: "fixture_records",
         private_relations: ["fixture_records.items"],
+        private_routines: ["fixture_records.mutate"],
         public_reads: [contract],
+        public_routine_reads: [{
+          contract,
+          routine: "fixture_records.mutate",
+        }],
         public_commands: [],
         emitted_events: [],
       },

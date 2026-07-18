@@ -15,6 +15,8 @@ Operational notes are explicitly marked conversation syntheses, not raw turns.
 
 The same dataset boundary owns current `toast_raw` evidence during the physical
 schema transition. Source-specific adapters do not own those raw relations.
+Archive-owned Toast trigger adapters emit only immutable evidence references;
+the event router owns storage and fanout and does not own source event meaning.
 
 ## Immutability
 

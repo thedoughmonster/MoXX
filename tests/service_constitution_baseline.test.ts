@@ -79,7 +79,7 @@ test("rejects recurrence after the baseline entry is removed", () => {
 test("rejects re-adding an exemption removed from the target baseline", () => {
   assert.match(
     findBaselineViolations([current], baseline([current]), new Set()).join("\n"),
-    /baseline identity was not present on origin\/dev/,
+    /baseline identity was not present on the trusted development ref/,
   )
 })
 
@@ -91,7 +91,7 @@ test("rejects changing the evidence of an existing exemption", () => {
   assert.match(
     findBaselineViolations([changed], baseline([changed]), targetBaselineFingerprints)
       .join("\n"),
-    /baseline identity was not present on origin\/dev/,
+    /baseline identity was not present on the trusted development ref/,
   )
 })
 

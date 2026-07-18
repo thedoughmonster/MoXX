@@ -9,7 +9,9 @@
   "functions": ["momi-toast-orders-get-by-id-v1"],
   "contracts": {
     "provides": ["momi.toast_orders.get_by_id.v1"],
-    "consumes": []
+    "consumes": [
+      { "service": "warehouse-projection", "contract": "momi.warehouse.toast_order_read_view.v1" }
+    ]
   },
   "database": {
     "read": ["momi_orders", "momi_api"],

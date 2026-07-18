@@ -41,9 +41,15 @@ function specializedService(
       approved_packages: [],
       owned_dataset: {
         dataset_key: datasetKey,
+        dataset_class: "operational",
         private_schema: stem,
         private_relations: [`${stem}.operations`],
+        private_routines: [`${stem}.read_operations`],
         public_reads: [contract],
+        public_routine_reads: [{
+          contract,
+          routine: `${stem}.read_operations`,
+        }],
         public_commands: [],
         emitted_events: [`${stem}.operations.changed`],
         db_role: `svc_${stem}`,

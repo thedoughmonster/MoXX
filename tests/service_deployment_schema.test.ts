@@ -31,6 +31,7 @@ const manifest = {
   approved_packages: [],
   owned_dataset: {
     dataset_key: "momi.runtime_registry",
+    dataset_class: "operational",
     private_relations: ["momi_runtime.function_registry"],
   },
 }

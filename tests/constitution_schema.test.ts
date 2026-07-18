@@ -30,6 +30,7 @@ const manifest = {
   approved_packages: [],
   owned_dataset: {
     dataset_key: "fixture.records",
+    dataset_class: "domain",
     private_schema: "fixture_records",
     private_relations: ["fixture_records.items"],
     public_reads: ["fixture.records.read.v1"],
@@ -56,6 +57,19 @@ test("requires versioned public reads and commands", () => {
   for (const field of ["public_reads", "public_commands"] as const) {
     const owned_dataset = { ...manifest.owned_dataset, [field]: ["fixture.records"] }
     assert.throws(() => validateJson(serviceSchema, { ...manifest, owned_dataset }, "fixture"))
+  }
+})
+
+test("requires exact public relation read artifacts", () => {
+  for (const artifact of [
+    { contract: "fixture.records", relation: "fixture_records.items" },
+    { contract: "fixture.records.read.v1", relation: "items" },
+  ]) {
+    const owned_dataset = { ...manifest.owned_dataset,
+      public_relation_reads: [artifact] }
+    assert.throws(() => validateJson(
+      serviceSchema, { ...manifest, owned_dataset }, "fixture",
+    ))
   }
 })
 
