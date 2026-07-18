@@ -18,18 +18,20 @@ resuming an already merged release. Production must start on clean, current
 
 The development command owns feature PR creation and merge, exact-commit
 validation, migration preview/apply/parity, and GitHub workflow dispatch. The
-production command owns the promotion PR, exact-SHA promotion, production
-migration, and hosted completion proof. Production establishes and verifies the
-approved `prod` SHA before applying its migration, then dispatches deployment.
+production command owns the promotion PR, exact-commit development validation,
+production migration preview/apply/parity, guarded exact-SHA promotion,
+production validation, and hosted completion proof.
 
 Validation resolves the exact successful `dev` push used as its debt baseline.
 A production push uses its own already validated SHA rather than a moving
-`origin/dev`; production waits for that development validation before any
-migration apply. This private personal repository cannot enforce a server-side
-ruleset protecting the validation workflow itself. Until it moves to a plan
-with enforceable branch rules, operator review of workflow changes remains a
-required trust boundary; a successful run is not a self-authenticating proof of
-the workflow code that produced it.
+`origin/dev`; production waits for that development validation, applies its
+migrations, dispatches the guarded promotion, verifies the resulting `prod`
+SHA, waits for production validation, and only then dispatches deployment. This
+private personal repository cannot enforce a server-side ruleset protecting the
+validation workflow itself. Until it moves to a plan with enforceable branch
+rules, operator review of workflow changes remains a required trust boundary; a
+successful run is not a self-authenticating proof of the workflow code that
+produced it.
 
 ## Deployment Boundary
 
@@ -48,8 +50,10 @@ JWT-protected function may instead prove reachability with `401` or `403`.
 
 The coordinator links the selected project, rejects anything except the IPv4
 session pooler on port 5432, previews `db push`, applies it, and compares every
-local migration version with hosted history. GitHub workflows never apply
-migrations and local code never deploys Edge Functions.
+local migration version with hosted history. It rejects the CLI `--debug` flag,
+which changes the database transport and cannot validate the normal TLS path.
+GitHub workflows never apply migrations and local code never deploys Edge
+Functions.
 
 Files already present on `prod` are immutable. A migration not present in the
 production baseline has exactly one ownership header on physical line 1:

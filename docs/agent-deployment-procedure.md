@@ -57,6 +57,8 @@ into Supabase runtime secrets, Vault, `.env`, GitHub, or the repository.
 
 - `scripts/release/apply_migrations.ts` is the sole normal `db push` caller.
 - The pinned CLI must select `*.pooler.supabase.com:5432`; direct IPv6 is rejected.
+- The coordinator rejects the Supabase CLI `--debug` flag because debug mode
+  changes the database transport and cannot prove normal TLS connectivity.
 - Every apply starts with a dry preview and ends with exact history parity.
 - Applied migrations are immutable; corrections require a new migration.
 - Migrations must remain backward-compatible if a later GitHub step is delayed.
