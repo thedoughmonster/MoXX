@@ -3,7 +3,6 @@
 Each `services/<service-key>/service.json` is the enforceable authority record
 for one cohesive capability. It is validated against
 `schemas/service-manifest-v1.schema.json`.
-
 ## Identity
 
 - `service_key` is the stable directory and ownership key.
@@ -23,16 +22,32 @@ empty and recurrence is rejected.
 ## Dataset Authority
 
 A service may declare `owned_dataset` as one object rather than a list, but it
-must first declare `service_type`. A `dataset_owner` must declare the object;
-other state-owning types may use it for their constitution-defined state. It has:
+must first declare `service_type`. Dataset owners, raw archives, and event
+routers must declare the object; other specialized types may own only bounded
+operational state. It has:
 
 - one canonical dotted `dataset_key`;
-- optional `private_schema` and `db_role` declarations;
+- one `dataset_class`: `domain`, `operational`, or `raw_evidence`, constrained
+  by `service_type`;
+- optional `private_schema`, `private_schemas`, and `db_role` declarations;
 - exact `schema.relation` entries in `private_relations`;
+- exact schema-qualified names for every active routine in `private_routines`;
 - versioned contract keys ending in `.vN` for `public_reads` and
   `public_commands`;
-- exact event keys in `emitted_events`.
+- optional `public_relation_reads` mappings from an exact owned versioned view
+  to one contract already listed in `public_reads`;
+- optional `public_routine_commands` mappings from a schema-qualified private
+  routine name to one contract already listed in `public_commands`;
+- optional `public_routine_reads` mappings from a schema-qualified private
+  routine name to one contract already listed in `public_reads`;
+- exact event keys in `emitted_events`; dynamic identities are removal-only
+  runtime debt, and new dynamic event names are rejected.
 
+Procurement adapters may not consume MoMi-owned contracts. Transitional direct
+handoffs remain removal-only debt, not authorized dependencies.
+
+`private_schemas` is used only when one coherent dataset spans multiple
+exclusive schemas; each listed schema remains exclusive to that service.
 Dataset keys, database roles, private schemas, private relations, contract
 providers, and event producers are globally unique when declared. A private
 relation cannot be claimed inside another service's declared private schema.
@@ -41,12 +56,30 @@ Every public read or command must also appear in the owner's
 mandatory only with the later role-and-grant migration.
 
 The constitution replays ordered migration DDL and requires every current
-application table and view to appear in exactly one `private_relations` set.
-Renames, schema moves, drops, and replacements are applied in migration order.
-This proves declaration completeness and uniqueness. It does not attest hosted
-roles, grants, or removal of the transition-period direct accesses identified
-by ADR `0014`.
+application table, view, function, and procedure to have exactly one declared
+owner. Renames, schema moves, drops, and replacements are applied in migration
+order. This proves declaration completeness and uniqueness. It does not attest
+hosted roles, grants, or removal of the transition-period direct accesses
+identified by ADR `0014`.
 
+Runtime TypeScript under every service directory and every active overload of
+each migrated view or routine are scanned for exact relation references. A
+cross-owner read is valid only when the owner maps that relation
+to a public-read contract and the consumer declares the exact provider and
+contract. Writes to another owner's relation and dynamic SQL identifiers are
+never authorized by a public-read mapping. Historical occurrences live in the
+separate removal-only service access debt baseline.
+
+Calls into another service's declared routine require an exact routine-name
+mapping plus the matching consumed provider contract. Ownership remains at the
+schema-qualified routine name in version 1, while replay and body scanning use
+canonical input signatures so overloads cannot hide one another. Role/grant
+enforcement must add hosted signatures before runtime isolation is claimed.
+New migrations assign index authority through the indexed relation, reject
+unmodeled role ownership, use the same object rules, and may not
+rewrite any migration after it lands on `dev`. Existing object authority and
+history come from trusted `dev`, so transfers land as manifest-only changes
+before a later migration may use the new owner.
 ## Contracts
 
 `contracts.provides` lists versioned public contracts owned by the service.

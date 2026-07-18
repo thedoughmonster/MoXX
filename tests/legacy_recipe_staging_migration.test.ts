@@ -46,7 +46,10 @@ test("declares schema ownership and portable NAS preservation", async () => {
   const workspace = JSON.parse(await readFile(
     new URL("../workspace.json", import.meta.url), "utf8",
   )) as { database_schemas: string[] }
-  const service = JSON.parse(await readFile(
+  const transform = JSON.parse(await readFile(
+    new URL("../services/legacy-recipe-transform/service.json", import.meta.url), "utf8",
+  )) as { database: { read: string[]; write: string[] } }
+  const warehouse = JSON.parse(await readFile(
     new URL("../services/warehouse-projection/service.json", import.meta.url), "utf8",
   )) as { database: { read: string[]; write: string[] } }
   const selector = await readFile(new URL(
@@ -54,7 +57,9 @@ test("declares schema ownership and portable NAS preservation", async () => {
     import.meta.url,
   ), "utf8")
   assert.ok(workspace.database_schemas.includes("legacy_recipe_staging"))
-  assert.ok(service.database.read.includes("legacy_recipe_staging"))
-  assert.ok(service.database.write.includes("legacy_recipe_staging"))
+  assert.ok(transform.database.read.includes("legacy_recipe_staging"))
+  assert.ok(transform.database.write.includes("legacy_recipe_staging"))
+  assert.ok(!warehouse.database.read.includes("legacy_recipe_staging"))
+  assert.ok(!warehouse.database.write.includes("legacy_recipe_staging"))
   assert.match(selector, /schema === "legacy_recipe_staging"/)
 })

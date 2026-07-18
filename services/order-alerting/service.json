@@ -2,7 +2,7 @@
   "$schema": "../../schemas/service-manifest-v1.schema.json",
   "schema_version": 1,
   "service_key": "order-alerting",
-  "purpose": "Own source-neutral order alert decisions and durable delivery work.",
+  "purpose": "Own source-neutral order alert decisions and presentation snapshots.",
   "kind": "core_capability",
   "service_type": "dataset_owner",
   "lifecycle_status": "active",
@@ -10,7 +10,6 @@
   "contracts": {
     "provides": [
       "momi.order_api.invocation_work.v1",
-      "momi.order_alert.delivery_work.v1",
       "momi.orders.alert.evaluate.v1",
       "toast.order.webhook_alert_work.v1"
     ],
@@ -52,6 +51,7 @@
   "approved_packages": [],
   "owned_dataset": {
     "dataset_key": "momi.order_alerting",
+    "dataset_class": "domain",
     "private_relations": [
       "momi_alerting.alert_routes",
       "momi_alerting.alert_rule_conditions",
@@ -66,7 +66,17 @@
       "momi_orders.api_invocation_attempts",
       "momi_orders.api_invocation_work"
     ],
-    "public_reads": ["momi.order_alert.delivery_work.v1"],
+    "private_routines": [
+      "momi_alerting.claim_order_alert_candidates", "momi_alerting.is_doughnut_preorder",
+      "momi_alerting.issue_order_read_capability", "momi_alerting.match_canonical_order_alert_routes",
+      "momi_alerting.matches_canonical_condition", "momi_alerting.matches_source_value",
+      "momi_alerting.prevent_cross_path_order_alert_duplicate",
+      "momi_alerting.revoke_order_read_capability", "momi_alerting.stage_order_event_work",
+      "momi_alerting.try_timestamptz", "momi_alerting.wake_order_event_worker",
+      "momi_orders.enqueue_toast_webhook_order_alert_work",
+      "momi_orders.wake_order_alert_worker"
+    ],
+    "public_reads": [],
     "public_commands": [
       "momi.order_api.invocation_work.v1",
       "momi.orders.alert.evaluate.v1",

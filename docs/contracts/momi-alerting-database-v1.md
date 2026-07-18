@@ -10,7 +10,7 @@ not fetch source data or send Slack messages.
 
 `momi_runtime` owns function and trigger registries. `momi_orders` owns durable
 owned-API invocation work and attempts. `momi_alerting` owns alert
-configuration, candidates, and delivery work.
+configuration and candidates. Destination adapters own their delivery work.
 
 All three schemas are private. Public, anonymous, and authenticated roles
 receive no access, and row-level security on their tables remains defense in
@@ -72,7 +72,9 @@ dispatches are not part of the active pipeline.
 Candidate insertion idempotently creates `momi_alerting.slack_delivery_work`.
 The versioned prepared-message view renders Block Kit from the snapshotted
 presentation and configured destination. It does not put a source order GUID in
-the Slack payload. A separate Slack adapter performs the external call.
+the Slack payload. Those Slack relations belong to the Slack destination
+adapter; their current direct candidate read remains removal-only access debt
+until an order-alert-owned versioned view replaces it.
 
 ## Failure Behavior
 

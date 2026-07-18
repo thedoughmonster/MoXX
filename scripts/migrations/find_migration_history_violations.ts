@@ -4,6 +4,7 @@ export function findMigrationHistoryViolations(
   baseline: Map<string, string>,
   current: Map<string, string>,
   serviceKeys: Set<string>,
+  baselineName = "production",
 ): string[] {
   const violations: string[] = []
   const normalize = (value: string) => value.replaceAll("\r\n", "\n")
@@ -11,16 +12,16 @@ export function findMigrationHistoryViolations(
     const source = baseline.get(name) as string
     const local = current.get(name)
     if (local === undefined) {
-      violations.push(`${name}: production migration was deleted`)
+      violations.push(`${name}: ${baselineName} migration was deleted`)
     } else if (source.startsWith("git-blob-sha1:")) {
       const bytes = Buffer.from(normalize(local), "utf8")
       const hash = createHash("sha1")
         .update(`blob ${bytes.length}\0`).update(bytes).digest("hex")
       if (source !== `git-blob-sha1:${hash}`) {
-        violations.push(`${name}: production migration was modified`)
+        violations.push(`${name}: ${baselineName} migration was modified`)
       }
     } else if (normalize(local) !== normalize(source)) {
-      violations.push(`${name}: production migration was modified`)
+      violations.push(`${name}: ${baselineName} migration was modified`)
     }
   }
   for (const name of [...current.keys()].sort()) {

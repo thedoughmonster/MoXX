@@ -78,15 +78,21 @@ overwrite canonical documents, delete v1 history, or refetch Toast.
 
 ## Authority
 
-The service may read private durable events and raw references and invoke its
-owned database procedures. It has no network authority or Toast credentials.
+The service owns the canonical warehouse and the versioned `momi_api` views.
+`momi.warehouse.canonical_read_views.v1` exposes only the canonical views to
+`warehouse-read-api`; `momi.warehouse.toast_order_read_view.v1` exposes only
+`momi_api.toast_orders_by_id_v1` to the retiring Toast facade. It has no network
+authority or Toast credentials.
+
+Its current direct read of the event router's private event relation remains
+fingerprinted transition debt. Removing that read requires an owner-provided
+event contract; the manifest does not convert the private table into one.
 
 ## Legacy Recipe Staging
 
-This capability also owns the private `legacy_recipe_staging` preservation
-schema accepted by ADR `0011`. A manual development-only importer may place
-verified legacy recipe rows and repair evidence there. Runtime projection does
-not consume that schema, select canonical recipe versions, or publish recipes.
+`legacy-recipe-transform` owns the private `legacy_recipe_staging` preservation
+schema under ADR `0014`. Warehouse projection has no authority for that schema,
+does not consume it at runtime, and does not publish canonical recipes from it.
 
 ## Verification
 

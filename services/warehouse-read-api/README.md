@@ -13,6 +13,10 @@ employees, schedules, and latest stock observations through versioned `momi.*`
 HTTP contracts. The five entity routes share one reader while retaining their
 own manifests and registrations.
 
+The service consumes `momi.warehouse.canonical_read_views.v1` from
+`warehouse-projection`. That contract maps the exact versioned database views;
+it does not grant access to canonical base tables.
+
 Callers provide only Dough Monster UUIDs and an expiring, one-use durable read
 token. Every response contains a normalized document, schema version,
 source-neutral provenance, and freshness. `canonical-resource-v2` responses use
@@ -42,7 +46,10 @@ was observed without leaking a source DTO.
 The API reads approved versioned views only and never fetches Toast or reads
 `toast_raw` directly. Exact raw reconstruction remains privileged archive work.
 Toast acquisition and webhook HTTP boundaries are unchanged. The legacy source
-reader remains separate until order-alert migration is complete.
+reader remains separate until order-alert migration is complete. Its dynamic
+view identifier is exact current access debt. While it remains, every runtime
+TypeScript file in this service is source-hashed into that finding, so any code
+change must first replace the dynamic identifier with static relation reads.
 
 ## Verification
 

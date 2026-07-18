@@ -8,19 +8,22 @@
   "lifecycle_status": "active",
   "functions": ["momi-warehouse-projection-worker-v1"],
   "contracts": {
-    "provides": ["momi.warehouse_projection.toast.consume.v1"],
+    "provides": [
+      "momi.warehouse.canonical_read_views.v1",
+      "momi.warehouse.toast_order_read_view.v1",
+      "momi.warehouse_projection.toast.consume.v1"
+    ],
     "consumes": [
       { "service": "momi-event-routing", "contract": "momi.events.delivery_lifecycle.v1" }
     ]
   },
   "database": {
     "read": [
-      "legacy_recipe_staging", "momi_api", "momi_events", "toast_acquisition",
-      "toast_raw", "warehouse_projection"
+      "momi_api", "momi_events", "toast_acquisition", "toast_raw",
+      "warehouse_projection"
     ],
     "write": [
-      "legacy_recipe_staging", "momi_events", "momi_warehouse",
-      "toast_acquisition", "warehouse_projection"
+      "momi_events", "momi_warehouse", "toast_acquisition", "warehouse_projection"
     ]
   },
   "network": { "outbound_hosts": [] },
@@ -47,13 +50,11 @@
   "approved_packages": [],
   "owned_dataset": {
     "dataset_key": "momi.canonical_warehouse",
+    "dataset_class": "domain",
     "private_relations": [
-      "momi_api.employees_by_id_v1",
-      "momi_api.menu_entities_by_id_v1",
-      "momi_api.order_versions_by_id_v1",
-      "momi_api.orders_by_id_v1",
-      "momi_api.payments_by_id_v1",
-      "momi_api.schedules_by_id_v1",
+      "momi_api.employees_by_id_v1", "momi_api.menu_entities_by_id_v1",
+      "momi_api.order_versions_by_id_v1", "momi_api.orders_by_id_v1",
+      "momi_api.payments_by_id_v1", "momi_api.schedules_by_id_v1",
       "momi_api.stock_observations_latest_v1",
       "momi_api.toast_order_alert_presentations_v1",
       "momi_api.toast_order_source_versions_v1",
@@ -71,12 +72,49 @@
       "warehouse_projection.delivery_reservations",
       "warehouse_projection.worker_settings"
     ],
-    "public_reads": [],
+    "private_routines": [
+      "warehouse_projection.begin_reserved_delivery", "warehouse_projection.build_toast_menu_edges",
+      "warehouse_projection.canonical_entity_type", "warehouse_projection.canonical_menu_document",
+      "warehouse_projection.canonical_menu_sales_channels", "warehouse_projection.canonical_resource_document_v2",
+      "warehouse_projection.canonical_toast_order_document_v2", "warehouse_projection.canonical_toast_ordering_schedule_document",
+      "warehouse_projection.claim_database_delivery",
+      "warehouse_projection.enforce_edge_reservation_mode", "warehouse_projection.link_source_entity",
+      "warehouse_projection.process_delivery_batch", "warehouse_projection.project_and_ack_delivery",
+      "warehouse_projection.project_staged_menu_entities", "warehouse_projection.project_toast_archived_order",
+      "warehouse_projection.project_toast_daily_stock_snapshot", "warehouse_projection.project_toast_event",
+      "warehouse_projection.project_toast_menu_document", "warehouse_projection.project_toast_order",
+      "warehouse_projection.project_toast_resource_observation", "warehouse_projection.project_toast_stock_observation",
+      "warehouse_projection.project_toast_stock_snapshot", "warehouse_projection.project_toast_stock_webhook",
+      "warehouse_projection.record_entity_version", "warehouse_projection.reserve_internal_delivery",
+      "warehouse_projection.resolve_source_entity", "warehouse_projection.resolve_toast_stock_item",
+      "warehouse_projection.rotate_projection_delivery_capability", "warehouse_projection.stage_toast_menu_nodes",
+      "warehouse_projection.stage_toast_menu_references",
+      "warehouse_projection.staged_menu_relationships", "warehouse_projection.toast_fulfillment_mode",
+      "warehouse_projection.toast_order_presentation_v1", "warehouse_projection.toast_schedule_date",
+      "warehouse_projection.toast_schedule_day", "warehouse_projection.toast_schedule_time",
+      "warehouse_projection.try_timestamptz", "warehouse_projection.wake_next_delivery", "warehouse_projection.wake_projection_worker"
+    ],
+    "public_reads": [
+      "momi.warehouse.canonical_read_views.v1",
+      "momi.warehouse.toast_order_read_view.v1"
+    ],
+    "public_relation_reads": [
+      { "contract": "momi.warehouse.canonical_read_views.v1", "relation": "momi_api.employees_by_id_v1" },
+      { "contract": "momi.warehouse.canonical_read_views.v1", "relation": "momi_api.menu_entities_by_id_v1" },
+      { "contract": "momi.warehouse.canonical_read_views.v1", "relation": "momi_api.order_versions_by_id_v1" },
+      { "contract": "momi.warehouse.canonical_read_views.v1", "relation": "momi_api.orders_by_id_v1" },
+      { "contract": "momi.warehouse.canonical_read_views.v1", "relation": "momi_api.payments_by_id_v1" },
+      { "contract": "momi.warehouse.canonical_read_views.v1", "relation": "momi_api.schedules_by_id_v1" },
+      { "contract": "momi.warehouse.canonical_read_views.v1", "relation": "momi_api.stock_observations_latest_v1" },
+      { "contract": "momi.warehouse.canonical_read_views.v1", "relation": "momi_api.warehouse_entities_by_id_v1" },
+      { "contract": "momi.warehouse.toast_order_read_view.v1", "relation": "momi_api.toast_orders_by_id_v1" }
+    ],
     "public_commands": ["momi.warehouse_projection.toast.consume.v1"],
     "emitted_events": [
       "warehouse.order.archived",
       "warehouse.order.observed",
-      "warehouse.order.reconciled"
+      "warehouse.order.reconciled",
+      "warehouse.menu_entity.observed", "warehouse.stock.observed", "warehouse.stock_snapshot.observed"
     ]
   }
 }

@@ -9,9 +9,10 @@ export async function waitForWorkflow(
   event: "push" | "workflow_dispatch",
   headSha: string,
   ignoredRunId?: number,
+  branch?: string,
 ): Promise<WorkflowRun> {
   for (let attempt = 0; attempt < 90; attempt += 1) {
-    const run = findWorkflowRun(workflow, event, headSha)
+    const run = findWorkflowRun(workflow, event, headSha, branch)
     if (!run || run.databaseId === ignoredRunId) {
       await sleep(2000)
       continue
@@ -23,7 +24,7 @@ export async function waitForWorkflow(
       return run
     }
     runCommand("gh", ["run", "watch", String(run.databaseId), "--exit-status"])
-    const completed = findWorkflowRun(workflow, event, headSha)
+    const completed = findWorkflowRun(workflow, event, headSha, branch)
     if (!completed || completed.conclusion !== "success") {
       throw new Error(`${workflow} did not complete successfully`)
     }

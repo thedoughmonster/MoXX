@@ -17,12 +17,16 @@
   "approved_packages": [],
   "owned_dataset": {
     "dataset_key": "momi.archive_governance",
+    "dataset_class": "operational",
     "private_schema": "momi_archive",
     "private_relations": [
       "momi_archive.export_runs",
       "momi_archive.manual_export_findings_v1",
       "momi_archive.product_export_status_v1",
       "momi_archive.product_gap_register"
+    ],
+    "private_routines": [
+      "momi_archive.reject_export_run_mutation"
     ],
     "public_reads": [],
     "public_commands": [],

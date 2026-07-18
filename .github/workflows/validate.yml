@@ -7,10 +7,12 @@ on:
     branches: [dev, prod]
 
 permissions:
+  actions: read
   contents: read
 
 env:
   MOMI_PROD_REF: origin/prod
+  MOMI_DEV_REF: origin/dev
 
 concurrency:
   group: validate-${{ github.ref }}
@@ -24,7 +26,46 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - run: git fetch origin prod:refs/remotes/origin/prod
+      - run: git fetch origin dev:refs/remotes/origin/dev prod:refs/remotes/origin/prod
+      - name: Resolve last accepted development baseline
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          runs="$(gh api --method GET \
+            "repos/$GITHUB_REPOSITORY/actions/workflows/validate.yml/runs" \
+            -f branch=dev -f event=push -f status=success -F per_page=100)"
+          if [[ "$GITHUB_EVENT_NAME" == push && "$GITHUB_REF" == refs/heads/dev ]]; then
+            baseline="$(jq -r --arg current "$GITHUB_SHA" \
+              '[.workflow_runs[] | select(.head_sha != $current)][].head_sha' \
+              <<<"$runs" | while read -r candidate; do
+                if git merge-base --is-ancestor "$candidate" "$GITHUB_SHA"; then
+                  echo "$candidate"
+                  break
+                fi
+              done)"
+          elif [[ "$GITHUB_EVENT_NAME" == push && "$GITHUB_REF" == refs/heads/prod ]]; then
+            baseline="$GITHUB_SHA"
+            jq -e --arg dev "$baseline" \
+              '.workflow_runs[] | select(.head_sha == $dev)' <<<"$runs" >/dev/null
+          elif [[ "$GITHUB_EVENT_NAME" == pull_request && "$GITHUB_BASE_REF" == prod ]]; then
+            baseline="${{ github.event.pull_request.head.sha }}"
+            jq -e --arg dev "$baseline" \
+              '.workflow_runs[] | select(.head_sha == $dev)' <<<"$runs" >/dev/null
+            git merge-base --is-ancestor "$baseline" "$GITHUB_SHA"
+          else
+            baseline="${{ github.event.pull_request.base.sha }}"
+            jq -e --arg dev "$baseline" \
+              '.workflow_runs[] | select(.head_sha == $dev)' <<<"$runs" >/dev/null
+            git merge-base --is-ancestor "$baseline" "$GITHUB_SHA"
+          fi
+          if [[ ! "$baseline" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Unable to resolve the last accepted development SHA" >&2
+            exit 1
+          fi
+          if [[ "$GITHUB_REF" == refs/heads/dev ]]; then
+            git merge-base --is-ancestor "$baseline" "$GITHUB_SHA"
+          fi
+          echo "MOMI_DEV_REF=$baseline" >> "$GITHUB_ENV"
       - uses: pnpm/action-setup@v4
         with:
           version: 11.7.0

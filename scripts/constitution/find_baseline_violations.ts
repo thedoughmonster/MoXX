@@ -15,7 +15,9 @@ export function findBaselineViolations(
   for (const finding of baseline.findings) {
     const expected = fingerprintFinding(finding)
     if (!targetBaselineFingerprints.has(expected)) {
-      violations.push(`${finding.subject}: baseline identity was not present on origin/dev`)
+      violations.push(
+        `${finding.subject}: baseline identity was not present on the trusted development ref`,
+      )
     }
     if (finding.fingerprint !== expected) {
       violations.push(`${finding.subject}: baseline fingerprint must be ${expected}`)

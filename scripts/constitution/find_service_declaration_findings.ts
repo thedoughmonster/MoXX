@@ -25,15 +25,6 @@ export function findServiceDeclarationFindings(
         summary: "Service manifest does not declare service_type.",
       })
     }
-    if (type === "dataset_owner" && !dataset) {
-      findings.push({
-        rule_version: 1,
-        rule_id: "dataset_owner_missing_dataset",
-        subject,
-        evidence: { service_key: key, service_type: type },
-        summary: "Dataset-owner service does not declare owned_dataset.",
-      })
-    }
     if (dataset && !type) {
       findings.push({
         rule_version: 1,

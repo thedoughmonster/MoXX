@@ -67,6 +67,11 @@ export function findAuthorityViolations(
     ) {
       violations.push(`${module.path}: outbound HTTP is not declared`)
     }
+    if (authority.service_type === "procurement_adapter" &&
+      /(?:\/functions\/v1\/|\.supabase\.co\b|\bSUPABASE_URL\b|\bmomi_project_url\b|\.functions\.invoke\s*\()/i
+        .test(module.source)) {
+      violations.push(`${module.path}: procurement cannot call a MoMi-owned HTTP route`)
+    }
     if (module.source.includes("slack.com") && module.service_key !== "slack-order-delivery") {
       violations.push(`${module.path}: only Slack delivery may call slack.com`)
     }

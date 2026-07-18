@@ -1,26 +1,26 @@
 import { readFile } from "node:fs/promises"
 
-import type { LoadedFunction, SourceModule } from "./types.ts"
+import type { LoadedService, SourceModule } from "./types.ts"
 import { collectTypeScriptFiles } from "./collect_typescript_files.ts"
 import { extractImports } from "./extract_imports.ts"
 
 export async function loadSourceModules(
-  functions: LoadedFunction[],
+  services: LoadedService[],
 ): Promise<SourceModule[]> {
   const modules: SourceModule[] = []
 
-  for (const loadedFunction of functions) {
-    const paths = await collectTypeScriptFiles(loadedFunction.source_directory)
+  for (const service of services) {
+    const paths = await collectTypeScriptFiles(service.directory)
     for (const path of paths) {
       const source = await readFile(path, "utf8")
       modules.push({
         path,
-        service_key: loadedFunction.service.manifest.service_key,
+        service_key: service.manifest.service_key,
         source,
         imports: extractImports(path, source),
       })
     }
   }
 
-  return modules
+  return modules.sort((left, right) => left.path.localeCompare(right.path))
 }

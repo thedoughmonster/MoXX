@@ -4,6 +4,7 @@ import { ensureDispatchedWorkflow } from "./ensure_dispatched_workflow.ts"
 import { getOrCreatePullRequest } from "./get_or_create_pull_request.ts"
 import { runCommand } from "./run_command.ts"
 import { waitForPullRequest } from "./wait_for_pull_request.ts"
+import { waitForWorkflow } from "./wait_for_workflow.ts"
 
 export async function releaseProd(): Promise<void> {
   const preflight = assertReleasePreflight("prod")
@@ -20,6 +21,9 @@ export async function releaseProd(): Promise<void> {
     )
     await waitForPullRequest(pullRequest.number)
   }
+  await waitForWorkflow(
+    "validate.yml", "push", preflight.headSha, undefined, "dev",
+  )
   await applyMigrations("prod")
   if (productionBefore !== preflight.headSha) {
     await ensureDispatchedWorkflow(
@@ -28,7 +32,6 @@ export async function releaseProd(): Promise<void> {
       preflight.headSha,
     )
   }
-  await ensureDispatchedWorkflow("deploy-prod.yml", "prod", preflight.headSha)
   runCommand("git", ["fetch", "origin", "prod:refs/remotes/origin/prod"])
   const productionSha = runCommand("git", ["rev-parse", "origin/prod"], {
     capture: true,
@@ -36,5 +39,9 @@ export async function releaseProd(): Promise<void> {
   if (productionSha !== preflight.headSha) {
     throw new Error("Production did not reach the approved development commit")
   }
+  await waitForWorkflow(
+    "validate.yml", "push", preflight.headSha, undefined, "prod",
+  )
+  await ensureDispatchedWorkflow("deploy-prod.yml", "prod", preflight.headSha)
   console.log(`Production release complete at ${productionSha}`)
 }

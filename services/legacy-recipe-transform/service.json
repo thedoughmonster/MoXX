@@ -20,6 +20,7 @@
   "approved_packages": [],
   "owned_dataset": {
     "dataset_key": "legacy.recipe_transform_operations",
+    "dataset_class": "operational",
     "private_schema": "legacy_recipe_staging",
     "private_relations": [
       "legacy_recipe_staging.import_batches",
@@ -29,6 +30,11 @@
       "legacy_recipe_staging.source_files",
       "legacy_recipe_staging.source_rows",
       "legacy_recipe_staging.source_tables"
+    ],
+    "private_routines": [
+      "legacy_recipe_staging.guard_import_batch_update",
+      "legacy_recipe_staging.guard_import_run_update",
+      "legacy_recipe_staging.reject_immutable_change"
     ],
     "public_reads": [],
     "public_commands": [],

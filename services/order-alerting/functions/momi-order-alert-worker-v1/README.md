@@ -3,7 +3,8 @@
 ## ELI5
 
 This worker claims one exact order-event delivery, asks the canonical MoMi order
-reader for that order, then records matching delivery work. During dual-run it
+reader for that order, then records matching alert candidates and requests
+destination-owned delivery work. During dual-run it
 also finishes already-created legacy order jobs.
 
 ## Identity
@@ -54,7 +55,8 @@ and rotating capability token. Acknowledgement deletes only that exact message.
 
 The worker records an invocation attempt, issues and revokes one scoped read
 capability, claims configured alert candidates, snapshots readable presentation
-data, and queues configured delivery work. It never logs the read token.
+data, and queues configured destination-owned delivery work. It never logs the
+read token.
 
 ## Failure Handling
 

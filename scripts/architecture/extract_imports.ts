@@ -1,5 +1,7 @@
 import * as ts from "typescript"
 
+export const computedImportSpecifier = "<computed-dynamic-import>"
+
 export function extractImports(path: string, source: string): string[] {
   const sourceFile = ts.createSourceFile(
     path,
@@ -20,10 +22,15 @@ export function extractImports(path: string, source: string): string[] {
       imports.push(node.moduleSpecifier.text)
     }
     if (
-      ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword &&
-      node.arguments.length === 1 && ts.isStringLiteral(node.arguments[0])
+      ts.isCallExpression(node) && node.expression.kind === ts.SyntaxKind.ImportKeyword
     ) {
-      imports.push(node.arguments[0].text)
+      const argument = node.arguments[0]
+      imports.push(
+        argument && (ts.isStringLiteral(argument) ||
+            ts.isNoSubstitutionTemplateLiteral(argument))
+          ? argument.text
+          : computedImportSpecifier,
+      )
     }
     pending.push(...node.getChildren(sourceFile))
   }

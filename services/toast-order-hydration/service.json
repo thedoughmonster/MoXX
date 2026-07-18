@@ -9,9 +9,7 @@
   "functions": ["toast-orders-fetch-by-guid-v1"],
   "contracts": {
     "provides": ["toast.orders.fetch_by_guid.v1"],
-    "consumes": [
-      { "service": "order-alerting", "contract": "momi.order_api.invocation_work.v1" }
-    ]
+    "consumes": []
   },
   "database": {
     "read": ["toast_hydration", "momi_runtime"],
@@ -35,6 +33,7 @@
   "approved_packages": [],
   "owned_dataset": {
     "dataset_key": "toast.legacy_order_hydration_control",
+    "dataset_class": "operational",
     "private_schema": "toast_hydration",
     "private_relations": [
       "toast_hydration.api_sources",
@@ -42,6 +41,10 @@
       "toast_hydration.order_hydration_jobs",
       "toast_hydration.restaurants",
       "toast_hydration.webhook_order_mappings"
+    ],
+    "private_routines": [
+      "toast_hydration.enqueue_order_hydration",
+      "toast_hydration.wake_order_hydration_worker"
     ],
     "public_reads": [],
     "public_commands": ["toast.orders.fetch_by_guid.v1"],

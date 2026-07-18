@@ -17,9 +17,10 @@ Slack `chat.postMessage` with the prepared payload.
 
 ## Contracts
 
-The service consumes `momi.order_alert.delivery_work.v1` and provides
-`momi.slack.order_alert.deliver.v1`. Source and destination enablement remain
-independent database controls.
+The service provides `momi.slack.order_alert.deliver.v1`. Its current prepared
+message view reads the order-alert candidate snapshot through recorded
+transition debt; a later owner-view cutover will remove that direct access.
+Source and destination enablement remain independent database controls.
 
 ## Authority
 

@@ -3,13 +3,14 @@
 ## ELI5
 
 MoMi gives this service a saved order. It checks the configured alert rules,
-takes one readable snapshot, and creates one delivery job for every enabled
+takes one readable snapshot, and records one candidate for every enabled
 destination. It does not know how to talk to Toast or Slack.
 
 ## Purpose
 
 This source-neutral capability owns order alert decisions, idempotent candidate
-claims, destination fan-out, presentation snapshots, and durable delivery work.
+claims, destination fan-out, and presentation snapshots. Destination adapters
+own their durable delivery work.
 
 ## Owned Function
 
@@ -25,8 +26,9 @@ never forwarded as canonical reader authority.
 The active business path consumes the event delivery lifecycle and exact
 `momi.orders.get_by_version.v1`. The latest-version canonical reader and old
 `momi.toast_orders.get_by_id.v1` work path remain available only for dual-run
-compatibility. It provides
-`momi.order_alert.delivery_work.v1` for destination adapters.
+compatibility. The current Slack view still reads the candidate snapshot
+directly; that transition access is removal-only constitution debt until an
+owner-controlled versioned read view replaces it.
 
 ## Dual-Run Safety
 

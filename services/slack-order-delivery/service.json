@@ -9,9 +9,7 @@
   "functions": ["slack-order-alert-delivery-v1"],
   "contracts": {
     "provides": ["momi.slack.order_alert.deliver.v1"],
-    "consumes": [
-      { "service": "order-alerting", "contract": "momi.order_alert.delivery_work.v1" }
-    ]
+    "consumes": []
   },
   "database": {
     "read": ["momi_runtime", "momi_alerting"],
@@ -35,11 +33,16 @@
   "approved_packages": [],
   "owned_dataset": {
     "dataset_key": "momi.slack_delivery",
+    "dataset_class": "operational",
     "private_relations": [
       "momi_alerting.slack_delivery_attempts",
       "momi_alerting.slack_delivery_work",
       "momi_alerting.slack_destinations",
       "momi_alerting.slack_order_alert_messages_v1"
+    ],
+    "private_routines": [
+      "momi_alerting.enqueue_slack_order_alert_delivery",
+      "momi_alerting.wake_slack_delivery_worker"
     ],
     "public_reads": [],
     "public_commands": ["momi.slack.order_alert.deliver.v1"],

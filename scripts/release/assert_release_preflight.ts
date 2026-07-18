@@ -1,6 +1,8 @@
 import type { EnvironmentKey } from "../deploy/types.ts"
 import { runSupabase } from "../deploy/run_supabase.ts"
 import { runCommand } from "./run_command.ts"
+import { resolveDevelopmentBaseline } from
+  "./resolve_development_baseline.ts"
 import type { ReleasePreflight } from "./types.ts"
 
 export function assertReleasePreflight(
@@ -43,6 +45,14 @@ export function assertReleasePreflight(
     )
     if (ancestry.status !== 0) throw new Error("Feature branch must include current dev")
   }
-  runCommand(process.execPath, ["scripts/check.ts", "--service", "all"])
+  const developmentBaseline = resolveDevelopmentBaseline(branch, headSha, devSha)
+  const previousDevRef = process.env.MOMI_DEV_REF
+  process.env.MOMI_DEV_REF = developmentBaseline
+  try {
+    runCommand(process.execPath, ["scripts/check.ts", "--service", "all"])
+  } finally {
+    if (previousDevRef === undefined) delete process.env.MOMI_DEV_REF
+    else process.env.MOMI_DEV_REF = previousDevRef
+  }
   return { environment, branch, headSha }
 }

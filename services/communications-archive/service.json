@@ -12,7 +12,9 @@
       "momi.communications.capture_openai_message.v1",
       "momi.communications.capture_operational_note.v1"
     ],
-    "consumes": []
+    "consumes": [
+      { "service": "momi-event-routing", "contract": "momi.events.route.v1" }
+    ]
   },
   "database": {
     "read": ["momi_communications", "toast_raw"],
@@ -29,6 +31,8 @@
   "approved_packages": [],
   "owned_dataset": {
     "dataset_key": "momi.raw_json_evidence",
+    "dataset_class": "raw_evidence",
+    "private_schemas": ["toast_raw"],
     "private_relations": [
       "momi_communications.archive_items",
       "momi_communications.source_accounts",
@@ -42,6 +46,15 @@
       "toast_raw.webhook_event_types",
       "toast_raw.webhook_events",
       "toast_raw.webhook_subscriptions"
+    ],
+    "private_routines": [
+      "momi_communications.capture_openai_message_v1",
+      "momi_communications.capture_operational_note_v1",
+      "momi_communications.reject_archive_item_mutation",
+      "momi_events.emit_toast_resource_observation",
+      "momi_events.emit_toast_webhook_event",
+      "toast_raw.has_header", "toast_raw.reject_archive_mutation",
+      "toast_raw.webhook_headers_are_safe"
     ],
     "public_reads": [],
     "public_commands": [
