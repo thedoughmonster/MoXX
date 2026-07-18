@@ -11,6 +11,7 @@ export function runCommand(
   const capture = options.capture ?? false
   const env = { ...process.env }
   delete env.SUPABASE_DB_PASSWORD
+  delete env.PGPASSWORD
   const result = spawnSync(command, args, {
     cwd: workspaceRoot,
     encoding: "utf8",

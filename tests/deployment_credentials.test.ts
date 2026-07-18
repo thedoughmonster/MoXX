@@ -20,8 +20,8 @@ test("keeps database credentials out of repository deployment", async () => {
     new URL("../scripts/release/apply_migrations.ts", import.meta.url),
     "utf8",
   )
-  assert.match(source, /"db", "push", "--linked", "--dry-run"/)
+  assert.match(source, /"db", "push", "--db-url", databaseUrl, "--dry-run"/)
+  assert.match(source, /"db", "query", "--db-url", databaseUrl/)
   assert.match(source, /IPv4 session pooler/)
-  assert.match(source, /5432/)
   assert.doesNotMatch(source, /SUPABASE_DB_PASSWORD|PGPASSWORD/)
 })

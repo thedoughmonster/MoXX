@@ -49,10 +49,12 @@ JWT-protected function may instead prove reachability with `401` or `403`.
 
 ## Migration Boundary
 
-The coordinator links the selected project, rejects anything except the IPv4
-session pooler on port 5432, previews `db push`, applies it, and compares every
-local migration version with hosted history. It rejects the CLI `--debug` flag,
-which changes the database transport and cannot validate the normal TLS path.
+The coordinator links the selected project, validates its password-free IPv4
+session-pooler URL on port 5432, and adds verified TLS. Preview, apply, and
+hosted-history parity all use that exact URL. The database password reaches only
+those database children as `PGPASSWORD`; it never enters a URL or argument. The
+coordinator rejects the CLI `--debug` flag, which changes the database transport
+and cannot validate the normal TLS path.
 GitHub workflows never apply migrations and local code never deploys Edge
 Functions.
 

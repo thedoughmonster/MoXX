@@ -41,7 +41,7 @@ test("keeps migration apply in one local coordinator module", async () => {
 
 test("disables optional Supabase CLI telemetry during releases", async () => {
   const source = await readFile(
-    new URL("../scripts/deploy/run_supabase.ts", import.meta.url),
+    new URL("../scripts/deploy/supabase_environment.ts", import.meta.url),
     "utf8",
   )
   assert.match(source, /SUPABASE_TELEMETRY_DISABLED:\s*"1"/)

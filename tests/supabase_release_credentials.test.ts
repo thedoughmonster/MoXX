@@ -12,6 +12,10 @@ test("requires a password-authenticated Supabase database session", () => {
   assert.doesNotThrow(() => assertSupabaseDbPassword({
     SUPABASE_DB_PASSWORD: "present-but-never-logged",
   }))
+  assert.equal(
+    assertSupabaseDbPassword({ SUPABASE_DB_PASSWORD: "database-secret" }),
+    "database-secret",
+  )
 })
 
 test("requires CLI access to the exact release project", () => {
@@ -42,11 +46,20 @@ test("confines the database password to Supabase CLI processes", async () => {
     new URL("../scripts/deploy/run_supabase.ts", import.meta.url),
     "utf8",
   )
+  const environment = await readFile(
+    new URL("../scripts/deploy/supabase_environment.ts", import.meta.url),
+    "utf8",
+  )
   const password = preflight.indexOf("assertSupabaseDbPassword()")
   const target = preflight.indexOf("assertSupabaseProjectAccess(")
   const validation = preflight.indexOf('"scripts/check.ts"')
   assert.ok(password >= 0 && password < target && target < validation)
   assert.match(command, /delete env\.SUPABASE_DB_PASSWORD/)
-  assert.match(supabase, /env: \{ \.\.\.process\.env,/)
+  assert.match(command, /delete env\.PGPASSWORD/)
+  assert.match(supabase, /supabaseEnvironment\(process\.env, databasePassword\)/)
+  assert.match(environment, /delete environment\.SUPABASE_DB_PASSWORD/)
+  assert.match(environment, /delete environment\.PGPASSWORD/)
+  assert.match(environment, /environment\.PGPASSWORD = databasePassword/)
+  assert.doesNotMatch(supabase, /"--password"|SUPABASE_DB_PASSWORD/)
   assert.doesNotMatch(preflight, /console\..*SUPABASE_DB_PASSWORD/)
 })
