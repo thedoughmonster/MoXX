@@ -46,12 +46,16 @@ Supabase plugin, CLI, dashboard, or a local script.
 
 | Credential | Authoritative location |
 | --- | --- |
-| Local Supabase CLI token | Windows Credential Manager |
+| Local Supabase CLI token | Supabase CLI credential store on the release host |
+| Local database password | Transient `SUPABASE_DB_PASSWORD` release environment |
 | GitHub deployment token | Protected GitHub environment secret |
 | Runtime/API secret | Supabase Edge Function Secret |
 
-The local Supabase token is an account-management credential. Do not copy it
-into Supabase runtime secrets, Vault, `.env`, GitHub, or the repository.
+The local Supabase token and database password are account-management
+credentials. Preflight requires the token to enumerate the exact target project
+and requires a database password so the CLI cannot use a temporary login role.
+Do not copy either credential into Supabase runtime secrets, Vault, `.env`,
+GitHub, the repository, commands, or logs.
 
 ## Database Controls
 

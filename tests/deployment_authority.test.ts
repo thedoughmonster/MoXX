@@ -78,7 +78,8 @@ test("codifies the supported agent deployment path", async () => {
   assert.match(contract, /agent-deployment-procedure\.md/)
   assert.match(procedure, /pnpm release:dev/)
   assert.match(procedure, /Never merge or push `prod` directly/)
-  assert.match(procedure, /Windows Credential Manager/)
+  assert.match(procedure, /Supabase CLI credential store/)
+  assert.match(procedure, /SUPABASE_DB_PASSWORD/)
   assert.match(procedure, /Do not retry through a different deployment authority/)
 })
 

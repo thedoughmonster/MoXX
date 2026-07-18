@@ -1,13 +1,16 @@
+import { loadWorkspace } from "../architecture/load_workspace.ts"
 import type { EnvironmentKey } from "../deploy/types.ts"
 import { runSupabase } from "../deploy/run_supabase.ts"
+import { assertSupabaseDbPassword } from "./assert_supabase_db_password.ts"
+import { assertSupabaseProjectAccess } from "./assert_supabase_project_access.ts"
 import { runCommand } from "./run_command.ts"
 import { resolveDevelopmentBaseline } from
   "./resolve_development_baseline.ts"
 import type { ReleasePreflight } from "./types.ts"
 
-export function assertReleasePreflight(
+export async function assertReleasePreflight(
   environment: EnvironmentKey,
-): ReleasePreflight {
+): Promise<ReleasePreflight> {
   if (!process.versions.node.startsWith("24.")) {
     throw new Error(`Node 24 is required; found ${process.versions.node}`)
   }
@@ -21,7 +24,13 @@ export function assertReleasePreflight(
     throw new Error("Production releases must start from dev")
   }
   runCommand("gh", ["auth", "status"])
-  runSupabase(["projects", "list", "--output", "json"], true)
+  const workspace = await loadWorkspace()
+  assertSupabaseDbPassword()
+  const projects = runSupabase(["projects", "list", "--output", "json"], true)
+  assertSupabaseProjectAccess(
+    projects,
+    workspace.environments[environment].project_ref,
+  )
   runCommand("git", [
     "fetch",
     "origin",

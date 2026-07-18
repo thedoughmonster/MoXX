@@ -9,9 +9,12 @@ export function runCommand(
   options: CommandOptions = {},
 ): CommandResult {
   const capture = options.capture ?? false
+  const env = { ...process.env }
+  delete env.SUPABASE_DB_PASSWORD
   const result = spawnSync(command, args, {
     cwd: workspaceRoot,
     encoding: "utf8",
+    env,
     stdio: capture ? ["ignore", "pipe", "pipe"] : "inherit",
   })
   if (result.error) throw result.error

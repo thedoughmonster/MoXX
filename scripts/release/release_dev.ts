@@ -7,7 +7,7 @@ import { waitForPullRequest } from "./wait_for_pull_request.ts"
 import { waitForWorkflow } from "./wait_for_workflow.ts"
 
 export async function releaseDev(): Promise<void> {
-  const preflight = assertReleasePreflight("dev")
+  const preflight = await assertReleasePreflight("dev")
   let releaseSha = preflight.headSha
   if (preflight.branch !== "dev") {
     console.log(`Publishing ${preflight.branch} for development...`)
