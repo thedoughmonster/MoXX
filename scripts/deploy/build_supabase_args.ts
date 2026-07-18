@@ -1,9 +1,8 @@
 export function buildSupabaseArgs(
   args: string[],
-  env: Record<string, string | undefined> = process.env,
 ): string[] {
-  if (env.MOMI_SUPABASE_CLI_DEBUG !== "1" || args.includes("--debug")) {
-    return [...args]
+  if (args.some((arg) => arg === "--debug" || arg.startsWith("--debug="))) {
+    throw new Error("Supabase CLI --debug is forbidden by release policy")
   }
-  return [...args, "--debug"]
+  return [...args]
 }
