@@ -13,6 +13,9 @@ purpose-bound gateway credential outside model-visible input. Chat input carries
 the authenticated OpenWebUI user ID/email, conversation/turn IDs, idempotency
 key, alias, and OpenAI-compatible ordered messages.
 
+Zac's admin route can adjust each user's per-minute, per-day, input, output,
+timeout, and total beta-budget ceilings independently.
+
 An exact affirmative final user command `log this message`, `log this turn`, or
 `log this conversation` excludes the command itself. Message selects the
 immediately preceding model-visible message, turn selects the preceding
@@ -22,6 +25,8 @@ means turn. Negated, quoted, embedded, or non-final text never creates a flag.
 ## Output
 
 The response is OpenAI-compatible and keeps the visible alias provider-neutral.
+The provider call uses the authenticated user's opaque UUID as a stable
+privacy-preserving safety identifier.
 
 ## Side Effects
 
