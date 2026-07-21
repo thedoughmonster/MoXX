@@ -22,7 +22,8 @@ export async function executeAdmittedChat(input: ChatInput, admission: Admission
   tools: JSONValue[]): Promise<{ status: number; body: Record<string, JSONValue> }> {
   const requestOne: Record<string, JSONValue> = { model: admission.provider_model,
     messages: input.messages as unknown as JSONValue[], tools, tool_choice: "auto",
-    parallel_tool_calls: false, max_tokens: admission.maximum_output_tokens, store: false }
+    parallel_tool_calls: false, max_completion_tokens: admission.maximum_output_tokens,
+    safety_identifier: input.user.id, store: false }
   const admissionReceipt = await captureEvidence(input, admission.invocation_id, 0,
     "request_admission", { alias: visibleAlias, provider_request: requestOne },
     admission.provider_key, admission.provider_model, "pending")

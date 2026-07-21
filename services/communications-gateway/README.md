@@ -3,7 +3,8 @@
 ## ELI5
 
 This service is the guarded front door between OpenWebUI and MoMi's configured
-model provider. It checks who may use the beta and how much they may spend,
+model provider. It checks who may use the beta, per-minute and per-day request
+limits, token ceilings, timeouts, and how much each user may spend,
 records the complete exchange, and exposes only approved MoMi tools.
 
 ## Boundary
@@ -17,6 +18,12 @@ Only `momi-assistant` is listed. All route, provider, and cohort records ship
 inactive. Same-key/same-payload requests replay safely; changed payloads fail;
 an ambiguous paid result pauses for reconciliation. Final success requires the
 archive owner's terminal receipt.
+
+Provider execution prefers the beta-specific `MOMI_BETA_PROVIDER_API_KEY` and
+may reuse the existing project-scoped `OPENAI_API_KEY` during beta activation.
+Neither value is returned, logged, archived, or exposed to OpenWebUI. Provider
+requests use the authenticated user's opaque UUID as `safety_identifier` and
+the current `max_completion_tokens` field.
 
 ## Tools
 

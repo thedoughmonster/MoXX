@@ -7,7 +7,8 @@ export async function callProvider(
   timeoutSeconds: number,
   fetchImpl: typeof fetch = fetch,
 ): Promise<ProviderResult> {
-  const apiKey = Deno.env.get("MOMI_BETA_PROVIDER_API_KEY")
+  const apiKey = Deno.env.get("MOMI_BETA_PROVIDER_API_KEY") ??
+    Deno.env.get("OPENAI_API_KEY")
   if (!apiKey) throw new Error("provider configuration is unavailable")
   const started = performance.now()
   try {

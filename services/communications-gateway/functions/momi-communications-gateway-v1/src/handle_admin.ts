@@ -20,20 +20,22 @@ export async function handleAdmin(
       ${adminId}::uuid, true, ${body.user_id}::uuid, ${body.email}, ${body.active}
     )`
   } else if (pathname.endsWith("/admin/user-limits")) {
-    const numeric = ["requests_per_minute", "maximum_input_tokens",
+    const numeric = ["requests_per_minute", "requests_per_day", "maximum_input_tokens",
       "maximum_output_tokens", "timeout_seconds", "budget_micros"]
     if (typeof body.user_id !== "string" || numeric.some((key) =>
       typeof body[key] !== "number" || !Number.isSafeInteger(body[key]))) {
       return Response.json({ error: "invalid_request" }, { status: 400 })
     }
     const requestsPerMinute = body.requests_per_minute as number
+    const requestsPerDay = body.requests_per_day as number
     const maximumInputTokens = body.maximum_input_tokens as number
     const maximumOutputTokens = body.maximum_output_tokens as number
     const timeoutSeconds = body.timeout_seconds as number
     const budgetMicros = body.budget_micros as number
     await sql`select momi_communications_gateway.set_user_limits_v1(
       ${adminId}::uuid, true, ${body.user_id}::uuid,
-      ${requestsPerMinute}::integer, ${maximumInputTokens}::integer,
+      ${requestsPerMinute}::integer, ${requestsPerDay}::integer,
+      ${maximumInputTokens}::integer,
       ${maximumOutputTokens}::integer, ${timeoutSeconds}::integer,
       ${budgetMicros}::bigint
     )`
