@@ -4,4 +4,5 @@ process.stdout.write(JSON.stringify({
   telemetry: process.env.SUPABASE_TELEMETRY_DISABLED,
   hasReleasePassword: Boolean(process.env.SUPABASE_DB_PASSWORD),
   hasPostgresPassword: Boolean(process.env.PGPASSWORD),
+  passwordsMatch: process.env.SUPABASE_DB_PASSWORD === process.env.PGPASSWORD,
 }))
