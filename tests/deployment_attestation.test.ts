@@ -60,13 +60,12 @@ verify_jwt = true # explicit
   assert.deepEqual([...settings], [["alpha-v1", false], ["beta-v1", true]])
 })
 
-test("accepts an authorization challenge only for JWT-protected probes", () => {
-  assert.equal(isAcceptableProbeStatus(200, false), true)
-  assert.equal(isAcceptableProbeStatus(401, true), true)
-  assert.equal(isAcceptableProbeStatus(403, true), true)
-  assert.equal(isAcceptableProbeStatus(401, false), false)
-  assert.equal(isAcceptableProbeStatus(404, true), false)
-  assert.equal(isAcceptableProbeStatus(500, true), false)
+test("accepts an authorization challenge as healthy reachability", () => {
+  assert.equal(isAcceptableProbeStatus(200), true)
+  assert.equal(isAcceptableProbeStatus(401), true)
+  assert.equal(isAcceptableProbeStatus(403), true)
+  assert.equal(isAcceptableProbeStatus(404), false)
+  assert.equal(isAcceptableProbeStatus(500), false)
 })
 
 test("pairs hosted bundle metadata with a deterministic function manifest digest", async (t) => {
