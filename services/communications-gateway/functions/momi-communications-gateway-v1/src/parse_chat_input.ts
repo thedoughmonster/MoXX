@@ -1,3 +1,4 @@
+import { validRange } from "./valid_range.ts"
 import { visibleAlias, type ChatInput, type Message } from "./types.ts"
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu
@@ -38,15 +39,23 @@ export function parseChatInput(value: unknown): ChatInput | null {
   if (input.momi_log !== undefined) {
     if (!input.momi_log || typeof input.momi_log !== "object" || Array.isArray(input.momi_log)) return null
     const flag = input.momi_log as Record<string, unknown>
-    const flagKeys = ["scope", "message_id", "range", "note", "category"]
+    const flagKeys = ["scope", "message_id", "range", "selected_content", "note", "category"]
     if (Object.keys(flag).some((key) => !flagKeys.includes(key)) ||
       typeof flag.scope !== "string" || !scopes.has(flag.scope) ||
       !(flag.message_id === undefined || typeof flag.message_id === "string") ||
-      !(flag.range === undefined || flag.range && typeof flag.range === "object" &&
-        !Array.isArray(flag.range)) ||
+      !(flag.selected_content === undefined || typeof flag.selected_content === "string" &&
+        flag.selected_content.length > 0 && flag.selected_content.length <= 240000) ||
+      !(flag.range === undefined || validRange(flag.range)) ||
       !(flag.note === undefined || typeof flag.note === "string" && flag.note.length <= 2000) ||
       !(flag.category === undefined || typeof flag.category === "string" &&
         flag.category.length <= 120)) return null
+    if ((flag.scope === "message" && (typeof flag.message_id !== "string" ||
+        typeof flag.selected_content !== "string" || flag.range !== undefined)) ||
+      (flag.scope === "range" && (!validRange(flag.range) ||
+        typeof flag.selected_content !== "string" || flag.message_id !== undefined)) ||
+      (["turn", "conversation"].includes(flag.scope as string) &&
+        (flag.message_id !== undefined || flag.range !== undefined ||
+          flag.selected_content !== undefined))) return null
   }
   return { ...input, messages, user: { id: user.id, email: user.email } } as ChatInput
 }

@@ -11,7 +11,10 @@ conversation and turn identity, `momi-assistant`, an ordered model-visible
 message array, and an idempotency key. The gateway resolves the active provider
 and model from private configuration. Same-key/same-payload replay returns the
 existing execution; a different payload is rejected. Pending or ambiguous paid
-attempts are returned for operator reconciliation and never retried.
+attempts return only redacted state and are never retried. Admission reserves
+the worst-case two-round cost. Each complete provider payload, including tool
+definitions and results, is checked before egress, and both paid rounds share
+one whole-invocation deadline.
 
 `list_models`, `get_conversation_execution`, `set_user_limits`,
 `set_user_access`, and `set_gateway_state` are versioned gateway contracts. The
@@ -27,7 +30,8 @@ metadata. `capture_human_message` appends one committed OpenWebUI message using
 stable source account, user, conversation, and message identity. Replays
 collapse only when identity and content match. Purpose-bound receipt reads
 return identifiers, hashes, order, status, usage, and timing, but no protected
-value or unrelated conversation content.
+value or unrelated conversation content. Post-admission failures append redacted
+terminal evidence before terminalization; replay exposes no archived content.
 
 ## Operations
 
@@ -36,6 +40,9 @@ one of `message`, `turn`, `range`, or `conversation`, stable gateway/archive
 receipts, optional note/category, and an idempotency key. It appends one
 selection and log. Replays return the same log; correction and supersession are
 later append-only records. Model and system selections cannot use `user_flag`.
+Natural-language selection accepts only a standalone affirmative imperative,
+rejects negation and quotation, validates scope-specific references/content,
+and invokes the append contract exactly once.
 
 ## Canonical Read Tools
 

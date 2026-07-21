@@ -15,6 +15,7 @@ export type UserFlag = {
   scope: "message" | "turn" | "range" | "conversation"
   message_id?: string
   range?: Record<string, JSONValue>
+  selected_content?: string
   note?: string
   category?: string
 }
@@ -38,6 +39,10 @@ export type Admission = {
   maximum_output_tokens: number
   timeout_seconds: number
   maximum_attempt_cost_micros: string
+  maximum_input_tokens: number
+  invocation_deadline: string
+  invocation_status: string
+  error_code: string | null
 }
 
 export type ArchiveReceipt = {

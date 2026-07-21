@@ -75,6 +75,24 @@ begin
     or (p_source_range is not null and jsonb_typeof(p_source_range) <> 'object') then
     raise exception 'explicit user flag selection is invalid' using errcode = '22023';
   end if;
+  if (p_selection_scope = 'message' and (
+      coalesce(p_source_message_id, '') = '' or p_source_range is not null
+      or not (p_log_content ? 'selected_content')))
+    or (p_selection_scope = 'turn' and (
+      coalesce(p_source_turn_id, '') = '' or p_source_message_id is not null
+      or p_source_range is not null or not (p_log_content ? 'selected_content')))
+    or (p_selection_scope = 'range' and (
+      p_source_message_id is not null or p_source_range is null
+      or jsonb_typeof(p_source_range -> 'start') <> 'number'
+      or jsonb_typeof(p_source_range -> 'end') <> 'number'
+      or (p_source_range ->> 'start')::integer < 0
+      or (p_source_range ->> 'end')::integer <= (p_source_range ->> 'start')::integer
+      or not (p_log_content ? 'selected_content')))
+    or (p_selection_scope = 'conversation' and (
+      p_source_message_id is not null or p_source_range is not null
+      or jsonb_typeof(p_log_content -> 'messages') <> 'array')) then
+    raise exception 'scope-specific user selection is invalid' using errcode = '22023';
+  end if;
   if not exists (
     select 1 from momi_communications.get_gateway_exchange_receipt_v1(
       p_gateway_invocation_id, p_flagged_by_user_id

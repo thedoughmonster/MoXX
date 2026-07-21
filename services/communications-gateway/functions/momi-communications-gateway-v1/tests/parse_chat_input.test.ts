@@ -31,6 +31,11 @@ test("rejects client-forged tool messages and provider fields", () => {
 
 test("accepts only bounded explicit user-log selection metadata", () => {
   assert.ok(parseChatInput({ ...valid, momi_log: { scope: "turn", note: "log this" } }))
+  assert.ok(parseChatInput({ ...valid, momi_log: { scope: "message",
+    message_id: "message-1", selected_content: "selected" } }))
+  assert.ok(parseChatInput({ ...valid, momi_log: { scope: "range",
+    range: { start: 0, end: 8 }, selected_content: "selected" } }))
+  assert.equal(parseChatInput({ ...valid, momi_log: { scope: "message" } }), null)
   assert.equal(parseChatInput({ ...valid, momi_log: {
     scope: "turn",
     selected_by: "model",

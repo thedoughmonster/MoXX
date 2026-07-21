@@ -5,15 +5,14 @@ export async function completeInvocation(
   status: "completed" | "failed" | "paid_ambiguous",
   receiptId: string | null,
   outputTokens: number,
-  billedMicros: string,
   errorCode: string | null,
-): Promise<boolean> {
+): Promise<void> {
   const sql = getDatabase()
   const rows = await sql<{ completed: boolean }[]>`
     select momi_communications_gateway.complete_invocation_v1(
       ${invocationId}::uuid, ${status}, ${receiptId}::uuid,
-      ${outputTokens}, ${billedMicros}::bigint, ${errorCode}
+      ${outputTokens}, ${errorCode}
     ) as completed
   `
-  return rows[0]?.completed ?? false
+  if (!rows[0]?.completed) throw new Error("invocation_terminalization_failed")
 }

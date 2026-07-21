@@ -10,6 +10,6 @@
     "conversation_id": {"type": "string", "minLength": 1, "maxLength": 256},
     "turn_id": {"type": "string", "minLength": 1, "maxLength": 256},
     "idempotency_key": {"type": "string", "minLength": 1, "maxLength": 256},
-    "momi_log": {"type": "object", "additionalProperties": false, "required": ["scope"], "properties": {"scope": {"enum": ["message", "turn", "range", "conversation"]}, "message_id": {"type": "string"}, "range": {"type": "object"}, "note": {"type": "string", "maxLength": 2000}, "category": {"type": "string", "maxLength": 120}}}
+    "momi_log": {"type": "object", "additionalProperties": false, "required": ["scope"], "properties": {"scope": {"enum": ["message", "turn", "range", "conversation"]}, "message_id": {"type": "string", "minLength": 1}, "range": {"type": "object", "additionalProperties": false, "required": ["start", "end"], "properties": {"start": {"type": "integer", "minimum": 0}, "end": {"type": "integer", "minimum": 1}}}, "selected_content": {"type": "string", "minLength": 1, "maxLength": 240000}, "note": {"type": "string", "maxLength": 2000}, "category": {"type": "string", "maxLength": 120}}}
   }
 }

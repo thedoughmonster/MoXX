@@ -14,7 +14,7 @@ create table momi_communications_gateway.provider_bindings (
   alias text primary key,
   provider_key text not null,
   endpoint text not null,
-  model text not null,
+  model text not null check (length(model) between 1 and 200),
   enabled boolean not null default false,
   maximum_attempt_cost_micros bigint not null default 0
     check (maximum_attempt_cost_micros >= 0),
@@ -61,7 +61,11 @@ create table momi_communications_gateway.invocations (
   input_tokens integer not null default 0,
   output_tokens integer not null default 0,
   billed_micros bigint not null default 0,
+  reserved_micros bigint not null default 0,
+  per_attempt_cost_micros bigint not null default 0,
+  provider_calls integer not null default 0 check (provider_calls between 0 and 2),
   started_at timestamptz not null default now(),
+  invocation_deadline timestamptz not null,
   archive_admitted_at timestamptz,
   provider_started_at timestamptz,
   completed_at timestamptz,
@@ -102,7 +106,9 @@ create function momi_communications_gateway.admit_invocation_v1(
 returns table (
   disposition text, invocation_id uuid, provider_key text, provider_model text,
   provider_endpoint text, maximum_output_tokens integer,
-  timeout_seconds integer, maximum_attempt_cost_micros bigint
+  maximum_input_tokens integer, timeout_seconds integer,
+  maximum_attempt_cost_micros bigint, invocation_deadline timestamptz,
+  invocation_status text, error_code text
 )
 language plpgsql security definer set search_path = ''
 as $$
@@ -130,6 +136,7 @@ begin
   if not found then raise exception 'provider binding is disabled' using errcode = '55000'; end if;
   select * into limits from momi_communications_gateway.user_limits
     where user_id = p_user_id for update;
+  p_input_tokens := p_input_tokens + ceil(length(binding.model)::numeric / 4)::integer;
   if not found or p_input_tokens > limits.maximum_input_tokens then
     raise exception 'effective user limit refused request' using errcode = '22023';
   end if;
@@ -143,30 +150,42 @@ begin
     provider_key := existing.provider_key; provider_model := existing.provider_model;
     provider_endpoint := binding.endpoint;
     maximum_output_tokens := limits.maximum_output_tokens;
+    maximum_input_tokens := limits.maximum_input_tokens;
     timeout_seconds := limits.timeout_seconds;
     maximum_attempt_cost_micros := binding.maximum_attempt_cost_micros;
+    invocation_deadline := existing.invocation_deadline;
+    invocation_status := existing.status; error_code := existing.error_code;
     return next; return;
   end if;
   select count(*) into recent_count from momi_communications_gateway.invocations
     where user_id = p_user_id and started_at >= now() - interval '1 minute';
-  select coalesce(sum(billed_micros), 0) into spend
+  select coalesce(sum(case when status in ('completed', 'failed', 'paid_ambiguous')
+    then billed_micros else reserved_micros end), 0) into spend
     from momi_communications_gateway.invocations where user_id = p_user_id;
   if recent_count >= limits.requests_per_minute
-    or spend + binding.maximum_attempt_cost_micros > limits.budget_micros then
+    or binding.maximum_attempt_cost_micros > limits.budget_micros / 2
+    or spend + (binding.maximum_attempt_cost_micros * 2) > limits.budget_micros then
     raise exception 'effective rate or budget limit refused request' using errcode = '22023';
   end if;
   insert into momi_communications_gateway.invocations (
     user_id, conversation_id, turn_id, idempotency_key, request_hash, alias,
-    provider_key, provider_model, input_tokens
+    provider_key, provider_model, input_tokens, reserved_micros,
+    per_attempt_cost_micros, invocation_deadline
   ) values (p_user_id, p_conversation_id, p_turn_id, p_idempotency_key,
-    p_request_hash, p_alias, binding.provider_key, binding.model, p_input_tokens)
+    p_request_hash, p_alias, binding.provider_key, binding.model, p_input_tokens,
+    binding.maximum_attempt_cost_micros * 2, binding.maximum_attempt_cost_micros,
+    now() + make_interval(secs => limits.timeout_seconds))
   returning momi_communications_gateway.invocations.invocation_id into new_id;
   disposition := 'admitted'; invocation_id := new_id;
   provider_key := binding.provider_key; provider_model := binding.model;
   provider_endpoint := binding.endpoint;
   maximum_output_tokens := limits.maximum_output_tokens;
+  maximum_input_tokens := limits.maximum_input_tokens;
   timeout_seconds := limits.timeout_seconds;
   maximum_attempt_cost_micros := binding.maximum_attempt_cost_micros;
+  select i.invocation_deadline into invocation_deadline
+    from momi_communications_gateway.invocations i where i.invocation_id = new_id;
+  invocation_status := 'pending_archive'; error_code := null;
   return next;
 end;
 $$;
@@ -182,17 +201,25 @@ create function momi_communications_gateway.mark_archive_admitted_v1(
 $$;
 
 create function momi_communications_gateway.mark_provider_started_v1(
-  p_invocation_id uuid
+  p_invocation_id uuid, p_payload_tokens integer, p_round integer
 ) returns boolean language sql security definer set search_path = '' as $$
   update momi_communications_gateway.invocations
-  set status = 'provider_started', provider_started_at = now()
-  where invocation_id = p_invocation_id and status = 'admitted'
-    and archive_admission_receipt is not null returning true
+  set status = 'provider_started', provider_started_at = coalesce(provider_started_at, now()),
+      provider_calls = p_round
+  where invocation_id = p_invocation_id
+    and ((p_round = 1 and status = 'admitted' and provider_calls = 0)
+      or (p_round = 2 and status = 'provider_started' and provider_calls = 1))
+    and archive_admission_receipt is not null and now() < invocation_deadline
+    and p_payload_tokens > 0 and p_payload_tokens <= (
+      select limits.maximum_input_tokens
+      from momi_communications_gateway.user_limits limits
+      where limits.user_id = momi_communications_gateway.invocations.user_id
+    ) returning true
 $$;
 
 create function momi_communications_gateway.complete_invocation_v1(
   p_invocation_id uuid, p_status text, p_terminal_receipt uuid,
-  p_output_tokens integer, p_billed_micros bigint, p_error_code text default null
+  p_output_tokens integer, p_error_code text default null
 ) returns boolean language plpgsql security definer set search_path = '' as $$
 begin
   if p_status not in ('completed', 'failed', 'paid_ambiguous')
@@ -202,11 +229,24 @@ begin
   update momi_communications_gateway.invocations set status = p_status,
     terminal_archive_receipt = p_terminal_receipt,
     output_tokens = greatest(coalesce(p_output_tokens, 0), 0),
-    billed_micros = greatest(coalesce(p_billed_micros, 0), 0),
+    billed_micros = per_attempt_cost_micros * provider_calls,
+    reserved_micros = 0,
     error_code = p_error_code, completed_at = now()
   where invocation_id = p_invocation_id and status = 'provider_started';
   return found;
 end;
+$$;
+
+create function momi_communications_gateway.fail_invocation_v1(
+  p_invocation_id uuid, p_terminal_receipt uuid, p_error_code text
+) returns boolean language sql security definer set search_path = '' as $$
+  update momi_communications_gateway.invocations set status = 'failed',
+    terminal_archive_receipt = p_terminal_receipt,
+    billed_micros = per_attempt_cost_micros * provider_calls,
+    reserved_micros = 0, error_code = p_error_code, completed_at = now()
+  where invocation_id = p_invocation_id
+    and status in ('admitted', 'provider_started')
+    and p_terminal_receipt is not null and p_error_code <> '' returning true
 $$;
 
 create function momi_communications_gateway.get_conversation_execution_v1(

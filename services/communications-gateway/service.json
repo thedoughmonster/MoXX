@@ -61,6 +61,7 @@
     "private_routines": [
       "momi_communications_gateway.admit_invocation_v1",
       "momi_communications_gateway.complete_invocation_v1",
+      "momi_communications_gateway.fail_invocation_v1",
       "momi_communications_gateway.get_conversation_execution_v1",
       "momi_communications_gateway.list_models_v1",
       "momi_communications_gateway.mark_archive_admitted_v1",
