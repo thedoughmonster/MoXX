@@ -104,7 +104,7 @@ they deploy from the same repository.
 - Build joins and projections as explicitly named, versioned database views.
 - Treat the Toast event GUID as the delivery idempotency key.
 - Store runtime secrets in Supabase, deployment secrets in GitHub, and local CLI credentials in the approved release host's credential store.
-- Expose the database password only as `SUPABASE_DB_PASSWORD` during a release; never duplicate credentials in Git.
+- Authenticate the pinned Supabase CLI by OAuth/PAT; supply its temporary token as `SUPABASE_DB_PASSWORD`, never the long-lived Postgres role password.
 
 ## Change Sequence
 

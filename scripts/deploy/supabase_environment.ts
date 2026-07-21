@@ -1,6 +1,5 @@
 export function supabaseEnvironment(
   source: NodeJS.ProcessEnv = process.env,
-  databasePassword?: string,
 ): NodeJS.ProcessEnv {
   const environment = {
     ...source,
@@ -9,6 +8,5 @@ export function supabaseEnvironment(
   }
   delete environment.SUPABASE_DB_PASSWORD
   delete environment.PGPASSWORD
-  if (databasePassword) environment.PGPASSWORD = databasePassword
   return environment
 }

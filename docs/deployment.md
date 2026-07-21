@@ -11,11 +11,13 @@ pnpm release:dev
 pnpm release:prod
 ```
 
-Both commands require a clean worktree, secure CLI sign-in, access to the exact
-target project, and a transient `SUPABASE_DB_PASSWORD`. Development may start
-on a committed feature branch based on current `dev`, or on `dev` when resuming
-an already merged release. Production must start on clean, current `dev`.
-Neither command commits unknown work.
+Both commands require a clean worktree and a Supabase CLI profile authenticated
+by OAuth or a personal access token with temporary access to the exact target
+project. Export that same temporary token as `SUPABASE_DB_PASSWORD`; it is used
+as a temporary-access database password, not the long-lived Postgres role
+password. Development may start on a committed feature branch based on current
+`dev`, or on `dev` when resuming an already merged release. Production must
+start on clean, current `dev`. Neither command commits unknown work.
 
 The development command owns feature PR creation and merge, exact-commit
 validation, migration preview/apply/parity, and GitHub workflow dispatch. The
@@ -49,14 +51,23 @@ JWT-protected function may instead prove reachability with `401` or `403`.
 
 ## Migration Boundary
 
-The coordinator links the selected project, validates its password-free IPv4
-session-pooler URL on port 5432, and adds verified TLS. Preview, apply, and
-hosted-history parity all use that exact URL. The database password reaches only
-those database children as `PGPASSWORD`; it never enters a URL or argument. The
-coordinator rejects the CLI `--debug` flag, which changes the database transport
-and cannot validate the normal TLS path.
-GitHub workflows never apply migrations and local code never deploys Edge
-Functions.
+Preflight links the exact selected ref, validates `.temp/project-ref` and the
+password-free `.temp/pooler-url`, builds an explicit password-free connection
+URL with only the decoded option `options=-c jit=true`, then proves access with
+one bounded read-only database query. It does not depend on top-level project
+enumeration because persistent branches may not appear there.
+
+Migration apply links and validates the exact ref again, previews with
+`db push --db-url <validated-url> --dry-run --yes`, applies with that same URL,
+and queries migration history with it for exact parity. The validated IPv4
+session-pooler URL uses port 5432, the approved Supabase pooler domain, exact
+project username, and `/postgres`; it carries no password, fragment, or other
+query option. Remote CLI database connections are TLS-only; the policy does not
+claim certificate `verify-full` without the dashboard CA. Only the narrowly
+scoped database child receives `SUPABASE_DB_PASSWORD`, mirrored to `PGPASSWORD`.
+Every general child strips both. The coordinator rejects `--debug`, which
+changes the database transport. GitHub workflows never apply migrations and
+local code never deploys Edge Functions.
 
 Files already present on `prod` are immutable. A migration not present in the
 production baseline has exactly one ownership header on physical line 1:
@@ -70,12 +81,13 @@ non-executable `.sql` files.
 
 ## Credentials
 
-The permanent local Supabase CLI token is stored by the CLI on the approved
-release host. The database password is supplied only through the release
-process's `SUPABASE_DB_PASSWORD` environment. GitHub environment secrets
-authorize GitHub's function deployment. Supabase project secrets authorize
-runtime integrations. No credential value belongs in a repository file,
-`.env`, command log, or release record.
+The operator supplies the temporary OAuth or personal access token in
+`SUPABASE_DB_PASSWORD` for the release process. The database-only child mirrors
+it to `PGPASSWORD`; repository code never reads a fixed token file or puts the
+token in the password-free URL, CLI arguments, logs, or release records. GitHub
+environment secrets authorize GitHub's function deployment. Supabase project
+secrets authorize runtime integrations. No credential value belongs in a
+repository file or `.env`.
 
 ## Retirement
 

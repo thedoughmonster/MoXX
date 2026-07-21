@@ -9,6 +9,11 @@ This core capability moves append-only `source.*` and `warehouse.*` event
 references into one private PGMQ queue per subscriber. It does not interpret
 source documents or call external systems.
 
+Producers append one immutable reference through `momi.events.append.v1`.
+Identical idempotency replay returns the existing event; conflicting replay
+fails. The append transaction creates durable routing work through the existing
+insert trigger but never routes synchronously or reads producer-private state.
+
 Collection responses that contain many stock items enter routing as one
 snapshot event. Item-level source observations remain queryable in the archive
 without creating one network wake-up per item.

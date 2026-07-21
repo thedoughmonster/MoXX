@@ -1,8 +1,13 @@
 import { loadWorkspace } from "../architecture/load_workspace.ts"
+import { workspaceRoot } from "../architecture/paths.ts"
+import { linkProject } from "../deploy/link_project.ts"
+import { runSupabaseDatabase } from "../deploy/run_supabase_database.ts"
 import type { EnvironmentKey } from "../deploy/types.ts"
-import { runSupabase } from "../deploy/run_supabase.ts"
-import { assertSupabaseDbPassword } from "./assert_supabase_db_password.ts"
-import { assertSupabaseProjectAccess } from "./assert_supabase_project_access.ts"
+import { assertLinkedSupabaseAccess } from
+  "./assert_linked_supabase_access.ts"
+import { assertLinkedSupabaseTarget } from
+  "./assert_linked_supabase_target.ts"
+import { migrationDatabaseUrl } from "./migration_database_url.ts"
 import { runCommand } from "./run_command.ts"
 import { resolveDevelopmentBaseline } from
   "./resolve_development_baseline.ts"
@@ -25,12 +30,16 @@ export async function assertReleasePreflight(
   }
   runCommand("gh", ["auth", "status"])
   const workspace = await loadWorkspace()
-  assertSupabaseDbPassword()
-  const projects = runSupabase(["projects", "list", "--output", "json"], true)
-  assertSupabaseProjectAccess(
-    projects,
-    workspace.environments[environment].project_ref,
-  )
+  const projectRef = workspace.environments[environment].project_ref
+  linkProject(projectRef)
+  const poolerUrl = assertLinkedSupabaseTarget(projectRef)
+  const databaseUrl = migrationDatabaseUrl(poolerUrl, projectRef)
+  const access = runSupabaseDatabase([
+    "db", "query", "--db-url", databaseUrl,
+    "--workdir", workspaceRoot, "--output", "json",
+    "select 1::integer as release_access_check",
+  ], true)
+  assertLinkedSupabaseAccess(access)
   runCommand("git", [
     "fetch",
     "origin",

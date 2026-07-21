@@ -32,9 +32,16 @@ wrapper for original messages. Account-instruction agents call
 `momi_communications.capture_operational_note_v1` with one strict JSON object.
 Replays return the existing item and do not duplicate evaluator work.
 
+The production beta additionally calls
+`momi_communications.capture_gateway_exchange_v1` for ordered model-boundary
+evidence and `momi_communications.capture_human_message_v1` for committed
+OpenWebUI user-to-user messages. Both contracts are idempotent and immutable.
+The purpose-bound receipt reader returns identifiers, content hashes, order,
+status, usage, and timing only; it never returns protected values.
+
 ## Evaluation Handoff
 
-Every newly captured item inserts one `pending` row in
+Every original source item captured through an evaluation intake contract inserts one `pending` row in
 `momi_communications.evaluation_jobs`. The scheduled dispatcher wakes no worker
 when the queue is empty. When work is due, it sends only one job identity and
 capability token to `momi-communications-evaluate-item-v1`.
@@ -42,6 +49,9 @@ capability token to `momi-communications-evaluate-item-v1`.
 The `communications-evaluation` owner claims the lease, calls the configured
 model, and appends evaluation state. ClickUp and GitHub delivery remain outside
 both archive and evaluation boundaries.
+
+Gateway-exchange and committed human-message beta evidence is archive-only and
+does not recursively enqueue model evaluation.
 
 The registry route and schedule ship inactive. After the hosted function has
 the `OPENAI_API_KEY` and `MOMI_COMMUNICATIONS_EVALUATOR_MODEL` secrets, the
