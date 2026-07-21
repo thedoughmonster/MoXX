@@ -56,6 +56,23 @@ test("requires scope-specific explicit selections", () => {
   }))?.flag.scope, "range")
 })
 
+test("structured turn preserves the complete latest model-visible turn", () => {
+  const messages: ChatInput["messages"] = [
+    { role: "user", content: "earlier question" },
+    { role: "assistant", content: "earlier answer" },
+    { role: "user", content: "current question" },
+    { role: "assistant", content: "calling sales reader", tool_calls: [{
+      id: "call-1", type: "function", function: { name: "read_sales", arguments: "{}" },
+    }] },
+    { role: "tool", content: "sales result", tool_call_id: "call-1" },
+    { role: "assistant", content: "current answer" },
+  ]
+  const selection = resolveLogSelection(input("", { scope: "turn" }, messages))
+  assert.deepEqual(selection?.content.messages, messages.slice(2))
+  assert.equal(selection?.content.selected_content,
+    "current question\ncalling sales reader\nsales result\ncurrent answer")
+})
+
 test("performs exactly one append for affirmative intent and none otherwise", async () => {
   let appends = 0
   const append = () => { appends += 1; return Promise.resolve({ disposition: "stored" }) }
