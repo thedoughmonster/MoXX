@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["model", "messages", "user", "conversation_id", "turn_id", "idempotency_key"],
+  "properties": {
+    "model": {"const": "momi-assistant"},
+    "messages": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"type": "object", "additionalProperties": false, "required": ["role", "content"], "properties": {"role": {"enum": ["system", "developer", "user", "assistant"]}, "content": {"type": "string", "maxLength": 120000}}},
+    "user": {"type": "object", "additionalProperties": false, "required": ["id", "email"], "properties": {"id": {"type": "string", "format": "uuid"}, "email": {"type": "string", "format": "email"}}},
+    "conversation_id": {"type": "string", "minLength": 1, "maxLength": 256},
+    "turn_id": {"type": "string", "minLength": 1, "maxLength": 256},
+    "idempotency_key": {"type": "string", "minLength": 1, "maxLength": 256},
+    "momi_log": {"type": "object", "additionalProperties": false, "required": ["scope"], "properties": {"scope": {"enum": ["message", "turn", "range", "conversation"]}, "message_id": {"type": "string"}, "range": {"type": "object"}, "note": {"type": "string", "maxLength": 2000}, "category": {"type": "string", "maxLength": 120}}}
+  }
+}
