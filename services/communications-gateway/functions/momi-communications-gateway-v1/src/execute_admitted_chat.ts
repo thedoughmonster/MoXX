@@ -12,6 +12,7 @@ import { outputTokens } from "./output_tokens.ts"
 import { estimateProviderPayloadTokens } from "./provider_payload_policy.ts"
 import { usage } from "./provider_usage.ts"
 import { remainingDeadlineSeconds } from "./remaining_deadline_seconds.ts"
+import { resolveLogSelection } from "./resolve_log_selection.ts"
 import { runToolCall } from "./run_tool_call.ts"
 import { successResponse } from "./success_response.ts"
 import { toolCalls } from "./tool_calls.ts"
@@ -28,8 +29,10 @@ export async function executeAdmittedChat(input: ChatInput, admission: Admission
   if (!await markArchiveAdmitted(admission.invocation_id, admissionReceipt.archive_item_id)) {
     throw new Error("archive_admission_state_failed")
   }
-  await appendLogSelection(input, { input, invocationId: admission.invocation_id,
-    archiveReceiptId: admissionReceipt.archive_item_id }, createUserFlagLog)
+  const logSelection = resolveLogSelection(input)
+  const toolContext = { input, invocationId: admission.invocation_id,
+    archiveReceiptId: admissionReceipt.archive_item_id, logSelection }
+  await appendLogSelection(logSelection, toolContext, createUserFlagLog)
   const requestOneTokens = estimateProviderPayloadTokens(requestOne)
   if (!await authorizeProviderRound(admission.invocation_id, requestOneTokens, 1)) {
     throw new Error("provider_round_not_authorized")
@@ -60,8 +63,7 @@ export async function executeAdmittedChat(input: ChatInput, admission: Admission
   for (const rawCall of firstToolCalls) {
     if (!rawCall || typeof rawCall !== "object" || Array.isArray(rawCall)) continue
     const call = rawCall as Record<string, JSONValue>
-    const result = await runToolCall(call, { input, invocationId: admission.invocation_id,
-      archiveReceiptId: firstReceipt.archive_item_id })
+    const result = await runToolCall(call, toolContext)
     toolMessages.push({ role: "tool", content: JSON.stringify(result),
       tool_call_id: typeof call.id === "string" ? call.id : "invalid-tool-call" })
   }

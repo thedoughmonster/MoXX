@@ -17,4 +17,18 @@ export const toolDefinitions = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "create_momi_log",
+      description: "Confirm the user's already-resolved explicit request to create one MoMi log.",
+      strict: true,
+      parameters: {
+        type: "object",
+        additionalProperties: false,
+        required: [],
+        properties: {},
+      },
+    },
+  },
 ] as const

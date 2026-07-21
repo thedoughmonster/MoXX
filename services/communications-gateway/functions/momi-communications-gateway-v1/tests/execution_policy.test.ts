@@ -8,9 +8,10 @@ import { replayResponse } from "../src/replay_response.ts"
 import { resolveLogSelection } from "../src/resolve_log_selection.ts"
 import type { Admission, ChatInput } from "../src/types.ts"
 
-const input = (content: string, momi_log?: ChatInput["momi_log"]): ChatInput => ({
+const input = (content: string, momi_log?: ChatInput["momi_log"],
+  messages?: ChatInput["messages"]): ChatInput => ({
   model: "momi-assistant",
-  messages: [{ role: "user", content }],
+  messages: messages ?? [{ role: "user", content }],
   user: { id: "c03fbd6e-65b7-4b23-8e65-2e5a8ec00123", email: "user@example.com" },
   conversation_id: "conversation-1",
   turn_id: "turn-1",
@@ -18,12 +19,31 @@ const input = (content: string, momi_log?: ChatInput["momi_log"]): ChatInput => 
   ...(momi_log ? { momi_log } : {}),
 })
 
-test("accepts affirmative log intent and rejects negation or quotation", () => {
-  assert.equal(resolveLogSelection(input("log this"))?.flag.scope, "turn")
-  assert.equal(resolveLogSelection(input("please log this conversation."))?.flag.scope,
-    "conversation")
+test("resolves strict message, turn, and conversation commands without command text", () => {
+  const messages: ChatInput["messages"] = [
+    { role: "system", content: "policy" }, { role: "user", content: "question" },
+    { role: "assistant", content: "answer" }, { role: "user", content: "log this message" },
+  ]
+  const message = resolveLogSelection(input("", undefined, messages))
+  assert.equal(message?.flag.scope, "message")
+  assert.equal(message?.flag.message_id, "conversation-1:model-visible-message:2")
+  assert.equal(message?.content.selected_content, "answer")
+  messages[3] = { role: "user", content: "log this turn" }
+  const turn = resolveLogSelection(input("", undefined, messages))
+  assert.deepEqual(turn?.content.messages, messages.slice(1, 3))
+  assert.equal(turn?.content.selected_content, "question\nanswer")
+  messages[3] = { role: "user", content: "please log this conversation." }
+  assert.deepEqual(resolveLogSelection(input("", undefined, messages))?.content.messages,
+    messages.slice(0, 3))
+})
+
+test("rejects commands without prior scope, negation, quotation, or latest position", () => {
+  assert.equal(resolveLogSelection(input("log this")), null)
   assert.equal(resolveLogSelection(input("do not log this")), null)
   assert.equal(resolveLogSelection(input('Explain the phrase "log this"')), null)
+  assert.equal(resolveLogSelection(input("", undefined, [
+    { role: "user", content: "log this" }, { role: "assistant", content: "later" },
+  ])), null)
 })
 
 test("requires scope-specific explicit selections", () => {
@@ -39,10 +59,15 @@ test("requires scope-specific explicit selections", () => {
 test("performs exactly one append for affirmative intent and none otherwise", async () => {
   let appends = 0
   const append = () => { appends += 1; return Promise.resolve({ disposition: "stored" }) }
-  const context = { input: input("log this"), invocationId: "invocation-1",
-    archiveReceiptId: "receipt-1" }
-  await appendLogSelection(context.input, context, append)
-  await appendLogSelection(input("do not log this"), context, append)
+  const selectedInput = input("", undefined, [
+    { role: "user", content: "question" }, { role: "assistant", content: "selected" },
+    { role: "user", content: "log this" },
+  ])
+  const selection = resolveLogSelection(selectedInput)
+  const context = { input: selectedInput, invocationId: "invocation-1",
+    archiveReceiptId: "receipt-1", logSelection: selection }
+  await appendLogSelection(selection, context, append)
+  await appendLogSelection(null, context, append)
   assert.equal(appends, 1)
 })
 

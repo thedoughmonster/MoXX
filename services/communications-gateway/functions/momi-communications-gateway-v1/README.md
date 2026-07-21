@@ -13,6 +13,12 @@ purpose-bound gateway credential outside model-visible input. Chat input carries
 the authenticated OpenWebUI user ID/email, conversation/turn IDs, idempotency
 key, alias, and OpenAI-compatible ordered messages.
 
+An exact affirmative final user command `log this message`, `log this turn`, or
+`log this conversation` excludes the command itself. Message selects the
+immediately preceding model-visible message, turn selects the preceding
+user-led turn, and conversation selects all preceding messages; bare `log this`
+means turn. Negated, quoted, embedded, or non-final text never creates a flag.
+
 ## Output
 
 The response is OpenAI-compatible and keeps the visible alias provider-neutral.
@@ -22,6 +28,9 @@ The response is OpenAI-compatible and keeps the visible alias provider-neutral.
 Before provider egress the function admits the invocation, enforces access and
 limits, and archives the exact request and tool definitions. It archives every
 provider response and tool result before advancing, then commits terminal state.
+The strict zero-argument `create_momi_log` tool can only replay an already
+resolved authenticated user flag through the operations-owner contract. Its
+identity is the same as the deterministic pre-provider append, so it collapses.
 
 ## Failure Handling
 

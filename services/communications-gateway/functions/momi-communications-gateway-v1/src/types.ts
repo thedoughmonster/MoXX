@@ -63,4 +63,10 @@ export type ToolContext = {
   input: ChatInput
   invocationId: string
   archiveReceiptId: string
+  logSelection: LogSelection | null
+}
+
+export type LogSelection = {
+  flag: UserFlag
+  content: Record<string, JSONValue>
 }

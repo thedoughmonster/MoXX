@@ -1,4 +1,5 @@
 import type { JSONValue } from "postgres"
+import { executeMomiLogTool } from "./execute_momi_log_tool.ts"
 import { runCanonicalTool } from "./run_canonical_tool.ts"
 import type { ToolContext } from "./types.ts"
 
@@ -17,5 +18,6 @@ export function runToolCall(
   let args: unknown
   try { args = JSON.parse(definition.arguments) } catch { return { error: "invalid_tool_arguments" } }
   if (name === "get_momi_canonical_record") return runCanonicalTool(args, context)
+  if (name === "create_momi_log") return executeMomiLogTool(args, context)
   return { error: "tool_not_allowlisted" }
 }
