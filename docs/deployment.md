@@ -11,11 +11,12 @@ pnpm release:dev
 pnpm release:prod
 ```
 
-Both commands require a clean worktree, secure CLI sign-in, access to the exact
-target project, and a transient `SUPABASE_DB_PASSWORD`. Development may start
-on a committed feature branch based on current `dev`, or on `dev` when resuming
-an already merged release. Production must start on clean, current `dev`.
-Neither command commits unknown work.
+Both commands require a clean worktree and a Supabase CLI profile authenticated
+by OAuth or a personal access token with temporary access to the exact target
+project. They do not require a database password. Development may start on a
+committed feature branch based on current `dev`, or on `dev` when resuming an
+already merged release. Production must start on clean, current `dev`. Neither
+command commits unknown work.
 
 The development command owns feature PR creation and merge, exact-commit
 validation, migration preview/apply/parity, and GitHub workflow dispatch. The
@@ -49,12 +50,23 @@ JWT-protected function may instead prove reachability with `401` or `403`.
 
 ## Migration Boundary
 
-The coordinator links the selected project, validates its password-free IPv4
-session-pooler URL on port 5432, and adds verified TLS. Preview, apply, and
-hosted-history parity all use that exact URL. The database password reaches only
-those database children as `PGPASSWORD`; it never enters a URL or argument. The
-coordinator rejects the CLI `--debug` flag, which changes the database transport
-and cannot validate the normal TLS path.
+Preflight links the exact selected ref, validates `.temp/project-ref` and the
+password-free `.temp/pooler-url`, then proves authenticated access through one
+bounded read-only `db query --linked` over the exact-ref HTTPS Management API.
+It does not depend on top-level project enumeration because persistent branches
+may not appear there.
+
+Migration apply links and validates the exact ref again, previews with
+`db push --linked --dry-run --yes`, applies with `db push --linked --yes`, and
+queries linked migration history through the exact-ref HTTPS Management API for
+exact parity. The pinned CLI may mint a short-lived login role and fall back
+from unreachable direct IPv6 to the saved, ref-validated IPv4 session pooler on
+port 5432. That URL must use the approved
+Supabase profile domain, exact project username, session database, and no
+password, query, or fragment. Remote CLI database connections are TLS-only; the
+policy does not claim certificate `verify-full` without the dashboard CA.
+Every Supabase child strips ambient `SUPABASE_DB_PASSWORD` and `PGPASSWORD`.
+The coordinator rejects `--debug`, which changes the database transport.
 GitHub workflows never apply migrations and local code never deploys Edge
 Functions.
 
@@ -70,12 +82,12 @@ non-executable `.sql` files.
 
 ## Credentials
 
-The permanent local Supabase CLI token is stored by the CLI on the approved
-release host. The database password is supplied only through the release
-process's `SUPABASE_DB_PASSWORD` environment. GitHub environment secrets
-authorize GitHub's function deployment. Supabase project secrets authorize
-runtime integrations. No credential value belongs in a repository file,
-`.env`, command log, or release record.
+The local Supabase OAuth or personal access token is stored by the CLI on the
+approved release host. Its linked temporary database credential is created and
+used internally by the pinned CLI and is never read or logged by the
+coordinator. GitHub environment secrets authorize GitHub's function deployment.
+Supabase project secrets authorize runtime integrations. No credential value
+belongs in a repository file, `.env`, command log, or release record.
 
 ## Retirement
 

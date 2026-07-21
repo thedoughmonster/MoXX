@@ -3,5 +3,5 @@ process.stdout.write(JSON.stringify({
   profile: process.env.SUPABASE_PROFILE,
   telemetry: process.env.SUPABASE_TELEMETRY_DISABLED,
   hasReleasePassword: Boolean(process.env.SUPABASE_DB_PASSWORD),
-  databasePassword: process.env.PGPASSWORD,
+  hasPostgresPassword: Boolean(process.env.PGPASSWORD),
 }))

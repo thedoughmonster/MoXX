@@ -2,8 +2,8 @@
 
 - Status: accepted
 - Date: 2026-07-14
-- Amendment: the authoritative Linux release host must use an exact-project
-  account token and password-authenticated IPv4 session-pooler connection.
+- Amendment: the authoritative Linux release host must use its authenticated
+  CLI profile and an exact-project passwordless linked connection.
 
 ## Context
 
@@ -19,8 +19,10 @@ A pinned Node 24 coordinator provides `pnpm release:dev` and
 use the authenticated pinned CLI through the IPv4 session pooler on port 5432.
 
 Each migration apply is previewed, ordered, noninteractive, and followed by an
-exact comparison of local and hosted migration versions through the same
-validated, password-free session-pooler URL. Migrations must remain
+exact comparison of local and hosted migration versions. The coordinator links
+the selected ref again immediately before apply, validates the CLI's exact
+`.temp/project-ref` and password-free `.temp/pooler-url` evidence, and uses only
+`db push --linked` and `db query --linked`. Migrations must remain
 backward-compatible because schema can precede code while GitHub completes.
 
 GitHub Actions remains the sole Edge Function deployment authority. Development
@@ -34,13 +36,24 @@ secrets stay in Supabase. The local token is not duplicated into Supabase
 because doing so is circular and would expose account-management authority to
 project runtime.
 
-On the authoritative Linux release host, the account token stays in the
-Supabase CLI credential store and the database password is injected only as
-`SUPABASE_DB_PASSWORD` for the release process. Preflight must prove that the
-account can enumerate the exact target project. Only the three database children
-receive that password, mapped to `PGPASSWORD`; their validated URL contains no
-secret and requires verified TLS on port 5432. This explicit path prevents
-fallback to a temporary CLI login role or another database transport.
+On the authoritative Linux release host, the CLI profile is authenticated by
+OAuth or a personal access token held only in the Supabase CLI credential
+store. Preflight links the exact target ref, validates the saved linked evidence,
+and proves access with one bounded read-only `db query --linked` through the
+exact-ref HTTPS Management API before repository validation. A persistent
+branch need not appear in `projects list`, so top-level project enumeration is
+not an access gate.
+
+The pinned CLI exchanges the authenticated profile identity for a short-lived
+CLI login role when a linked database command needs PostgreSQL access. It first
+uses the exact linked ref and direct host, then may fall back from unreachable
+IPv6 to the ref-validated IPv4 session pooler on port 5432. The saved pooler URL
+must use the exact project username, approved Supabase profile domain, session
+database, and contain no password, query, or fragment. The pinned CLI permits
+only TLS remote connections and rejects mismatched profile-domain, ref, or
+pooler identity. We do not claim certificate `verify-full` without the
+Supabase dashboard CA. Ambient `SUPABASE_DB_PASSWORD` and `PGPASSWORD` are
+removed from every Supabase child; no database password is required.
 
 This supersedes ADR `0006` only where it paused migrations and required the
 development function workflow itself to use a push event.

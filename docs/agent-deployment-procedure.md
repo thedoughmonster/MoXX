@@ -46,24 +46,29 @@ Supabase plugin, CLI, dashboard, or a local script.
 
 | Credential | Authoritative location |
 | --- | --- |
-| Local Supabase CLI token | Supabase CLI credential store on the release host |
-| Local database password | Transient `SUPABASE_DB_PASSWORD` release environment |
+| Local Supabase OAuth/PAT | Supabase CLI credential store on the release host |
+| Temporary database login | Created and consumed internally by the pinned CLI |
 | GitHub deployment token | Protected GitHub environment secret |
 | Runtime/API secret | Supabase Edge Function Secret |
 
-The local Supabase token and database password are account-management
-credentials. Preflight requires the token to enumerate the exact target project
-and requires a database password so the CLI cannot use a temporary login role.
-Do not copy either credential into Supabase runtime secrets, Vault, `.env`,
+Authenticate the local CLI profile through OAuth or personal access token.
+Preflight links the exact target ref, validates the saved ref and password-free
+pooler evidence, and proves access with a bounded read-only linked query through
+the exact-ref HTTPS Management API. The pinned CLI may mint a short-lived
+database login role; the coordinator does not read or log that credential and
+does not require a database password. Do not
+copy the profile credential into Supabase runtime secrets, Vault, `.env`,
 GitHub, the repository, commands, or logs.
 
 ## Database Controls
 
 - `scripts/release/apply_migrations.ts` is the sole normal `db push` caller.
-- Preview, apply, and parity use one validated password-free
-  `*.pooler.supabase.com:5432` URL with verified TLS; direct IPv6 is rejected.
-- Only database children receive the password, as `PGPASSWORD`; it must never
-  appear in a URL, argument, log, file, or release record.
+- Preflight and apply each relink and assert the exact `.temp/project-ref`.
+- The linked URL must use the exact ref username, approved Supabase profile
+  domain, IPv4 session pooler port 5432, session database, and no secret/options.
+- The pinned CLI's remote path is TLS-only; do not claim `verify-full` without
+  the Supabase dashboard CA or bypass its exact profile/ref validation.
+- Every Supabase child strips ambient `SUPABASE_DB_PASSWORD` and `PGPASSWORD`.
 - The coordinator rejects the Supabase CLI `--debug` flag because debug mode
   changes the database transport and cannot prove normal TLS connectivity.
 - Every apply starts with a dry preview and ends with exact history parity.

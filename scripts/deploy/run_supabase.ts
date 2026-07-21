@@ -8,15 +8,15 @@ import { supabaseEnvironment } from "./supabase_environment.ts"
 export function runSupabase(
   args: string[],
   capture = false,
-  databasePassword?: string,
   launcher = join(workspaceRoot, "node_modules", "supabase", "dist", "supabase.js"),
 ): string {
   const result = spawnSync(process.execPath, [launcher, ...buildSupabaseArgs(args)], {
     cwd: workspaceRoot,
     encoding: capture ? "utf8" : undefined,
-    env: supabaseEnvironment(process.env, databasePassword),
+    env: supabaseEnvironment(process.env),
     stdio: capture ? ["ignore", "pipe", "inherit"] : "inherit",
   })
+  if (result.error) throw result.error
   if (result.status !== 0) {
     throw new Error(`Supabase CLI failed with status ${result.status ?? "unknown"}`)
   }
