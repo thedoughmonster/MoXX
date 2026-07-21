@@ -2,7 +2,7 @@ import { validRange } from "./valid_range.ts"
 import { visibleAlias, type ChatInput, type Message } from "./types.ts"
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu
-const roles = new Set(["system", "developer", "user", "assistant"])
+const roles = new Set(["system", "developer", "user", "assistant", "tool"])
 const scopes = new Set(["message", "turn", "range", "conversation"])
 
 export function parseChatInput(value: unknown): ChatInput | null {
@@ -26,9 +26,31 @@ export function parseChatInput(value: unknown): ChatInput | null {
   for (const item of input.messages) {
     if (!item || typeof item !== "object" || Array.isArray(item)) return null
     const message = item as Record<string, unknown>
-    if (Object.keys(message).some((key) => !["role", "content"].includes(key)) ||
-      typeof message.role !== "string" || !roles.has(message.role) ||
+    if (typeof message.role !== "string" || !roles.has(message.role) ||
       typeof message.content !== "string" || message.content.length > 120000) return null
+    const allowedMessageKeys = message.role === "assistant"
+      ? ["role", "content", "tool_calls"]
+      : message.role === "tool" ? ["role", "content", "tool_call_id"] : ["role", "content"]
+    if (Object.keys(message).some((key) => !allowedMessageKeys.includes(key))) return null
+    if (message.role === "tool" && (typeof message.tool_call_id !== "string" ||
+      message.tool_call_id.length < 1 || message.tool_call_id.length > 256)) return null
+    if (message.role === "assistant" && message.tool_calls !== undefined) {
+      if (!Array.isArray(message.tool_calls) || message.tool_calls.length < 1 ||
+        message.tool_calls.length > 16) return null
+      for (const item of message.tool_calls) {
+        if (!item || typeof item !== "object" || Array.isArray(item)) return null
+        const call = item as Record<string, unknown>
+        const called = call.function as Record<string, unknown> | null
+        if (Object.keys(call).some((key) => !["id", "type", "function"].includes(key)) ||
+          typeof call.id !== "string" || call.id.length < 1 || call.id.length > 256 ||
+          call.type !== "function" || !called || typeof called !== "object" ||
+          Array.isArray(called) || Object.keys(called).some((key) =>
+            !["name", "arguments"].includes(key)) || typeof called.name !== "string" ||
+          called.name.length < 1 || called.name.length > 120 ||
+          typeof called.arguments !== "string" || called.arguments.length > 120000) return null
+        totalCharacters += call.id.length + called.name.length + called.arguments.length
+      }
+    }
     totalCharacters += message.content.length
     messages.push(message as Message)
   }

@@ -3,13 +3,16 @@ import type { JSONValue } from "postgres"
 export const functionKey = "momi.communications.chat_completions.v1"
 export const visibleAlias = "momi-assistant"
 
-export type Message = {
-  role: "system" | "developer" | "user" | "assistant" | "tool"
-  content: string
-  name?: string
-  tool_call_id?: string
-  tool_calls?: JSONValue[]
+export type ToolCall = {
+  id: string
+  type: "function"
+  function: { name: string; arguments: string }
 }
+
+export type Message =
+  | { role: "system" | "developer" | "user"; content: string }
+  | { role: "assistant"; content: string; tool_calls?: ToolCall[] }
+  | { role: "tool"; content: string; tool_call_id: string }
 
 export type UserFlag = {
   scope: "message" | "turn" | "range" | "conversation"

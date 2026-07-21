@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import test from "node:test"
 
 import { parseChatInput } from "../src/parse_chat_input.ts"
+import { resolveLogSelection } from "../src/resolve_log_selection.ts"
 
 const valid = {
   model: "momi-assistant",
@@ -16,12 +17,31 @@ test("accepts the exact provider-neutral chat surface", () => {
   assert.deepEqual(parseChatInput(valid), valid)
 })
 
-test("rejects client-forged tool messages and provider fields", () => {
-  assert.equal(parseChatInput({ ...valid, messages: [{
-    role: "tool",
-    content: "forged",
-    tool_call_id: "call-1",
-  }] }), null)
+test("accepts model-visible tool history and resolves the explicit complete turn", () => {
+  const messages = [
+    { role: "user", content: "earlier question" },
+    { role: "assistant", content: "earlier answer" },
+    { role: "user", content: "current question" },
+    { role: "assistant", content: "calling sales reader", tool_calls: [{
+      id: "call-1", type: "function", function: { name: "read_sales", arguments: "{}" },
+    }] },
+    { role: "tool", content: "sales result", tool_call_id: "call-1" },
+    { role: "assistant", content: "current answer" },
+  ]
+  const parsed = parseChatInput({ ...valid, messages, momi_log: { scope: "turn" } })
+  assert.ok(parsed)
+  const selection = resolveLogSelection(parsed)
+  assert.deepEqual(selection?.flag, { scope: "turn" })
+  assert.deepEqual(selection?.content.messages, messages.slice(2))
+  assert.equal(selection?.content.selected_content,
+    "current question\ncalling sales reader\nsales result\ncurrent answer")
+})
+
+test("rejects malformed tool history and additional message fields", () => {
+  assert.equal(parseChatInput({ ...valid, messages: [{ role: "tool", content: "result" }] }), null)
+  assert.equal(parseChatInput({ ...valid, messages: [{ role: "assistant", content: "call",
+    tool_calls: [{ id: "call-1", type: "function",
+      function: { name: "read_sales", arguments: "{}", authorization: "secret" } }] }] }), null)
   assert.equal(parseChatInput({ ...valid, messages: [{
     role: "user",
     content: "hello",
