@@ -51,7 +51,10 @@ identity is the same as the deterministic pre-provider append, so it collapses.
 
 Same-key/same-payload replay returns existing execution state. Changed payloads
 fail. Any provider transport ambiguity becomes `paid_ambiguous` and is never
-automatically retried. Missing configuration fails closed.
+automatically retried. Adjustable request or budget limits return
+`request_limit_reached` with HTTP 429, and oversized effective input returns
+`input_limit_reached` with HTTP 413, so the client can render a useful message.
+Missing or unexpected configuration still fails closed.
 
 ## Tests
 
