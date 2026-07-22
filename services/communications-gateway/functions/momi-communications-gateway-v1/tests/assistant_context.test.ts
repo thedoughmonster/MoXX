@@ -15,6 +15,10 @@ const analysisMigration = new URL(
   "../../../../../supabase/migrations/20260722164117_add_curated_shop_analysis_query_contract.sql",
   import.meta.url,
 )
+const queryDisciplineMigration = new URL(
+  "../../../../../supabase/migrations/20260722203914_tune_gateway_parallel_shop_analysis.sql",
+  import.meta.url,
+)
 const context: AssistantContext = {
   context_version: "momi-context-v3",
   assistant_name: "MoMi",
@@ -44,6 +48,7 @@ test("builds provider instructions from mapped business context", () => {
 test("stores configurable business identity in the owned database mapping", async () => {
   const sql = await readFile(migration, "utf8")
   const analysisSql = await readFile(analysisMigration, "utf8")
+  const queryDisciplineSql = await readFile(queryDisciplineMigration, "utf8")
   const source = await readFile(builder, "utf8")
   assert.match(sql, /create table momi_communications_gateway\.assistant_context/u)
   assert.match(sql, /'Dough Monster'/u)
@@ -51,6 +56,10 @@ test("stores configurable business identity in the owned database mapping", asyn
   assert.match(sql, /grant select .*assistant_context to service_role/su)
   assert.match(analysisSql, /beta_analysis_catalog/u)
   assert.match(analysisSql, /beta_analysis_scopes/u)
+  assert.match(queryDisciplineSql, /context_version = 'momi-context-v4'/u)
+  assert.match(queryDisciplineSql, /Do not split joinable facts into sequential tool rounds/u)
+  assert.match(queryDisciplineSql, /issue the simple query_momi_shop_data calls together/u)
+  assert.match(queryDisciplineSql, /After any successful shop-data result, answer/u)
   assert.doesNotMatch(source, /Dough Monster|doughmonster\.com|[0-9a-f]{8}-[0-9a-f-]{27,}/iu)
 })
 
