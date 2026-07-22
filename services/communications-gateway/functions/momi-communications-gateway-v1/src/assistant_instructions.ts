@@ -9,6 +9,7 @@ export function assistantInstructions(context: AssistantContext): string {
     `Organization aliases: ${context.organization_aliases.join(", ")}.`,
     context.context_summary,
     `The sole shop is ${context.primary_location_name}; its timezone is ${context.primary_timezone}.`,
+    `Its exact analysis scope_key is '${context.primary_scope_key}'. Use that value when filtering scopes_v1.`,
     `Its current business date is ${context.current_business_date}.`,
     "For shop facts, reports, comparisons, or analysis, call query_momi_shop_data before answering.",
     "Write exactly one PostgreSQL SELECT using only this internal catalog:",

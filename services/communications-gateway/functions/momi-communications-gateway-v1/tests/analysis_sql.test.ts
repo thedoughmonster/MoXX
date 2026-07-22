@@ -16,6 +16,12 @@ test("accepts bounded analytical selects over cataloged relations", () => {
     join payments_v1 p using (location_id, business_date)
     group by o.business_date`
   assert.equal(validateAnalysisSql(joined, relations), joined)
+  const commonTable = `with shop as (
+      select location_id from orders_v1 where business_date = current_date
+    ), totals as (
+      select count(*) as orders from orders_v1 join shop using (location_id)
+    ) select * from totals`
+  assert.equal(validateAnalysisSql(commonTable, relations), commonTable)
 })
 
 test("rejects mutation, multiple statements, comments, and uncataloged access", () => {
@@ -29,6 +35,8 @@ test("rejects mutation, multiple statements, comments, and uncataloged access", 
     "select set_config('role', 'postgres', false) from orders_v1",
     "select public.unsafe(total_amount) from orders_v1",
     "with changed as (delete from orders_v1 returning *) select * from changed",
+    "with recursive loop as (select * from loop) select * from loop",
+    "with hidden as (select * from auth.users) select * from hidden",
     "select current_user",
   ]
   for (const sql of invalid) assert.equal(validateAnalysisSql(sql, relations), null)

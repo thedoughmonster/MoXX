@@ -45,12 +45,12 @@ export type AssistantContext = {
   organization_name: string
   organization_aliases: string[]
   context_summary: string
+  primary_scope_key: string
   primary_location_name: string
   primary_timezone: string
   current_business_date: string
   analysis_catalog: AnalysisCatalogEntry[]
 }
-
 export type Admission = {
   disposition: "admitted" | "duplicate"
   invocation_id: string

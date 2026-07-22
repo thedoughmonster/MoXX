@@ -21,6 +21,7 @@ const context: AssistantContext = {
   organization_name: "Dough Monster",
   organization_aliases: ["Dough Monster", "DoughMonster"],
   context_summary: "Mapped business context.",
+  primary_scope_key: "primary",
   primary_location_name: "Berwick",
   primary_timezone: "America/New_York",
   current_business_date: "2026-07-22",
@@ -33,6 +34,7 @@ test("builds provider instructions from mapped business context", () => {
   assert.match(result, /Dough Monster/u)
   assert.match(result, /Berwick/u)
   assert.match(result, /2026-07-22/u)
+  assert.match(result, /scope_key is 'primary'/u)
   assert.match(result, /orders_v1\(business_date:date, total_amount:numeric\)/u)
   assert.match(result, /query_momi_shop_data/u)
   assert.match(result, /Never ask a user for an internal UUID/u)

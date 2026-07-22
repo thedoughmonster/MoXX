@@ -15,8 +15,24 @@ export function validateAnalysisSql(
   try { statements = parse(value) } catch { return null }
   if (statements.length !== 1) return null
   const statement = statements[0]
-  if (!statement || typeof statement !== "object" ||
-    (statement as { type?: unknown }).type !== "select") return null
+  if (!statement || typeof statement !== "object") return null
+  const root = statement as Record<string, unknown>
+  const commonTables = new Set<string>()
+  if (root.type === "with") {
+    if (root.recursive === true || !Array.isArray(root.bind) ||
+      !root.in || typeof root.in !== "object" ||
+      (root.in as { type?: unknown }).type !== "select") return null
+    for (const item of root.bind) {
+      if (!item || typeof item !== "object") return null
+      const binding = item as Record<string, unknown>
+      const alias = binding.alias as { name?: unknown } | undefined
+      if (!alias || typeof alias.name !== "string" ||
+        commonTables.has(alias.name.toLowerCase()) || !binding.statement ||
+        typeof binding.statement !== "object" ||
+        (binding.statement as { type?: unknown }).type !== "select") return null
+      commonTables.add(alias.name.toLowerCase())
+    }
+  } else if (root.type !== "select") return null
   const stack: unknown[] = [statement]
   let relationCount = 0
   while (stack.length > 0) {
@@ -31,10 +47,13 @@ export function validateAnalysisSql(
       node.schema !== "momi_analysis" && node.schema !== "pg_catalog") return null
     if (node.type === "table") {
       const name = node.name as { schema?: unknown; name?: unknown } | undefined
-      if (!name || typeof name.name !== "string" ||
-        name.schema !== undefined && name.schema !== "momi_analysis" ||
-        !allowedRelations.has(name.name.toLowerCase())) return null
-      relationCount += 1
+      if (!name || typeof name.name !== "string") return null
+      const relation = name.name.toLowerCase()
+      if (!(name.schema === undefined && commonTables.has(relation))) {
+        if (name.schema !== undefined && name.schema !== "momi_analysis" ||
+          !allowedRelations.has(relation)) return null
+        relationCount += 1
+      }
     }
     if (node.type === "call") {
       const called = node.function as { schema?: unknown; name?: unknown } | undefined
