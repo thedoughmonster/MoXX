@@ -3,7 +3,7 @@ import { getDatabase } from "./database.ts"
 export async function authorizeProviderRound(
   invocationId: string,
   payloadTokens: number,
-  round: 1 | 2 | 3,
+  round: number,
 ): Promise<boolean> {
   const sql = getDatabase()
   const rows = await sql<{ marked: boolean }[]>`

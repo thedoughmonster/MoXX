@@ -16,7 +16,7 @@ export async function loadRoutingPolicy(userId: string): Promise<RoutingPolicy> 
   `
   const profiles = await sql<RouteProfile[]>`
     select route_key, route_rank, provider_model, reasoning_effort,
-      maximum_output_tokens, automatic_enabled
+      maximum_output_tokens, maximum_answer_calls, automatic_enabled
     from momi_communications_gateway.routing_profiles
     where enabled order by route_rank
   `

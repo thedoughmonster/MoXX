@@ -8,7 +8,8 @@ export async function persistRoute(invocationId: string, userId: string,
     update momi_communications_gateway.invocations invocation set
       selected_route = profile.route_key, provider_model = profile.provider_model,
       reasoning_effort = profile.reasoning_effort, routing_source = ${route.source},
-      routing_reason = ${route.reason}, routing_confidence = ${route.confidence}
+      routing_reason = ${route.reason}, routing_confidence = ${route.confidence},
+      maximum_answer_calls = profile.maximum_answer_calls
     from momi_communications_gateway.user_limits limits,
       momi_communications_gateway.routing_profiles profile,
       momi_communications_gateway.routing_profiles ceiling
