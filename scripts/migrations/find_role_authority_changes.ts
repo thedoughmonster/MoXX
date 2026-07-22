@@ -1,8 +1,36 @@
 import { splitSqlStatements } from "../sql/split_sql_statements.ts"
 
-export function findRoleAuthorityChanges(source: string, allowedRole?: string): string[] {
+type DynamicReadBinding = { routine: string; role: string; schema: string }
+
+export function findRoleAuthorityChanges(
+  source: string,
+  allowedRole?: string,
+  bindings: DynamicReadBinding[] = [],
+): string[] {
   const changes: string[] = []
-  for (const statement of splitSqlStatements(source)) {
+  const statements = splitSqlStatements(source)
+  const compact = (value: string) => value.replace(/^\s*--[^\n]*(?:\n|$)/u, "")
+    .trim().replace(/;$/u, "").trim().replace(/\s+/gu, " ").toLowerCase()
+  const compacted = statements.map((statement) => compact(statement.text))
+  const safe = new Set<number>()
+  for (const binding of bindings) {
+    const expected = [
+      `grant ${binding.role} to postgres with inherit false, set true`,
+      `grant create on schema ${binding.schema} to ${binding.role}`,
+      `alter function ${binding.routine}(text) owner to ${binding.role}`,
+      `revoke create on schema ${binding.schema} from ${binding.role}`,
+      `grant ${binding.role} to postgres with inherit false, set false`,
+    ]
+    const indexes = expected.map((value) => compacted.indexOf(value))
+    if (indexes.every((value) => value >= 0) &&
+      indexes.every((value, index) => index === 0 || value > indexes[index - 1])) {
+      safe.add(indexes[0])
+      safe.add(indexes[2])
+      safe.add(indexes[4])
+    }
+  }
+  for (const [index, statement] of statements.entries()) {
+    if (safe.has(index)) continue
     const sql = statement.text.trim()
     const roleMatch = sql.match(/\b(create|alter|drop)\s+(?:role|user|group)\s+([a-z][a-z0-9_]*)\b/i)
     const declaredCreate = roleMatch?.[1]?.toLowerCase() === "create" &&

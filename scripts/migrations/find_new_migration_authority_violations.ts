@@ -5,8 +5,7 @@ import { findForeignSchemaAuthorityChanges } from "../sql/find_foreign_schema_au
 import { normalizeSqlIdentifiers } from "../sql/normalize_sql_identifiers.ts"
 import { findUnqualifiedRelationReferences } from "../sql/find_unqualified_relation_references.ts"
 import { assertSupportedPersistentDdl } from "./assert_supported_persistent_ddl.ts"
-import { findIndexAuthorityViolations } from
-  "./find_index_authority_violations.ts"
+import { findIndexAuthorityViolations } from "./find_index_authority_violations.ts"
 import { findRoleAuthorityChanges } from "./find_role_authority_changes.ts"
 import { findRelationAuthorityViolations } from
   "./find_relation_authority_violations.ts"
@@ -78,8 +77,9 @@ export function findNewMigrationAuthorityViolations(
     if (/\bexecute\b/i.test(procedural) && !declaredDynamic) {
       violations.push(`${file}: dynamic SQL relation authority is forbidden`)
     }
-    for (const change of findRoleAuthorityChanges(
-      normalized, consumer.manifest.owned_dataset?.db_role,
+    for (const change of findRoleAuthorityChanges(normalized,
+      consumer.manifest.owned_dataset?.db_role,
+      consumer.manifest.owned_dataset?.dynamic_read_routines ?? [],
     )) {
       violations.push(`${file}: ${change}`)
     }
