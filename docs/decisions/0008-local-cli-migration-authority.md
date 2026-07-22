@@ -23,7 +23,7 @@ exact comparison of local and hosted migration versions. The coordinator links
 the selected ref again immediately before apply, validates the CLI's exact
 `.temp/project-ref` and password-free `.temp/pooler-url` evidence, and uses only
 an explicit password-free `--db-url` derived from that evidence. The URL adds
-only the decoded connection option `options=-c jit=true`. Migrations must remain
+only the decoded connection option `options=-c jit=on`. Migrations must remain
 backward-compatible because schema can precede code while GitHub completes.
 
 GitHub Actions remains the sole Edge Function deployment authority. Development

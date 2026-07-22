@@ -13,7 +13,7 @@ test("builds one password-free temporary-access session-pooler target", () => {
   assert.equal(url.username, `postgres.${projectRef}`)
   assert.equal(url.password, "")
   assert.equal(url.searchParams.size, 1)
-  assert.equal(url.searchParams.get("options"), "-c jit=true")
+  assert.equal(url.searchParams.get("options"), "-c jit=on")
   assert.doesNotMatch(result, /secret|token|password/i)
 })
 

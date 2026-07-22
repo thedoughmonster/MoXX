@@ -53,7 +53,7 @@ JWT-protected function may instead prove reachability with `401` or `403`.
 
 Preflight links the exact selected ref, validates `.temp/project-ref` and the
 password-free `.temp/pooler-url`, builds an explicit password-free connection
-URL with only the decoded option `options=-c jit=true`, then proves access with
+URL with only the decoded option `options=-c jit=on`, then proves access with
 one bounded read-only database query. It does not depend on top-level project
 enumeration because persistent branches may not appear there.
 
