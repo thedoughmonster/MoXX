@@ -17,6 +17,7 @@ import { findRuntimeEventFindings } from "./find_runtime_event_findings.ts"
 import { findRuntimeRoutineFindings } from "./find_runtime_routine_findings.ts"
 import { findRuntimeSchemaFindings } from "./find_runtime_schema_findings.ts"
 import { hashServiceSource } from "./hash_service_source.ts"
+import { isDeclaredDynamicRead } from "./is_declared_dynamic_read.ts"
 import type { ConstitutionFinding, ConstitutionFindingInput } from "./types.ts"
 
 export function findRuntimeAccessFindings(
@@ -50,7 +51,9 @@ export function findRuntimeAccessFindings(
     const dynamicExpressions = module.path.endsWith(".sql")
       ? (/\bexecute\b/i.test(source) ? ["EXECUTE"] : [])
       : findDynamicSqlExpressions(module.path, module.source)
-    if (dynamicExpressions.length > 0) findings.push({
+    const owner = byKey.get(module.service_key)
+    if (dynamicExpressions.length > 0 &&
+      !isDeclaredDynamicRead(owner, services, module, subject, source)) findings.push({
       rule_version: 1,
       rule_id: "dynamic_relation_identifier",
       subject,

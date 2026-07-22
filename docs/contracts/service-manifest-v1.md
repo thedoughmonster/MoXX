@@ -1,5 +1,4 @@
 # Service Manifest v1
-
 Each `services/<service-key>/service.json` is the enforceable authority record
 for one cohesive capability. It is validated against
 `schemas/service-manifest-v1.schema.json`.
@@ -40,25 +39,25 @@ operational state. It has:
   routine name to one contract already listed in `public_commands`;
 - optional `public_routine_reads` mappings from a schema-qualified private
   routine name to one contract already listed in `public_reads`;
+- optional `dynamic_read_routines` binding one security-invoker query sandbox
+  to its read contract, routine, consumer, non-login role, and allowed schema;
 - exact event keys in `emitted_events`; dynamic identities are removal-only
   runtime debt, and new dynamic event names are rejected.
 
-Procurement adapters may not consume MoMi-owned contracts. Transitional direct
-handoffs remain removal-only debt, not authorized dependencies.
+Procurement adapters may not consume MoMi-owned contracts. Transitional direct handoffs remain removal-only debt, not authorized dependencies.
 
-`private_schemas` is used only when one coherent dataset spans multiple
-exclusive schemas; each listed schema remains exclusive to that service.
-Dataset keys, database roles, private schemas, private relations, contract
-providers, and event producers are globally unique when declared. A private
-relation cannot be claimed inside another service's declared private schema.
+`private_schemas` spans multiple exclusive schemas for one coherent dataset.
+Dataset keys, roles, schemas, relations, contract providers, and event producers
+are globally unique. A private relation cannot be claimed inside another
+service's declared private schema.
 Every public read or command must also appear in the owner's
 `contracts.provides`. Database roles are validated when present but become
 mandatory only with the later role-and-grant migration.
 
-The constitution replays ordered migration DDL and requires every current
-application table, view, function, and procedure to have exactly one declared
-owner. Renames, schema moves, drops, and replacements are applied in migration
-order. This proves declaration completeness and uniqueness. It does not attest
+The constitution replays ordered migration DDL and requires every current table,
+view, function, and procedure to have one declared owner. Renames, schema moves,
+drops, and replacements apply in order. This proves declaration completeness
+and uniqueness. It does not attest
 hosted roles, grants, or removal of the transition-period direct accesses
 identified by ADR `0014`.
 
@@ -70,11 +69,14 @@ contract. Writes to another owner's relation and dynamic SQL identifiers are
 never authorized by a public-read mapping. Historical occurrences live in the
 separate removal-only service access debt baseline.
 
-Calls into another service's declared routine require an exact routine-name
-mapping plus the matching consumed provider contract. Ownership remains at the
+Cross-service routine calls require an exact routine-name mapping plus the
+matching consumed provider contract. Ownership remains at the
 schema-qualified routine name in version 1, while replay and body scanning use
 canonical input signatures so overloads cannot hide one another. Role/grant
 enforcement must add hosted signatures before runtime isolation is claimed.
+Dynamic SQL remains rejected unless its routine is a declared public read, its
+consumer declares the contract and role, and it checks that role plus a
+read-only transaction. The declaration never permits writes or another routine.
 New migrations assign index authority through the indexed relation, reject
 unmodeled role ownership, use the same object rules, and may not
 rewrite any migration after it lands on `dev`. Existing object authority and
@@ -82,11 +84,10 @@ history come from trusted `dev`, so transfers land as manifest-only changes
 before a later migration may use the new owner.
 ## Contracts
 
-`contracts.provides` lists versioned public contracts owned by the service.
-`contracts.consumes` identifies both provider and contract. Consumers may
-import only a provider's declared public contract files, never implementation.
-The checks reject duplicate providers, missing providers, and dependency
-cycles.
+`contracts.provides` lists versioned public contracts owned by the service;
+`contracts.consumes` identifies provider and contract. Consumers may import
+only declared contract files, never implementation. Checks reject duplicate or
+missing providers and dependency cycles.
 
 ## Authority
 
@@ -96,9 +97,8 @@ cycles.
 - `runtime_dependencies` pins Deno-resolved runtime dependencies.
 - `approved_packages` lists repository packages the service may import.
 
-Empty authority arrays are deliberate and must remain present. New external
-network authority, schema ownership, shared packages, services, and
-cross-service contracts require an accepted ADR.
+Empty authority arrays are deliberate. New external network authority, schema
+ownership, shared packages, services, and cross-service contracts require an ADR.
 
 ## Deployment And Configuration
 

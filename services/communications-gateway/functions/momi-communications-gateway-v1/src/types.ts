@@ -1,4 +1,5 @@
 import type { JSONValue } from "postgres"
+import type { AnalysisCatalogEntry } from "./analysis_types.ts"
 
 export const functionKey = "momi.communications.chat_completions.v1"
 export const visibleAlias = "momi-assistant"
@@ -44,6 +45,10 @@ export type AssistantContext = {
   organization_name: string
   organization_aliases: string[]
   context_summary: string
+  primary_location_name: string
+  primary_timezone: string
+  current_business_date: string
+  analysis_catalog: AnalysisCatalogEntry[]
 }
 
 export type Admission = {

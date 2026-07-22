@@ -36,10 +36,12 @@ break the currently deployed Chat Completions runtime.
 
 ## Tools
 
-The model sees bounded canonical order, payment, menu, schedule, and stock
-readers and `create_momi_log`. Every shop read uses a one-use capability issued
-by `warehouse-read-api`. No arbitrary HTTP, SQL, shell, attachment, source API,
-or other business mutation is available.
+The model sees bounded canonical record readers, a curated shop-analysis query,
+and `create_momi_log`. The analysis query accepts one parsed read-only `SELECT`
+over the database-provided catalog; a dedicated PostgreSQL role is the final
+boundary. SQL stays internal, and no raw/private/auth relation is reachable.
+No arbitrary HTTP, shell, attachment, source API, or other business mutation is
+available.
 
 ## Tests
 
