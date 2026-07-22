@@ -66,7 +66,7 @@ commands, URLs, logs, or release records.
 - Preflight and apply each relink and assert the exact `.temp/project-ref`.
 - The linked URL must use the exact ref username, approved Supabase pooler
   domain, IPv4 session pooler port 5432, session database, no secret, and only
-  the decoded option `options=-c jit=on`.
+  the decoded option `options=-c jit=true`.
 - The pinned CLI's remote path is TLS-only; do not claim `verify-full` without
   the Supabase dashboard CA or bypass its exact profile/ref validation.
 - Only the database child receives `SUPABASE_DB_PASSWORD`, mirrored to

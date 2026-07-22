@@ -17,5 +17,5 @@ export function migrationDatabaseUrl(
   if (url.search || url.hash) {
     throw new Error("Migration target must not contain query or fragment data")
   }
-  return `${url.toString()}?options=-c%20jit%3Don`
+  return `${url.toString()}?options=-c%20jit%3Dtrue`
 }
