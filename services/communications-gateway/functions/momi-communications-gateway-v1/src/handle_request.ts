@@ -4,6 +4,7 @@ import { isAuthorized } from "./is_authorized.ts"
 import { listModels } from "./list_models.ts"
 import { parseChatInput } from "./parse_chat_input.ts"
 import { processChat } from "./process_chat.ts"
+import { publicGatewayFailure } from "./public_gateway_failure.ts"
 
 export async function handleRequest(request: Request): Promise<Response> {
   const pathname = new URL(request.url).pathname
@@ -41,7 +42,8 @@ export async function handleRequest(request: Request): Promise<Response> {
   try {
     const result = await processChat(input)
     return Response.json(result.body, { status: result.status })
-  } catch {
-    return Response.json({ error: "gateway_failed_closed" }, { status: 503 })
+  } catch (error) {
+    const failure = publicGatewayFailure(error)
+    return Response.json(failure.body, { status: failure.status })
   }
 }
