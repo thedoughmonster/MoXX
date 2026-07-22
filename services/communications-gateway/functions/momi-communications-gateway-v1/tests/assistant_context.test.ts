@@ -57,7 +57,7 @@ test("stores configurable business identity in the owned database mapping", asyn
   assert.match(analysisSql, /beta_analysis_catalog/u)
   assert.match(analysisSql, /beta_analysis_scopes/u)
   assert.match(queryDisciplineSql, /context_version = 'momi-context-v4'/u)
-  assert.match(queryDisciplineSql, /Do not split joinable facts into serial tool rounds/u)
+  assert.match(queryDisciplineSql, /Do not split joinable facts into sequential tool rounds/u)
   assert.match(queryDisciplineSql, /issue the simple query_momi_shop_data calls together/u)
   assert.match(queryDisciplineSql, /After any successful shop-data result, answer/u)
   assert.doesNotMatch(source, /Dough Monster|doughmonster\.com|[0-9a-f]{8}-[0-9a-f-]{27,}/iu)
