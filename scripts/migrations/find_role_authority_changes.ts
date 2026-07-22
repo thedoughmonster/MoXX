@@ -28,6 +28,19 @@ export function findRoleAuthorityChanges(
       safe.add(indexes[2])
       safe.add(indexes[4])
     }
+    const executeGrant = [
+      `grant ${binding.role} to postgres with inherit false, set true`,
+      `set role ${binding.role}`,
+      `grant execute on function ${binding.routine}(text) to postgres`,
+      "reset role",
+      `grant ${binding.role} to postgres with inherit false, set false`,
+    ]
+    const executeIndexes = executeGrant.map((value) => compacted.indexOf(value))
+    if (executeIndexes.every((value) => value >= 0) &&
+      executeIndexes.every((value, index) =>
+        index === 0 || value > executeIndexes[index - 1])) {
+      for (const index of executeIndexes) safe.add(index)
+    }
   }
   for (const [index, statement] of statements.entries()) {
     if (safe.has(index)) continue

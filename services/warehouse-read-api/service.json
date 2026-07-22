@@ -64,6 +64,7 @@
     ],
     "private_routines": [
       "momi_analysis.execute_query_v1",
+      "momi_api.analysis_source_entities_v1",
       "momi_api.consume_read_capability",
       "momi_api.consume_versioned_read_capability",
       "momi_api.issue_beta_query_capability_v1",
