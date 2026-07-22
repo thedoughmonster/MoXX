@@ -28,7 +28,7 @@ test("uses the selected routed Responses tool contract", () => {
   assert.deepEqual(request.input, [{ role: "user", content: "question" }])
   assert.deepEqual(request.tools, [{ type: "function", name: "read", parameters: {} }])
   assert.equal(request.tool_choice, "auto")
-  assert.equal(request.parallel_tool_calls, false)
+  assert.equal(request.parallel_tool_calls, true)
   assert.equal(request.store, false)
   assert.equal(request.safety_identifier, "c03fbd6e-65b7-4b23-8e65-2e5a8ec00123")
 })
