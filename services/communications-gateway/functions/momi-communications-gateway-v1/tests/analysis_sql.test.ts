@@ -16,6 +16,8 @@ test("accepts bounded analytical selects over cataloged relations", () => {
     join payments_v1 p using (location_id, business_date)
     group by o.business_date`
   assert.equal(validateAnalysisSql(joined, relations), joined)
+  const terminated = "select count(*) from orders_v1;"
+  assert.equal(validateAnalysisSql(terminated, relations), terminated.slice(0, -1))
   const commonTable = `with shop as (
       select location_id from orders_v1 where business_date = current_date
     ), totals as (
@@ -28,6 +30,7 @@ test("rejects mutation, multiple statements, comments, and uncataloged access", 
   const invalid = [
     "update orders_v1 set total_amount = 0",
     "select * from orders_v1; select * from payments_v1",
+    "select * from orders_v1;;",
     "select * from orders_v1 -- hidden",
     "select * from momi_api.orders_by_id_v1",
     "select * from auth.users",
