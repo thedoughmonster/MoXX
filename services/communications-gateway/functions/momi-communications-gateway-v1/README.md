@@ -26,7 +26,9 @@ means turn. Negated, quoted, embedded, or non-final text never creates a flag.
 
 The response is OpenAI-compatible and keeps the visible alias provider-neutral.
 The provider call uses the authenticated user's opaque UUID as a stable
-privacy-preserving safety identifier.
+privacy-preserving safety identifier. The current Chat Completions adapter sets
+reasoning effort to `none`, the supported mode for this model's function tools;
+the provider-neutral route and tool contracts remain unchanged.
 
 ## Side Effects
 

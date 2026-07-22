@@ -10,6 +10,7 @@ import { markArchiveAdmitted } from "./mark_archive_admitted.ts"
 import { authorizeProviderRound } from "./mark_provider_started.ts"
 import { outputTokens } from "./output_tokens.ts"
 import { estimateProviderPayloadTokens } from "./provider_payload_policy.ts"
+import { providerRequest } from "./provider_request.ts"
 import { usage } from "./provider_usage.ts"
 import { remainingDeadlineSeconds } from "./remaining_deadline_seconds.ts"
 import { resolveLogSelection } from "./resolve_log_selection.ts"
@@ -20,10 +21,7 @@ import { visibleAlias, type Admission, type ChatInput, type Message } from "./ty
 
 export async function executeAdmittedChat(input: ChatInput, admission: Admission,
   tools: JSONValue[]): Promise<{ status: number; body: Record<string, JSONValue> }> {
-  const requestOne: Record<string, JSONValue> = { model: admission.provider_model,
-    messages: input.messages as unknown as JSONValue[], tools, tool_choice: "auto",
-    parallel_tool_calls: false, max_completion_tokens: admission.maximum_output_tokens,
-    safety_identifier: input.user.id, store: false }
+  const requestOne = providerRequest(input.messages, input.user.id, admission, tools)
   const admissionReceipt = await captureEvidence(input, admission.invocation_id, 0,
     "request_admission", { alias: visibleAlias, provider_request: requestOne },
     admission.provider_key, admission.provider_model, "pending")
@@ -68,8 +66,9 @@ export async function executeAdmittedChat(input: ChatInput, admission: Admission
     toolMessages.push({ role: "tool", content: JSON.stringify(result),
       tool_call_id: typeof call.id === "string" ? call.id : "invalid-tool-call" })
   }
-  const requestTwo: Record<string, JSONValue> = { ...requestOne,
-    messages: [...input.messages, firstMessage as Message, ...toolMessages] as unknown as JSONValue[] }
+  const requestTwo = providerRequest(
+    [...input.messages, firstMessage as Message, ...toolMessages], input.user.id,
+    admission, tools)
   await captureEvidence(input, admission.invocation_id, 2, "tool_round_request",
     { tool_calls: firstToolCalls, tool_results: toolMessages as unknown as JSONValue[],
       provider_request: requestTwo }, admission.provider_key, admission.provider_model, "pending")
