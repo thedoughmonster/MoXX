@@ -12,7 +12,7 @@ const migration = new URL(
 )
 const builder = new URL("../src/assistant_instructions.ts", import.meta.url)
 const analysisMigration = new URL(
-  "../../../../../supabase/migrations/20260722152443_add_curated_shop_analysis_query_contract.sql",
+  "../../../../../supabase/migrations/20260722164117_add_curated_shop_analysis_query_contract.sql",
   import.meta.url,
 )
 const context: AssistantContext = {

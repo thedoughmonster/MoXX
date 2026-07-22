@@ -4,11 +4,11 @@ import test from "node:test"
 
 const root = new URL("../../../../../", import.meta.url)
 const roleMigration = new URL(
-  "supabase/migrations/20260722152436_add_gateway_analysis_reader_and_context.sql",
+  "supabase/migrations/20260722164106_add_gateway_analysis_reader_and_context.sql",
   root,
 )
 const queryMigration = new URL(
-  "supabase/migrations/20260722152443_add_curated_shop_analysis_query_contract.sql",
+  "supabase/migrations/20260722164117_add_curated_shop_analysis_query_contract.sql",
   root,
 )
 const toolSource = new URL(
