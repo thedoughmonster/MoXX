@@ -11,6 +11,7 @@
   },
   "properties": {
     "model": {"const": "momi-assistant"},
+    "momi_route": {"enum": ["auto", "quick", "standard", "deep", "maximum"]},
     "messages": {"type": "array", "minItems": 1, "maxItems": 100, "items": {"oneOf": [{"$ref": "#/$defs/plain_message"}, {"$ref": "#/$defs/assistant_message"}, {"$ref": "#/$defs/tool_message"}]}},
     "user": {"type": "object", "additionalProperties": false, "required": ["id", "email"], "properties": {"id": {"type": "string", "format": "uuid"}, "email": {"type": "string", "format": "email"}}},
     "conversation_id": {"type": "string", "minLength": 1, "maxLength": 256},

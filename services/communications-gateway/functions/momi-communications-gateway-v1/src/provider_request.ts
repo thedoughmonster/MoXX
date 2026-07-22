@@ -1,16 +1,19 @@
 import type { JSONValue } from "postgres"
-import type { Admission, Message } from "./types.ts"
+import { responsesInput } from "./responses_input.ts"
+import { responsesTools } from "./responses_tools.ts"
+import type { Admission, Message, RouteSelection } from "./types.ts"
 
 export function providerRequest(messages: Message[], safetyIdentifier: string,
-  admission: Admission, tools: JSONValue[]): Record<string, JSONValue> {
+  admission: Admission, route: RouteSelection, tools: JSONValue[]): Record<string, JSONValue> {
   return {
-    model: admission.provider_model,
-    messages: messages as unknown as JSONValue[],
-    tools,
+    model: route.provider_model,
+    input: responsesInput(messages),
+    tools: responsesTools(tools),
     tool_choice: "auto",
     parallel_tool_calls: false,
-    reasoning_effort: "none",
-    max_completion_tokens: admission.maximum_output_tokens,
+    reasoning: { effort: route.reasoning_effort },
+    max_output_tokens: Math.min(admission.maximum_output_tokens,
+      route.maximum_output_tokens),
     safety_identifier: safetyIdentifier,
     store: false,
   }

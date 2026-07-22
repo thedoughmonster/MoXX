@@ -17,6 +17,11 @@ test("accepts the exact provider-neutral chat surface", () => {
   assert.deepEqual(parseChatInput(valid), valid)
 })
 
+test("accepts only a provider-neutral routing request", () => {
+  assert.equal(parseChatInput({ ...valid, momi_route: "deep" })?.momi_route, "deep")
+  assert.equal(parseChatInput({ ...valid, momi_route: "gpt-5.6-sol" }), null)
+})
+
 test("accepts model-visible tool history and resolves the explicit complete turn", () => {
   const messages = [
     { role: "user", content: "earlier question" },
