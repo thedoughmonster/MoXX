@@ -19,7 +19,7 @@ const profiles: RoutingPolicy["profiles"] = [
 const policy: RoutingPolicy = { router_endpoint: "https://api.openai.com/v1/responses",
   answer_endpoint: "https://api.openai.com/v1/responses",
   router_model: "luna", router_reasoning_effort: "low",
-  router_prompt_version: "momi-router-v1", default_route: "standard",
+  router_prompt_version: "momi-router-v2", default_route: "standard",
   maximum_route: "deep", profiles }
 const input = { messages: [{ role: "user", content: "compare the last four weeks" }],
   user: { id: "c03fbd6e-65b7-4b23-8e65-2e5a8ec00123", email: "user@example.com" } } as ChatInput
@@ -30,7 +30,10 @@ test("builds a bounded structured-output router request", () => {
   assert.deepEqual(request.reasoning, { effort: "low" })
   assert.equal(request.max_output_tokens, 500)
   assert.equal(request.tools, undefined)
-  assert.deepEqual(request.metadata, { momi_router_prompt_version: "momi-router-v1" })
+  assert.deepEqual(request.metadata, { momi_router_prompt_version: "momi-router-v2" })
+  const instructions = (request.input as { content: string }[])[0].content
+  assert.match(instructions, /quick only.*needs no tool/u)
+  assert.match(instructions, /standard for any shop-data lookup.*tool-backed request/u)
   const format = request.text as { format: { schema: {
     properties: { route: { enum: string[] } } } } }
   assert.deepEqual(format.format.schema.properties.route.enum,
