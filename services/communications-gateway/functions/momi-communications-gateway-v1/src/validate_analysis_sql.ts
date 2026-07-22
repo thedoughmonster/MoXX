@@ -9,10 +9,12 @@ export function validateAnalysisSql(
   value: unknown,
   allowedRelations: Set<string>,
 ): string | null {
-  if (typeof value !== "string" || value.length < 1 || value.length > 6000 ||
-    /;|--|\/\*/u.test(value)) return null
+  if (typeof value !== "string" || value.length < 1 || value.length > 6000) return null
+  let normalized = value.trim()
+  if (normalized.endsWith(";")) normalized = normalized.slice(0, -1).trimEnd()
+  if (!normalized || /;|--|\/\*/u.test(normalized)) return null
   let statements: unknown[]
-  try { statements = parse(value) } catch { return null }
+  try { statements = parse(normalized) } catch { return null }
   if (statements.length !== 1) return null
   const statement = statements[0]
   if (!statement || typeof statement !== "object") return null
@@ -63,5 +65,5 @@ export function validateAnalysisSql(
     }
     for (const nested of Object.values(node)) stack.push(nested)
   }
-  return relationCount > 0 ? value.trim() : null
+  return relationCount > 0 ? normalized : null
 }
