@@ -2,9 +2,11 @@
 
 ## ELI5
 
-This is OpenWebUI's one guarded model endpoint. It lists `momi-assistant`, checks
-the exact user and limits, calls the configured model at most once per round,
-uses only approved tools, and saves complete archive evidence.
+This is OpenWebUI's guarded provider-neutral model endpoint. Auto uses one small
+router; explicit Quick, Standard, Deep, or Maximum profiles bypass it. The
+gateway checks the exact user and adjustable route ceiling, calls the selected
+model at most once per round, uses only approved tools, and saves complete
+archive evidence.
 
 ## Trigger And Input
 
@@ -14,7 +16,7 @@ the authenticated OpenWebUI user ID/email, conversation/turn IDs, idempotency
 key, alias, and OpenAI-compatible ordered messages.
 
 Zac's admin route can adjust each user's per-minute, per-day, input, output,
-timeout, and total beta-budget ceilings independently.
+timeout, total beta-budget, default route, and maximum route independently.
 
 An exact affirmative final user command `log this message`, `log this turn`, or
 `log this conversation` excludes the command itself. Message selects the
@@ -24,11 +26,12 @@ means turn. Negated, quoted, embedded, or non-final text never creates a flag.
 
 ## Output
 
-The response is OpenAI-compatible and keeps the visible alias provider-neutral.
+The response is OpenAI-compatible and keeps every visible name provider-neutral.
 The provider call uses the authenticated user's opaque UUID as a stable
-privacy-preserving safety identifier. The current Chat Completions adapter sets
-reasoning effort to `none`, the supported mode for this model's function tools;
-the provider-neutral route and tool contracts remain unchanged.
+privacy-preserving safety identifier. Routing profiles set the provider model,
+reasoning effort, and output ceiling; the tool contracts remain unchanged.
+The gateway uses stateless Responses for the structured router, selected answer,
+and its bounded tool round.
 
 ## Side Effects
 

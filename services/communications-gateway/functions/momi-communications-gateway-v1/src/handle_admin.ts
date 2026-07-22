@@ -51,6 +51,15 @@ export async function handleAdmin(
       ${body.provider_key}, ${body.provider_model},
       ${body.maximum_attempt_cost_micros}::bigint
     )`
+  } else if (pathname.endsWith("/admin/user-routing")) {
+    if (typeof body.user_id !== "string" || typeof body.default_route !== "string" ||
+      typeof body.maximum_route !== "string") {
+      return Response.json({ error: "invalid_request" }, { status: 400 })
+    }
+    await sql`select momi_communications_gateway.set_user_routing_v1(
+      ${adminId}::uuid, true, ${body.user_id}::uuid,
+      ${body.default_route}, ${body.maximum_route}
+    )`
   } else return Response.json({ error: "not_found" }, { status: 404 })
   return Response.json({ ok: true })
 }

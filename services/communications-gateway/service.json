@@ -13,6 +13,7 @@
       "momi.communications.chat_completions.v1",
       "momi.communications.get_conversation_execution.v1",
       "momi.communications.set_user_limits.v1",
+      "momi.communications.set_user_routing.v1",
       "momi.communications.set_user_access.v1",
       "momi.communications.set_gateway_state.v1"
     ],
@@ -57,10 +58,14 @@
       "momi_communications_gateway.gateway_state",
       "momi_communications_gateway.invocations",
       "momi_communications_gateway.provider_bindings",
+      "momi_communications_gateway.routing_policy",
+      "momi_communications_gateway.routing_profiles",
       "momi_communications_gateway.user_limits"
     ],
     "private_routines": [
       "momi_communications_gateway.admit_invocation_v1",
+      "momi_communications_gateway.admit_routed_invocation_v2",
+      "momi_communications_gateway.authorize_provider_attempt_v2",
       "momi_communications_gateway.complete_invocation_v1",
       "momi_communications_gateway.fail_invocation_v1",
       "momi_communications_gateway.get_conversation_execution_v1",
@@ -69,7 +74,8 @@
       "momi_communications_gateway.mark_provider_started_v1",
       "momi_communications_gateway.set_gateway_state_v1",
       "momi_communications_gateway.set_user_access_v1",
-      "momi_communications_gateway.set_user_limits_v1"
+      "momi_communications_gateway.set_user_limits_v1",
+      "momi_communications_gateway.set_user_routing_v1"
     ],
     "public_reads": [
       "momi.communications.get_conversation_execution.v1",
@@ -78,6 +84,7 @@
     "public_commands": [
       "momi.communications.chat_completions.v1",
       "momi.communications.set_user_limits.v1",
+      "momi.communications.set_user_routing.v1",
       "momi.communications.set_user_access.v1",
       "momi.communications.set_gateway_state.v1"
     ],
@@ -86,8 +93,9 @@
       {"contract": "momi.communications.list_models.v1", "routine": "momi_communications_gateway.list_models_v1"}
     ],
     "public_routine_commands": [
-      {"contract": "momi.communications.chat_completions.v1", "routine": "momi_communications_gateway.admit_invocation_v1"},
+      {"contract": "momi.communications.chat_completions.v1", "routine": "momi_communications_gateway.admit_routed_invocation_v2"},
       {"contract": "momi.communications.set_user_limits.v1", "routine": "momi_communications_gateway.set_user_limits_v1"},
+      {"contract": "momi.communications.set_user_routing.v1", "routine": "momi_communications_gateway.set_user_routing_v1"},
       {"contract": "momi.communications.set_user_access.v1", "routine": "momi_communications_gateway.set_user_access_v1"},
       {"contract": "momi.communications.set_gateway_state.v1", "routine": "momi_communications_gateway.set_gateway_state_v1"}
     ],

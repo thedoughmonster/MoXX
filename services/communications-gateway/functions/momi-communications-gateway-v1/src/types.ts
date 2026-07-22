@@ -2,6 +2,10 @@ import type { JSONValue } from "postgres"
 
 export const functionKey = "momi.communications.chat_completions.v1"
 export const visibleAlias = "momi-assistant"
+export const routeKeys = ["quick", "standard", "deep", "maximum"] as const
+
+export type RouteKey = typeof routeKeys[number]
+export type RequestedRoute = "auto" | RouteKey
 
 export type ToolCall = {
   id: string
@@ -25,6 +29,7 @@ export type UserFlag = {
 
 export type ChatInput = {
   model: typeof visibleAlias
+  momi_route?: RequestedRoute
   messages: Message[]
   user: { id: string; email: string }
   conversation_id: string
@@ -46,6 +51,31 @@ export type Admission = {
   invocation_deadline: string
   invocation_status: string
   error_code: string | null
+}
+
+export type RouteProfile = {
+  route_key: RouteKey
+  route_rank: number
+  provider_model: string
+  reasoning_effort: "none" | "low" | "medium" | "high" | "xhigh" | "max"
+  maximum_output_tokens: number
+  automatic_enabled: boolean
+}
+
+export type RoutingPolicy = {
+  router_endpoint: string
+  router_model: string
+  router_reasoning_effort: "none" | "low" | "medium"
+  router_prompt_version: string
+  default_route: RouteKey
+  maximum_route: RouteKey
+  profiles: RouteProfile[]
+}
+
+export type RouteSelection = RouteProfile & {
+  source: "explicit" | "router" | "fallback"
+  reason: string
+  confidence: number
 }
 
 export type ArchiveReceipt = {

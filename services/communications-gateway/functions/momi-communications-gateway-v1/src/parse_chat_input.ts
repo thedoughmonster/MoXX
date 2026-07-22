@@ -1,5 +1,5 @@
 import { validRange } from "./valid_range.ts"
-import { visibleAlias, type ChatInput, type Message } from "./types.ts"
+import { routeKeys, visibleAlias, type ChatInput, type Message } from "./types.ts"
 
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu
 const roles = new Set(["system", "developer", "user", "assistant", "tool"])
@@ -10,7 +10,7 @@ export function parseChatInput(value: unknown): ChatInput | null {
   const input = value as Record<string, unknown>
   const allowed = new Set([
     "model", "messages", "user", "conversation_id", "turn_id",
-    "idempotency_key", "momi_log",
+    "idempotency_key", "momi_log", "momi_route",
   ])
   if (Object.keys(input).some((key) => !allowed.has(key)) ||
     input.model !== visibleAlias || !Array.isArray(input.messages) ||
@@ -58,6 +58,8 @@ export function parseChatInput(value: unknown): ChatInput | null {
   for (const key of ["conversation_id", "turn_id", "idempotency_key"] as const) {
     if (typeof input[key] !== "string" || input[key].length < 1 || input[key].length > 256) return null
   }
+  if (input.momi_route !== undefined && input.momi_route !== "auto" &&
+    !routeKeys.includes(input.momi_route as typeof routeKeys[number])) return null
   if (input.momi_log !== undefined) {
     if (!input.momi_log || typeof input.momi_log !== "object" || Array.isArray(input.momi_log)) return null
     const flag = input.momi_log as Record<string, unknown>
