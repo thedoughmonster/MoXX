@@ -7,6 +7,10 @@ model provider. It checks who may use the beta, per-minute and per-day request
 limits, token ceilings, timeouts, and how much each user may spend,
 records the complete exchange, and exposes only approved MoMi tools.
 
+The gateway loads MoMi's business identity and organization aliases from its
+owned `assistant_context` database mapping before every admitted turn. Business
+names and organization context are not embedded in request-building code.
+
 ## Boundary
 
 The gateway owns access, limits, provider/model binding, invocation and attempt

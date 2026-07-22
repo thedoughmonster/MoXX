@@ -4,9 +4,11 @@ import { responsesTools } from "./responses_tools.ts"
 import type { Admission, Message, RouteSelection } from "./types.ts"
 
 export function providerRequest(messages: Message[], safetyIdentifier: string,
-  admission: Admission, route: RouteSelection, tools: JSONValue[]): Record<string, JSONValue> {
+  admission: Admission, route: RouteSelection, tools: JSONValue[],
+  instructions: string): Record<string, JSONValue> {
   return {
     model: route.provider_model,
+    instructions,
     input: responsesInput(messages),
     tools: responsesTools(tools),
     tool_choice: "auto",

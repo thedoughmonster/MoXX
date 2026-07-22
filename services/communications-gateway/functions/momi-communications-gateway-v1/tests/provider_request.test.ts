@@ -19,10 +19,12 @@ test("uses the selected routed Responses tool contract", () => {
     source: "router", reason: "analysis", confidence: 0.9 } as RouteSelection
   const request = providerRequest(messages,
     "c03fbd6e-65b7-4b23-8e65-2e5a8ec00123", admission, route,
-    [{ type: "function", function: { name: "read", parameters: {} } }])
+    [{ type: "function", function: { name: "read", parameters: {} } }],
+    "mapped context")
   assert.equal(request.model, "gpt-5.6-sol")
   assert.deepEqual(request.reasoning, { effort: "high" })
   assert.equal(request.max_output_tokens, 2000)
+  assert.equal(request.instructions, "mapped context")
   assert.deepEqual(request.input, [{ role: "user", content: "question" }])
   assert.deepEqual(request.tools, [{ type: "function", name: "read", parameters: {} }])
   assert.equal(request.tool_choice, "auto")
