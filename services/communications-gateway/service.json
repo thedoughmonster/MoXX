@@ -54,6 +54,7 @@
     "private_schema": "momi_communications_gateway",
     "private_relations": [
       "momi_communications_gateway.access_entries",
+      "momi_communications_gateway.assistant_context",
       "momi_communications_gateway.audit_events",
       "momi_communications_gateway.gateway_state",
       "momi_communications_gateway.invocations",

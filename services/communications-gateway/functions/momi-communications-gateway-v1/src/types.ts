@@ -38,6 +38,14 @@ export type ChatInput = {
   momi_log?: UserFlag
 }
 
+export type AssistantContext = {
+  context_version: string
+  assistant_name: string
+  organization_name: string
+  organization_aliases: string[]
+  context_summary: string
+}
+
 export type Admission = {
   disposition: "admitted" | "duplicate"
   invocation_id: string

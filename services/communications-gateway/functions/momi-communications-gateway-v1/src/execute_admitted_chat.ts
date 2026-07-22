@@ -21,12 +21,15 @@ import { successResponse } from "./success_response.ts"
 import type { Admission, ChatInput } from "./types.ts"
 
 export async function executeAdmittedChat(input: ChatInput, admission: Admission,
-  tools: JSONValue[]): Promise<{ status: number; body: Record<string, JSONValue> }> {
+  tools: JSONValue[], instructions: string): Promise<{
+    status: number; body: Record<string, JSONValue>
+  }> {
   const begun = await beginRoute(input, admission, tools)
   if (begun.failure) return begun.failure
   if (!begun.route) throw new Error("route_selection_failed")
   const route = begun.route
-  const requestOne = providerRequest(input.messages, input.user.id, admission, route, tools)
+  const requestOne = providerRequest(input.messages, input.user.id, admission,
+    route, tools, instructions)
   const logSelection = resolveLogSelection(input)
   const toolContext = { input, invocationId: admission.invocation_id,
     archiveReceiptId: begun.archiveReceiptId, logSelection }
