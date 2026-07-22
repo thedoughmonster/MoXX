@@ -30,8 +30,9 @@ The response is OpenAI-compatible and keeps every visible name provider-neutral.
 The provider call uses the authenticated user's opaque UUID as a stable
 privacy-preserving safety identifier. Routing profiles set the provider model,
 reasoning effort, and output ceiling; the tool contracts remain unchanged.
-The gateway uses stateless Responses for the structured router, selected answer,
-and its bounded tool round.
+The gateway uses stateless Responses for the structured router and selected
+answer. Each route's database mapping bounds its answer calls; within that
+limit the gateway continues approved tool calls until the model returns text.
 
 Natural shop questions use the database-mapped analysis catalog and one
 read-only SQL tool. The model never needs to expose SQL, relation names, or

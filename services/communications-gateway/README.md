@@ -21,9 +21,11 @@ provider credential outside its runtime secret store.
 `momi-assistant` automatically selects a bounded Quick, Standard, or Deep
 profile through a small structured-output router. Provider-neutral explicit
 profiles bypass the router, and Maximum is explicit-only. Per-user default and
-maximum profiles are independently adjustable. Same-key/same-payload requests
-replay safely; changed payloads fail; an ambiguous paid result pauses for
-reconciliation. Final success requires the archive owner's terminal receipt.
+maximum profiles are independently adjustable. Each profile also maps a bounded
+answer-call allowance so recoverable tool-query corrections can finish without
+a code-defined one-round cutoff. Same-key/same-payload requests replay safely;
+changed payloads fail; an ambiguous paid result pauses for reconciliation.
+Final success requires the archive owner's terminal receipt.
 
 Provider execution prefers the beta-specific `MOMI_BETA_PROVIDER_API_KEY` and
 may reuse the existing project-scoped `OPENAI_API_KEY` during beta activation.

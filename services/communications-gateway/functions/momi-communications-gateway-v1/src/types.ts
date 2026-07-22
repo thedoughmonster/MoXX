@@ -72,6 +72,7 @@ export type RouteProfile = {
   provider_model: string
   reasoning_effort: "none" | "low" | "medium" | "high" | "xhigh" | "max"
   maximum_output_tokens: number
+  maximum_answer_calls: number
   automatic_enabled: boolean
 }
 
@@ -113,7 +114,6 @@ export type ToolContext = {
   archiveReceiptId: string
   logSelection: LogSelection | null
 }
-
 export type LogSelection = {
   flag: UserFlag
   content: Record<string, JSONValue>
