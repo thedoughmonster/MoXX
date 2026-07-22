@@ -18,8 +18,7 @@ they deploy from the same repository.
 - Each TypeScript file may declare at most one function.
 - Organize deployable behavior by business capability under `services/`.
 - Each service owns `AGENTS.md`, `README.md`, and one valid `service.json`.
-- Each owned function has a README with `ELI5`, trigger, input, output, side
-  effects, failure handling, and tests, plus one valid `function.json`.
+- Each owned function has a README with `ELI5`, trigger, input, output, side effects, failure handling, and tests, plus one valid `function.json`.
 - Do not add function-level agent files unless a unique local rule requires one.
 - Keep `supabase/functions/<slug>/` as a thin deployment adapter only.
 - Manifests own logical purpose; runtime and route are deployment metadata.
@@ -35,8 +34,7 @@ they deploy from the same repository.
 - Never add new findings to the constitution debt baseline; remove fixed entries.
 - Never add or rewrite runtime access debt findings, including active view and routine bodies; remove only after owner-contract cutover.
 - Every dataset has exactly one owning service; other services use only the owner's versioned public contracts.
-- Procurement services may call external sources but may not call MoMi-owned
-  services or write domain datasets.
+- Procurement services may call external sources but may not call MoMi-owned services or write domain datasets.
 - Dataset ownership includes database permissions; private tables must become
   inaccessible to non-owner runtime roles as enforcement hardens.
 - Services may import declared public contracts, never another implementation.
@@ -51,11 +49,8 @@ they deploy from the same repository.
 - Keep `supabase/migrations/` flat; only `AGENTS.md` and migration SQL belong there.
 - Start each migration absent from production with one `-- service-owner: <service-key>` header.
 - Land an ownership transfer as a manifest-only change before any later migration mutates it; checks pin existing authority to trusted `dev`.
-- Never deploy with `--prune`; retire hosted functions through an expiring
-  manifest and explicit caller-verified removal.
-- GitHub Actions is the sole authority for repository code and Edge Function
-  deployments. Local apply, Supabase Git deployment, and second deployers are
-  forbidden by ADR `0006`.
+- Never deploy with `--prune`; retire hosted functions through an expiring manifest and explicit caller-verified removal.
+- GitHub Actions is the sole authority for repository code and Edge Function deployments. Local apply, Supabase Git deployment, and second deployers are forbidden by ADR `0006`.
 - Only `.github/workflows/deploy-dev.yml` and `deploy-prod.yml` may invoke the
   deployment apply command.
 - The Node 24 release coordinator is the sole normal database migration
@@ -72,8 +67,7 @@ they deploy from the same repository.
 - Preserve complete source payloads. Do not omit source fields.
 - Do not perform business decisions or delivery work in ingestion code.
 - Treat the warehouse as the system of record for all source and business data.
-- Acquire source data through inbound webhooks, files, warehouse loads, or a
-  dedicated hydration adapter processing durable work.
+- Acquire source data through inbound webhooks, files, warehouse loads, or a dedicated hydration adapter processing durable work.
 - Only a dedicated hydration adapter may fetch business data from a source API.
 - Hydration and re-hydration must be scheduled, idempotent, and warehouse-backed.
 - Never fetch source data inside a report, request, decision, or delivery path.
@@ -106,15 +100,21 @@ they deploy from the same repository.
 - Store runtime secrets in Supabase, deployment secrets in GitHub, and local CLI credentials in the approved release host's credential store.
 - Authenticate the pinned Supabase CLI by OAuth/PAT; supply its temporary token as `SUPABASE_DB_PASSWORD`, never the long-lived Postgres role password.
 
-## Change Sequence
+## Default Development Loop
+- Use `$develop-repository-change` for ordinary features, fixes, and refactors.
+- One owning agent inspects, implements, tests, and prepares the reviewable diff.
+- Use focused tests while iterating, then run the required full check once.
+- Keep mechanical enforcement in tests and CI; do not manually re-audit passes.
+- Perform one final semantic review. Classify findings as `BLOCKING`, `FIX_NOW`, `FOLLOW_UP`, or `NO_ACTION`; only the first two normally trigger another edit.
+- Escalate to Architect or Repo Guard only for a new ownership/contract boundary,
+  material security/privacy/cost/exposure decision, destructive migration,
+  production infrastructure change, or irreconcilable repository-law conflict.
+- Use subagents only for independent parallel work that materially saves time.
+- Release hosted work with `pnpm release:dev`; promote with `pnpm release:prod`.
+- Verify hosted behavior with one controlled acceptance event. Applied migrations
+  are immutable; add a new migration for later corrections.
 
-1. Update the behavior contract.
-2. Add or revise tests.
-3. Create a migration with the Supabase CLI when schema changes are needed.
-4. Implement the smallest behavior change.
-5. Run `npm run check -- --service <service-key>`.
-6. Review and commit the diff on a feature branch based on current `dev`.
-7. Release with `pnpm release:dev`; promote with `pnpm release:prod`.
-8. Verify the hosted behavior with a controlled event.
-
-Applied migrations are immutable. Add a new migration for later corrections.
+## Code Review Rules
+- Block unauthorized ownership, private-data, public-contract, or deployer changes.
+- Block material correctness, security, privacy, data-loss, or rollback defects.
+- Report nonblocking improvements as follow-up work; leave mechanical checks to CI.
