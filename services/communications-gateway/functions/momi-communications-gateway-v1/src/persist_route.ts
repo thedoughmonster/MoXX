@@ -8,17 +8,7 @@ export async function persistRoute(invocationId: string, userId: string,
     update momi_communications_gateway.invocations invocation set
       selected_route = profile.route_key, provider_model = profile.provider_model,
       reasoning_effort = profile.reasoning_effort, routing_source = ${route.source},
-      routing_reason = ${route.reason}, routing_confidence = ${route.confidence},
-      per_attempt_cost_micros = ceil(
-        (invocation.input_tokens * profile.input_micros_per_token) +
-        (least(limits.maximum_output_tokens, profile.maximum_output_tokens) *
-          profile.output_micros_per_token)
-      )::bigint,
-      reserved_micros = ceil(
-        (invocation.input_tokens * profile.input_micros_per_token) +
-        (least(limits.maximum_output_tokens, profile.maximum_output_tokens) *
-          profile.output_micros_per_token)
-      )::bigint * case when invocation.requested_route = 'auto' then 3 else 2 end
+      routing_reason = ${route.reason}, routing_confidence = ${route.confidence}
     from momi_communications_gateway.user_limits limits,
       momi_communications_gateway.routing_profiles profile,
       momi_communications_gateway.routing_profiles ceiling

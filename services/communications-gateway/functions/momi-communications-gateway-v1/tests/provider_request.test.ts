@@ -4,6 +4,7 @@ import test from "node:test"
 import { providerContinuationRequest } from "../src/provider_continuation_request.ts"
 import { providerRequest } from "../src/provider_request.ts"
 import { outputTokens } from "../src/output_tokens.ts"
+import { responseCompleted } from "../src/response_completed.ts"
 import { responseText } from "../src/response_text.ts"
 import { responseToolCalls } from "../src/response_tool_calls.ts"
 import { successResponse } from "../src/success_response.ts"
@@ -44,11 +45,18 @@ test("normalizes Responses calls and final text for OpenWebUI", () => {
   const callBody = { output: [{ type: "function_call", call_id: "call-1",
     name: "read", arguments: "{}" }] }
   assert.equal(responseToolCalls(callBody)[0]?.function.name, "read")
-  const answerBody = { output: [{ type: "reasoning" }, { type: "message", content: [
+  const answerBody = { status: "completed", output: [{ type: "reasoning" }, { type: "message", content: [
     { type: "output_text", text: "answer" }, { type: "refusal", refusal: "none" }] }],
     usage: { input_tokens: 10, output_tokens: 2 } }
   assert.equal(responseText(answerBody), "answer")
+  assert.equal(responseCompleted(answerBody), true)
+  assert.equal(responseCompleted({ status: "incomplete", output: [] }), false)
   assert.equal(outputTokens(answerBody), 2)
   assert.equal((successResponse(answerBody, "invocation").body.choices as Array<{
     message: { content: string } }>)[0]?.message.content, "answer")
+  assert.deepEqual(successResponse(answerBody, "invocation").body.usage,
+    { prompt_tokens: 10, completion_tokens: 2, total_tokens: 12 })
+  assert.equal(responseText({ output: [{ type: "message", content: [
+    { type: "refusal", refusal: "I cannot help with that." }] }] }),
+  "I cannot help with that.")
 })

@@ -64,6 +64,7 @@ export type RouteProfile = {
 
 export type RoutingPolicy = {
   router_endpoint: string
+  answer_endpoint: string
   router_model: string
   router_reasoning_effort: "none" | "low" | "medium"
   router_prompt_version: string
@@ -73,6 +74,7 @@ export type RoutingPolicy = {
 }
 
 export type RouteSelection = RouteProfile & {
+  provider_endpoint: string
   source: "explicit" | "router" | "fallback"
   reason: string
   confidence: number

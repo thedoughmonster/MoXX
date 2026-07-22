@@ -4,8 +4,13 @@ create table momi_communications_gateway.routing_policy (
   singleton boolean primary key default true check (singleton),
   router_endpoint text not null
     check (router_endpoint = 'https://api.openai.com/v1/responses'),
+  answer_endpoint text not null
+    check (answer_endpoint = 'https://api.openai.com/v1/responses'),
   router_model text not null check (length(router_model) between 1 and 200),
   router_reasoning_effort text not null check (router_reasoning_effort in ('none', 'low', 'medium')),
+  router_maximum_output_tokens integer not null check (router_maximum_output_tokens = 500),
+  router_input_micros_per_token numeric(12,4) not null check (router_input_micros_per_token > 0),
+  router_output_micros_per_token numeric(12,4) not null check (router_output_micros_per_token > 0),
   router_prompt_version text not null check (router_prompt_version ~ '^momi-router-v[0-9]+$'),
   enabled boolean not null default false,
   updated_at timestamptz not null default now()
@@ -25,20 +30,11 @@ create table momi_communications_gateway.routing_profiles (
 );
 
 insert into momi_communications_gateway.routing_policy
-  (router_endpoint, router_model, router_reasoning_effort, router_prompt_version, enabled)
-values ('https://api.openai.com/v1/responses',
-  'gpt-5.6-luna', 'low', 'momi-router-v1', true);
-
-alter table momi_communications_gateway.provider_bindings
-  drop constraint provider_endpoint_exact;
-
-update momi_communications_gateway.provider_bindings
-set endpoint = 'https://api.openai.com/v1/responses', updated_at = now()
-where alias = 'momi-assistant';
-
-alter table momi_communications_gateway.provider_bindings
-  add constraint provider_endpoint_exact
-    check (endpoint = 'https://api.openai.com/v1/responses');
+  (router_endpoint, answer_endpoint, router_model, router_reasoning_effort,
+    router_maximum_output_tokens, router_input_micros_per_token,
+    router_output_micros_per_token, router_prompt_version, enabled)
+values ('https://api.openai.com/v1/responses', 'https://api.openai.com/v1/responses',
+  'gpt-5.6-luna', 'low', 500, 1, 6, 'momi-router-v1', true);
 
 insert into momi_communications_gateway.routing_profiles
   (route_key, route_rank, provider_model, reasoning_effort,
@@ -74,7 +70,9 @@ alter table momi_communications_gateway.invocations
     check (routing_source in ('explicit', 'router', 'fallback')),
   add column routing_reason text check (length(routing_reason) between 1 and 240),
   add column routing_confidence numeric(4,3)
-    check (routing_confidence between 0 and 1);
+    check (routing_confidence between 0 and 1),
+  add column accrued_cost_micros bigint not null default 0
+    check (accrued_cost_micros >= 0);
 
 create function momi_communications_gateway.admit_routed_invocation_v2(
   p_user_id uuid, p_email text, p_conversation_id text, p_turn_id text,
@@ -201,21 +199,98 @@ $$;
 
 create function momi_communications_gateway.authorize_provider_attempt_v2(
   p_invocation_id uuid, p_payload_tokens integer, p_round integer
+) returns boolean language plpgsql security definer set search_path = '' as $$
+declare
+  invocation momi_communications_gateway.invocations%rowtype;
+  limits momi_communications_gateway.user_limits%rowtype;
+  attempt_cost bigint;
+  other_spend bigint;
+begin
+  select i.* into invocation from momi_communications_gateway.invocations i
+    where i.invocation_id = p_invocation_id;
+  if not found then return false; end if;
+  select l.* into limits from momi_communications_gateway.user_limits l
+    where l.user_id = invocation.user_id for update;
+  if not found then return false; end if;
+  select i.* into invocation from momi_communications_gateway.invocations i
+    where i.invocation_id = p_invocation_id for update;
+  if p_round not between 1 and 3 or p_round <> invocation.provider_calls + 1
+    or invocation.status not in ('admitted', 'provider_started')
+    or invocation.archive_admission_receipt is null
+    or now() >= invocation.invocation_deadline
+    or p_payload_tokens <= 0 or p_payload_tokens > limits.maximum_input_tokens then
+    return false;
+  end if;
+  if invocation.selected_route is null then
+    select ceil(
+      (p_payload_tokens * policy.router_input_micros_per_token) +
+      (policy.router_maximum_output_tokens * policy.router_output_micros_per_token)
+    )::bigint into attempt_cost
+    from momi_communications_gateway.routing_policy policy
+    where policy.singleton and policy.enabled and invocation.requested_route = 'auto'
+      and p_round = 1;
+  else
+    select ceil(
+      (p_payload_tokens * profile.input_micros_per_token) +
+      (least(limits.maximum_output_tokens, profile.maximum_output_tokens) *
+        profile.output_micros_per_token)
+    )::bigint into attempt_cost
+    from momi_communications_gateway.routing_profiles profile
+    join momi_communications_gateway.routing_profiles ceiling
+      on ceiling.route_key = limits.maximum_route
+    where profile.route_key = invocation.selected_route and profile.enabled
+      and profile.route_rank <= ceiling.route_rank;
+  end if;
+  if attempt_cost is null then return false; end if;
+  select coalesce(sum(case when i.status in ('completed', 'failed', 'paid_ambiguous')
+    then i.billed_micros else i.reserved_micros end), 0) into other_spend
+  from momi_communications_gateway.invocations i
+  where i.user_id = invocation.user_id and i.invocation_id <> p_invocation_id;
+  if other_spend + invocation.accrued_cost_micros + attempt_cost > limits.budget_micros then
+    return false;
+  end if;
+  update momi_communications_gateway.invocations i set
+    status = 'provider_started',
+    provider_started_at = coalesce(i.provider_started_at, now()),
+    provider_calls = p_round,
+    accrued_cost_micros = i.accrued_cost_micros + attempt_cost,
+    per_attempt_cost_micros = greatest(i.per_attempt_cost_micros, attempt_cost),
+    reserved_micros = greatest(i.reserved_micros,
+      i.accrued_cost_micros + attempt_cost)
+  where i.invocation_id = p_invocation_id;
+  return found;
+end;
+$$;
+
+create or replace function momi_communications_gateway.complete_invocation_v1(
+  p_invocation_id uuid, p_status text, p_terminal_receipt uuid,
+  p_output_tokens integer, p_error_code text default null
+) returns boolean language plpgsql security definer set search_path = '' as $$
+begin
+  if p_status not in ('completed', 'failed', 'paid_ambiguous')
+    or (p_status = 'completed' and p_terminal_receipt is null) then
+    raise exception 'invalid terminal invocation state' using errcode = '22023';
+  end if;
+  update momi_communications_gateway.invocations set status = p_status,
+    terminal_archive_receipt = p_terminal_receipt,
+    output_tokens = greatest(coalesce(p_output_tokens, 0), 0),
+    billed_micros = accrued_cost_micros, reserved_micros = 0,
+    error_code = p_error_code, completed_at = now()
+  where invocation_id = p_invocation_id and status = 'provider_started';
+  return found;
+end;
+$$;
+
+create or replace function momi_communications_gateway.fail_invocation_v1(
+  p_invocation_id uuid, p_terminal_receipt uuid, p_error_code text
 ) returns boolean language sql security definer set search_path = '' as $$
-  update momi_communications_gateway.invocations invocation
-  set status = 'provider_started',
-      provider_started_at = coalesce(provider_started_at, now()),
-      provider_calls = p_round
-  where invocation.invocation_id = p_invocation_id
-    and p_round between 1 and 3 and p_round = invocation.provider_calls + 1
-    and invocation.status in ('admitted', 'provider_started')
-    and invocation.archive_admission_receipt is not null
-    and now() < invocation.invocation_deadline
-    and p_payload_tokens > 0 and p_payload_tokens <= (
-      select limits.maximum_input_tokens
-      from momi_communications_gateway.user_limits limits
-      where limits.user_id = invocation.user_id
-    ) returning true
+  update momi_communications_gateway.invocations set status = 'failed',
+    terminal_archive_receipt = p_terminal_receipt,
+    billed_micros = accrued_cost_micros,
+    reserved_micros = 0, error_code = p_error_code, completed_at = now()
+  where invocation_id = p_invocation_id
+    and status in ('admitted', 'provider_started')
+    and p_terminal_receipt is not null and p_error_code <> '' returning true
 $$;
 
 create function momi_communications_gateway.set_user_routing_v1(

@@ -25,7 +25,10 @@ Provider execution prefers the beta-specific `MOMI_BETA_PROVIDER_API_KEY` and
 may reuse the existing project-scoped `OPENAI_API_KEY` during beta activation.
 Neither value is returned, logged, archived, or exposed to OpenWebUI. Provider
 requests use the authenticated user's opaque UUID as `safety_identifier` and
-the current `max_completion_tokens` field.
+the current Responses API `max_output_tokens` field. The routing policy owns
+the Responses endpoints; the migration intentionally leaves the legacy active
+provider-binding endpoint unchanged so applying schema before Edge code cannot
+break the currently deployed Chat Completions runtime.
 
 ## Tools
 

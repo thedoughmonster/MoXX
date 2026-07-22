@@ -36,6 +36,11 @@ replays every returned output item, including opaque reasoning state, with the
 matching function result; OpenWebUI still receives its existing compatible chat
 response shape.
 
+The migration does not rewrite the active legacy provider binding. The new
+routing policy owns the router and answer endpoints, so migration-before-code
+deployment remains backward compatible and route activation occurs only when
+the new gateway code is deployed.
+
 ## Consequences
 
 Model and reasoning depth can change without changing the product identity.

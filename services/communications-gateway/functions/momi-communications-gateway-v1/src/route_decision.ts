@@ -14,11 +14,13 @@ export function routeDecision(body: Record<string, JSONValue>, policy: RoutingPo
   const selected = typeof value?.route === "string" ? policy.profiles.find((profile) =>
     profile.route_key === value?.route && profile.automatic_enabled && profile.route_rank <= maximumRank) : null
   if (selected && typeof value?.reason === "string" && typeof value?.confidence === "number") {
-    return { ...selected, source: "router", reason: value.reason.slice(0, 240),
+    return { ...selected, provider_endpoint: policy.answer_endpoint,
+      source: "router", reason: value.reason.slice(0, 240),
       confidence: Math.max(0, Math.min(1, value.confidence)) }
   }
   const fallback = policy.profiles.find((profile) => profile.route_key === policy.default_route &&
     profile.route_rank <= maximumRank)
   if (!fallback) throw new Error("routing_fallback_unavailable")
-  return { ...fallback, source: "fallback", reason: "router output was invalid", confidence: 0 }
+  return { ...fallback, provider_endpoint: policy.answer_endpoint,
+    source: "fallback", reason: "router output was invalid", confidence: 0 }
 }

@@ -3,10 +3,12 @@ import type { RouteKey, RouteProfile, RoutingPolicy } from "./types.ts"
 
 export async function loadRoutingPolicy(userId: string): Promise<RoutingPolicy> {
   const sql = getDatabase()
-  const policies = await sql<{ router_endpoint: string; router_model: string;
+  const policies = await sql<{ router_endpoint: string; answer_endpoint: string;
+    router_model: string;
     router_reasoning_effort: "none" | "low" | "medium";
     router_prompt_version: string; default_route: RouteKey; maximum_route: RouteKey }[]>`
-    select policy.router_endpoint, policy.router_model, policy.router_reasoning_effort,
+    select policy.router_endpoint, policy.answer_endpoint,
+      policy.router_model, policy.router_reasoning_effort,
       policy.router_prompt_version, limits.default_route, limits.maximum_route
     from momi_communications_gateway.routing_policy policy
     join momi_communications_gateway.user_limits limits on limits.user_id = ${userId}::uuid

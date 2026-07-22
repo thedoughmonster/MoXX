@@ -17,6 +17,7 @@ const profiles: RoutingPolicy["profiles"] = [
     reasoning_effort: "max", maximum_output_tokens: 16000, automatic_enabled: false },
 ]
 const policy: RoutingPolicy = { router_endpoint: "https://api.openai.com/v1/responses",
+  answer_endpoint: "https://api.openai.com/v1/responses",
   router_model: "luna", router_reasoning_effort: "low",
   router_prompt_version: "momi-router-v1", default_route: "standard",
   maximum_route: "deep", profiles }
@@ -37,7 +38,7 @@ test("builds a bounded structured-output router request", () => {
 })
 
 test("accepts an authorized decision and falls back on invalid output", () => {
-  const selected = routeDecision({ output: [{ type: "message", content: [{
+  const selected = routeDecision({ status: "completed", output: [{ type: "message", content: [{
     type: "output_text", text:
       JSON.stringify({ route: "deep", confidence: 0.8, reason: "multi-step analysis" }) }] }] }, policy)
   assert.equal(selected.route_key, "deep")
