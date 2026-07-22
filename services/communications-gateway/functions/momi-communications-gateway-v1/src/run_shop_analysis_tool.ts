@@ -27,7 +27,6 @@ export async function runShopAnalysisTool(value: unknown): Promise<JSONValue> {
           set_config('statement_timeout', '6000', true),
           set_config('idle_in_transaction_session_timeout', '8000', true)
       `
-      await transaction`set local role svc_communications_gateway`
       const rows = await transaction<{ result: JSONValue }[]>`
         select momi_analysis.execute_query_v1(${query}) as result
       `
