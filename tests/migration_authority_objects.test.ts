@@ -21,6 +21,21 @@ test("rejects role membership and unmodeled ownership authority", () => {
   ).join("\n"), /role and ownership authority is not yet modeled/)
 })
 
+test("allows only the exact declared least-privilege non-login role", () => {
+  const owner = service("records-owner")
+  owner.manifest.owned_dataset!.db_role = "svc_records_owner"
+  const header = "-- service-owner: records-owner\n"
+  const safe = "create role svc_records_owner nologin noinherit nosuperuser " +
+    "nocreatedb nocreaterole noreplication nobypassrls;"
+  assert.deepEqual(findNewMigrationAuthorityViolations(
+    new Map(), new Map([["001.sql", header + safe]]), [owner],
+  ), [])
+  const unsafe = safe.replace("nologin", "login")
+  assert.match(findNewMigrationAuthorityViolations(
+    new Map(), new Map([["001.sql", header + unsafe]]), [owner],
+  ).join("\n"), /role and ownership authority is not yet modeled/u)
+})
+
 test("pins index mutation authority to its owning relation", () => {
   const owner = service("records-owner")
   const actor = service("records-actor")

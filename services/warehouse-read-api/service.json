@@ -24,7 +24,8 @@
       "momi.employees.get_by_id.v1",
       "momi.schedules.get_by_id.v1",
       "momi.stock_observations.get_latest.v1",
-      "momi.canonical_beta_query.v1"
+      "momi.canonical_beta_query.v1",
+      "momi.shop_analysis_query.v1"
     ],
     "consumes": [
       { "service": "warehouse-projection", "contract": "momi.warehouse.canonical_read_views.v1" }
@@ -47,21 +48,53 @@
     "dataset_key": "momi.canonical_read_authorization",
     "dataset_class": "operational",
     "private_relations": [
+      "momi_analysis.catalog_v1",
+      "momi_analysis.menu_items_v1",
+      "momi_analysis.order_items_v1",
+      "momi_analysis.orders_v1",
+      "momi_analysis.payments_v1",
+      "momi_analysis.schedules_v1",
+      "momi_analysis.scopes_v1",
+      "momi_analysis.time_entries_v1",
+      "momi_api.beta_analysis_catalog",
+      "momi_api.beta_analysis_scopes",
       "momi_api.read_capabilities",
       "momi_api.read_view_registry",
       "momi_api.beta_query_capabilities"
     ],
     "private_routines": [
+      "momi_analysis.execute_query_v1",
       "momi_api.consume_read_capability",
       "momi_api.consume_versioned_read_capability",
       "momi_api.issue_beta_query_capability_v1",
       "momi_api.consume_beta_query_capability_v1"
     ],
-    "public_reads": ["momi.canonical_beta_query.v1"],
+    "public_reads": [
+      "momi.canonical_beta_query.v1",
+      "momi.shop_analysis_query.v1"
+    ],
+    "public_relation_reads": [
+      {"contract": "momi.shop_analysis_query.v1", "relation": "momi_analysis.catalog_v1"},
+      {"contract": "momi.shop_analysis_query.v1", "relation": "momi_analysis.menu_items_v1"},
+      {"contract": "momi.shop_analysis_query.v1", "relation": "momi_analysis.order_items_v1"},
+      {"contract": "momi.shop_analysis_query.v1", "relation": "momi_analysis.orders_v1"},
+      {"contract": "momi.shop_analysis_query.v1", "relation": "momi_analysis.payments_v1"},
+      {"contract": "momi.shop_analysis_query.v1", "relation": "momi_analysis.schedules_v1"},
+      {"contract": "momi.shop_analysis_query.v1", "relation": "momi_analysis.scopes_v1"},
+      {"contract": "momi.shop_analysis_query.v1", "relation": "momi_analysis.time_entries_v1"}
+    ],
     "public_commands": ["momi.canonical_beta_query.v1"],
     "public_routine_reads": [
-      {"contract": "momi.canonical_beta_query.v1", "routine": "momi_api.consume_beta_query_capability_v1"}
+      {"contract": "momi.canonical_beta_query.v1", "routine": "momi_api.consume_beta_query_capability_v1"},
+      {"contract": "momi.shop_analysis_query.v1", "routine": "momi_analysis.execute_query_v1"}
     ],
+    "dynamic_read_routines": [{
+      "contract": "momi.shop_analysis_query.v1",
+      "routine": "momi_analysis.execute_query_v1",
+      "consumer_service": "communications-gateway",
+      "role": "svc_communications_gateway",
+      "schema": "momi_analysis"
+    }],
     "public_routine_commands": [
       {"contract": "momi.canonical_beta_query.v1", "routine": "momi_api.issue_beta_query_capability_v1"}
     ],

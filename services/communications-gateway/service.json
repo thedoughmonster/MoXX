@@ -21,12 +21,14 @@
       {"service": "communications-archive", "contract": "momi.communications.capture_gateway_exchange.v1"},
       {"service": "communications-archive", "contract": "momi.communications.get_gateway_exchange_receipt.v1"},
       {"service": "communications-operations", "contract": "momi.communications.create_user_flagged_shop_log.v1"},
-      {"service": "warehouse-read-api", "contract": "momi.canonical_beta_query.v1"}
+      {"service": "warehouse-read-api", "contract": "momi.canonical_beta_query.v1"},
+      {"service": "warehouse-read-api", "contract": "momi.shop_analysis_query.v1"}
     ]
   },
   "database": {
     "read": [
       "momi_api",
+      "momi_analysis",
       "momi_communications",
       "momi_communications_gateway",
       "momi_communications_operations"
@@ -45,12 +47,14 @@
   "deployment": {"owns": [], "depends_on": []},
   "runtime_dependencies": [
     "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
+    "npm:pgsql-ast-parser@12.0.2",
     "npm:postgres@3.4.3"
   ],
   "approved_packages": [],
   "owned_dataset": {
     "dataset_key": "momi.communications_gateway",
     "dataset_class": "operational",
+    "db_role": "svc_communications_gateway",
     "private_schema": "momi_communications_gateway",
     "private_relations": [
       "momi_communications_gateway.access_entries",

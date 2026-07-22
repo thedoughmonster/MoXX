@@ -1,10 +1,17 @@
 import { splitSqlStatements } from "../sql/split_sql_statements.ts"
 
-export function findRoleAuthorityChanges(source: string): string[] {
+export function findRoleAuthorityChanges(source: string, allowedRole?: string): string[] {
   const changes: string[] = []
   for (const statement of splitSqlStatements(source)) {
     const sql = statement.text.trim()
-    const roleDdl = /\b(?:create|alter|drop)\s+(?:role|user|group)\b/i.test(sql)
+    const roleMatch = sql.match(/\b(create|alter|drop)\s+(?:role|user|group)\s+([a-z][a-z0-9_]*)\b/i)
+    const declaredCreate = roleMatch?.[1]?.toLowerCase() === "create" &&
+      roleMatch[2] === allowedRole && /\bnologin\b/i.test(sql) &&
+      /\bnoinherit\b/i.test(sql) && /\bnosuperuser\b/i.test(sql) &&
+      /\bnocreatedb\b/i.test(sql) && /\bnocreaterole\b/i.test(sql) &&
+      /\bnoreplication\b/i.test(sql) && /\bnobypassrls\b/i.test(sql) &&
+      !/\blogin\b/i.test(sql) && !/\bpassword\b/i.test(sql)
+    const roleDdl = Boolean(roleMatch) && !declaredCreate
     const owned = /\b(?:drop|reassign)\s+owned\s+by\b/i.test(sql)
     const ownerTransfer = /\balter\b[\s\S]*\bowner\s+to\b/i.test(sql)
     const roleSession = /\b(?:set(?:\s+local)?\s+role|reset\s+role|(?:set|reset)\s+session\s+authorization)\b/i

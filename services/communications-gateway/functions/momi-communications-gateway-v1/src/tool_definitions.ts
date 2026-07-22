@@ -2,6 +2,22 @@ export const toolDefinitions = [
   {
     type: "function",
     function: {
+      name: "query_momi_shop_data",
+      description: "Answer a shop question with one private, read-only SELECT over the provided catalog.",
+      strict: true,
+      parameters: {
+        type: "object",
+        additionalProperties: false,
+        required: ["sql"],
+        properties: {
+          sql: { type: "string", minLength: 1, maxLength: 6000 },
+        },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
       name: "get_momi_canonical_record",
       description: "Read one approved canonical MoMi shop record with provenance and freshness.",
       strict: true,

@@ -19,6 +19,7 @@ export type OwnedDataset = {
   public_commands?: string[]
   public_routine_reads?: PublicRoutineCommand[]
   public_routine_commands?: PublicRoutineCommand[]
+  dynamic_read_routines?: DynamicReadRoutine[]
   emitted_events?: string[]
   db_role?: string
 }
@@ -31,6 +32,14 @@ export type PublicRelationRead = {
 export type PublicRoutineCommand = {
   contract: string
   routine: string
+}
+
+export type DynamicReadRoutine = {
+  contract: string
+  routine: string
+  consumer_service: string
+  role: string
+  schema: string
 }
 
 export type DeploymentUnitKind =

@@ -33,6 +33,10 @@ reasoning effort, and output ceiling; the tool contracts remain unchanged.
 The gateway uses stateless Responses for the structured router, selected answer,
 and its bounded tool round.
 
+Natural shop questions use the database-mapped analysis catalog and one
+read-only SQL tool. The model never needs to expose SQL, relation names, or
+internal UUIDs to the user. The explicit logger remains a separate write tool.
+
 ## Side Effects
 
 Before provider egress the function admits the invocation, enforces access and
