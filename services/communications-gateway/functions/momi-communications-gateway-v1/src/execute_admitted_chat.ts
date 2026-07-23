@@ -3,6 +3,7 @@ import { beginRoute } from "./begin_route.ts"
 import { callProvider } from "./call_provider.ts"
 import { captureEvidence } from "./capture_evidence.ts"
 import { completeInvocation } from "./complete_invocation.ts"
+import { completeProviderLimitation } from "./complete_provider_limitation.ts"
 import { failedProviderResponse } from "./failed_provider_response.ts"
 import { authorizeProviderRound } from "./mark_provider_started.ts"
 import { outputTokens } from "./output_tokens.ts"
@@ -18,6 +19,7 @@ import { remainingDeadlineSeconds } from "./remaining_deadline_seconds.ts"
 import { resolveLogSelection } from "./resolve_log_selection.ts"
 import { runToolCall } from "./run_tool_call.ts"
 import { successResponse } from "./success_response.ts"
+import { terminalLimitationCodes } from "./terminal_limitation_response.ts"
 import type { Admission, ChatInput } from "./types.ts"
 import { waitForBackgroundResponse } from "./wait_for_background_response.ts"
 
@@ -90,6 +92,14 @@ export async function executeAdmittedChat(input: ChatInput, admission: Admission
           (result.ambiguous ? "provider_transport_ambiguous" : !result.ok
         ? `provider_http_${result.status}` : !completed
         ? "provider_response_incomplete" : "provider_response_missing_output_text")
+      if (providerError && terminalLimitationCodes.has(providerError)) {
+        return await completeProviderLimitation(
+          admission,
+          receipt.archive_item_id,
+          result.body,
+          providerError,
+        )
+      }
       const response = state === "completed" ? successResponse(result.body,
         admission.invocation_id) : failedProviderResponse(
           admission.invocation_id,

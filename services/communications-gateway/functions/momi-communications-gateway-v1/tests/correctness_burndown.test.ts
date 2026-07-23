@@ -4,7 +4,7 @@ import test from "node:test"
 
 import { analysisDatabaseError } from "../src/analysis_database_error.ts"
 import { assistantInstructions } from "../src/assistant_instructions.ts"
-import { failedProviderResponse } from "../src/failed_provider_response.ts"
+import { terminalLimitationResponse } from "../src/terminal_limitation_response.ts"
 import type { AssistantContext } from "../src/types.ts"
 
 const fixtureUrl = new URL("./fixtures/correctness_burndown.json", import.meta.url)
@@ -59,11 +59,12 @@ test("database failures collapse only to safe actionable categories", () => {
   }
 })
 
-test("Maximum failure is non-empty and explicitly never retried", () => {
-  const response = failedProviderResponse("invocation", "failed",
+test("Maximum deadline is a durable relay-compatible terminal response", () => {
+  const response = terminalLimitationResponse("invocation",
     fixture.maximum.visible_deadline_error)
-  assert.equal(response.status, 504)
-  assert.equal(response.body.error, "maximum_analysis_deadline_exceeded")
-  assert.match(response.body.message, /not retried/u)
+  assert.equal(response.status, 200)
+  assert.equal(response.body.object, "chat.completion")
+  assert.match(response.body.choices[0].message.content, /did not finish/u)
+  assert.match(response.body.choices[0].message.content, /not retried/u)
   assert.equal(fixture.maximum.automatic_paid_retries, 0)
 })

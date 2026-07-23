@@ -9,8 +9,9 @@ const body = { id, object: "chat.completion", model: "momi-assistant",
   choices: [{ index: 0, message: { role: "assistant", content: "durable answer" },
     finish_reason: "stop" }], usage: { prompt_tokens: 11, completion_tokens: 4 } }
 const replay = (status: string,
-  terminalResponse: InvocationReplay["terminal_response"] = null): InvocationReplay => ({
-  invocation_status: status, error_code: null,
+  terminalResponse: InvocationReplay["terminal_response"] = null,
+  errorCode: string | null = null): InvocationReplay => ({
+  invocation_status: status, error_code: errorCode,
   terminal_response: terminalResponse, provider_calls: 2,
 })
 
@@ -19,6 +20,21 @@ test("returns the exact durable completed response", () => {
   assert.equal(response.status, 200)
   assert.strictEqual(response.body, body)
   assert.equal(response.body.choices?.[0]?.message?.content, "durable answer")
+})
+
+test("returns the exact durable completed limitation without another attempt", () => {
+  const limitation = { ...body, choices: [{
+    index: 0,
+    message: { role: "assistant", content: "Maximum reached its deadline and was not retried." },
+    finish_reason: "stop",
+  }] }
+  const response = replayResponse(id, replay(
+    "completed",
+    limitation,
+    "provider_background_deadline_exceeded",
+  ))
+  assert.equal(response.status, 200)
+  assert.strictEqual(response.body, limitation)
 })
 
 test("failed and paid ambiguous replays are never HTTP 200", () => {

@@ -2,6 +2,7 @@ import type { JSONValue } from "postgres"
 import { admitInvocation } from "./admit_invocation.ts"
 import { archiveFailure } from "./archive_failure.ts"
 import { assistantInstructions } from "./assistant_instructions.ts"
+import { completeVisibleLimitation } from "./complete_visible_limitation.ts"
 import { executeAdmittedChat } from "./execute_admitted_chat.ts"
 import { hashRequest } from "./hash_request.ts"
 import { loadAssistantContext } from "./load_assistant_context.ts"
@@ -43,6 +44,12 @@ export async function processChat(input: ChatInput): Promise<{
       ].includes(error.message)
       ? error.message
       : "post_admission_failure"
+    if ([
+      "provider_round_not_authorized",
+      "tool_round_not_authorized",
+    ].includes(code)) {
+      return await completeVisibleLimitation(input, admission, code)
+    }
     await archiveFailure(input, admission, code)
     return { status: 503, body: {
       id: admission.invocation_id,

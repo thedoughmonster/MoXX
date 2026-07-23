@@ -44,6 +44,9 @@ coverage fallback. The explicit logger remains a separate write tool.
 Maximum creates each answer round as one background provider response and polls
 that response ID until it becomes terminal or the admitted user deadline ends.
 Poll retrieval is continuation of the same paid attempt, not a model retry.
+If a non-ambiguous background or mapped-round limit ends the analysis first,
+the gateway completes with a durable, non-empty provider-neutral explanation
+that OpenWebUI can render and replay without another provider attempt.
 
 ## Side Effects
 
