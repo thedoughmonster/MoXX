@@ -6,3 +6,6 @@ process.stdout.write(JSON.stringify({
   hasPostgresPassword: Boolean(process.env.PGPASSWORD),
   passwordsMatch: process.env.SUPABASE_DB_PASSWORD === process.env.PGPASSWORD,
 }))
+if (process.argv.includes("probe-stderr")) {
+  process.stderr.write("preview from stderr")
+}

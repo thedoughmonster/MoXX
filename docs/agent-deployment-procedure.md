@@ -66,8 +66,14 @@ Supabase plugin, CLI, dashboard, or local code.
 - No credential value enters a command, URL, log, commit, packet, or receipt.
 
 Only `scripts/release/apply_migrations.ts` may call `db push`. Each apply uses
-`--linked`, starts with `--dry-run`, ends with exact parity, and never rewrites
-an applied migration. GitHub workflows never apply migrations.
+`--linked`, reads hosted history before its dry-run, ends with exact parity, and
+never rewrites an applied migration. The default command omits `--include-all`.
+The coordinator adds it only for receipt-authorized locally missing migrations
+that are ordered before the hosted tip, after rejecting unknown hosted versions
+and unexplained local gaps. The dry-run must list exactly those local filenames
+before the same selected arguments can apply them. No release flag or
+environment variable can override these checks. GitHub workflows never apply
+migrations.
 
 ## Failure and rollback
 

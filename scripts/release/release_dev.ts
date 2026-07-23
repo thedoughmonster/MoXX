@@ -27,7 +27,9 @@ export async function releaseDev(validationPath: string): Promise<void> {
   const plan = await buildBoundPlan(validation.identities.base_sha!, head)
   assertPlanMatchesValidation(plan, validation)
   const databaseApplied = plan.impact.release.database !== "none"
-  if (databaseApplied) await applyMigrations("dev")
+  if (databaseApplied) {
+    await applyMigrations("dev", validatedPlan.impact.migrations)
+  }
   const planDigest = hashText(canonicalJson(plan))
   const run = plan.impact.release.functions.length === 0
     ? undefined

@@ -7,7 +7,8 @@ test("opens database access only through the migration apply path", async () => 
     new URL("../scripts/release/release_dev.ts", import.meta.url),
     "utf8",
   )
-  assert.match(dev, /if \(databaseApplied\) await applyMigrations\("dev"\)/)
+  assert.match(dev, /if \(databaseApplied\)/)
+  assert.match(dev, /applyMigrations\("dev", validatedPlan\.impact\.migrations\)/)
   assert.doesNotMatch(dev, /linkProject|runSupabase|SUPABASE/)
   const linker = await readFile(
     new URL("../scripts/deploy/link_project.ts", import.meta.url),
