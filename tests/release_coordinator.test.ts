@@ -77,6 +77,7 @@ test("requires migration completion before development deployment", async () => 
   assert.match(release, /if \(preflight\.requiresMigrationApply\)/)
   assert.match(release, /"switch", "--detach", "origin\/dev"/)
   assert.doesNotMatch(release, /"switch", "dev"/)
+  assert.doesNotMatch(release, /--delete-branch/)
 })
 
 test("dispatches production only after promotion", async () => {
