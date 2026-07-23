@@ -9,7 +9,7 @@ export function logReplayResponse(id: string, replay: InvocationReplay): {
     id, object: "momi.log", model: "momi-assistant", status: "failed",
     error: replay.error_code ?? "request_failed",
   } }
-  if (["pending_archive", "admitted"].includes(replay.invocation_status)) {
+  if (replay.invocation_status === "pending_archive") {
     return { status: 409, body: {
       id, object: "momi.log", model: "momi-assistant",
       status: replay.invocation_status, error: "request_in_progress",

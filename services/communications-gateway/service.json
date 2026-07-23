@@ -44,7 +44,7 @@
     "MOMI_OPENWEBUI_GATEWAY_SECRET",
     "MOMI_GATEWAY_ADMIN_SECRET"
   ],
-  "configuration": ["MOMI_BETA_ADMIN_USER_ID"],
+  "configuration": ["DENO_DEPLOYMENT_ID", "MOMI_BETA_ADMIN_USER_ID"],
   "deployment": {"owns": [], "depends_on": []},
   "runtime_dependencies": [
     "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",

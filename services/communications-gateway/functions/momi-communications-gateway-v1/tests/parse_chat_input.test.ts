@@ -12,6 +12,10 @@ const valid = {
   turn_id: "turn-1",
   idempotency_key: "conversation-1:turn-1",
 }
+const source = {
+  source_user_id: valid.user.id,
+  source_conversation_id: valid.conversation_id,
+}
 
 test("accepts the exact provider-neutral chat surface", () => {
   assert.deepEqual(parseChatInput(valid), valid)
@@ -33,10 +37,14 @@ test("accepts model-visible tool history and resolves the explicit complete turn
     { role: "tool", content: "sales result", tool_call_id: "call-1" },
     { role: "assistant", content: "current answer" },
   ]
-  const parsed = parseChatInput({ ...valid, messages, momi_log: { scope: "turn" } })
+  const parsed = parseChatInput({ ...valid, messages, momi_log: {
+    ...source, scope: "turn", source_turn_id: "turn-1",
+  } })
   assert.ok(parsed)
   const selection = resolveLogSelection(parsed)
-  assert.deepEqual(selection?.flag, { scope: "turn" })
+  assert.deepEqual(selection?.flag, {
+    ...source, scope: "turn", source_turn_id: "turn-1",
+  })
   assert.deepEqual(selection?.content.messages, messages.slice(2))
   assert.equal(selection?.content.selected_content,
     "current question\ncalling sales reader\nsales result\ncurrent answer")
@@ -55,14 +63,20 @@ test("rejects malformed tool history and additional message fields", () => {
 })
 
 test("accepts only bounded explicit user-log selection metadata", () => {
-  assert.ok(parseChatInput({ ...valid, momi_log: { scope: "turn", note: "log this" } }))
-  assert.ok(parseChatInput({ ...valid, momi_log: { scope: "message",
-    message_id: "message-1", selected_content: "selected" } }))
-  assert.ok(parseChatInput({ ...valid, momi_log: { scope: "range",
+  assert.ok(parseChatInput({ ...valid, momi_log: {
+    ...source, scope: "turn", source_turn_id: "turn-1", note: "log this",
+  } }))
+  assert.ok(parseChatInput({ ...valid, momi_log: { ...source, scope: "message",
+    message_id: "message-1", source_turn_id: "turn-1", selected_content: "selected" } }))
+  assert.ok(parseChatInput({ ...valid, momi_log: { ...source, scope: "range",
     range: { start: 0, end: 8 }, selected_content: "selected" } }))
   assert.equal(parseChatInput({ ...valid, momi_log: { scope: "message" } }), null)
   assert.equal(parseChatInput({ ...valid, momi_log: {
-    scope: "turn",
+    ...source, scope: "turn", source_turn_id: "turn-1",
     selected_by: "model",
+  } }), null)
+  assert.equal(parseChatInput({ ...valid, momi_log: {
+    ...source, scope: "message", message_id: "message-1",
+    selected_content: "selected",
   } }), null)
 })

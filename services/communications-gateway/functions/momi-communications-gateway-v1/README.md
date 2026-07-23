@@ -11,7 +11,9 @@ approved tools, and saves complete archive evidence.
 ## Trigger And Input
 
 The thin OpenWebUI Pipe calls `GET /models` or `POST /chat/completions`; the
-reviewed native Action calls `POST /log`. Both use the purpose-bound gateway
+reviewed native Action calls `POST /log`. An authenticated `HEAD /log` returns
+the stable logging-contract digest and live `DENO_DEPLOYMENT_ID` without a
+side effect. Both use the purpose-bound gateway
 credential outside model-visible input. Input carries the authenticated
 OpenWebUI user ID/email, conversation/turn IDs, idempotency key, alias, and
 ordered messages.
@@ -20,11 +22,11 @@ Zac's admin route can adjust each user's per-minute, per-day, input, output,
 timeout, total beta-budget, default route, and maximum route independently.
 
 Versioned `config/log_intent_v1.ts` owns the exact accepted phrases, including
-`@log` and `Can you log this bug?`. The final command is excluded. Message
-selects the immediately preceding assistant message, turn selects the preceding
-user-led turn, and conversation selects all preceding messages; bare `@log`
-means turn. Negated, quoted, ambiguous, embedded, or non-final text never
-creates a flag. Structured `/log` requests require an explicit selection.
+`@log` and `Can you log this bug?`. Natural commands are refused visibly before
+provider setup because the model-visible message list has no authenticated
+source receipt. Negated, quoted, ambiguous, embedded, or non-final text never
+creates a flag. Structured `/log` requests require the exact authenticated
+source user/conversation and scope-specific message/turn identity.
 
 ## Output
 
@@ -63,11 +65,15 @@ receipt, and commits a replayable `momi.log` result.
 
 ## Failure Handling
 
-Same-key/same-payload replay returns the exact durable assistant or log response
-only for completed execution. A duplicate log action never invokes a provider
-or creates a second user flag. In-flight, failed, ambiguous, missing, corrupt,
-or identity-mismatched replay evidence returns a non-2xx failure without another
-provider call. Changed payloads fail. Any provider transport ambiguity becomes
+Same-key/same-payload replay returns the exact durable assistant or log response.
+If the user flag committed before later evidence or terminal bookkeeping failed,
+replay calls the same operations-owner idempotency identity, reconciles the
+original receipt, and completes the same visible success. Indeterminate
+reconciliation remains explicit and never creates a second identity. A
+duplicate log action never invokes a provider or creates a second user flag.
+Missing, corrupt, or identity-mismatched replay evidence returns a non-2xx
+failure without another provider call. Changed payloads fail. Any provider
+transport ambiguity becomes
 `paid_ambiguous` and is never
 automatically retried. Adjustable request or budget limits return
 `request_limit_reached` with HTTP 429, and oversized effective input returns

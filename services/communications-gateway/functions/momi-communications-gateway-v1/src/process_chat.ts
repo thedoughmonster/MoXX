@@ -8,6 +8,8 @@ import { hashRequest } from "./hash_request.ts"
 import { logChatResponse } from "./log_chat_response.ts"
 import { loadAssistantContext } from "./load_assistant_context.ts"
 import { loadInvocationReplay } from "./load_invocation_replay.ts"
+import { logIdentityRefusalResponse } from "./log_identity_refusal_response.ts"
+import { logIntentScope } from "./log_intent_scope.ts"
 import { estimateProviderPayloadTokens } from "./provider_payload_policy.ts"
 import { processLog } from "./process_log.ts"
 import { replayResponse } from "./replay_response.ts"
@@ -24,6 +26,7 @@ export async function processChat(input: ChatInput): Promise<{
     const result = await processLog(input, logSelection)
     return result.status === 200 ? logChatResponse(result.body) : result
   }
+  if (logIntentScope(input)) return logIdentityRefusalResponse(input.turn_id)
   const tools = JSON.parse(JSON.stringify(toolDefinitions)) as JSONValue[]
   const instructions = assistantInstructions(await loadAssistantContext())
   const admissionPayload: Record<string, JSONValue> = {
