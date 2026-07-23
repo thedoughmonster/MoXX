@@ -68,3 +68,16 @@ test("aligns evaluator registry ownership without changing behavior", async () =
   assert.doesNotMatch(sql, /momi_communications\.|archive_items|evaluation_jobs|backlog/i)
   assert.doesNotMatch(sql, /\b(?:grant|revoke|insert|delete|create role|alter role)\b/i)
 })
+
+test("keeps schedule, backlog, and a second paid canary outside this change", async () => {
+  const operations = await readFile(new URL(
+    "../../../docs/communications-evaluation-operations.md",
+    import.meta.url,
+  ), "utf8")
+  assert.match(operations, /Keep `momi-communications-evaluator-wakeup-v1` inactive/u)
+  assert.match(operations, /Dispatch only one explicitly selected, due evaluation job at a time/u)
+  assert.match(operations, /Stop again; do not drain another job implicitly/u)
+  assert.match(operations,
+    /Dead-letter release, backlog processing, automatic scheduling, production use,[\s\S]*require separate accepted procedures\s+and authority/u)
+  assert.doesNotMatch(operations, /cron\.schedule|alter_job|drain backlog|second paid/u)
+})
