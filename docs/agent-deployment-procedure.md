@@ -28,6 +28,8 @@ The Node 24 coordinator checks the repository, pushes the feature branch,
 creates or resumes its PR, waits for GitHub validation, merges it, and waits for
 the exact `dev` commit validation. It detaches the release worktree at that
 merged commit, so another worktree may safely retain the local `dev` branch.
+It leaves feature-branch cleanup separate so GitHub cannot force a local branch
+checkout while another worktree owns `dev`.
 For migration-bearing releases it then links the development database over
 the IPv4 session pooler, previews and applies ordered migrations, proves local
 and hosted history parity, and dispatches the exact-SHA development workflow.

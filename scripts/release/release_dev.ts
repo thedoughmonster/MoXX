@@ -21,7 +21,7 @@ export async function releaseDev(): Promise<void> {
     )
     await waitForPullRequest(pullRequest.number)
     runCommand("gh", [
-      "pr", "merge", String(pullRequest.number), "--merge", "--delete-branch",
+      "pr", "merge", String(pullRequest.number), "--merge",
       "--match-head-commit", preflight.headSha,
     ])
     runCommand("git", ["fetch", "origin", "dev:refs/remotes/origin/dev"])

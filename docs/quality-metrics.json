@@ -3,7 +3,7 @@
   "purpose": "Repository-wide trend signals; compare this file through Git history.",
   "metrics": {
     "handwritten_files": 1286,
-    "handwritten_lines": 61914,
+    "handwritten_lines": 61917,
     "typescript_files": 795,
     "import_declarations": 2518,
     "top_level_functions": 526,
