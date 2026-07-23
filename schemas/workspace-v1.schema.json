@@ -56,9 +56,14 @@
     "policies": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["max_handwritten_lines", "minimum_shared_consumers"],
+      "required": [
+        "max_handwritten_lines",
+        "hard_max_handwritten_lines",
+        "minimum_shared_consumers"
+      ],
       "properties": {
         "max_handwritten_lines": { "type": "integer", "minimum": 1 },
+        "hard_max_handwritten_lines": { "type": "integer", "minimum": 1 },
         "minimum_shared_consumers": { "type": "integer", "minimum": 2 }
       }
     }

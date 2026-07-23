@@ -12,15 +12,23 @@ not a reason to try another publisher.
 
 ## Release To Dev
 
-Run exactly:
+For a feature with no migration-tree diff, run exactly:
 
 ```text
 pnpm release:dev
 ```
 
+For a feature that adds or changes unapplied migrations, run:
+
+```text
+/root/momi-release dev
+```
+
 The Node 24 coordinator checks the repository, pushes the feature branch,
 creates or resumes its PR, waits for GitHub validation, merges it, and waits for
-the exact `dev` commit validation. It then links the development database over
+the exact `dev` commit validation. It detaches the release worktree at that
+merged commit, so another worktree may safely retain the local `dev` branch.
+For migration-bearing releases it then links the development database over
 the IPv4 session pooler, previews and applies ordered migrations, proves local
 and hosted history parity, and dispatches the exact-SHA development workflow.
 
@@ -32,7 +40,7 @@ completed stages without creating a second successful deployment for a commit.
 From clean `dev` matching `origin/dev`, run exactly:
 
 ```text
-pnpm release:prod
+/root/momi-release prod
 ```
 
 The coordinator creates or resumes the `dev`-to-`prod` PR, waits for checks,
@@ -54,6 +62,8 @@ Supabase plugin, CLI, dashboard, or a local script.
 Authenticate the local CLI profile through OAuth or personal access token.
 Export that temporary-access token as `SUPABASE_DB_PASSWORD`; it is the database
 password for temporary access, not the long-lived Postgres role password.
+On Keen Pine, `/root/momi-release` performs that export from the protected
+Supabase CLI store without exposing the token. See `docs/release-credentials.md`.
 Preflight links the exact target ref, validates the saved ref and password-free
 pooler evidence, builds the exact JIT URL, and proves access with a bounded
 read-only query. Repository code never reads a fixed token path. Do not copy the

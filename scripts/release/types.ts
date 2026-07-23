@@ -15,6 +15,7 @@ export type ReleasePreflight = {
   environment: EnvironmentKey
   branch: string
   headSha: string
+  requiresMigrationApply: boolean
 }
 
 export type PullRequestRecord = {

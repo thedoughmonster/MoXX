@@ -31,6 +31,12 @@ function deployment changes from an automatic push to exact-SHA dispatch after
 the coordinator proves migration parity. Production uses an exact-SHA
 fast-forward followed by an explicit exact-SHA production dispatch.
 
+A development feature branch with an empty migration-tree diff may reuse the
+exact current `dev` commit's already-proven parity only when that commit has a
+successful `deploy-dev.yml` receipt. This path opens no database connection.
+Direct releases from `dev`, every migration-bearing feature, and every
+production release retain the full database preflight and migration apply.
+
 The local account token stays in the approved release host's CLI credential
 store. GitHub deployment tokens stay in protected GitHub secrets, and runtime
 secrets stay in Supabase. The local token is not duplicated into Supabase

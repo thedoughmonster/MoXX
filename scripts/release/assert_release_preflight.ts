@@ -3,11 +3,15 @@ import { workspaceRoot } from "../architecture/paths.ts"
 import { linkProject } from "../deploy/link_project.ts"
 import { runSupabaseDatabase } from "../deploy/run_supabase_database.ts"
 import type { EnvironmentKey } from "../deploy/types.ts"
+import { assertDeployedDevelopmentBaseline } from
+  "./assert_deployed_development_baseline.ts"
 import { assertLinkedSupabaseAccess } from
   "./assert_linked_supabase_access.ts"
 import { assertLinkedSupabaseTarget } from
   "./assert_linked_supabase_target.ts"
 import { migrationDatabaseUrl } from "./migration_database_url.ts"
+import { releaseRequiresMigrations } from
+  "./release_requires_migrations.ts"
 import { runCommand } from "./run_command.ts"
 import { resolveDevelopmentBaseline } from
   "./resolve_development_baseline.ts"
@@ -29,17 +33,6 @@ export async function assertReleasePreflight(
     throw new Error("Production releases must start from dev")
   }
   runCommand("gh", ["auth", "status"])
-  const workspace = await loadWorkspace()
-  const projectRef = workspace.environments[environment].project_ref
-  linkProject(projectRef)
-  const poolerUrl = assertLinkedSupabaseTarget(projectRef)
-  const databaseUrl = migrationDatabaseUrl(poolerUrl, projectRef)
-  const access = runSupabaseDatabase([
-    "db", "query", "--db-url", databaseUrl,
-    "--workdir", workspaceRoot, "--output", "json",
-    "select 1::integer as release_access_check",
-  ], true)
-  assertLinkedSupabaseAccess(access)
   runCommand("git", [
     "fetch",
     "origin",
@@ -63,6 +56,29 @@ export async function assertReleasePreflight(
     )
     if (ancestry.status !== 0) throw new Error("Feature branch must include current dev")
   }
+  const migrationDiff = runCommand("git", [
+    "diff", "--quiet", "origin/dev...HEAD", "--", "supabase/migrations",
+  ], { allowFailure: true })
+  const requiresMigrationApply = releaseRequiresMigrations(
+    environment,
+    branch,
+    migrationDiff.status,
+  )
+  if (requiresMigrationApply) {
+    const workspace = await loadWorkspace()
+    const projectRef = workspace.environments[environment].project_ref
+    linkProject(projectRef)
+    const poolerUrl = assertLinkedSupabaseTarget(projectRef)
+    const databaseUrl = migrationDatabaseUrl(poolerUrl, projectRef)
+    const access = runSupabaseDatabase([
+      "db", "query", "--db-url", databaseUrl,
+      "--workdir", workspaceRoot, "--output", "json",
+      "select 1::integer as release_access_check",
+    ], true)
+    assertLinkedSupabaseAccess(access)
+  } else {
+    assertDeployedDevelopmentBaseline(devSha)
+  }
   const developmentBaseline = resolveDevelopmentBaseline(branch, headSha, devSha)
   const previousDevRef = process.env.MOMI_DEV_REF
   process.env.MOMI_DEV_REF = developmentBaseline
@@ -72,5 +88,5 @@ export async function assertReleasePreflight(
     if (previousDevRef === undefined) delete process.env.MOMI_DEV_REF
     else process.env.MOMI_DEV_REF = previousDevRef
   }
-  return { environment, branch, headSha }
+  return { environment, branch, headSha, requiresMigrationApply }
 }

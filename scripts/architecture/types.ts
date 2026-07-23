@@ -26,6 +26,7 @@ export type WorkspaceConfig = {
   database_schemas: string[]
   policies: {
     max_handwritten_lines: number
+    hard_max_handwritten_lines: number
     minimum_shared_consumers: number
   }
 }
