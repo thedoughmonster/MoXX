@@ -38,6 +38,7 @@ test("schema and parser accept the deterministic contract", async () => {
   assert.equal(schema.properties.relationships.items.properties.type.type, "string")
   assert.equal(schema.properties.confidence.type, "string")
   assert.equal(schema.properties.labels.items.type, "string")
+  assert.equal("uniqueItems" in schema.properties.labels, false)
 })
 
 test("all explicit relationship types are accepted", () => {
