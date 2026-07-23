@@ -1,12 +1,15 @@
-import { allowedLabels, relationshipTypes, type IssueTriage } from "./types.ts"
+import { loadTriageConfig } from "./load_triage_config.ts"
+import { relationshipTypes, type IssueTriage } from "./types.ts"
 import { isPlainRecord } from "./is_plain_record.ts"
 
-const safeText = /^[A-Za-z0-9][A-Za-z0-9 .,;:()/'&+-]*$/
+export const safeTextPattern =
+  `^[A-Za-z0-9][A-Za-z0-9 #.,;:!?()/'"&%+-]*$`
+const safeText = new RegExp(safeTextPattern)
 
 export function validateTriage(value: unknown): IssueTriage {
   if (!isPlainRecord(value)) throw new Error("Triage output must be an object")
   const rootKeys = [
-    "schema_version", "issue_number", "feature", "relationships",
+    "schema_version", "issue_number", "issue_type", "feature", "relationships",
     "safe_parallel", "confidence", "rationale", "labels",
   ]
   if (
@@ -16,6 +19,9 @@ export function validateTriage(value: unknown): IssueTriage {
   if (value.schema_version !== 1) throw new Error("Unsupported schema version")
   if (!Number.isInteger(value.issue_number) || Number(value.issue_number) < 1) {
     throw new Error("Invalid current issue number")
+  }
+  if (value.issue_type !== "bug" && value.issue_type !== "feature") {
+    throw new Error("Invalid issue type")
   }
   if (!isPlainRecord(value.feature)) throw new Error("Invalid feature")
   if (
@@ -80,7 +86,7 @@ export function validateTriage(value: unknown): IssueTriage {
   if (
     !Array.isArray(value.labels) ||
     value.labels.length !== 1 ||
-    !allowedLabels.includes(value.labels[0] as never)
-  ) throw new Error("Label is not allowlisted")
+    value.labels[0] !== loadTriageConfig().labels_by_issue_type[value.issue_type][0]
+  ) throw new Error("Label does not match the configured issue type")
   return value as IssueTriage
 }

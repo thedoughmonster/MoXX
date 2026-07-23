@@ -2,40 +2,13 @@ import assert from "node:assert/strict"
 import { readFile } from "node:fs/promises"
 import test from "node:test"
 
-import { assertLinkedSupabaseAccess } from
-  "../scripts/release/assert_linked_supabase_access.ts"
-
-test("requires the exact linked read-only access proof", () => {
-  assert.doesNotThrow(() => assertLinkedSupabaseAccess(JSON.stringify({
-    rows: [{ release_access_check: 1 }],
-  })))
-  for (const invalid of [
-    "not-json",
-    "null",
-    JSON.stringify({ rows: [] }),
-    JSON.stringify({ rows: [{ release_access_check: 0 }] }),
-    JSON.stringify({ rows: [{ release_access_check: 1 }, { release_access_check: 1 }] }),
-  ]) assert.throws(() => assertLinkedSupabaseAccess(invalid))
-})
-
-test("opens database access only for migration-bearing releases", async () => {
-  const preflight = await readFile(
-    new URL("../scripts/release/assert_release_preflight.ts", import.meta.url),
+test("opens database access only through the migration apply path", async () => {
+  const dev = await readFile(
+    new URL("../scripts/release/release_dev.ts", import.meta.url),
     "utf8",
   )
-  const link = preflight.indexOf("linkProject(projectRef)")
-  const target = preflight.indexOf("assertLinkedProjectRef(projectRef)")
-  const query = preflight.indexOf('"db", "query", "--linked"')
-  const access = preflight.indexOf("assertLinkedSupabaseAccess(access)")
-  const conditional = preflight.indexOf("if (requiresMigrationApply)")
-  const baseline = preflight.indexOf("assertDeployedDevelopmentBaseline(devSha)")
-  const validation = preflight.indexOf('"scripts/check.ts"')
-  assert.ok(conditional >= 0 && conditional < link)
-  assert.ok(link < target && target < query)
-  assert.ok(query < access && access < validation)
-  assert.ok(access < baseline && baseline < validation)
-  assert.match(preflight, /select 1::integer as release_access_check/)
-  assert.doesNotMatch(preflight, /projects.*list|--db-url/)
+  assert.match(dev, /if \(databaseApplied\) await applyMigrations\("dev"\)/)
+  assert.doesNotMatch(dev, /linkProject|runSupabase|SUPABASE/)
   const linker = await readFile(
     new URL("../scripts/deploy/link_project.ts", import.meta.url),
     "utf8",

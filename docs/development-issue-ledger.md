@@ -1,46 +1,35 @@
 # Development Issue Ledger
 
-GitHub issues are the durable project ledger. A merged pull request is delivery
-evidence, not a substitute for updating its owning issue.
+GitHub issues are the durable project ledger. Every development PR has exactly
+one open owning issue.
 
-## Before implementation
+## Required PR metadata
 
-Every change has exactly one open owning issue. Update an existing issue when
-the work is already in its accepted scope. Create a linked issue only for a
-distinct outcome; do not duplicate the same plan across issues.
-
-Record new plans, material follow-ups, and deferred work in the owning issue or
-a linked follow-up issue before finishing the development turn.
-
-## Required delivery metadata
-
-Put exactly these lines in the development PR body:
+Put exactly these lines in the PR body:
 
 ```text
 Owning issue: #109
 Disposition: partial
 ```
 
-Use `partial` when any accepted issue scope remains after the PR. Use
-`complete` only when the issue's remaining acceptance criteria are satisfied.
+Use `partial` when accepted scope or live acceptance remains. Use `complete`
+only when all remaining acceptance is satisfied. CI rejects absent, duplicate,
+invalid, closed, or pull-request targets.
 
-The release coordinator creates a minimal PR body. For that path, put the same
-two lines in the final commit message instead:
+## Fresh execution
 
-```text
-Owning issue: #109
-Disposition: complete
-```
-
-CI rejects missing, duplicate, closed, or invalid owning issues and any
-disposition other than `partial` or `complete`.
+For complex or stale-context work, create one deterministic packet with
+`momi-context pack` and use one fresh transcript-free executor. The owning issue
+does not change, and the executor does not spawn children. Routine work remains
+with one owner.
 
 ## After merge
 
-The issue-ledger workflow writes one idempotent delivery comment containing the
-merged PR, merge commit, and disposition. A `partial` delivery leaves the issue
-open. A `complete` delivery closes it. Production promotion is not a second
-delivery and does not repeat this process.
+The privileged ledger job never checks out or executes PR code. It parses only
+PR metadata, writes one marker-bound delivery comment, and reconciles
+idempotently: reruns update no duplicate state. `partial` leaves the issue open;
+`complete` closes it. Production promotion is not a second delivery.
 
-Do not mark an issue complete because CI passed. Completion means its accepted
-outcome and remaining acceptance criteria are actually satisfied.
+Do not mark an issue complete merely because validation passed. Record the PR,
+merge/release receipt, workflow run, and any disposable acceptance evidence in
+the owning issue before completion.

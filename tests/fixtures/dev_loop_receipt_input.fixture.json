@@ -1,0 +1,21 @@
+{
+  "kind": "command",
+  "base_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "head_sha": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "run_id": "fixture-run-7",
+  "log_url": "https://example.invalid/runs/7",
+  "commands": [
+    {
+      "id": "focused",
+      "status": 0,
+      "duration_ms": 12,
+      "stdout": "successful raw output is not copied"
+    },
+    {
+      "id": "failed",
+      "status": 1,
+      "duration_ms": 8,
+      "stderr": "token=fixture-secret\nbounded failure"
+    }
+  ]
+}

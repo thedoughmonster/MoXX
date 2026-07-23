@@ -10,6 +10,7 @@ export function renderComment(triage: IssueTriage, marker: string): string {
     marker,
     "## Automated feature triage",
     "",
+    `- Issue type: **${triage.issue_type}**`,
     `- Feature: **${triage.feature.title}** (\`${triage.feature.id}\`)`,
     `- Safe parallel work: **${triage.safe_parallel ? "yes" : "no"}**`,
     `- Confidence: **${triage.confidence}**`,

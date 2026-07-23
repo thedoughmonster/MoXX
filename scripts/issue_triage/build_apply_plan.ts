@@ -1,5 +1,5 @@
 import type { ApplyEvidence, ApplyPlan, IssueTriage } from "./types.ts"
-import { allowedLabels } from "./types.ts"
+import { loadTriageConfig } from "./load_triage_config.ts"
 import { renderComment } from "./render_comment.ts"
 import { validateTriage } from "./validate_triage.ts"
 
@@ -26,7 +26,8 @@ export function buildApplyPlan(
   ) throw new Error("Related issue reference does not exist")
   if (
     triage.labels.some((label) =>
-      !allowedLabels.includes(label) || !evidence.availableLabels.includes(label)
+      !Object.values(loadTriageConfig().labels_by_issue_type).flat().includes(label) ||
+      !evidence.availableLabels.includes(label)
     )
   ) throw new Error("Requested label is not predeclared and available")
   if (evidence.matchingCommentIds.length > 1) {

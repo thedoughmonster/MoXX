@@ -1,10 +1,15 @@
 name: Promote development to production
+run-name: promote-prod ${{ inputs.expected_sha }} ${{ inputs.dev_receipt_sha256 }}
 
 on:
   workflow_dispatch:
     inputs:
       expected_sha:
         description: Exact dev commit approved for production
+        required: true
+        type: string
+      dev_receipt_sha256:
+        description: Digest of the exact development release receipt
         required: true
         type: string
 
@@ -33,6 +38,7 @@ jobs:
         id: promotion
         shell: bash
         run: |
+          [[ "${{ inputs.dev_receipt_sha256 }}" =~ ^[0-9a-f]{64}$ ]]
           pr=$(gh pr list --base prod --head dev --state open --json number --jq 'if length == 1 then .[0].number else empty end')
           test -n "$pr" || { echo "Expected one open dev-to-prod PR"; exit 1; }
           draft=$(gh pr view "$pr" --json isDraft --jq .isDraft)

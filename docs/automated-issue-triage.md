@@ -1,48 +1,38 @@
 # Automated issue triage
 
-`.github/workflows/issue-triage.yml` proposes feature and dependency triage for
-each newly opened issue. GitHub runs issue workflows from the default branch,
-so the behavior becomes active only after production promotion.
+`.github/workflows/issue-triage.yml` produces one bounded triage record for each
+new issue and supports explicit manual re-triage.
 
 ## Authority split
 
-The model job has only `contents: read` and `issues: read`. It receives a sparse,
-shallow checkout and a generated JSON snapshot capped at one 12,000-character
-body, 20 1,200-character comments, and 50 200-character candidate titles.
-Issue text, comments, labels, and repository text are untrusted prompt data.
-The official Codex action and CLI are pinned, run read-only, use low effort, and
-have a ten-minute job timeout.
-All repository users who can open an issue may trigger the read-only model job.
+The model job has read-only repository/issue authority and no write token. Issue
+text is untrusted. It reads only the generated bounded context, uses the pinned
+official Codex action, and emits schema-constrained JSON.
 
-The writer is a fresh job with `contents: read` and `issues: write`. It receives
-no OpenAI credential. Before its first mutation it parses the schema, verifies
-the current open issue, verifies every related issue exists and is not a pull
-request, verifies the label allowlist, and checks the idempotency marker.
+The writer is a separate job with issue-write authority and no OpenAI
+credential. Before mutation it verifies the current open issue, related issue
+existence/type, configured labels, safe text, and one idempotency marker.
 
-## Output and relationships
+## Authoritative contract
 
-The only predeclared label is `enhancement`. The structured comment records a
-feature identity, safe-parallel result, confidence, rationale, and explicit
-typed relationships. Relationship types are hard prerequisite, ordering
+`.github/codex/issue-triage.config.json` configures labels by issue type.
+The schema, runtime validator, prompt, and focused fixtures deterministically
+check parity with that configuration.
+
+Both `bug` and `feature` records retain one owning feature identity and the same
+typed dependency graph. Relationship types are hard prerequisite, ordering
 constraint, shared mutation/release boundary, external/user gate, and
-independent. Labels are never treated as dependency evidence.
+independent. Labels are not relationship evidence. Safe rationale punctuation
+includes issue references such as `#109`; markup, mentions, and
+credential-shaped data remain forbidden.
 
-The marker is `momi-issue-triage:v1` plus the issue number. A retry updates the
-one matching comment and adds the same allowlisted label idempotently. Multiple
-matching comments are ambiguous and fail closed.
+## Idempotency and recovery
 
-## Re-triage and failure recovery
+The marker is `momi-issue-triage:v1 issue=<number>`. First run creates one
+structured comment; rerun updates that comment and reapplies the same configured
+label without duplication. Multiple markers fail closed.
 
-Use the workflow's manual `workflow_dispatch` input with one open issue number.
-No issue edit, comment, or label event triggers the workflow, preventing loops.
-Concurrency serializes runs per issue, and each run has explicit timeouts.
-
-Invalid JSON, extra fields, duplicate or excessive references, self references,
-missing issues, pull request references, unavailable labels, unsafe text, and
-ambiguous markers fail before issue mutation. Model/action failures also skip
-the writer. Inspect the failed run, correct the issue text or workflow defect,
-then dispatch one manual re-triage. Never hand-edit the marker or add a second
-triage comment.
-
-Cost is bounded by one low-effort model call per open or manual dispatch, the
-capped context above, an eight-reference maximum, and short schema fields.
+Only `issues.opened` and bounded `workflow_dispatch` trigger the workflow.
+Invalid output, nonexistent references, unavailable labels, or model failure
+causes no mutation. Inspect the exact failed job, correct the source defect, and
+dispatch once. Cost remains one low-effort call over capped context.

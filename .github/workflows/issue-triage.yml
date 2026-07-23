@@ -35,6 +35,7 @@ jobs:
           sparse-checkout: |
             .github/codex
             scripts/issue_triage
+            scripts/dev_loop/types.ts
           sparse-checkout-cone-mode: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
@@ -73,7 +74,10 @@ jobs:
           ref: ${{ github.sha }}
           fetch-depth: 1
           persist-credentials: false
-          sparse-checkout: scripts/issue_triage
+          sparse-checkout: |
+            .github/codex/issue-triage.config.json
+            scripts/issue_triage
+            scripts/dev_loop/types.ts
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 24.14.0

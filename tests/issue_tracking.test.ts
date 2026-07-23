@@ -37,5 +37,8 @@ test("workflow validates and reconciles development PRs", async () => {
   assert.match(workflow, /issues: write/)
   assert.match(workflow, /disposition === "complete"/)
   assert.match(workflow, /state: "closed"/)
+  assert.match(workflow, /momi-issue-ledger:v1 pr=/)
+  assert.match(workflow, /comments\.some/)
+  assert.match(workflow, /if \(!comments\.some/)
   assert.doesNotMatch(reconcile, /actions\/checkout/)
 })

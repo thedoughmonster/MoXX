@@ -4,6 +4,8 @@
 - Date: 2026-07-14
 - Amendment: ADR `0008` supersedes the migration pause and development
   push-event requirement below.
+- Amendment: 2026-07-23; deployment dispatch is bound to an exact validated
+  plan/tree and only manifest-owned affected functions are selected.
 
 ## Context
 
@@ -18,7 +20,8 @@ Functions to development or production.
 
 Only `.github/workflows/deploy-dev.yml` and `deploy-prod.yml` may invoke
 `npm run deploy:apply`. The apply entry point must reject local execution,
-non-push events, the wrong Git ref, and any other workflow file.
+non-dispatch events, the wrong Git ref, any other workflow file, an invalid
+plan/tree identity, or an empty/unknown affected-service list.
 
 Supabase's GitHub deployment integration must remain disabled. A Supabase
 branch must not be Git-synced. Reconnecting either path requires a superseding
@@ -34,6 +37,8 @@ This decision supersedes the deployment-authority paragraph in ADR `0005`.
 
 - Every repository deployment has one GitHub commit, workflow run, and release
   artifact.
+- Repository-only releases have zero Edge Function deployments; service
+  releases deploy only functions owned by impact-selected manifests.
 - Protected GitHub environments remain the only holders of deployment tokens.
 - Developers and agents may run checks and deployment plans locally, but never
   deployment apply.

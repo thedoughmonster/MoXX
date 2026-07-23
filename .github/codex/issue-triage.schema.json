@@ -5,6 +5,7 @@
   "required": [
     "schema_version",
     "issue_number",
+    "issue_type",
     "feature",
     "relationships",
     "safe_parallel",
@@ -13,14 +14,9 @@
     "labels"
   ],
   "properties": {
-    "schema_version": {
-      "type": "integer",
-      "const": 1
-    },
-    "issue_number": {
-      "type": "integer",
-      "minimum": 1
-    },
+    "schema_version": { "type": "integer", "const": 1 },
+    "issue_number": { "type": "integer", "minimum": 1 },
+    "issue_type": { "type": "string", "enum": ["bug", "feature"] },
     "feature": {
       "type": "object",
       "additionalProperties": false,
@@ -34,7 +30,8 @@
         "title": {
           "type": "string",
           "minLength": 1,
-          "maxLength": 80
+          "maxLength": 80,
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9 #.,;:!?()/'\"&%+-]*$"
         }
       }
     },
@@ -46,10 +43,7 @@
         "additionalProperties": false,
         "required": ["issue_number", "type", "rationale"],
         "properties": {
-          "issue_number": {
-            "type": "integer",
-            "minimum": 1
-          },
+          "issue_number": { "type": "integer", "minimum": 1 },
           "type": {
             "type": "string",
             "enum": [
@@ -63,31 +57,25 @@
           "rationale": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 280
+            "maxLength": 280,
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9 #.,;:!?()/'\"&%+-]*$"
           }
         }
       }
     },
-    "safe_parallel": {
-      "type": "boolean"
-    },
-    "confidence": {
-      "type": "string",
-      "enum": ["low", "medium", "high"]
-    },
+    "safe_parallel": { "type": "boolean" },
+    "confidence": { "type": "string", "enum": ["low", "medium", "high"] },
     "rationale": {
       "type": "string",
       "minLength": 1,
-      "maxLength": 400
+      "maxLength": 400,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9 #.,;:!?()/'\"&%+-]*$"
     },
     "labels": {
       "type": "array",
       "minItems": 1,
       "maxItems": 1,
-      "items": {
-        "type": "string",
-        "enum": ["enhancement"]
-      }
+      "items": { "type": "string", "enum": ["bug", "enhancement"] }
     }
   }
 }

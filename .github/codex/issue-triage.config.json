@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "labels_by_issue_type": {
+    "bug": ["bug"],
+    "feature": ["enhancement"]
+  }
+}

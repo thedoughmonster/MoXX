@@ -1,41 +1,45 @@
 # Development Execution Handoffs
 
-Use the smallest context that can execute the change correctly.
+Keep routine work with one owner. Use a fresh transcript-free executor only
+when the work is complex, stale-context, or explicitly delegated.
 
-## Routine changes
+## Deterministic packet
 
-A small, well-scoped fix stays with one owning agent from inspection through
-testing and review. Do not create a plan artifact or a replacement agent when
-the current context is short, accurate, and directly useful.
+Create the packet from the exact repository state:
 
-## Complex or context-heavy changes
+```text
+pnpm momi-context pack --issue <number> --title "<title>" \
+  --base <sha> --head <sha> --output .momi/context.json
+```
 
-For a multi-step, ambiguous, high-risk, or context-polluted change, the planning
-agent produces one complete but compact execution packet, then hands
-implementation to one fresh executor with no inherited conversation transcript.
-A Codex Handoff or fork preserves chat history and is not a fresh-context
-handoff; use a new task or an unforked subagent.
+The packet contains the owning issue, exact commit/tree identities, changed
+paths, applicable rule and contract hashes, impact-selected checks, decisions,
+material stops, and diff/impact hashes. It redacts credential-shaped data.
+Running it against the same inputs and repository state is byte-identical.
 
-The execution packet contains only:
+A fresh executor receives only this packet and the named source files. It has no
+inherited transcript and does not spawn children. Handoff/fork features that
+preserve history are not fresh execution.
 
-- owning issue, goal, and user-visible done state
-- exact repository, base ref, branch/worktree, and current-state evidence
-- accepted decisions, constraints, exclusions, and non-goals
-- relevant files, contracts, upstream version evidence, and known failure
-- implementation sequence and unresolved questions
-- focused checks, full check, acceptance evidence, and rollback
-- hard stops that require returning to the planner or user
+## Model routing
 
-The executor reads applicable repository instructions and the named source
-files directly. It does not receive planning chatter, discarded alternatives,
-raw logs, or unrelated project history.
+- Use Spark, when supported, for bounded read-only discovery, issue triage,
+  changed-path inventory, and deterministic receipts.
+- Use the normal primary model for implementation, debugging, review, release,
+  and acceptance.
+- Use the highest-depth model only for material architecture, security, privacy,
+  exposure, destructive migration, or genuinely difficult failure decisions.
 
-## Ownership and return
+Missing evidence or behavioral ambiguity falls back once to the normal primary
+model. Do not route one task through several models for agreement. GitHub API
+model calls remain separately billed.
 
-The fresh executor owns implementation, focused tests, the required full check,
-and one final semantic review. It does not spawn more agents unless independent
-parallel work materially saves time and the prompt explicitly allows it.
+Optional silent hooks are not part of the normal loop until measured evidence
+shows net context reduction without hiding material transitions or secrets.
 
-Return one compact receipt: changed behavior, commit/diff identity, checks,
-acceptance, issue disposition, and real follow-ups. Reopen planning only for a
-material scope, architecture, safety, or authority change—not benign drift.
+## Return
+
+Return one compact receipt with base/head/tree/diff identity, checks, durations,
+bounded failure excerpts, acceptance, issue disposition, and real follow-ups.
+Continue through benign SHA, identifier, metadata, timing, or bounded tooling
+drift. Stop only for the materiality list embedded in the packet.

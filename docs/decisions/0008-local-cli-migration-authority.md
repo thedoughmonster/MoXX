@@ -4,6 +4,9 @@
 - Date: 2026-07-14
 - Amendment: 2026-07-23; the authoritative Linux release host must use its
   authenticated CLI profile and the CLI-owned short-lived login role.
+- Amendment: 2026-07-23; release consumes one exact PR validation receipt,
+  repository-only plans bypass database/deployment, and production consumes the
+  exact development receipt without revalidation.
 
 ## Context
 
@@ -14,9 +17,9 @@ steps made a healthy deployment require repeated agent decisions.
 
 ## Decision
 
-A pinned Node 24 coordinator provides `pnpm release:dev` and
-`pnpm release:prod`. It is the sole normal caller of Supabase `db push` and must
-use the authenticated pinned CLI's exact-project `--linked` transport.
+A pinned Node 24 coordinator provides receipt-bound `pnpm release:dev` and
+`pnpm release:prod`. It is the sole normal caller of Supabase `db push` and uses
+the authenticated pinned CLI's exact-project `--linked` transport.
 
 Each migration apply is previewed, ordered, noninteractive, and followed by an
 exact comparison of local and hosted migration versions. The coordinator links
@@ -27,17 +30,14 @@ passes, logs, hashes, or stores it. Migrations must remain backward-compatible
 because schema can precede code while GitHub completes.
 
 GitHub Actions remains the sole Edge Function deployment authority. Development
-function deployment changes from an automatic push to exact-SHA dispatch after
-the coordinator proves migration parity. Production uses an exact-SHA
-fast-forward followed by an explicit exact-SHA production dispatch.
+uses exact-SHA/tree/plan dispatch after migration parity and deploys only
+affected manifest-owned functions. Production uses receipt-bound exact-SHA
+fast-forward followed by affected-only production dispatch.
 
-A development feature branch with an empty migration-tree diff may reuse the
-exact current `dev` commit's already-proven parity only when that commit has a
-successful `deploy-dev.yml` receipt. This path opens no database connection.
-Every release computes its migration requirement against the selected
-environment baseline. A nonempty migration diff opens a database connection
-and performs preflight, preview, apply, and parity. A direct `dev` rerun does
-the same so a previously merged but interrupted migration release can recover.
+A repository-only release opens no database connection and dispatches no
+application deployment. A nonempty migration diff performs link, preview,
+apply, and parity before affected-only function deployment. A runtime-only plan
+opens no database connection.
 
 The local account token stays in the approved release host's CLI credential
 store. GitHub deployment tokens stay in protected GitHub secrets, and runtime
@@ -47,9 +47,9 @@ project runtime.
 
 On the authoritative Linux release host, the CLI profile is authenticated by
 OAuth or a personal access token. That account credential remains only in the
-CLI credential store. Preflight links the exact target ref, validates the saved
-ref, and proves access with one bounded `db query --linked` call. Preview,
-apply, and parity use the same linked identity. The CLI creates and expires the
+CLI credential store. Apply links the exact target ref, validates the saved
+ref, then previews, applies, and proves parity with that linked identity.
+The CLI creates and expires the
 temporary database login internally; no repository child receives the account
 token or generated database password as `SUPABASE_DB_PASSWORD`, `PGPASSWORD`,
 an argument, a URL, or a receipt. The pinned CLI's remote path is TLS-only.
@@ -60,8 +60,10 @@ development function workflow itself to use a push event.
 ## Consequences
 
 - A healthy environment release is one command with no planned checkpoint.
-- A rerun can reuse merged PRs and successful exact-commit workflows.
+- A rerun reuses exact receipts and successful required jobs idempotently.
 - GitHub workflows cannot race ahead of development migrations.
 - Code-only production promotions do not open a database connection.
+- Repository validation runs once for the final PR tree and is not repeated on
+  `dev`, production promotion, or production deployment.
 - Migration history drift fails before function deployment.
 - The Supabase plugin is reserved for inspection and explicit emergency repair.
