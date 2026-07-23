@@ -5,6 +5,7 @@ import { assistantInstructions } from "./assistant_instructions.ts"
 import { executeAdmittedChat } from "./execute_admitted_chat.ts"
 import { hashRequest } from "./hash_request.ts"
 import { loadAssistantContext } from "./load_assistant_context.ts"
+import { loadInvocationReplay } from "./load_invocation_replay.ts"
 import { estimateProviderPayloadTokens } from "./provider_payload_policy.ts"
 import { replayResponse } from "./replay_response.ts"
 import { toolDefinitions } from "./tool_definitions.ts"
@@ -25,10 +26,13 @@ export async function processChat(input: ChatInput): Promise<{
     parallel_tool_calls: false,
     store: false,
   }
-  const admission = await admitInvocation(input,
-    await hashRequest(input, instructions),
+  const requestHash = await hashRequest(input, instructions)
+  const admission = await admitInvocation(input, requestHash,
     estimateProviderPayloadTokens(admissionPayload))
-  if (admission.disposition === "duplicate") return replayResponse(admission)
+  if (admission.disposition === "duplicate") return replayResponse(
+    admission.invocation_id,
+    await loadInvocationReplay(input, admission.invocation_id, requestHash),
+  )
   try {
     return await executeAdmittedChat(input, admission, tools, instructions)
   } catch (error) {

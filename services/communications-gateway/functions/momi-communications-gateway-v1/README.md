@@ -49,8 +49,11 @@ identity is the same as the deterministic pre-provider append, so it collapses.
 
 ## Failure Handling
 
-Same-key/same-payload replay returns existing execution state. Changed payloads
-fail. Any provider transport ambiguity becomes `paid_ambiguous` and is never
+Same-key/same-payload replay returns the exact durable assistant response only
+for completed execution. In-flight, failed, ambiguous, missing, corrupt, or
+identity-mismatched replay evidence returns a non-2xx failure without another
+provider call. Changed payloads fail. Any provider transport ambiguity becomes
+`paid_ambiguous` and is never
 automatically retried. Adjustable request or budget limits return
 `request_limit_reached` with HTTP 429, and oversized effective input returns
 `input_limit_reached` with HTTP 413, so the client can render a useful message.

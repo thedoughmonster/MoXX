@@ -35,7 +35,7 @@ export async function runRouter(input: ChatInput, admission: Admission,
     const state = result.ambiguous ? "paid_ambiguous" : "failed"
     await completeInvocation(admission.invocation_id, state, receipt.archive_item_id, 0,
       result.ambiguous ? "router_transport_ambiguous" : !result.ok
-      ? `router_http_${result.status}` : "router_response_incomplete")
+      ? `router_http_${result.status}` : "router_response_incomplete", null)
     return { route: null, failure: failedProviderResponse(admission.invocation_id, state) }
   }
   const route = routeDecision(result.body, policy)

@@ -66,10 +66,12 @@ export async function executeAdmittedChat(input: ChatInput, admission: Admission
         ? "provider_transport_ambiguous" : !result.ok
         ? `provider_http_${result.status}` : !completed
         ? "provider_response_incomplete" : "provider_response_missing_output_text"
-      await completeInvocation(admission.invocation_id, state,
-        receipt.archive_item_id, outputTokens(result.body), error)
-      return state === "completed" ? successResponse(result.body,
+      const response = state === "completed" ? successResponse(result.body,
         admission.invocation_id) : failedProviderResponse(admission.invocation_id, state)
+      await completeInvocation(admission.invocation_id, state,
+        receipt.archive_item_id, outputTokens(result.body), error,
+        state === "completed" ? response.body : null)
+      return response
     }
     const toolOutputs: JSONValue[] = []
     for (const call of toolCalls) {
