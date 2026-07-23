@@ -2,6 +2,7 @@ import { readdirSync } from "node:fs"
 import { join } from "node:path"
 
 import { workspaceRoot } from "../architecture/paths.ts"
+import { assertMigrationVersionParity } from "./assert_migration_version_parity.ts"
 import { parseMigrationQuery } from "./parse_migration_query.ts"
 
 export function assertMigrationParity(linkedList: string): void {
@@ -11,12 +12,5 @@ export function assertMigrationParity(linkedList: string): void {
     .filter((version): version is string => version !== null)
     .sort()
   const remote = parseMigrationQuery(linkedList).sort()
-  if (local.join("\n") !== remote.join("\n")) {
-    const missing = local.filter((version) => !remote.includes(version))
-    const extra = remote.filter((version) => !local.includes(version))
-    throw new Error(
-      `Migration history differs; missing remote: ${missing.join(", ") || "none"}; ` +
-      `extra remote: ${extra.join(", ") || "none"}`,
-    )
-  }
+  assertMigrationVersionParity(local, remote)
 }

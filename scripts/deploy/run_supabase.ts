@@ -7,18 +7,25 @@ import { supabaseEnvironment } from "./supabase_environment.ts"
 
 export function runSupabase(
   args: string[],
-  capture = false,
+  capture: boolean | "combined" = false,
   launcher = join(workspaceRoot, "node_modules", "supabase", "dist", "supabase.js"),
 ): string {
+  const capturesOutput = capture !== false
   const result = spawnSync(process.execPath, [launcher, ...buildSupabaseArgs(args)], {
     cwd: workspaceRoot,
-    encoding: capture ? "utf8" : undefined,
+    encoding: capturesOutput ? "utf8" : undefined,
     env: supabaseEnvironment(process.env),
-    stdio: capture ? ["ignore", "pipe", "inherit"] : "inherit",
+    stdio: capturesOutput ? ["ignore", "pipe", "pipe"] : "inherit",
   })
   if (result.error) throw result.error
+  const stdout = capturesOutput ? String(result.stdout ?? "") : ""
+  const stderr = capturesOutput ? String(result.stderr ?? "") : ""
   if (result.status !== 0) {
-    throw new Error(`Supabase CLI failed with status ${result.status ?? "unknown"}`)
+    const detail = stderr.trim() || stdout.trim()
+    throw new Error(
+      `Supabase CLI failed with status ${result.status ?? "unknown"}` +
+      `${detail ? `: ${detail}` : ""}`,
+    )
   }
-  return capture ? String(result.stdout ?? "") : ""
+  return capture === "combined" ? `${stdout}\n${stderr}` : stdout
 }

@@ -20,8 +20,11 @@ test("uses the exact linked project through the native CLI login role", async ()
     new URL("../scripts/release/apply_migrations.ts", import.meta.url),
     "utf8",
   )
-  assert.match(source, /"db", "push", "--linked", "--dry-run", "--yes"/)
-  assert.match(source, /"db", "push", "--linked", "--yes"/)
+  assert.match(source, /"db", "push", "--linked"/)
+  assert.match(source, /dryRun \? \["--dry-run"\] : \[\]/)
+  assert.match(source, /includeAll \? \["--include-all"\] : \[\]/)
+  assert.match(source, /pushArgs\(includeAll, true\), "combined"/)
+  assert.match(source, /pushArgs\(includeAll, false\)/)
   assert.match(source, /"db", "query", "--linked"/)
   assert.match(source, /assertLinkedProjectRef\(projectRef\)/)
   assert.match(source, /temporary CLI login role/)

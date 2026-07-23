@@ -59,8 +59,20 @@ artifact. It never uses Docker, `--prune`, or implicit function discovery.
 ## Migration boundary
 
 Only `scripts/release/apply_migrations.ts` calls `db push`. It links and checks
-the exact project, previews with `db push --linked --dry-run --yes`, applies
-through the same linked project, and verifies exact migration-history parity.
+the exact project, reads hosted migration history, and compares every locally
+missing version with the migration set in the accepted validation plan. The
+default preview and apply omit `--include-all`. The coordinator derives
+`--include-all` only when every locally missing migration is authorized by that
+plan, at least one is ordered before the hosted tip, hosted history has no
+version unknown to local files, and local history has no unexplained missing
+version.
+
+The dry-run output must name every and only the authorized missing filename in
+local order. Only then does the coordinator apply with the same derived
+arguments and verify final exact migration-history parity. Any inventory,
+preview, apply, or parity mismatch stops the release. There is no caller flag,
+environment bypass, or manual release override for this path.
+
 The authenticated CLI owns its short-lived database login; repository code
 passes no password, database URL, JIT option, or credential-shaped receipt data.
 
