@@ -9,6 +9,7 @@ const model = workflow.slice(
 )
 const writer = workflow.slice(workflow.indexOf("  writer:"))
 const apply = await readFile("scripts/issue_triage/apply_triage.ts", "utf8")
+const prompt = await readFile(".github/codex/issue-triage-prompt.md", "utf8")
 
 test("model authority and context are bounded and read-only", () => {
   assert.match(model, /contents: read/)
@@ -25,6 +26,8 @@ test("model authority and context are bounded and read-only", () => {
     model,
     /openai\/codex-action@e469131063221562acfb9ea6bbc9fd7f27226ffb/,
   )
+  assert.match(prompt, /read-only filesystem\s+command only to read that exact file/)
+  assert.match(prompt, /Do not read another file, run another\s+command/)
 })
 
 test("writer has narrow write authority and no OpenAI credential", () => {
