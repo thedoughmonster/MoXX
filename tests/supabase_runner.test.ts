@@ -16,3 +16,12 @@ test("strips ambient database credentials from the child environment", () => {
   assert.equal(child.hasReleasePassword, false)
   assert.equal(child.hasPostgresPassword, false)
 })
+
+test("captures preview output from both CLI channels", () => {
+  const launcher = fileURLToPath(
+    new URL("./fixtures/supabase_child_probe.ts", import.meta.url),
+  )
+  const output = runSupabase(["probe-stderr"], "combined", launcher)
+  assert.match(output, /"args":\["probe-stderr"\]/)
+  assert.match(output, /preview from stderr/)
+})

@@ -31,7 +31,9 @@ export async function releaseProd(devReceiptPath: string): Promise<void> {
     throw new Error("Production diff differs from the development release")
   }
   const databaseApplied = plan.impact.release.database !== "none"
-  if (databaseApplied) await applyMigrations("prod")
+  if (databaseApplied) {
+    await applyMigrations("prod", devReceipt.plan.impact.migrations)
+  }
   if (plan.base.sha !== plan.head.sha) {
     ensurePromotionPullRequest(head, hashText(devSource))
     await ensureDispatchedWorkflow("promote-prod.yml", "dev", head, "promote", {
