@@ -66,6 +66,13 @@ export type Admission = {
   error_code: string | null
 }
 
+export type LogAdmission = {
+  disposition: "admitted" | "duplicate"
+  invocation_id: string
+  invocation_status: string
+  error_code: string | null
+}
+
 export type InvocationReplay = {
   invocation_status: string
   error_code: string | null
@@ -119,7 +126,6 @@ export type ToolContext = {
   input: ChatInput
   invocationId: string
   archiveReceiptId: string
-  logSelection: LogSelection | null
 }
 export type LogSelection = {
   flag: UserFlag

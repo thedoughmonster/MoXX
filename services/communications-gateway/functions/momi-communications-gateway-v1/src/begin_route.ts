@@ -1,12 +1,9 @@
 import type { JSONValue } from "postgres"
-import { appendLogSelection } from "./append_log_selection.ts"
 import { captureEvidence } from "./capture_evidence.ts"
-import { createUserFlagLog } from "./create_user_flag_log.ts"
 import { explicitRoute } from "./explicit_route.ts"
 import { loadRoutingPolicy } from "./load_routing_policy.ts"
 import { markArchiveAdmitted } from "./mark_archive_admitted.ts"
 import { persistRoute } from "./persist_route.ts"
-import { resolveLogSelection } from "./resolve_log_selection.ts"
 import { routerRequest } from "./router_request.ts"
 import { runRouter } from "./run_router.ts"
 import { visibleAlias, type Admission, type ChatInput, type RouteSelection } from "./types.ts"
@@ -27,9 +24,6 @@ export async function beginRoute(input: ChatInput, admission: Admission,
   if (!await markArchiveAdmitted(admission.invocation_id, receipt.archive_item_id)) {
     throw new Error("archive_admission_state_failed")
   }
-  const logSelection = resolveLogSelection(input)
-  await appendLogSelection(logSelection, { input, invocationId: admission.invocation_id,
-    archiveReceiptId: receipt.archive_item_id, logSelection }, createUserFlagLog)
   const policy = await loadRoutingPolicy(input.user.id)
   let route: RouteSelection | null = null
   if (requested !== "auto") {

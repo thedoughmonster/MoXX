@@ -1,7 +1,7 @@
 {
   "function_key": "momi.communications.chat_completions.v1",
   "contract_version": 1,
-  "purpose": "Serve one bounded provider-neutral MoMi assistant gateway route.",
+  "purpose": "Serve bounded provider-neutral MoMi assistant and explicit logging routes.",
   "owner_service": "communications-gateway",
   "function_type": "coordinator",
   "capability": "decide",
@@ -19,6 +19,7 @@
   "declared_side_effects": [
     "admits_gateway_invocation",
     "archives_model_boundary_evidence",
+    "creates_explicit_user_flagged_log",
     "calls_configured_provider",
     "calls_allowlisted_owner_tools",
     "stores_terminal_execution_state"

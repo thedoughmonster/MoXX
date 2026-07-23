@@ -5,10 +5,13 @@ import { assistantInstructions } from "./assistant_instructions.ts"
 import { completeVisibleLimitation } from "./complete_visible_limitation.ts"
 import { executeAdmittedChat } from "./execute_admitted_chat.ts"
 import { hashRequest } from "./hash_request.ts"
+import { logChatResponse } from "./log_chat_response.ts"
 import { loadAssistantContext } from "./load_assistant_context.ts"
 import { loadInvocationReplay } from "./load_invocation_replay.ts"
 import { estimateProviderPayloadTokens } from "./provider_payload_policy.ts"
+import { processLog } from "./process_log.ts"
 import { replayResponse } from "./replay_response.ts"
+import { resolveLogSelection } from "./resolve_log_selection.ts"
 import { toolDefinitions } from "./tool_definitions.ts"
 import type { ChatInput } from "./types.ts"
 
@@ -16,6 +19,11 @@ export async function processChat(input: ChatInput): Promise<{
   status: number
   body: Record<string, JSONValue>
 }> {
+  const logSelection = resolveLogSelection(input)
+  if (logSelection) {
+    const result = await processLog(input, logSelection)
+    return result.status === 200 ? logChatResponse(result.body) : result
+  }
   const tools = JSON.parse(JSON.stringify(toolDefinitions)) as JSONValue[]
   const instructions = assistantInstructions(await loadAssistantContext())
   const admissionPayload: Record<string, JSONValue> = {

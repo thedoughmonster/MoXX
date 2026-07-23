@@ -2,7 +2,7 @@
   "$schema": "../../schemas/service-manifest-v1.schema.json",
   "schema_version": 1,
   "service_key": "communications-gateway",
-  "purpose": "Admit and orchestrate bounded provider-neutral MoMi assistant turns.",
+  "purpose": "Admit bounded provider-neutral assistant turns and explicit user logging.",
   "kind": "core_capability",
   "service_type": "dataset_owner",
   "lifecycle_status": "active",
@@ -11,6 +11,7 @@
     "provides": [
       "momi.communications.list_models.v1",
       "momi.communications.chat_completions.v1",
+      "momi.communications.create_explicit_log.v1",
       "momi.communications.get_conversation_execution.v1",
       "momi.communications.set_user_limits.v1",
       "momi.communications.set_user_routing.v1",
@@ -69,10 +70,12 @@
     ],
     "private_routines": [
       "momi_communications_gateway.admit_invocation_v1",
+      "momi_communications_gateway.admit_log_invocation_v1",
       "momi_communications_gateway.admit_routed_invocation_v2",
       "momi_communications_gateway.authorize_provider_attempt_v2",
       "momi_communications_gateway.complete_invocation_v1",
       "momi_communications_gateway.complete_invocation_v2",
+      "momi_communications_gateway.complete_log_invocation_v1",
       "momi_communications_gateway.fail_invocation_v1",
       "momi_communications_gateway.get_conversation_execution_v1",
       "momi_communications_gateway.get_invocation_replay_v1",
@@ -90,6 +93,7 @@
     ],
     "public_commands": [
       "momi.communications.chat_completions.v1",
+      "momi.communications.create_explicit_log.v1",
       "momi.communications.set_user_limits.v1",
       "momi.communications.set_user_routing.v1",
       "momi.communications.set_user_access.v1",
@@ -101,6 +105,7 @@
     ],
     "public_routine_commands": [
       {"contract": "momi.communications.chat_completions.v1", "routine": "momi_communications_gateway.admit_routed_invocation_v2"},
+      {"contract": "momi.communications.create_explicit_log.v1", "routine": "momi_communications_gateway.admit_log_invocation_v1"},
       {"contract": "momi.communications.set_user_limits.v1", "routine": "momi_communications_gateway.set_user_limits_v1"},
       {"contract": "momi.communications.set_user_routing.v1", "routine": "momi_communications_gateway.set_user_routing_v1"},
       {"contract": "momi.communications.set_user_access.v1", "routine": "momi_communications_gateway.set_user_access_v1"},

@@ -1,7 +1,6 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 
-import { appendLogSelection } from "../src/append_log_selection.ts"
 import { estimateProviderPayloadTokens } from "../src/provider_payload_policy.ts"
 import { remainingDeadlineSeconds } from "../src/remaining_deadline_seconds.ts"
 import { resolveLogSelection } from "../src/resolve_log_selection.ts"
@@ -40,9 +39,23 @@ test("rejects commands without prior scope, negation, quotation, or latest posit
   assert.equal(resolveLogSelection(input("log this")), null)
   assert.equal(resolveLogSelection(input("do not log this")), null)
   assert.equal(resolveLogSelection(input('Explain the phrase "log this"')), null)
+  assert.equal(resolveLogSelection(input("maybe log this")), null)
   assert.equal(resolveLogSelection(input("", undefined, [
     { role: "user", content: "log this" }, { role: "assistant", content: "later" },
   ])), null)
+})
+
+test("maps exact @log and ordinary explicit phrases from configuration", () => {
+  const history: ChatInput["messages"] = [
+    { role: "user", content: "The checkout failed." },
+    { role: "assistant", content: "I found the error." },
+    { role: "user", content: "@log" },
+  ]
+  assert.equal(resolveLogSelection(input("", undefined, history))?.flag.scope, "turn")
+  history[2] = { role: "user", content: "Can you log this bug?" }
+  assert.equal(resolveLogSelection(input("", undefined, history))?.flag.scope, "turn")
+  history[2] = { role: "user", content: "@log message" }
+  assert.equal(resolveLogSelection(input("", undefined, history))?.flag.scope, "message")
 })
 
 test("requires scope-specific explicit selections", () => {
@@ -70,21 +83,6 @@ test("structured turn preserves the complete latest model-visible turn", () => {
   assert.deepEqual(selection?.content.messages, messages.slice(2))
   assert.equal(selection?.content.selected_content,
     "current question\ncalling sales reader\nsales result\ncurrent answer")
-})
-
-test("performs exactly one append for affirmative intent and none otherwise", async () => {
-  let appends = 0
-  const append = () => { appends += 1; return Promise.resolve({ disposition: "stored" }) }
-  const selectedInput = input("", undefined, [
-    { role: "user", content: "question" }, { role: "assistant", content: "selected" },
-    { role: "user", content: "log this" },
-  ])
-  const selection = resolveLogSelection(selectedInput)
-  const context = { input: selectedInput, invocationId: "invocation-1",
-    archiveReceiptId: "receipt-1", logSelection: selection }
-  await appendLogSelection(selection, context, append)
-  await appendLogSelection(null, context, append)
-  assert.equal(appends, 1)
 })
 
 test("counts tool definitions and results in each complete provider payload", () => {
