@@ -12,13 +12,21 @@ and deterministic checks authoritative; do not create role ceremony around them.
 
 1. Read the applicable `AGENTS.md` files and the code, contracts, and tests
    directly implicated by the request.
-2. State the outcome, acceptance evidence, material constraints, and exclusions.
+2. Bind the change to exactly one open owning GitHub issue. Create or update it
+   when the accepted work is not already represented.
+3. State the outcome, acceptance evidence, material constraints, and exclusions.
    Resolve minor ambiguity with a reasonable documented assumption.
-3. Work from current repository state on a feature branch or isolated worktree.
+4. Work from current repository state on a feature branch or isolated worktree.
    Preserve unrelated user changes.
 
 Use plan mode only when dependency ordering or a material user decision is
 unclear. A routine task does not need a separate planning agent or artifact.
+
+For complex, long-running, or context-polluted changes, follow
+`docs/development-execution-handoffs.md`. The planning owner produces one compact
+execution packet and hands implementation to one fresh-context executor. A fork
+or product Handoff retains history and does not satisfy that boundary. Do not
+carry exploratory chatter or raw logs into the executor.
 
 ## Escalate only when necessary
 
@@ -64,6 +72,12 @@ continue. Do not stop for benign drift. After one correction pass, escalate only
 if a material blocker remains; do not commission repeated opinion reviews.
 
 ## Finish
+
+Before release, classify the owning issue as `partial` when accepted scope
+remains or `complete` when all remaining acceptance criteria are satisfied.
+Follow `docs/development-issue-ledger.md` for the exact PR or final-commit
+metadata. Record discovered follow-up work in the owning issue or one linked
+issue rather than leaving it only in the final response.
 
 Commit and publish only when requested or required by the repository workflow.
 Use the repository's declared release command for hosted changes. Report the

@@ -6,9 +6,11 @@ not a reason to try another publisher.
 ## Before Release
 
 1. Read root and affected service instructions and manifests.
-2. Start from current `dev` and make one intentional feature branch.
-3. Commit the complete change and confirm the worktree is clean.
-4. Keep secrets out of commands, logs, commits, manifests, and release records.
+2. Bind the change to one open issue under
+   `docs/development-issue-ledger.md`.
+3. Start from current `dev` and make one intentional feature branch.
+4. Commit the complete change and confirm the worktree is clean.
+5. Keep secrets out of commands, logs, commits, manifests, and release records.
 
 ## Release To Dev
 
@@ -30,6 +32,10 @@ the exact `dev` commit validation. It detaches the release worktree at that
 merged commit, so another worktree may safely retain the local `dev` branch.
 It leaves feature-branch cleanup separate so GitHub cannot force a local branch
 checkout while another worktree owns `dev`.
+Because the coordinator creates a minimal PR body, its final feature commit must
+contain the exact `Owning issue` and `Disposition` trailers documented in
+`docs/development-issue-ledger.md`. Manually created PRs may put them in the PR
+body instead.
 For migration-bearing releases it then links the development database over
 the IPv4 session pooler, previews and applies ordered migrations, proves local
 and hosted history parity, and dispatches the exact-SHA development workflow.

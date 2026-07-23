@@ -101,15 +101,14 @@ they deploy from the same repository.
 - Store runtime secrets in Supabase, deployment secrets in GitHub, and local CLI credentials in the approved release host's credential store.
 - Authenticate the pinned Supabase CLI by OAuth/PAT; supply its temporary token as `SUPABASE_DB_PASSWORD`, never the long-lived Postgres role password.
 ## Default Development Loop
-- Use `$develop-repository-change` for ordinary features, fixes, and refactors.
-- One owning agent inspects, implements, tests, and prepares the reviewable diff.
+- Use `$develop-repository-change` for ordinary work; every change has one open issue and follows `docs/development-issue-ledger.md`.
 - Use focused tests while iterating, then run the required full check once.
 - Keep mechanical enforcement in tests and CI; do not manually re-audit passes.
 - Perform one final semantic review. Classify findings as `BLOCKING`, `FIX_NOW`, `FOLLOW_UP`, or `NO_ACTION`; only the first two normally trigger another edit.
 - Escalate to Architect or Repo Guard only for a new ownership/contract boundary,
   material security/privacy/cost/exposure decision, destructive migration,
   production infrastructure change, or irreconcilable repository-law conflict.
-- Use subagents only for independent parallel work that materially saves time.
+- Keep routine work with one owner; for complex or context-heavy work, use the compact fresh-context handoff in `docs/development-execution-handoffs.md`.
 - Release code-only work with `pnpm release:dev`, migrations with `/root/momi-release dev`, and promote with `/root/momi-release prod`.
 - Verify hosted behavior with one controlled acceptance event. Applied migrations
   are immutable; add a new migration for later corrections.
