@@ -41,6 +41,11 @@ test("builds provider instructions from mapped business context", () => {
   assert.match(result, /scope_key is 'primary'/u)
   assert.match(result, /orders_v1\(business_date:date, total_amount:numeric\)/u)
   assert.match(result, /query_momi_shop_data/u)
+  assert.match(result, /item_name and display_name.*mapped aliases/u)
+  assert.match(result, /discover.*distinct.*status/u)
+  assert.match(result, /submitted_at.*opened_at.*closed_at/u)
+  assert.match(result, /Do not retract.*earlier sourced fact/u)
+  assert.match(result, /analysis_query_schema_mismatch/u)
   assert.match(result, /Never ask a user for an internal UUID/u)
   assert.match(result, /Ask at most one natural clarification/u)
 })
@@ -61,6 +66,7 @@ test("stores configurable business identity in the owned database mapping", asyn
   assert.match(queryDisciplineSql, /issue the simple query_momi_shop_data calls together/u)
   assert.match(queryDisciplineSql, /After any successful shop-data result, answer/u)
   assert.doesNotMatch(source, /Dough Monster|doughmonster\.com|[0-9a-f]{8}-[0-9a-f-]{27,}/iu)
+  assert.doesNotMatch(source, /Classic Smashburger|CAPTURED/u)
 })
 
 test("binds mapped instructions into invocation idempotency", async () => {

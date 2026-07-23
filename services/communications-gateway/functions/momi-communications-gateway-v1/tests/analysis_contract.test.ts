@@ -36,6 +36,8 @@ test("binds dynamic analysis to a non-login read-only database role", async () =
   assert.doesNotMatch(query, /customer_label|first_name|last_name|email|phone/iu)
   assert.match(tool, /begin\("read only"/u)
   assert.match(tool, /set_config\('statement_timeout', '6000', true\)/u)
+  assert.match(tool, /analysisDatabaseError/u)
+  assert.doesNotMatch(tool, /analysis_query_failed/u)
   assert.doesNotMatch(tool, /set local role/u)
   assert.doesNotMatch(tool, /\.unsafe\(/u)
 })

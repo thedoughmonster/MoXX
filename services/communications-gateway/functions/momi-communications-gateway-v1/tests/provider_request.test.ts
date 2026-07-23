@@ -30,7 +30,18 @@ test("uses the selected routed Responses tool contract", () => {
   assert.equal(request.tool_choice, "auto")
   assert.equal(request.parallel_tool_calls, true)
   assert.equal(request.store, false)
+  assert.equal(request.background, undefined)
   assert.equal(request.safety_identifier, "c03fbd6e-65b7-4b23-8e65-2e5a8ec00123")
+})
+
+test("uses background mode only for Maximum", () => {
+  const admission = ({ maximum_output_tokens: 16000 } as Admission)
+  const route = { route_key: "maximum", provider_model: "gpt-5.6-sol",
+    reasoning_effort: "max", maximum_output_tokens: 16000 } as RouteSelection
+  const request = providerRequest([{ role: "user", content: "deep analysis" }],
+    "user-id", admission, route, [], "mapped context")
+  assert.equal(request.background, true)
+  assert.equal(request.store, false)
 })
 
 test("replays every Responses output item before a matching function result", () => {

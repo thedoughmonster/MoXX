@@ -19,6 +19,14 @@ import { resolveLogSelection } from "./resolve_log_selection.ts"
 import { runToolCall } from "./run_tool_call.ts"
 import { successResponse } from "./success_response.ts"
 import type { Admission, ChatInput } from "./types.ts"
+import { waitForBackgroundResponse } from "./wait_for_background_response.ts"
+
+const safeProviderErrors = new Set([
+  "provider_background_deadline_exceeded",
+  "provider_background_id_missing",
+  "provider_background_poll_failed",
+  "provider_transport_ambiguous",
+])
 
 export async function executeAdmittedChat(input: ChatInput, admission: Admission,
   tools: JSONValue[], instructions: string): Promise<{
@@ -46,8 +54,15 @@ export async function executeAdmittedChat(input: ChatInput, admission: Admission
       estimateProviderPayloadTokens(request), providerRound)) {
       throw new Error("provider_round_not_authorized")
     }
-    const result = await callProvider(route.provider_endpoint, request,
-      remainingDeadlineSeconds(admission.invocation_deadline))
+    const remaining = remainingDeadlineSeconds(admission.invocation_deadline)
+    const initial = await callProvider(route.provider_endpoint, request,
+      request.background === true ? Math.min(15, remaining) : remaining)
+    const background = await waitForBackgroundResponse(
+      route.provider_endpoint,
+      initial,
+      admission.invocation_deadline,
+    )
+    const result = background.result
     const toolCalls = responseToolCalls(result.body)
     const completed = responseCompleted(result.body)
     const hasText = Boolean(responseText(result.body))
@@ -56,18 +71,31 @@ export async function executeAdmittedChat(input: ChatInput, admission: Admission
       : toolCalls.length ? "tool_pending" : "completed"
     const receipt = await captureEvidence(input, admission.invocation_id,
       ++evidenceOrder, `provider_round_${answerRound}`,
-      { provider_request: request, provider_response: result.body },
+      { provider_request: request, provider_response: result.body,
+        provider_observations: background.observations },
       admission.provider_key, route.provider_model, terminal, usage(result.body),
       { duration_ms: result.duration_ms, http_status: result.status })
     if (result.ambiguous || !result.ok || !completed || !toolCalls.length) {
       const state = terminal === "completed" ? "completed"
         : result.ambiguous ? "paid_ambiguous" : "failed"
-      const error = state === "completed" ? null : result.ambiguous
-        ? "provider_transport_ambiguous" : !result.ok
+      const errorBody = result.body.error
+      const errorType = errorBody && typeof errorBody === "object" &&
+          !Array.isArray(errorBody) && !(errorBody instanceof Date)
+        ? (errorBody as Record<string, JSONValue>).type : null
+      const providerError = typeof errorType === "string" &&
+          safeProviderErrors.has(errorType)
+        ? errorType
+        : null
+      const error = state === "completed" ? null : providerError ??
+          (result.ambiguous ? "provider_transport_ambiguous" : !result.ok
         ? `provider_http_${result.status}` : !completed
-        ? "provider_response_incomplete" : "provider_response_missing_output_text"
+        ? "provider_response_incomplete" : "provider_response_missing_output_text")
       const response = state === "completed" ? successResponse(result.body,
-        admission.invocation_id) : failedProviderResponse(admission.invocation_id, state)
+        admission.invocation_id) : failedProviderResponse(
+          admission.invocation_id,
+          state,
+          error ?? undefined,
+        )
       await completeInvocation(admission.invocation_id, state,
         receipt.archive_item_id, outputTokens(result.body), error,
         state === "completed" ? response.body : null)

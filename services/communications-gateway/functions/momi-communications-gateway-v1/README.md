@@ -36,7 +36,14 @@ limit the gateway continues approved tool calls until the model returns text.
 
 Natural shop questions use the database-mapped analysis catalog and one
 read-only SQL tool. The model never needs to expose SQL, relation names, or
-internal UUIDs to the user. The explicit logger remains a separate write tool.
+internal UUIDs to the user. It resolves product aliases through mapped name
+fields, discovers business enum values before filtering, reconciles new query
+evidence with earlier sourced claims, and applies the documented order-time
+coverage fallback. The explicit logger remains a separate write tool.
+
+Maximum creates each answer round as one background provider response and polls
+that response ID until it becomes terminal or the admitted user deadline ends.
+Poll retrieval is continuation of the same paid attempt, not a model retry.
 
 ## Side Effects
 
@@ -57,7 +64,10 @@ provider call. Changed payloads fail. Any provider transport ambiguity becomes
 automatically retried. Adjustable request or budget limits return
 `request_limit_reached` with HTTP 429, and oversized effective input returns
 `input_limit_reached` with HTTP 413, so the client can render a useful message.
-Missing or unexpected configuration still fails closed.
+An unfinished Maximum response and every provider failure include a safe,
+non-empty visible explanation. Analysis failures identify only an actionable
+safe category and never expose SQL or database internals. Missing or unexpected
+configuration still fails closed.
 
 ## Tests
 

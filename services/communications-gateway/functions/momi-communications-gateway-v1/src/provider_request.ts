@@ -18,5 +18,6 @@ export function providerRequest(messages: Message[], safetyIdentifier: string,
       route.maximum_output_tokens),
     safety_identifier: safetyIdentifier,
     store: false,
+    ...(route.route_key === "maximum" ? { background: true } : {}),
   }
 }
