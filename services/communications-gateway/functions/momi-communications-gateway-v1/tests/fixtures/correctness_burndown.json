@@ -1,0 +1,41 @@
+{
+  "entity_reconciliation": {
+    "user_alias": "DM Classic Smashburger",
+    "mapped_display_name": "🍔 DM Classic Smashburger",
+    "earlier_sourced_count": 12,
+    "later_bare_lookup_count": 0,
+    "direct_opened_at_distribution": {
+      "11_orders": "11:45 AM–12:25 PM Eastern",
+      "1_order": "about 9:20 AM Eastern"
+    }
+  },
+  "payment_status": {
+    "guessed_value": "completed",
+    "discovered_value": "CAPTURED",
+    "count": 49,
+    "amount": 598.13,
+    "tips": 67.19
+  },
+  "timestamp_coverage": {
+    "submitted_at": "all null",
+    "opened_at": "populated",
+    "closed_at": "populated",
+    "expected_preference": ["submitted_at", "opened_at", "closed_at"]
+  },
+  "safe_errors": [
+    "analysis_query_invalid",
+    "analysis_query_not_allowed",
+    "analysis_query_schema_mismatch",
+    "analysis_query_timeout",
+    "analysis_result_too_large",
+    "analysis_query_permission_denied",
+    "analysis_query_data_error",
+    "analysis_query_database_error"
+  ],
+  "maximum": {
+    "route": "maximum",
+    "provider_statuses": ["queued", "in_progress", "completed"],
+    "automatic_paid_retries": 0,
+    "visible_deadline_error": "provider_background_deadline_exceeded"
+  }
+}

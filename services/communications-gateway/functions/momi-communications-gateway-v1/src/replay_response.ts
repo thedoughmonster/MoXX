@@ -8,7 +8,8 @@ export function replayResponse(id: string, replay: InvocationReplay): {
   body: Record<string, JSONValue>
 } {
   if (["failed", "paid_ambiguous"].includes(replay.invocation_status)) {
-    return failedProviderResponse(id, replay.invocation_status)
+    return failedProviderResponse(id, replay.invocation_status,
+      replay.error_code ?? undefined)
   }
   if (["pending_archive", "admitted", "provider_started"].includes(
     replay.invocation_status,

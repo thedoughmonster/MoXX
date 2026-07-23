@@ -10,6 +10,9 @@ records the complete exchange, and exposes only approved MoMi tools.
 The gateway loads MoMi's business identity and organization aliases from its
 owned `assistant_context` database mapping before every admitted turn. Business
 names and organization context are not embedded in request-building code.
+Shop entities are resolved through mapped catalog identities and aliases, and
+business enum values are discovered from current scoped data before filtering.
+Later evidence is reconciled with earlier sourced facts before any correction.
 
 ## Boundary
 
@@ -26,6 +29,10 @@ answer-call allowance so recoverable tool-query corrections can finish without
 a code-defined one-round cutoff. Same-key/same-payload requests replay safely;
 changed payloads fail; an ambiguous paid result pauses for reconciliation.
 Final success requires the archive owner's terminal receipt.
+Maximum uses the provider's background-response protocol and polls the same paid
+attempt within the user's configured deadline. Polling never creates a second
+model attempt, and an unfinished or unreachable background response fails
+visibly without automatic retry.
 
 Provider execution prefers the beta-specific `MOMI_BETA_PROVIDER_API_KEY` and
 may reuse the existing project-scoped `OPENAI_API_KEY` during beta activation.
@@ -43,7 +50,9 @@ and `create_momi_log`. The analysis query accepts one parsed read-only `SELECT`
 over the database-provided catalog; a dedicated PostgreSQL role is the final
 boundary. SQL stays internal, and no raw/private/auth relation is reachable.
 No arbitrary HTTP, shell, attachment, source API, or other business mutation is
-available.
+available. Query failures return only bounded correction categories for invalid
+or disallowed SQL, catalog mismatch, timeout, oversized results, permissions,
+data conversion, or an otherwise unavailable database result.
 
 ## Tests
 
