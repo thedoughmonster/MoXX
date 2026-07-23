@@ -8,22 +8,24 @@ Supabase Git deployment remains disabled. ADRs `0006` and `0008` govern this.
 
 ```text
 pnpm release:dev
-pnpm release:prod
+/root/momi-release dev
+/root/momi-release prod
 ```
 
-Both commands require a clean worktree and a Supabase CLI profile authenticated
-by OAuth or a personal access token with temporary access to the exact target
-project. Export that same temporary token as `SUPABASE_DB_PASSWORD`; it is used
-as a temporary-access database password, not the long-lived Postgres role
-password. Development may start on a committed feature branch based on current
-`dev`, or on `dev` when resuming an already merged release. Production must
-start on clean, current `dev`. Neither command commits unknown work.
+All commands require a clean worktree. `pnpm release:dev` is the code-only path
+and requires an empty migration-tree diff plus an exact successfully deployed
+`dev` baseline. `/root/momi-release dev` supplies the protected Supabase PAT for
+a migration-bearing development release. Production always uses
+`/root/momi-release prod`. Development may start on a committed feature branch
+based on current `dev`, or on `dev` when resuming an already merged release.
+Production must start on clean, current `dev`. No command commits unknown work.
 
 The development command owns feature PR creation and merge, exact-commit
-validation, migration preview/apply/parity, and GitHub workflow dispatch. The
-production command owns the promotion PR, exact-commit development validation,
-production migration preview/apply/parity, guarded exact-SHA promotion,
-production validation, and hosted completion proof.
+validation, migration preview/apply/parity when the migration tree changes, and
+GitHub workflow dispatch. The production command owns the promotion PR,
+exact-commit development validation, production migration
+preview/apply/parity, guarded exact-SHA promotion, production validation, and
+hosted completion proof.
 
 Validation resolves the exact successful `dev` push used as its debt baseline.
 A production push uses its own already validated SHA rather than a moving
@@ -51,7 +53,7 @@ JWT-protected function may instead prove reachability with `401` or `403`.
 
 ## Migration Boundary
 
-Preflight links the exact selected ref, validates `.temp/project-ref` and the
+Migration preflight links the exact selected ref, validates `.temp/project-ref` and the
 password-free `.temp/pooler-url`, builds an explicit password-free connection
 URL with only the decoded option `options=-c jit=true`, then proves access with
 one bounded read-only database query. It does not depend on top-level project
@@ -81,13 +83,15 @@ non-executable `.sql` files.
 
 ## Credentials
 
-The operator supplies the temporary OAuth or personal access token in
-`SUPABASE_DB_PASSWORD` for the release process. The database-only child mirrors
-it to `PGPASSWORD`; repository code never reads a fixed token file or puts the
-token in the password-free URL, CLI arguments, logs, or release records. GitHub
-environment secrets authorize GitHub's function deployment. Supabase project
-secrets authorize runtime integrations. No credential value belongs in a
-repository file or `.env`.
+For migration-bearing development releases and every production release,
+`/root/momi-release` loads the existing Supabase CLI PAT into
+`SUPABASE_DB_PASSWORD`. The database-only child mirrors it to `PGPASSWORD`;
+repository code never reads a fixed token file or puts the token in the
+password-free URL, CLI arguments, logs, or release records. Code-only
+development releases never receive either variable. GitHub environment secrets
+authorize GitHub's function deployment. Supabase project secrets authorize
+runtime integrations. No credential value belongs in a repository file or
+`.env`. See `docs/release-credentials.md`.
 
 ## Retirement
 

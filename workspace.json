@@ -41,6 +41,7 @@
   ],
   "policies": {
     "max_handwritten_lines": 120,
+    "hard_max_handwritten_lines": 140,
     "minimum_shared_consumers": 3
   }
 }

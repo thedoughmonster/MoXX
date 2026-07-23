@@ -18,7 +18,7 @@ test("requires the exact linked read-only access proof", () => {
   ]) assert.throws(() => assertLinkedSupabaseAccess(invalid))
 })
 
-test("links and proves exact access before repository validation", async () => {
+test("opens database access only for migration-bearing releases", async () => {
   const preflight = await readFile(
     new URL("../scripts/release/assert_release_preflight.ts", import.meta.url),
     "utf8",
@@ -28,9 +28,13 @@ test("links and proves exact access before repository validation", async () => {
   const url = preflight.indexOf("migrationDatabaseUrl(poolerUrl, projectRef)")
   const query = preflight.indexOf('"db", "query", "--db-url", databaseUrl')
   const access = preflight.indexOf("assertLinkedSupabaseAccess(access)")
+  const conditional = preflight.indexOf("if (requiresMigrationApply)")
+  const baseline = preflight.indexOf("assertDeployedDevelopmentBaseline(devSha)")
   const validation = preflight.indexOf('"scripts/check.ts"')
-  assert.ok(link >= 0 && link < target && target < url && url < query)
+  assert.ok(conditional >= 0 && conditional < link)
+  assert.ok(link < target && target < url && url < query)
   assert.ok(query < access && access < validation)
+  assert.ok(access < baseline && baseline < validation)
   assert.match(preflight, /select 1::integer as release_access_check/)
   assert.doesNotMatch(preflight, /projects.*list|--linked/)
   const linker = await readFile(

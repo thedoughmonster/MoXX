@@ -25,14 +25,14 @@ export async function releaseDev(): Promise<void> {
       "--match-head-commit", preflight.headSha,
     ])
     runCommand("git", ["fetch", "origin", "dev:refs/remotes/origin/dev"])
-    runCommand("git", ["switch", "dev"])
-    runCommand("git", ["merge", "--ff-only", "origin/dev"])
+    runCommand("git", ["switch", "--detach", "origin/dev"])
     releaseSha = runCommand("git", ["rev-parse", "HEAD"], {
       capture: true,
     }).stdout.trim()
   }
   await waitForWorkflow("validate.yml", "push", releaseSha, undefined, "dev")
-  await applyMigrations("dev")
+  if (preflight.requiresMigrationApply) await applyMigrations("dev")
+  else console.log("Migration-free release reused the deployed development baseline")
   await ensureDispatchedWorkflow("deploy-dev.yml", "dev", releaseSha)
   console.log(`Development release complete at ${releaseSha}`)
 }

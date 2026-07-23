@@ -4,13 +4,20 @@ import * as ts from "typescript"
 
 import type { WorkspaceConfig } from "./architecture/types.ts"
 import { workspaceRoot } from "./architecture/paths.ts"
+import { classifyHandwrittenLineCount } from "./classify_handwritten_line_count.ts"
 
 const extensions = new Set([".ts", ".md", ".json", ".sql", ".toml", ".yml", ".yaml"])
 
-export async function findSourceQualityViolations(
+export type SourceQualityFindings = {
+  warnings: string[]
+  violations: string[]
+}
+
+export async function findSourceQualityFindings(
   workspace: WorkspaceConfig,
-): Promise<string[]> {
+): Promise<SourceQualityFindings> {
   const entries = await readdir(workspaceRoot, { recursive: true, withFileTypes: true })
+  const warnings: string[] = []
   const violations: string[] = []
 
   for (const entry of entries) {
@@ -26,9 +33,21 @@ export async function findSourceQualityViolations(
     const normalizedSource = source.replaceAll("\r\n", "\n")
     const lineCount = normalizedSource === "" ? 0 :
       normalizedSource.split("\n").length - (normalizedSource.endsWith("\n") ? 1 : 0)
-    if (extname(path) !== ".sql" &&
-      lineCount > workspace.policies.max_handwritten_lines) {
-      violations.push(`${normalized}: ${lineCount} lines`)
+    if (extname(path) !== ".sql") {
+      const lineState = classifyHandwrittenLineCount(
+        lineCount,
+        workspace.policies.max_handwritten_lines,
+        workspace.policies.hard_max_handwritten_lines,
+      )
+      if (lineState === "violation") {
+        violations.push(
+          `${normalized}: ${lineCount} lines (hard limit ${workspace.policies.hard_max_handwritten_lines})`,
+        )
+      } else if (lineState === "warning") {
+        warnings.push(
+          `${normalized}: ${lineCount} lines (soft limit ${workspace.policies.max_handwritten_lines})`,
+        )
+      }
     }
     if (extname(path) !== ".ts") {
       continue
@@ -56,5 +75,5 @@ export async function findSourceQualityViolations(
     }
   }
 
-  return violations
+  return { warnings, violations }
 }

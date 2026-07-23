@@ -74,6 +74,9 @@ test("requires migration completion before development deployment", async () => 
   const deploy = release.indexOf('await ensureDispatchedWorkflow("deploy-dev.yml"')
   assert.ok(validation >= 0 && validation < apply)
   assert.ok(apply >= 0 && apply < deploy)
+  assert.match(release, /if \(preflight\.requiresMigrationApply\)/)
+  assert.match(release, /"switch", "--detach", "origin\/dev"/)
+  assert.doesNotMatch(release, /"switch", "dev"/)
 })
 
 test("dispatches production only after promotion", async () => {

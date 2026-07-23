@@ -14,7 +14,7 @@ they deploy from the same repository.
 ## Hard Rules
 
 - Do not require Docker or WSL for the normal development workflow.
-- Keep every handwritten non-SQL file at or below 120 physical lines.
+- Target 120 physical lines for handwritten non-SQL files; CI warns above 120 and fails above 140.
 - Each TypeScript file may declare at most one function.
 - Organize deployable behavior by business capability under `services/`.
 - Each service owns `AGENTS.md`, `README.md`, and one valid `service.json`.
@@ -56,7 +56,8 @@ they deploy from the same repository.
 - The Node 24 release coordinator is the sole normal database migration
   authority. It must use the pinned Supabase CLI and IPv4 session pooler.
 - A development deployment may start only after its exact commit is validated
-  and its migrations have reached parity in the development database.
+  and its migrations have reached parity; migration-free features may inherit
+  parity only from the exact deployed `dev` baseline and an empty migration diff.
 - Keep manual operator programs under `local-tools/` and obey its `AGENTS.md`.
 - Track local tooling on both branches, but never deploy, host, schedule, or
   import it into runtime code.
@@ -99,7 +100,6 @@ they deploy from the same repository.
 - Treat the Toast event GUID as the delivery idempotency key.
 - Store runtime secrets in Supabase, deployment secrets in GitHub, and local CLI credentials in the approved release host's credential store.
 - Authenticate the pinned Supabase CLI by OAuth/PAT; supply its temporary token as `SUPABASE_DB_PASSWORD`, never the long-lived Postgres role password.
-
 ## Default Development Loop
 - Use `$develop-repository-change` for ordinary features, fixes, and refactors.
 - One owning agent inspects, implements, tests, and prepares the reviewable diff.
@@ -110,7 +110,7 @@ they deploy from the same repository.
   material security/privacy/cost/exposure decision, destructive migration,
   production infrastructure change, or irreconcilable repository-law conflict.
 - Use subagents only for independent parallel work that materially saves time.
-- Release hosted work with `pnpm release:dev`; promote with `pnpm release:prod`.
+- Release code-only work with `pnpm release:dev`, migrations with `/root/momi-release dev`, and promote with `/root/momi-release prod`.
 - Verify hosted behavior with one controlled acceptance event. Applied migrations
   are immutable; add a new migration for later corrections.
 
