@@ -8,7 +8,10 @@ import { loadTriageConfig } from "../scripts/issue_triage/load_triage_config.ts"
 import { parseTriage } from "../scripts/issue_triage/parse_triage.ts"
 import { relationshipTypes, type IssueTriage } from
   "../scripts/issue_triage/types.ts"
-import { validateTriage } from "../scripts/issue_triage/validate_triage.ts"
+import {
+  safeTextPattern,
+  validateTriage,
+} from "../scripts/issue_triage/validate_triage.ts"
 
 const valid: IssueTriage = {
   schema_version: 1,
@@ -44,6 +47,12 @@ test("schema, validator, prompt, and config retain deterministic parity", async 
     schema.properties.labels.items.enum,
     Object.values(config.labels_by_issue_type).flat().sort(),
   )
+  assert.equal(schema.properties.feature.properties.title.pattern, safeTextPattern)
+  assert.equal(
+    schema.properties.relationships.items.properties.rationale.pattern,
+    safeTextPattern,
+  )
+  assert.equal(schema.properties.rationale.pattern, safeTextPattern)
   assert.match(prompt, /triage_config\.labels_by_issue_type/)
   assert.match(prompt, /issue_type/)
 })
@@ -91,6 +100,16 @@ test("duplicates, missing references, and mismatched labels fail closed", () => 
   }]
   assert.throws(() => buildApplyPlan(related, evidence))
   assert.throws(() => validateTriage({ ...valid, labels: ["bug"] }))
+})
+
+test("schema and validator reject the same unsafe rationale punctuation", async () => {
+  const schema = JSON.parse(
+    await readFile(".github/codex/issue-triage.schema.json", "utf8"),
+  )
+  const validateSchema = new Ajv2020({ strict: false }).compile(schema)
+  const candidate = { ...valid, rationale: "Unexpected [markup]" }
+  assert.equal(validateSchema(candidate), false)
+  assert.throws(() => validateTriage(candidate))
 })
 
 test("first run creates and rerun updates one marker idempotently", () => {

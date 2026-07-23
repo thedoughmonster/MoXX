@@ -44,10 +44,22 @@ test("production consumes the exact dev receipt without revalidation", async () 
   const source = await readFile("scripts/release/release_prod.ts", "utf8")
   assert.match(source, /readReleaseReceipt/)
   assert.match(source, /devReceipt\.head_sha !== head/)
+  assert.match(source, /ensurePromotionPullRequest/)
   assert.match(source, /applyMigrations\("prod"\)/)
   assert.match(source, /promote-prod\.yml/)
   assert.match(source, /deploy-prod\.yml/)
   assert.doesNotMatch(source, /scripts\/check|validate\.yml/)
+})
+
+test("production deterministically creates or reuses its exact promotion PR", async () => {
+  const source = await readFile(
+    "scripts/release/ensure_promotion_pull_request.ts",
+    "utf8",
+  )
+  assert.match(source, /"--base", "prod", "--head", "dev"/)
+  assert.match(source, /Multiple open dev-to-prod PRs/)
+  assert.match(source, /record\.headRefOid !== expectedHeadSha/)
+  assert.match(source, /"pr", "ready"/)
 })
 
 test("workflow polling is bounded and never shells out to run watch", async () => {

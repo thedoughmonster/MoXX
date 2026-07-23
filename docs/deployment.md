@@ -33,7 +33,9 @@ pnpm release:prod -- --dev-receipt <dev-release-receipt.json>
 Development accepts only the validated tree, diff, impact, and gate. A merge SHA
 may differ as benign technical drift only when those identities are equal.
 The coordinator verifies the receipt's exact GitHub run and required job.
-Production consumes the exact development receipt.
+Production consumes the exact development receipt. The coordinator creates or
+reuses the sole exact `dev`-to-`prod` promotion PR and makes it ready before
+dispatching the receipt-bound fast-forward workflow.
 
 - Repository-only: no database access and zero Edge Function deployments.
 - Service change: deploy only affected manifest-owned functions.

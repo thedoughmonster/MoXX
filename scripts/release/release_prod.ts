@@ -7,6 +7,7 @@ import { applyMigrations } from "./apply_migrations.ts"
 import { assertPlanMatchesValidation } from "./assert_plan_matches_validation.ts"
 import { assertReleaseHead } from "./assert_release_head.ts"
 import { buildReleaseReceipt } from "./build_release_receipt.ts"
+import { ensurePromotionPullRequest } from "./ensure_promotion_pull_request.ts"
 import { ensureDispatchedWorkflow } from "./ensure_dispatched_workflow.ts"
 import { readReleaseReceipt } from "./read_release_receipt.ts"
 import { runCommand } from "./run_command.ts"
@@ -32,6 +33,7 @@ export async function releaseProd(devReceiptPath: string): Promise<void> {
   const databaseApplied = plan.impact.release.database !== "none"
   if (databaseApplied) await applyMigrations("prod")
   if (plan.base.sha !== plan.head.sha) {
+    ensurePromotionPullRequest(head, hashText(devSource))
     await ensureDispatchedWorkflow("promote-prod.yml", "dev", head, "promote", {
       expected_sha: head,
       dev_receipt_sha256: hashText(devSource),

@@ -2,7 +2,9 @@ import { loadTriageConfig } from "./load_triage_config.ts"
 import { relationshipTypes, type IssueTriage } from "./types.ts"
 import { isPlainRecord } from "./is_plain_record.ts"
 
-const safeText = /^[A-Za-z0-9][A-Za-z0-9 #.,;:!?()/'"&%+-]*$/
+export const safeTextPattern =
+  `^[A-Za-z0-9][A-Za-z0-9 #.,;:!?()/'"&%+-]*$`
+const safeText = new RegExp(safeTextPattern)
 
 export function validateTriage(value: unknown): IssueTriage {
   if (!isPlainRecord(value)) throw new Error("Triage output must be an object")
