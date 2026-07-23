@@ -14,7 +14,8 @@ The service owns evaluation jobs, evaluations, derived records, corrections,
 and evaluation audit state. It does not capture source evidence or deliver
 routing recommendations to external systems.
 
-The repository manifest declares the target owner before runtime cutover, as
-required by ADR `0014`. Existing immutable migrations still register the
-function under `communications-archive`; an additive migration must align that
-registry before service-specific roles or grants are enforced.
+The repository manifest declared the target owner before runtime cutover, as
+required by ADR `0014`. Additive migration
+`20260719180809_align_communications_evaluator_runtime_owner.sql` aligns the
+function and route registry records while preserving their activation state.
+Service-specific roles, grants, and private-access cutover remain deferred.
