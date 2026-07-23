@@ -63,10 +63,19 @@ export function parseChatInput(value: unknown): ChatInput | null {
   if (input.momi_log !== undefined) {
     if (!input.momi_log || typeof input.momi_log !== "object" || Array.isArray(input.momi_log)) return null
     const flag = input.momi_log as Record<string, unknown>
-    const flagKeys = ["scope", "message_id", "range", "selected_content", "note", "category"]
+    const flagKeys = [
+      "scope", "source_user_id", "source_conversation_id", "message_id",
+      "source_turn_id", "range", "selected_content", "note", "category",
+    ]
     if (Object.keys(flag).some((key) => !flagKeys.includes(key)) ||
       typeof flag.scope !== "string" || !scopes.has(flag.scope) ||
-      !(flag.message_id === undefined || typeof flag.message_id === "string") ||
+      typeof flag.source_user_id !== "string" || !uuid.test(flag.source_user_id) ||
+      typeof flag.source_conversation_id !== "string" ||
+      flag.source_conversation_id.length < 1 || flag.source_conversation_id.length > 256 ||
+      !(flag.message_id === undefined || typeof flag.message_id === "string" &&
+        flag.message_id.length > 0 && flag.message_id.length <= 256) ||
+      !(flag.source_turn_id === undefined || typeof flag.source_turn_id === "string" &&
+        flag.source_turn_id.length > 0 && flag.source_turn_id.length <= 256) ||
       !(flag.selected_content === undefined || typeof flag.selected_content === "string" &&
         flag.selected_content.length > 0 && flag.selected_content.length <= 240000) ||
       !(flag.range === undefined || validRange(flag.range)) ||
@@ -74,12 +83,17 @@ export function parseChatInput(value: unknown): ChatInput | null {
       !(flag.category === undefined || typeof flag.category === "string" &&
         flag.category.length <= 120)) return null
     if ((flag.scope === "message" && (typeof flag.message_id !== "string" ||
+        typeof flag.source_turn_id !== "string" ||
         typeof flag.selected_content !== "string" || flag.range !== undefined)) ||
       (flag.scope === "range" && (!validRange(flag.range) ||
-        typeof flag.selected_content !== "string" || flag.message_id !== undefined)) ||
-      (["turn", "conversation"].includes(flag.scope as string) &&
-        (flag.message_id !== undefined || flag.range !== undefined ||
-          flag.selected_content !== undefined))) return null
+        typeof flag.selected_content !== "string" || flag.message_id !== undefined ||
+        flag.source_turn_id !== undefined)) ||
+      (flag.scope === "turn" && (typeof flag.source_turn_id !== "string" ||
+        flag.message_id !== undefined || flag.range !== undefined ||
+        flag.selected_content !== undefined)) ||
+      (flag.scope === "conversation" && (flag.source_turn_id !== undefined ||
+        flag.message_id !== undefined || flag.range !== undefined ||
+        flag.selected_content !== undefined))) return null
   }
   return { ...input, messages, user: { id: user.id, email: user.email } } as ChatInput
 }

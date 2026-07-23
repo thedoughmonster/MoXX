@@ -16,7 +16,6 @@ import { responseText } from "./response_text.ts"
 import { responseToolCalls } from "./response_tool_calls.ts"
 import { usage } from "./provider_usage.ts"
 import { remainingDeadlineSeconds } from "./remaining_deadline_seconds.ts"
-import { resolveLogSelection } from "./resolve_log_selection.ts"
 import { runToolCall } from "./run_tool_call.ts"
 import { successResponse } from "./success_response.ts"
 import { terminalLimitationCodes } from "./terminal_limitation_response.ts"
@@ -40,9 +39,8 @@ export async function executeAdmittedChat(input: ChatInput, admission: Admission
   const route = begun.route
   let request = providerRequest(input.messages, input.user.id, admission,
     route, tools, instructions)
-  const logSelection = resolveLogSelection(input)
   const toolContext = { input, invocationId: admission.invocation_id,
-    archiveReceiptId: begun.archiveReceiptId, logSelection }
+    archiveReceiptId: begun.archiveReceiptId }
   await captureEvidence(input, admission.invocation_id, begun.evidenceOrder,
     "selected_provider_request", { selected_route: route.route_key,
       routing_source: route.source, reasoning_effort: route.reasoning_effort,

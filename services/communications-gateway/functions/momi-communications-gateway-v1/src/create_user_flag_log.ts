@@ -12,8 +12,8 @@ export async function createUserFlagLog(
     select disposition, selection_id::text, shop_log_id::text
     from momi_communications_operations.create_user_flagged_shop_log_v1(
       ${context.input.user.id}::uuid, 'user_flag', ${flag.scope},
-      ${context.input.conversation_id}, ${flag.message_id ?? null},
-      ${context.input.turn_id}, ${sql.json(flag.range ?? null)},
+      ${flag.source_conversation_id}, ${flag.message_id ?? null},
+      ${flag.source_turn_id ?? null}, ${sql.json(flag.range ?? null)},
       ${context.invocationId}::uuid, ${context.archiveReceiptId}::uuid,
       ${flag.note ?? null}, ${flag.category ?? null}, ${sql.json(content)},
       null, null, ${context.input.idempotency_key + ":user-flag"}

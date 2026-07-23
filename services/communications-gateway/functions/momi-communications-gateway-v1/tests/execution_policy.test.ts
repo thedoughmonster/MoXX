@@ -1,58 +1,89 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 
-import { appendLogSelection } from "../src/append_log_selection.ts"
 import { estimateProviderPayloadTokens } from "../src/provider_payload_policy.ts"
 import { remainingDeadlineSeconds } from "../src/remaining_deadline_seconds.ts"
+import { logIntentScope } from "../src/log_intent_scope.ts"
 import { resolveLogSelection } from "../src/resolve_log_selection.ts"
 import type { ChatInput } from "../src/types.ts"
 
+const userId = "c03fbd6e-65b7-4b23-8e65-2e5a8ec00123"
+const source = {
+  source_user_id: userId,
+  source_conversation_id: "conversation-1",
+}
 const input = (content: string, momi_log?: ChatInput["momi_log"],
   messages?: ChatInput["messages"]): ChatInput => ({
   model: "momi-assistant",
   messages: messages ?? [{ role: "user", content }],
-  user: { id: "c03fbd6e-65b7-4b23-8e65-2e5a8ec00123", email: "user@example.com" },
+  user: { id: userId, email: "user@example.com" },
   conversation_id: "conversation-1",
   turn_id: "turn-1",
   idempotency_key: "conversation-1:turn-1",
   ...(momi_log ? { momi_log } : {}),
 })
 
-test("resolves strict message, turn, and conversation commands without command text", () => {
+test("recognizes strict natural commands but never invents source identities", () => {
   const messages: ChatInput["messages"] = [
     { role: "system", content: "policy" }, { role: "user", content: "question" },
     { role: "assistant", content: "answer" }, { role: "user", content: "log this message" },
   ]
-  const message = resolveLogSelection(input("", undefined, messages))
-  assert.equal(message?.flag.scope, "message")
-  assert.equal(message?.flag.message_id, "conversation-1:model-visible-message:2")
-  assert.equal(message?.content.selected_content, "answer")
+  assert.equal(logIntentScope(input("", undefined, messages)), "message")
+  assert.equal(resolveLogSelection(input("", undefined, messages)), null)
   messages[3] = { role: "user", content: "log this turn" }
-  const turn = resolveLogSelection(input("", undefined, messages))
-  assert.deepEqual(turn?.content.messages, messages.slice(1, 3))
-  assert.equal(turn?.content.selected_content, "question\nanswer")
+  assert.equal(logIntentScope(input("", undefined, messages)), "turn")
+  assert.equal(resolveLogSelection(input("", undefined, messages)), null)
   messages[3] = { role: "user", content: "please log this conversation." }
-  assert.deepEqual(resolveLogSelection(input("", undefined, messages))?.content.messages,
-    messages.slice(0, 3))
+  assert.equal(logIntentScope(input("", undefined, messages)), "conversation")
+  assert.equal(resolveLogSelection(input("", undefined, messages)), null)
 })
 
 test("rejects commands without prior scope, negation, quotation, or latest position", () => {
-  assert.equal(resolveLogSelection(input("log this")), null)
-  assert.equal(resolveLogSelection(input("do not log this")), null)
-  assert.equal(resolveLogSelection(input('Explain the phrase "log this"')), null)
-  assert.equal(resolveLogSelection(input("", undefined, [
+  assert.equal(logIntentScope(input("log this")), "turn")
+  assert.equal(logIntentScope(input("do not log this")), null)
+  assert.equal(logIntentScope(input('Explain the phrase "log this"')), null)
+  assert.equal(logIntentScope(input("maybe log this")), null)
+  assert.equal(logIntentScope(input("", undefined, [
     { role: "user", content: "log this" }, { role: "assistant", content: "later" },
   ])), null)
 })
 
-test("requires scope-specific explicit selections", () => {
+test("maps exact @log and ordinary explicit phrases from configuration", () => {
+  const history: ChatInput["messages"] = [
+    { role: "user", content: "The checkout failed." },
+    { role: "assistant", content: "I found the error." },
+    { role: "user", content: "@log" },
+  ]
+  assert.equal(logIntentScope(input("", undefined, history)), "turn")
+  history[2] = { role: "user", content: "Can you log this bug?" }
+  assert.equal(logIntentScope(input("", undefined, history)), "turn")
+  history[2] = { role: "user", content: "@log message" }
+  assert.equal(logIntentScope(input("", undefined, history)), "message")
+})
+
+test("requires authenticated scope-specific explicit selections", () => {
   assert.equal(resolveLogSelection(input("anything", {
-    scope: "message", message_id: "message-1", selected_content: "chosen",
+    ...source, scope: "message", message_id: "message-1",
+    source_turn_id: "turn-1", selected_content: "chosen",
   }))?.content.selected_content, "chosen")
-  assert.equal(resolveLogSelection(input("anything", { scope: "message" })), null)
   assert.equal(resolveLogSelection(input("anything", {
-    scope: "range", range: { start: 2, end: 9 }, selected_content: "chosen",
+    ...source, scope: "range", range: { start: 2, end: 9 },
+    selected_content: "chosen",
   }))?.flag.scope, "range")
+  assert.equal(resolveLogSelection(input("anything", {
+    ...source, source_user_id: "00000000-0000-4000-8000-000000000002",
+    scope: "conversation",
+  })), null)
+  assert.equal(resolveLogSelection(input("anything", {
+    ...source, source_conversation_id: "other-conversation", scope: "conversation",
+  })), null)
+  assert.equal(resolveLogSelection(input("anything", {
+    ...source, scope: "message", message_id: "message-1",
+    source_turn_id: "other-turn", selected_content: "chosen",
+  })), null)
+  assert.equal(resolveLogSelection(input("anything", {
+    ...source, scope: "turn", source_turn_id: "other-turn",
+  })), null)
 })
 
 test("structured turn preserves the complete latest model-visible turn", () => {
@@ -66,25 +97,12 @@ test("structured turn preserves the complete latest model-visible turn", () => {
     { role: "tool", content: "sales result", tool_call_id: "call-1" },
     { role: "assistant", content: "current answer" },
   ]
-  const selection = resolveLogSelection(input("", { scope: "turn" }, messages))
+  const selection = resolveLogSelection(input("", {
+    ...source, scope: "turn", source_turn_id: "turn-1",
+  }, messages))
   assert.deepEqual(selection?.content.messages, messages.slice(2))
   assert.equal(selection?.content.selected_content,
     "current question\ncalling sales reader\nsales result\ncurrent answer")
-})
-
-test("performs exactly one append for affirmative intent and none otherwise", async () => {
-  let appends = 0
-  const append = () => { appends += 1; return Promise.resolve({ disposition: "stored" }) }
-  const selectedInput = input("", undefined, [
-    { role: "user", content: "question" }, { role: "assistant", content: "selected" },
-    { role: "user", content: "log this" },
-  ])
-  const selection = resolveLogSelection(selectedInput)
-  const context = { input: selectedInput, invocationId: "invocation-1",
-    archiveReceiptId: "receipt-1", logSelection: selection }
-  await appendLogSelection(selection, context, append)
-  await appendLogSelection(null, context, append)
-  assert.equal(appends, 1)
 })
 
 test("counts tool definitions and results in each complete provider payload", () => {

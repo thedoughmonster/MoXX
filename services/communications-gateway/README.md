@@ -5,7 +5,9 @@
 This service is the guarded front door between OpenWebUI and MoMi's configured
 model provider. It checks who may use the beta, per-minute and per-day request
 limits, token ceilings, timeouts, and how much each user may spend,
-records the complete exchange, and exposes only approved MoMi tools.
+records the complete exchange, and exposes only approved MoMi tools. Explicit
+logging uses a separate zero-provider route with the same identity, rate-limit,
+archive, and idempotency boundaries.
 
 The gateway loads MoMi's business identity and organization aliases from its
 owned `assistant_context` database mapping before every admitted turn. Business
@@ -36,6 +38,11 @@ visibly without automatic retry. Non-ambiguous background deadlines and mapped
 round exhaustion return one durable OpenWebUI-compatible limitation message;
 they do not claim that the requested analysis completed.
 
+Exact `@log` and configured ordinary-language commands are resolved before
+provider admission. The native OpenWebUI Action sends an authenticated,
+persisted message selection to `POST /log`; both paths call only the
+communications-operations owner contract and replay one durable receipt.
+
 Provider execution prefers the beta-specific `MOMI_BETA_PROVIDER_API_KEY` and
 may reuse the existing project-scoped `OPENAI_API_KEY` during beta activation.
 Neither value is returned, logged, archived, or exposed to OpenWebUI. Provider
@@ -47,8 +54,8 @@ break the currently deployed Chat Completions runtime.
 
 ## Tools
 
-The model sees bounded canonical record readers, a curated shop-analysis query,
-and `create_momi_log`. The analysis query accepts one parsed read-only `SELECT`
+The model sees bounded canonical record readers and a curated shop-analysis
+query. The analysis query accepts one parsed read-only `SELECT`
 over the database-provided catalog; a dedicated PostgreSQL role is the final
 boundary. SQL stays internal, and no raw/private/auth relation is reachable.
 No arbitrary HTTP, shell, attachment, source API, or other business mutation is

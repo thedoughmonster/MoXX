@@ -2,31 +2,36 @@
 
 ## ELI5
 
-This is OpenWebUI's guarded provider-neutral model endpoint. Auto uses one small
-router; explicit Quick, Standard, Deep, or Maximum profiles bypass it. The
-gateway checks the exact user and adjustable route ceiling, calls the selected
-model at most once per round, uses only approved tools, and saves complete
-archive evidence.
+This is OpenWebUI's guarded provider-neutral assistant and explicit-log
+endpoint. Auto uses one small router; explicit Quick, Standard, Deep, or
+Maximum profiles bypass it. The gateway checks the exact user and adjustable
+route ceiling, calls the selected model at most once per round, uses only
+approved tools, and saves complete archive evidence.
 
 ## Trigger And Input
 
-The thin OpenWebUI Pipe calls `GET /models` or `POST /chat/completions` with the
-purpose-bound gateway credential outside model-visible input. Chat input carries
-the authenticated OpenWebUI user ID/email, conversation/turn IDs, idempotency
-key, alias, and OpenAI-compatible ordered messages.
+The thin OpenWebUI Pipe calls `GET /models` or `POST /chat/completions`; the
+reviewed native Action calls `POST /log`. An authenticated `HEAD /log` returns
+the stable logging-contract digest and live `DENO_DEPLOYMENT_ID` without a
+side effect. Both use the purpose-bound gateway
+credential outside model-visible input. Input carries the authenticated
+OpenWebUI user ID/email, conversation/turn IDs, idempotency key, alias, and
+ordered messages.
 
 Zac's admin route can adjust each user's per-minute, per-day, input, output,
 timeout, total beta-budget, default route, and maximum route independently.
 
-An exact affirmative final user command `log this message`, `log this turn`, or
-`log this conversation` excludes the command itself. Message selects the
-immediately preceding model-visible message, turn selects the preceding
-user-led turn, and conversation selects all preceding messages; bare `log this`
-means turn. Negated, quoted, embedded, or non-final text never creates a flag.
+Versioned `config/log_intent_v1.ts` owns the exact accepted phrases, including
+`@log` and `Can you log this bug?`. Natural commands are refused visibly before
+provider setup because the model-visible message list has no authenticated
+source receipt. Negated, quoted, ambiguous, embedded, or non-final text never
+creates a flag. Structured `/log` requests require the exact authenticated
+source user/conversation and scope-specific message/turn identity.
 
 ## Output
 
-The response is OpenAI-compatible and keeps every visible name provider-neutral.
+Assistant responses are OpenAI-compatible and keep every visible name
+provider-neutral.
 The provider call uses the authenticated user's opaque UUID as a stable
 privacy-preserving safety identifier. Routing profiles set the provider model,
 reasoning effort, and output ceiling; the tool contracts remain unchanged.
@@ -39,7 +44,7 @@ read-only SQL tool. The model never needs to expose SQL, relation names, or
 internal UUIDs to the user. It resolves product aliases through mapped name
 fields, discovers business enum values before filtering, reconciles new query
 evidence with earlier sourced claims, and applies the documented order-time
-coverage fallback. The explicit logger remains a separate write tool.
+coverage fallback. Explicit logging bypasses model inference and provider setup.
 
 Maximum creates each answer round as one background provider response and polls
 that response ID until it becomes terminal or the admitted user deadline ends.
@@ -53,16 +58,22 @@ that OpenWebUI can render and replay without another provider attempt.
 Before provider egress the function admits the invocation, enforces access and
 limits, and archives the exact request and tool definitions. It archives every
 provider response and tool result before advancing, then commits terminal state.
-The strict zero-argument `create_momi_log` tool can only replay an already
-resolved authenticated user flag through the operations-owner contract. Its
-identity is the same as the deterministic pre-provider append, so it collapses.
+For explicit logging it instead admits a zero-cost, zero-provider invocation,
+archives the resolved authenticated selection, calls only the operations-owner
+`momi.communications.create_user_flagged_shop_log.v1` contract, archives the
+receipt, and commits a replayable `momi.log` result.
 
 ## Failure Handling
 
-Same-key/same-payload replay returns the exact durable assistant response only
-for completed execution. In-flight, failed, ambiguous, missing, corrupt, or
-identity-mismatched replay evidence returns a non-2xx failure without another
-provider call. Changed payloads fail. Any provider transport ambiguity becomes
+Same-key/same-payload replay returns the exact durable assistant or log response.
+If the user flag committed before later evidence or terminal bookkeeping failed,
+replay calls the same operations-owner idempotency identity, reconciles the
+original receipt, and completes the same visible success. Indeterminate
+reconciliation remains explicit and never creates a second identity. A
+duplicate log action never invokes a provider or creates a second user flag.
+Missing, corrupt, or identity-mismatched replay evidence returns a non-2xx
+failure without another provider call. Changed payloads fail. Any provider
+transport ambiguity becomes
 `paid_ambiguous` and is never
 automatically retried. Adjustable request or budget limits return
 `request_limit_reached` with HTTP 429, and oversized effective input returns

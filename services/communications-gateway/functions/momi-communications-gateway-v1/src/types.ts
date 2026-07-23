@@ -21,7 +21,10 @@ export type Message =
 
 export type UserFlag = {
   scope: "message" | "turn" | "range" | "conversation"
+  source_user_id: string
+  source_conversation_id: string
   message_id?: string
+  source_turn_id?: string
   range?: Record<string, JSONValue>
   selected_content?: string
   note?: string
@@ -62,6 +65,13 @@ export type Admission = {
   maximum_attempt_cost_micros: string
   maximum_input_tokens: number
   invocation_deadline: string
+  invocation_status: string
+  error_code: string | null
+}
+
+export type LogAdmission = {
+  disposition: "admitted" | "duplicate"
+  invocation_id: string
   invocation_status: string
   error_code: string | null
 }
@@ -119,7 +129,6 @@ export type ToolContext = {
   input: ChatInput
   invocationId: string
   archiveReceiptId: string
-  logSelection: LogSelection | null
 }
 export type LogSelection = {
   flag: UserFlag
