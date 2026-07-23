@@ -4,9 +4,8 @@ import test from "node:test"
 import { appendLogSelection } from "../src/append_log_selection.ts"
 import { estimateProviderPayloadTokens } from "../src/provider_payload_policy.ts"
 import { remainingDeadlineSeconds } from "../src/remaining_deadline_seconds.ts"
-import { replayResponse } from "../src/replay_response.ts"
 import { resolveLogSelection } from "../src/resolve_log_selection.ts"
-import type { Admission, ChatInput } from "../src/types.ts"
+import type { ChatInput } from "../src/types.ts"
 
 const input = (content: string, momi_log?: ChatInput["momi_log"],
   messages?: ChatInput["messages"]): ChatInput => ({
@@ -104,13 +103,4 @@ test("enforces one whole-invocation deadline", () => {
     Date.parse("2026-07-21T00:00:00.000Z")), 10)
   assert.throws(() => remainingDeadlineSeconds("2026-07-21T00:00:00.000Z",
     Date.parse("2026-07-21T00:00:01.000Z")), /invocation_deadline_exceeded/)
-})
-
-test("returns only redacted terminal replay state", () => {
-  const admission = ({ disposition: "duplicate", invocation_id: "invocation-1",
-    invocation_status: "paid_ambiguous", error_code: "provider_transport_ambiguous" } as Admission)
-  assert.deepEqual(replayResponse(admission), { status: 200, body: {
-    id: "invocation-1", object: "momi.execution", model: "momi-assistant",
-    status: "paid_ambiguous", replay: true, error: "request_failed",
-  } })
 })

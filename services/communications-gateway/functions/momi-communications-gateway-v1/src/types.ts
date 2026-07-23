@@ -66,6 +66,13 @@ export type Admission = {
   error_code: string | null
 }
 
+export type InvocationReplay = {
+  invocation_status: string
+  error_code: string | null
+  terminal_response: Record<string, JSONValue> | null
+  provider_calls: number
+}
+
 export type RouteProfile = {
   route_key: RouteKey
   route_rank: number
