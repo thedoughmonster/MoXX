@@ -32,7 +32,9 @@ Final success requires the archive owner's terminal receipt.
 Maximum uses the provider's background-response protocol and polls the same paid
 attempt within the user's configured deadline. Polling never creates a second
 model attempt, and an unfinished or unreachable background response fails
-visibly without automatic retry.
+visibly without automatic retry. Non-ambiguous background deadlines and mapped
+round exhaustion return one durable OpenWebUI-compatible limitation message;
+they do not claim that the requested analysis completed.
 
 Provider execution prefers the beta-specific `MOMI_BETA_PROVIDER_API_KEY` and
 may reuse the existing project-scoped `OPENAI_API_KEY` during beta activation.
