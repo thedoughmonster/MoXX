@@ -34,6 +34,10 @@ test("schema and parser accept the deterministic contract", async () => {
   const schema = JSON.parse(source)
   assert.equal(new Ajv2020({ strict: false }).compile(schema)(valid), true)
   assert.deepEqual(schema.properties.labels.items.enum, allowedLabels)
+  assert.equal(schema.properties.schema_version.type, "integer")
+  assert.equal(schema.properties.relationships.items.properties.type.type, "string")
+  assert.equal(schema.properties.confidence.type, "string")
+  assert.equal(schema.properties.labels.items.type, "string")
 })
 
 test("all explicit relationship types are accepted", () => {
