@@ -36,7 +36,9 @@ test("previews and applies the same selected include-all path", () => {
       ["20260102000000"],
       ["20260101000000", "20260102000000"],
     ],
-    "Would push migration 20260101000000_first.sql...\n",
+    "DRY RUN: migrations will *not* be pushed to the database.\n" +
+      "Would push these migrations:\n" +
+      " • 20260101000000_first.sql\n",
     events,
   )
   executeMigrationRelease(
@@ -59,8 +61,9 @@ test("rejects preview output with an extra or missing migration", () => {
       ["20260102000000"],
       makeIo(
         [["20260101000000", "20260103000000"]],
-        "Would push migration 20260102000000_second.sql...\n" +
-          "Would push migration 20260103000000_third.sql...\n",
+        "Would push these migrations:\n" +
+          " • 20260102000000_second.sql\n" +
+          " • 20260103000000_third.sql\n",
         [],
       ),
     ),
@@ -70,7 +73,7 @@ test("rejects preview output with an extra or missing migration", () => {
     () => executeMigrationRelease(
       local,
       ["20260102000000"],
-      makeIo([["20260101000000", "20260103000000"]], "", []),
+      makeIo([["20260101000000", "20260103000000"]], "Remote database is up to date.\n", []),
     ),
     /Migration preview differs; missing: 20260102000000_second\.sql/,
   )
@@ -80,7 +83,8 @@ test("stops on apply failure before the final history query", () => {
   const events: string[] = []
   const io = makeIo(
     [["20260101000000"], ["20260101000000", "20260102000000"]],
-    "Would push migration 20260102000000_second.sql...\n",
+    "Would push these migrations:\n" +
+      " • 20260102000000_second.sql\n",
     events,
     new Error("apply failed"),
   )
@@ -98,7 +102,8 @@ test("stops on apply failure before the final history query", () => {
 test("fails when final hosted parity is incomplete", () => {
   const io = makeIo(
     [["20260101000000"], ["20260101000000"]],
-    "Would push migration 20260102000000_second.sql...\n",
+    "Would push these migrations:\n" +
+      " • 20260102000000_second.sql\n",
     [],
   )
   assert.throws(
