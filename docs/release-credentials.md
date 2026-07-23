@@ -1,0 +1,36 @@
+# Release credentials
+
+Keen Pine holds durable operator credentials. Never ask for token values in
+chat, commands, `.env`, repository content, packets, logs, or receipts.
+
+## Custody
+
+| Credential | Authoritative location |
+| --- | --- |
+| GitHub CLI account | `/root/.config/gh/` credential store |
+| Supabase OAuth/PAT | authenticated Supabase CLI profile |
+| CLI database login | short-lived and internal to the CLI |
+| GitHub deployment token | protected GitHub environment secret |
+| Runtime/API secret | Supabase Edge Function Secret |
+
+Verify GitHub with `gh auth status` and Supabase with a content-free CLI
+management call. Never read or export credential files. The pinned CLI mints and
+uses its database login internally; repository children strip
+`SUPABASE_DB_PASSWORD` and `PGPASSWORD`.
+
+Repository-only development releases require no Supabase access. Migration
+releases invoke only the official linked CLI preview/apply/parity path.
+Edge Function deployment credentials are available only to the two authorized
+GitHub workflows.
+
+## Failure handling
+
+1. Repeat sandbox-failed read-only auth checks with approved network access.
+2. Repair only the failed credential authority after that check also fails.
+3. For migration auth, verify the CLI profile, exact linked ref, and project
+   membership; never substitute the PAT as a database password.
+4. For repository-only release, any database login attempt is a tooling defect.
+
+A sandbox can report an inaccessible token as invalid. That never authorizes
+logout, login replacement, credential inspection, authority switching, or
+workspace tooling removal.

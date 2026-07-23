@@ -23,6 +23,18 @@ source-neutral provenance, and freshness. `canonical-resource-v2` responses use
 DM-owned identity and vocabulary; source DTOs and source identifiers never
 become request requirements or canonical document fields.
 
+The production beta uses `momi.canonical_beta_query.v1` to issue and consume an
+exact one-use capability for one allowlisted entity query. The contract accepts
+only canonical order, payment, menu, schedule, or stock identities and returns
+versioned source-neutral documents with provenance and freshness. It never
+accepts a source identifier or arbitrary relation.
+
+`momi.shop_analysis_query.v1` exposes a cataloged, non-identifying analytical
+projection for natural shop questions. Its exact security-invoker executor runs
+one parsed `SELECT` as the declared non-login gateway reader in a read-only,
+time- and size-bounded transaction. PostgreSQL grants limit it to the cataloged
+analysis relations even if model instructions or generated SQL are wrong.
+
 `momi.orders.get_by_version.v1` additionally binds the token and request to one
 immutable canonical order-version UUID. Event consumers can therefore decide
 the exact observation that triggered them even if a newer version arrives.

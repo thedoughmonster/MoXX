@@ -16,9 +16,13 @@
     "constitution:check": "node scripts/check_service_constitution.ts",
     "database-access:renew": "node scripts/run_renew_database_access.ts",
     "deploy:apply": "node scripts/run_deploy_apply.ts",
-    "deploy:plan": "node scripts/run_deploy_plan.ts",
+    "deploy:plan": "node scripts/run_impact_plan.ts plan",
     "edge:check": "node scripts/check_edge_functions.ts",
     "inventory": "node scripts/run_inventory.ts",
+    "momi-check": "node scripts/run_check_changed.ts",
+    "momi-context": "node scripts/run_context_pack.ts",
+    "momi-impact": "node scripts/run_impact_plan.ts",
+    "momi-receipt": "node scripts/run_receipt_summarize.ts",
     "local:db-export": "node local-tools/postgres-nas-export/export.ts",
     "local:db-restore-drill": "node local-tools/postgres-nas-export/restore_drill.ts",
     "local:db-verify": "node local-tools/postgres-nas-export/verify.ts",
@@ -35,6 +39,7 @@
   "devDependencies": {
     "ajv": "8.20.0",
     "deno": "2.9.2",
+    "pgsql-ast-parser": "12.0.2",
     "supabase": "2.109.1",
     "typescript": "6.0.3"
   }

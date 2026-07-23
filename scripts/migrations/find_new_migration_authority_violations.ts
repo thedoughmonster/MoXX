@@ -1,24 +1,18 @@
 import type { LoadedService } from "../architecture/types.ts"
-import type { AuthoritySnapshot } from
-  "../constitution/load_target_authority_snapshot.ts"
-import { buildRoutineAuthority } from
-  "../constitution/build_routine_authority.ts"
-import { findForeignSchemaAuthorityChanges } from
-  "../sql/find_foreign_schema_authority_changes.ts"
+import type { AuthoritySnapshot } from "../constitution/load_target_authority_snapshot.ts"
+import { buildRoutineAuthority } from "../constitution/build_routine_authority.ts"
+import { findForeignSchemaAuthorityChanges } from "../sql/find_foreign_schema_authority_changes.ts"
 import { normalizeSqlIdentifiers } from "../sql/normalize_sql_identifiers.ts"
-import { findUnqualifiedRelationReferences } from
-  "../sql/find_unqualified_relation_references.ts"
-import { assertSupportedPersistentDdl } from
-  "./assert_supported_persistent_ddl.ts"
-import { findIndexAuthorityViolations } from
-  "./find_index_authority_violations.ts"
+import { findUnqualifiedRelationReferences } from "../sql/find_unqualified_relation_references.ts"
+import { assertSupportedPersistentDdl } from "./assert_supported_persistent_ddl.ts"
+import { findIndexAuthorityViolations } from "./find_index_authority_violations.ts"
 import { findRoleAuthorityChanges } from "./find_role_authority_changes.ts"
 import { findRelationAuthorityViolations } from
   "./find_relation_authority_violations.ts"
 import { findSameChangeTransferViolations } from
   "./find_same_change_transfer_violations.ts"
-import { findMigrationRoutineAuthorityViolations } from
-  "./find_migration_routine_authority_violations.ts"
+import { findMigrationRoutineAuthorityViolations } from "./find_migration_routine_authority_violations.ts"
+import { hasDeclaredDynamicMigrationRead } from "./has_declared_dynamic_migration_read.ts"
 export function findNewMigrationAuthorityViolations(
   baseline: Map<string, string>,
   current: Map<string, string>,
@@ -77,10 +71,16 @@ export function findNewMigrationAuthorityViolations(
     const procedural = normalized
       .replace(/\bcreate\s+(?:constraint\s+)?trigger\b[^;]*?\bexecute\s+(?:function|procedure)\b[^;]*;/gi, "")
       .replace(/\b(?:grant|revoke)\b[^;]*;/gi, "")
-    if (/\bexecute\b/i.test(procedural)) {
+    const declaredDynamic = hasDeclaredDynamicMigrationRead(
+      consumer, services, normalized,
+    )
+    if (/\bexecute\b/i.test(procedural) && !declaredDynamic) {
       violations.push(`${file}: dynamic SQL relation authority is forbidden`)
     }
-    for (const change of findRoleAuthorityChanges(normalized)) {
+    for (const change of findRoleAuthorityChanges(normalized,
+      consumer.manifest.owned_dataset?.db_role,
+      consumer.manifest.owned_dataset?.dynamic_read_routines ?? [],
+    )) {
       violations.push(`${file}: ${change}`)
     }
     violations.push(...findSameChangeTransferViolations(

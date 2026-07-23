@@ -7,6 +7,7 @@ identify deployment location but do not define business purpose.
 
 | Capability | Function key | Purpose | Service | Kind | Boundary | Route |
 | --- | --- | --- | --- | --- | --- | --- |
+| ingest | `momi.communications.capture_human_message.v1` | Capture one committed OpenWebUI human message into immutable evidence. | `communications-archive` | core_capability | momi_internal | `/functions/v1/momi-communications-capture-human-message-v1` |
 | ingest | `momi.communications.capture_openai_message.v1` | Capture one OpenAI or ChatGPT source message into the immutable communications archive. | `communications-archive` | core_capability | momi_internal | `/functions/v1/momi-communications-capture-openai-message-v1` |
 | ingest | `momi.warehouse_projection.toast.consume.v1` | Claim one capability-bound Toast event delivery and project its referenced source record. | `warehouse-projection` | core_capability | momi_internal | `/functions/v1/momi-warehouse-projection-worker-v1` |
 | ingest | `toast.orders.webhook_ingest.v1` | Authenticate and preserve one Toast Orders webhook event before durable alert handoff. | `toast-order-ingest` | source_adapter | toast_inbound | `/functions/v1/toast-orders-webhook-ingest-v1` |
@@ -22,6 +23,7 @@ identify deployment location but do not define business purpose.
 | read | `momi.schedules.get_by_id.v1` | Read one canonical Dough Monster schedule by its stable entity ID. | `warehouse-read-api` | core_capability | momi_internal | `/functions/v1/momi-warehouse-schedules-get-by-id-v1` |
 | read | `momi.stock_observations.get_latest.v1` | Read the latest canonical stock observation for one item and location. | `warehouse-read-api` | core_capability | momi_internal | `/functions/v1/momi-warehouse-stock-observations-get-by-id-v1` |
 | read | `momi.toast_orders.get_by_id.v1` | Read one exact stored Toast order through the owned MoMi API contract. | `toast-order-read-api` | core_capability | momi_internal | `/functions/v1/momi-toast-orders-get-by-id-v1` |
+| decide | `momi.communications.chat_completions.v1` | Serve one bounded provider-neutral MoMi assistant gateway route. | `communications-gateway` | core_capability | momi_internal | `/functions/v1/momi-communications-gateway-v1` |
 | decide | `momi.communications.evaluate_item.v1` | Evaluate one durable communication archive item with a configured model. | `communications-evaluation` | core_capability | momi_internal | `/functions/v1/momi-communications-evaluate-item-v1` |
 | decide | `momi.orders.alert.evaluate.v1` | Consume one exact canonical order delivery, evaluate its owned order, and create durable delivery work. | `order-alerting` | core_capability | momi_internal | `/functions/v1/momi-order-alert-worker-v1` |
 | deliver | `momi.events.route.v1` | Route one durable event reference to configured subscriber queues. | `momi-event-routing` | core_capability | momi_internal | `/functions/v1/momi-event-router-v1` |

@@ -2,6 +2,7 @@ import { validateArchitecture } from "./architecture/validate_architecture.ts"
 import { assertGitHubDeploymentAuthority } from "./deploy/assert_github_deployment_authority.ts"
 import { assertGitState } from "./deploy/assert_git_state.ts"
 import { assertInventory } from "./deploy/assert_inventory.ts"
+import { assertPlanIdentity } from "./deploy/assert_plan_identity.ts"
 import { deployFunctions } from "./deploy/deploy_functions.ts"
 import { linkProject } from "./deploy/link_project.ts"
 import { listHostedFunctions } from "./deploy/list_hosted_functions.ts"
@@ -10,24 +11,23 @@ import { probeFunctions } from "./deploy/probe_functions.ts"
 import { readAdvisors } from "./deploy/read_advisors.ts"
 import { reconcileInventory } from "./deploy/reconcile_inventory.ts"
 import { requireCredentials } from "./deploy/require_credentials.ts"
-import { runChecks } from "./deploy/run_checks.ts"
 import { selectFunctions } from "./deploy/select_functions.ts"
 import { writeReleaseRecord } from "./deploy/write_release_record.ts"
 
 const options = parseDeploymentOptions()
 assertGitHubDeploymentAuthority(options.environment)
+assertPlanIdentity()
 const architecture = await validateArchitecture()
-const functions = selectFunctions(architecture, options.service)
+const functions = selectFunctions(architecture, options.services)
 const environment = architecture.workspace.environments[options.environment]
 const context = {
   environment: options.environment,
   project_ref: environment.project_ref,
-  service: options.service,
+  service: options.services.join(","),
   functions,
 }
 requireCredentials()
 assertGitState(environment.branch)
-runChecks(options.service)
 linkProject(environment.project_ref)
 deployFunctions(environment.project_ref, functions)
 const hosted = listHostedFunctions(environment.project_ref)

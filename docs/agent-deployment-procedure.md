@@ -1,81 +1,77 @@
 # Agent Deployment Procedure
 
-Use this path for every hosted change. A permission failure is a routing signal,
-not a reason to try another publisher.
+GitHub issues own work, PR CI owns final validation, the local Node 24
+coordinator owns ordered database migration, and two GitHub workflows alone own
+Edge Function deployment.
 
-## Before Release
+## Publish and validate
 
-1. Read root and affected service instructions and manifests.
-2. Start from current `dev` and make one intentional feature branch.
-3. Commit the complete change and confirm the worktree is clean.
-4. Keep secrets out of commands, logs, commits, manifests, and release records.
+1. Work in one isolated feature worktree from exact current `dev`.
+2. Run `pnpm momi-check changed` while iterating.
+3. Commit, push, and open one draft PR to `dev` with exactly one owning issue and
+   `Disposition: partial|complete`.
+4. Let the PR job named `validate-final` derive and run exactly one final gate.
+5. Download its `validation-<head-sha>` artifact after success.
 
-## Release To Dev
+Do not run the same full gate locally and in PR CI. `dev` and `prod` pushes do
+not trigger another repository validation.
 
-Run exactly:
+## Release development
 
-```text
-pnpm release:dev
-```
-
-The Node 24 coordinator checks the repository, pushes the feature branch,
-creates or resumes its PR, waits for GitHub validation, merges it, and waits for
-the exact `dev` commit validation. It then links the development database over
-the IPv4 session pooler, previews and applies ordered migrations, proves local
-and hosted history parity, and dispatches the exact-SHA development workflow.
-
-Only that GitHub workflow may deploy Edge Functions. The coordinator resumes
-completed stages without creating a second successful deployment for a commit.
-
-## Release To Production
-
-From clean `dev` matching `origin/dev`, run exactly:
+After the validated tree is merged and clean local `dev` equals `origin/dev`:
 
 ```text
-pnpm release:prod
+pnpm release:dev -- --validation-receipt <validation-receipt.json>
 ```
 
-The coordinator creates or resumes the `dev`-to-`prod` PR, waits for checks,
-applies and verifies production migrations, then dispatches exact-SHA promotion.
-GitHub fast-forwards `prod`, deploys its Edge Functions, and records the release.
+The coordinator accepts a benign descendant merge SHA only when the tree, diff,
+impact digest, and gate exactly match the validation receipt. It also verifies
+the receipt's exact GitHub run and successful `validate-final` job.
+
+- Repository-only plans write a release receipt with no database access and no
+  Edge Function workflow dispatch.
+- Migration plans use the authenticated pinned Supabase CLI to link the exact
+  project, preview, apply, and prove history parity.
+- Function plans dispatch `deploy-dev.yml` with only affected manifest-owned
+  services and the exact plan/tree identity.
+
+The coordinator polls the exact required job with a bound. A successful required
+job is authoritative even while aggregate run state is lagging.
+
+## Release production
+
+Production requires the exact development release receipt:
+
+```text
+pnpm release:prod -- --dev-receipt <dev-release-receipt.json>
+```
+
+The coordinator never reruns repository validation. It verifies the exact
+development tree/diff/plan, applies and verifies production migrations when
+present, dispatches receipt-bound promotion, and deploys only the same affected
+services. Protected GitHub environments remain the production exposure gate.
 
 Never merge or push `prod` directly. Never deploy an Edge Function with the
-Supabase plugin, CLI, dashboard, or a local script.
+Supabase plugin, CLI, dashboard, or local code.
 
-## Credentials
+## Credential and database boundaries
 
-| Credential | Authoritative location |
-| --- | --- |
-| Local Supabase CLI token | Supabase CLI credential store on the release host |
-| Local database password | Transient `SUPABASE_DB_PASSWORD` release environment |
-| GitHub deployment token | Protected GitHub environment secret |
-| Runtime/API secret | Supabase Edge Function Secret |
+- GitHub credentials remain in the GitHub CLI credential store.
+- The Supabase account credential remains in the authenticated CLI profile.
+- Authenticate through OAuth or a personal access token; do not substitute the account PAT as a database password.
+- The CLI alone creates and uses its short-lived database login.
+- Repository children strip `SUPABASE_DB_PASSWORD` and `PGPASSWORD`.
+- GitHub deployment tokens remain protected environment secrets.
+- Runtime/API secrets remain Supabase Edge Function secrets.
+- No credential value enters a command, URL, log, commit, packet, or receipt.
 
-The local Supabase token and database password are account-management
-credentials. Preflight requires the token to enumerate the exact target project
-and requires a database password so the CLI cannot use a temporary login role.
-Do not copy either credential into Supabase runtime secrets, Vault, `.env`,
-GitHub, the repository, commands, or logs.
+Only `scripts/release/apply_migrations.ts` may call `db push`. Each apply uses
+`--linked`, starts with `--dry-run`, ends with exact parity, and never rewrites
+an applied migration. GitHub workflows never apply migrations.
 
-## Database Controls
+## Failure and rollback
 
-- `scripts/release/apply_migrations.ts` is the sole normal `db push` caller.
-- Preview, apply, and parity use one validated password-free
-  `*.pooler.supabase.com:5432` URL with verified TLS; direct IPv6 is rejected.
-- Only database children receive the password, as `PGPASSWORD`; it must never
-  appear in a URL, argument, log, file, or release record.
-- The coordinator rejects the Supabase CLI `--debug` flag because debug mode
-  changes the database transport and cannot prove normal TLS connectivity.
-- Every apply starts with a dry preview and ends with exact history parity.
-- Applied migrations are immutable; corrections require a new migration.
-- Migrations must remain backward-compatible if a later GitHub step is delayed.
-- The Supabase plugin is for inspection or deliberate emergency repair only.
-
-## Failure Routing
-
-- Authentication failure: repair the named credential, then rerun the command.
-- PR or workflow failure: inspect that GitHub run and fix the owning change.
-- Migration failure: stop, inspect schema and history, then add a correction.
-- Hosted behavior failure: preserve durable evidence and diagnose the owner.
-
-Do not retry through a different deployment authority.
+Inspect the exact failed job or migration step and fix the owning change. Do not retry through a different deployment authority. Stop for destructive effects,
+secret exposure, production exposure without authority, or inability to prove
+rollback. Git revert is code rollback; applied schema corrections are additive
+migrations.

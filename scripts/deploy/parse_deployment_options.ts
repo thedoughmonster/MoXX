@@ -3,9 +3,12 @@ import type { DeploymentOptions, EnvironmentKey } from "./types.ts"
 
 export function parseDeploymentOptions(): DeploymentOptions {
   const environment = readOption("env", "")
-  const service = readOption("service", "all")
+  const services = readOption("services", "").split(",").filter(Boolean).sort()
   if (environment !== "dev" && environment !== "prod") {
     throw new Error("--env must be dev or prod")
   }
-  return { environment: environment as EnvironmentKey, service }
+  if (
+    services.some((service) => !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(service))
+  ) throw new Error("--services requires a comma-separated service list")
+  return { environment: environment as EnvironmentKey, services }
 }

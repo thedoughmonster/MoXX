@@ -67,12 +67,14 @@ the archive with Toast unavailable.
 - `prod` deploys to the production Supabase project.
 - Production changes flow from reviewed and verified development changes.
 
-See [deployment](docs/deployment.md) for the exact commands, credential
-boundaries, inventory gate, and exact-commit promotion process.
+See [deployment](docs/deployment.md) for the exact commands and
+[release credentials](docs/release-credentials.md) for the durable GitHub and
+Supabase token workflow.
 
 After a change is committed on a clean feature branch, `pnpm release:dev`
-handles its PR, checks, migration, and GitHub deployment. From clean, current
-`dev`, `pnpm release:prod` performs the exact-commit production promotion.
+handles a code-only PR, checks, and GitHub deployment. Migration-bearing
+development releases use `/root/momi-release dev`. From clean, current `dev`,
+`/root/momi-release prod` performs the exact-commit production promotion.
 
 ## Hosted Secrets
 

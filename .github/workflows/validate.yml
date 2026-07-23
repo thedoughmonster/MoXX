@@ -2,70 +2,41 @@ name: Validate backend
 
 on:
   pull_request:
-    branches: [dev, prod]
-  push:
-    branches: [dev, prod]
+    branches: [dev]
+  workflow_dispatch:
+    inputs:
+      base_sha:
+        description: Exact accepted base commit
+        required: true
+        type: string
+      head_sha:
+        description: Exact candidate commit
+        required: true
+        type: string
 
 permissions:
-  actions: read
   contents: read
 
-env:
-  MOMI_PROD_REF: origin/prod
-  MOMI_DEV_REF: origin/dev
-
 concurrency:
-  group: validate-${{ github.ref }}
+  group: validate-${{ github.event.pull_request.number || inputs.head_sha }}
   cancel-in-progress: true
 
 jobs:
-  validate:
+  validate-final:
+    name: validate-final
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      MOMI_BASE_REF: ${{ github.event.pull_request.base.sha || inputs.base_sha }}
+      MOMI_HEAD_REF: ${{ github.event.pull_request.head.sha || inputs.head_sha }}
+      MOMI_PROD_REF: origin/prod
+      MOMI_DEV_REF: ${{ github.event.pull_request.base.sha || inputs.base_sha }}
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ env.MOMI_HEAD_REF }}
           fetch-depth: 0
       - run: git fetch origin dev:refs/remotes/origin/dev prod:refs/remotes/origin/prod
-      - name: Resolve last accepted development baseline
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          runs="$(gh api --method GET \
-            "repos/$GITHUB_REPOSITORY/actions/workflows/validate.yml/runs" \
-            -f branch=dev -f event=push -f status=success -F per_page=100)"
-          if [[ "$GITHUB_EVENT_NAME" == push && "$GITHUB_REF" == refs/heads/dev ]]; then
-            baseline="$(jq -r --arg current "$GITHUB_SHA" \
-              '[.workflow_runs[] | select(.head_sha != $current)][].head_sha' \
-              <<<"$runs" | while read -r candidate; do
-                if git merge-base --is-ancestor "$candidate" "$GITHUB_SHA"; then
-                  echo "$candidate"
-                  break
-                fi
-              done)"
-          elif [[ "$GITHUB_EVENT_NAME" == push && "$GITHUB_REF" == refs/heads/prod ]]; then
-            baseline="$GITHUB_SHA"
-            jq -e --arg dev "$baseline" \
-              '.workflow_runs[] | select(.head_sha == $dev)' <<<"$runs" >/dev/null
-          elif [[ "$GITHUB_EVENT_NAME" == pull_request && "$GITHUB_BASE_REF" == prod ]]; then
-            baseline="${{ github.event.pull_request.head.sha }}"
-            jq -e --arg dev "$baseline" \
-              '.workflow_runs[] | select(.head_sha == $dev)' <<<"$runs" >/dev/null
-            git merge-base --is-ancestor "$baseline" "$GITHUB_SHA"
-          else
-            baseline="${{ github.event.pull_request.base.sha }}"
-            jq -e --arg dev "$baseline" \
-              '.workflow_runs[] | select(.head_sha == $dev)' <<<"$runs" >/dev/null
-            git merge-base --is-ancestor "$baseline" "$GITHUB_SHA"
-          fi
-          if [[ ! "$baseline" =~ ^[0-9a-f]{40}$ ]]; then
-            echo "Unable to resolve the last accepted development SHA" >&2
-            exit 1
-          fi
-          if [[ "$GITHUB_REF" == refs/heads/dev ]]; then
-            git merge-base --is-ancestor "$baseline" "$GITHUB_SHA"
-          fi
-          echo "MOMI_DEV_REF=$baseline" >> "$GITHUB_ENV"
       - uses: pnpm/action-setup@v4
         with:
           version: 11.7.0
@@ -74,4 +45,18 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run check
+      - name: Explain exact final validation plan
+        run: >-
+          pnpm momi-impact plan --base "$MOMI_BASE_REF" --head "$MOMI_HEAD_REF"
+          --output .momi/impact-plan.json
+      - name: Run the one final gate
+        run: >-
+          pnpm momi-check changed --final --base "$MOMI_BASE_REF"
+          --head "$MOMI_HEAD_REF" --receipt .momi/validation-receipt.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: validation-${{ env.MOMI_HEAD_REF }}
+          path: |
+            .momi/impact-plan.json
+            .momi/validation-receipt.json
+          if-no-files-found: error

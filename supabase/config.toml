@@ -81,3 +81,9 @@ verify_jwt = true
 
 [functions.momi-communications-evaluate-item-v1]
 verify_jwt = false
+
+[functions.momi-communications-gateway-v1]
+verify_jwt = false
+
+[functions.momi-communications-capture-human-message-v1]
+verify_jwt = false

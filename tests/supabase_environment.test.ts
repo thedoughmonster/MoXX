@@ -18,8 +18,8 @@ test("uses the official profile and strips ambient database credentials", () => 
   assert.equal(environment.PGPASSWORD, undefined)
 })
 
-test("exposes a database password only as child PGPASSWORD", () => {
-  const environment = supabaseEnvironment({ SAFE_VALUE: "preserved" }, "secret")
-  assert.equal(environment.PGPASSWORD, "secret")
+test("never creates a child database password", () => {
+  const environment = supabaseEnvironment({ SAFE_VALUE: "preserved" })
+  assert.equal(environment.PGPASSWORD, undefined)
   assert.equal(environment.SUPABASE_DB_PASSWORD, undefined)
 })

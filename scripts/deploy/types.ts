@@ -4,7 +4,7 @@ export type EnvironmentKey = "dev" | "prod"
 
 export type DeploymentOptions = {
   environment: EnvironmentKey
-  service: string
+  services: string[]
 }
 
 export type HostedFunction = {

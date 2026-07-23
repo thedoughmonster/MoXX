@@ -1,7 +1,6 @@
 # MoMi Backend Agent Contract
 
 ## Ownership
-
 This repository owns MoMi backend services, database migrations, and their
 explicit contracts. Modules are separated by business capability even when
 they deploy from the same repository.
@@ -12,14 +11,12 @@ they deploy from the same repository.
 - Frontend and mobile applications belong in their own repositories.
 
 ## Hard Rules
-
 - Do not require Docker or WSL for the normal development workflow.
-- Keep every handwritten non-SQL file at or below 120 physical lines.
+- Target 120 physical lines for handwritten non-SQL files; CI warns above 120 and fails above 140.
 - Each TypeScript file may declare at most one function.
 - Organize deployable behavior by business capability under `services/`.
 - Each service owns `AGENTS.md`, `README.md`, and one valid `service.json`.
-- Each owned function has a README with `ELI5`, trigger, input, output, side
-  effects, failure handling, and tests, plus one valid `function.json`.
+- Each owned function has a README with `ELI5`, trigger, input, output, side effects, failure handling, and tests, plus one valid `function.json`.
 - Do not add function-level agent files unless a unique local rule requires one.
 - Keep `supabase/functions/<slug>/` as a thin deployment adapter only.
 - Manifests own logical purpose; runtime and route are deployment metadata.
@@ -35,8 +32,7 @@ they deploy from the same repository.
 - Never add new findings to the constitution debt baseline; remove fixed entries.
 - Never add or rewrite runtime access debt findings, including active view and routine bodies; remove only after owner-contract cutover.
 - Every dataset has exactly one owning service; other services use only the owner's versioned public contracts.
-- Procurement services may call external sources but may not call MoMi-owned
-  services or write domain datasets.
+- Procurement services may call external sources but may not call MoMi-owned services or write domain datasets.
 - Dataset ownership includes database permissions; private tables must become
   inaccessible to non-owner runtime roles as enforcement hardens.
 - Services may import declared public contracts, never another implementation.
@@ -51,17 +47,18 @@ they deploy from the same repository.
 - Keep `supabase/migrations/` flat; only `AGENTS.md` and migration SQL belong there.
 - Start each migration absent from production with one `-- service-owner: <service-key>` header.
 - Land an ownership transfer as a manifest-only change before any later migration mutates it; checks pin existing authority to trusted `dev`.
-- Never deploy with `--prune`; retire hosted functions through an expiring
-  manifest and explicit caller-verified removal.
-- GitHub Actions is the sole authority for repository code and Edge Function
-  deployments. Local apply, Supabase Git deployment, and second deployers are
-  forbidden by ADR `0006`.
+- Never deploy with `--prune`; retire hosted functions through an expiring manifest and explicit caller-verified removal.
+- GitHub Actions is the sole authority for repository code and Edge Function deployments. Local apply, Supabase Git deployment, and second deployers are forbidden by ADR `0006`.
+- Run focused changed-path checks while iterating and exactly one final
+  authoritative validation gate for the committed tree.
 - Only `.github/workflows/deploy-dev.yml` and `deploy-prod.yml` may invoke the
   deployment apply command.
 - The Node 24 release coordinator is the sole normal database migration
-  authority. It must use the pinned Supabase CLI and IPv4 session pooler.
+  authority. It must use the pinned Supabase CLI's exact-project `--linked`
+  transport and CLI-owned short-lived login role.
 - A development deployment may start only after its exact commit is validated
-  and its migrations have reached parity in the development database.
+  and its migrations have reached parity; migration-free features may inherit
+  parity only from the exact deployed `dev` baseline and an empty migration diff.
 - Keep manual operator programs under `local-tools/` and obey its `AGENTS.md`.
 - Track local tooling on both branches, but never deploy, host, schedule, or
   import it into runtime code.
@@ -72,8 +69,7 @@ they deploy from the same repository.
 - Preserve complete source payloads. Do not omit source fields.
 - Do not perform business decisions or delivery work in ingestion code.
 - Treat the warehouse as the system of record for all source and business data.
-- Acquire source data through inbound webhooks, files, warehouse loads, or a
-  dedicated hydration adapter processing durable work.
+- Acquire source data through inbound webhooks, files, warehouse loads, or a dedicated hydration adapter processing durable work.
 - Only a dedicated hydration adapter may fetch business data from a source API.
 - Hydration and re-hydration must be scheduled, idempotent, and warehouse-backed.
 - Never fetch source data inside a report, request, decision, or delivery path.
@@ -104,17 +100,21 @@ they deploy from the same repository.
 - Build joins and projections as explicitly named, versioned database views.
 - Treat the Toast event GUID as the delivery idempotency key.
 - Store runtime secrets in Supabase, deployment secrets in GitHub, and local CLI credentials in the approved release host's credential store.
-- Expose the database password only as `SUPABASE_DB_PASSWORD` during a release; never duplicate credentials in Git.
-
-## Change Sequence
-
-1. Update the behavior contract.
-2. Add or revise tests.
-3. Create a migration with the Supabase CLI when schema changes are needed.
-4. Implement the smallest behavior change.
-5. Run `npm run check -- --service <service-key>`.
-6. Review and commit the diff on a feature branch based on current `dev`.
-7. Release with `pnpm release:dev`; promote with `pnpm release:prod`.
-8. Verify the hosted behavior with a controlled event.
-
-Applied migrations are immutable. Add a new migration for later corrections.
+- Authenticate the pinned Supabase CLI by OAuth/PAT; let the CLI mint its own
+  short-lived database login role, and never reuse the account token as a
+  Postgres password.
+## Default Development Loop
+- Bind every change to one open issue and an isolated feature worktree.
+- Use `momi-context pack` for a fresh executor and `momi-check changed` while
+  iterating; do not duplicate the PR's final gate locally.
+- Keep mechanical enforcement in the one impact-selected PR gate.
+- Escalate to Architect or Repo Guard only for a new ownership/contract boundary,
+  material security/privacy/cost/exposure decision, destructive migration,
+  production infrastructure change, or irreconcilable repository-law conflict.
+- Publish one PR with owning-issue disposition; release its exact validation
+  receipt to development, then promote only its exact development receipt.
+- Verify changed hosted behavior with one controlled acceptance event.
+## Code Review Rules
+- Block unauthorized ownership, private-data, public-contract, or deployer changes.
+- Block material correctness, security, privacy, data-loss, or rollback defects.
+- Report nonblocking improvements as follow-up work; leave mechanical checks to CI.

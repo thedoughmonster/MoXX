@@ -21,6 +21,46 @@ test("rejects role membership and unmodeled ownership authority", () => {
   ).join("\n"), /role and ownership authority is not yet modeled/)
 })
 
+test("allows only the exact declared least-privilege non-login role", () => {
+  const owner = service("records-owner")
+  owner.manifest.owned_dataset!.db_role = "svc_records_owner"
+  const header = "-- service-owner: records-owner\n"
+  const safe = "create role svc_records_owner nologin noinherit nosuperuser " +
+    "nocreatedb nocreaterole noreplication nobypassrls;"
+  assert.deepEqual(findNewMigrationAuthorityViolations(
+    new Map(), new Map([["001.sql", header + safe]]), [owner],
+  ), [])
+  const unsafe = safe.replace("nologin", "login")
+  assert.match(findNewMigrationAuthorityViolations(
+    new Map(), new Map([["001.sql", header + unsafe]]), [owner],
+  ).join("\n"), /role and ownership authority is not yet modeled/u)
+})
+
+test("allows only the declared dynamic-read owner binding ceremony", () => {
+  const owner = service("records-owner")
+  owner.manifest.owned_dataset!.private_routines = ["fixture_records.read_v1"]
+  owner.manifest.owned_dataset!.dynamic_read_routines = [{
+    contract: "fixture.records.read.v1",
+    routine: "fixture_records.read_v1",
+    consumer_service: "records-consumer",
+    role: "svc_records_consumer",
+    schema: "fixture_records",
+  }]
+  const source = `-- service-owner: records-owner
+grant svc_records_consumer to postgres with inherit false, set true;
+grant create on schema fixture_records to svc_records_consumer;
+alter function fixture_records.read_v1(text) security definer;
+alter function fixture_records.read_v1(text) owner to svc_records_consumer;
+revoke create on schema fixture_records from svc_records_consumer;
+grant svc_records_consumer to postgres with inherit false, set false;`
+  assert.deepEqual(findNewMigrationAuthorityViolations(
+    new Map(), new Map([["001.sql", source]]), [owner],
+  ), [])
+  assert.match(findNewMigrationAuthorityViolations(
+    new Map(), new Map([["001.sql", source.replace("set false", "set true")]]), [owner],
+  ).join("\n"), /role and ownership authority is not yet modeled/u)
+})
+
 test("pins index mutation authority to its owning relation", () => {
   const owner = service("records-owner")
   const actor = service("records-actor")

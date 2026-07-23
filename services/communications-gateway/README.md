@@ -1,0 +1,61 @@
+# Communications Gateway
+
+## ELI5
+
+This service is the guarded front door between OpenWebUI and MoMi's configured
+model provider. It checks who may use the beta, per-minute and per-day request
+limits, token ceilings, timeouts, and how much each user may spend,
+records the complete exchange, and exposes only approved MoMi tools.
+
+The gateway loads MoMi's business identity and organization aliases from its
+owned `assistant_context` database mapping before every admitted turn. Business
+names and organization context are not embedded in request-building code.
+Shop entities are resolved through mapped catalog identities and aliases, and
+business enum values are discovered from current scoped data before filtering.
+Later evidence is reconciled with earlier sourced facts before any correction.
+
+## Boundary
+
+The gateway owns access, limits, provider/model binding, invocation and attempt
+state, usage/timing/error metadata, and safe replay. It does not own immutable
+message evidence, curated logs, canonical shop truth, OpenWebUI state, or any
+provider credential outside its runtime secret store.
+
+`momi-assistant` automatically selects a bounded Quick, Standard, or Deep
+profile through a small structured-output router. Provider-neutral explicit
+profiles bypass the router, and Maximum is explicit-only. Per-user default and
+maximum profiles are independently adjustable. Each profile also maps a bounded
+answer-call allowance so recoverable tool-query corrections can finish without
+a code-defined one-round cutoff. Same-key/same-payload requests replay safely;
+changed payloads fail; an ambiguous paid result pauses for reconciliation.
+Final success requires the archive owner's terminal receipt.
+Maximum uses the provider's background-response protocol and polls the same paid
+attempt within the user's configured deadline. Polling never creates a second
+model attempt, and an unfinished or unreachable background response fails
+visibly without automatic retry. Non-ambiguous background deadlines and mapped
+round exhaustion return one durable OpenWebUI-compatible limitation message;
+they do not claim that the requested analysis completed.
+
+Provider execution prefers the beta-specific `MOMI_BETA_PROVIDER_API_KEY` and
+may reuse the existing project-scoped `OPENAI_API_KEY` during beta activation.
+Neither value is returned, logged, archived, or exposed to OpenWebUI. Provider
+requests use the authenticated user's opaque UUID as `safety_identifier` and
+the current Responses API `max_output_tokens` field. The routing policy owns
+the Responses endpoints; the migration intentionally leaves the legacy active
+provider-binding endpoint unchanged so applying schema before Edge code cannot
+break the currently deployed Chat Completions runtime.
+
+## Tools
+
+The model sees bounded canonical record readers, a curated shop-analysis query,
+and `create_momi_log`. The analysis query accepts one parsed read-only `SELECT`
+over the database-provided catalog; a dedicated PostgreSQL role is the final
+boundary. SQL stays internal, and no raw/private/auth relation is reachable.
+No arbitrary HTTP, shell, attachment, source API, or other business mutation is
+available. Query failures return only bounded correction categories for invalid
+or disallowed SQL, catalog mismatch, timeout, oversized results, permissions,
+data conversion, or an otherwise unavailable database result.
+
+## Tests
+
+Run `pnpm check -- --service communications-gateway`.

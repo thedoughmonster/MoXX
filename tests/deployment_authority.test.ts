@@ -54,6 +54,12 @@ test("keeps deployment apply in the two authorized workflows", async () => {
     assert.doesNotMatch(source, /supabase(?:\.cmd)?\s+functions\s+deploy/)
   }
   assert.deepEqual(callers.sort(), ["deploy-dev.yml", "deploy-prod.yml"])
+  const source = await readFile(".github/workflows/deploy-dev.yml", "utf8")
+  assert.match(source, /base_sha:|services:|plan_sha256:|validated_tree:/)
+  assert.match(source, /assert_bound_deployment_plan\.ts/)
+  assert.ok(source.indexOf("assert_bound_deployment_plan.ts") <
+    source.indexOf("SUPABASE_ACCESS_TOKEN"))
+  assert.doesNotMatch(source, /--service all|pnpm run check/)
 })
 
 test("requires an exact SHA for solo production promotion", async () => {
@@ -78,8 +84,10 @@ test("codifies the supported agent deployment path", async () => {
   assert.match(contract, /agent-deployment-procedure\.md/)
   assert.match(procedure, /pnpm release:dev/)
   assert.match(procedure, /Never merge or push `prod` directly/)
-  assert.match(procedure, /Supabase CLI credential store/)
-  assert.match(procedure, /SUPABASE_DB_PASSWORD/)
+  assert.match(procedure, /authenticated CLI profile/)
+  assert.match(procedure, /OAuth or a personal access token/)
+  assert.match(procedure, /short-lived database login/)
+  assert.match(procedure, /do not substitute the account PAT as a database password/)
   assert.match(procedure, /Do not retry through a different deployment authority/)
 })
 

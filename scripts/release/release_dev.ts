@@ -1,38 +1,51 @@
-import { applyMigrations } from "./apply_migrations.ts"
-import { assertReleasePreflight } from "./assert_release_preflight.ts"
-import { ensureDispatchedWorkflow } from "./ensure_dispatched_workflow.ts"
-import { getOrCreatePullRequest } from "./get_or_create_pull_request.ts"
-import { runCommand } from "./run_command.ts"
-import { waitForPullRequest } from "./wait_for_pull_request.ts"
-import { waitForWorkflow } from "./wait_for_workflow.ts"
+import { readFileSync } from "node:fs"
 
-export async function releaseDev(): Promise<void> {
-  const preflight = await assertReleasePreflight("dev")
-  let releaseSha = preflight.headSha
-  if (preflight.branch !== "dev") {
-    console.log(`Publishing ${preflight.branch} for development...`)
-    runCommand("git", ["push", "-u", "origin", preflight.branch])
-    const pullRequest = getOrCreatePullRequest(
-      "dev",
-      preflight.branch,
-      preflight.headSha,
-      `Release ${preflight.branch} to development`,
-      "Validates and releases this committed change through the MoMi coordinator.",
-    )
-    await waitForPullRequest(pullRequest.number)
-    runCommand("gh", [
-      "pr", "merge", String(pullRequest.number), "--merge", "--delete-branch",
-      "--match-head-commit", preflight.headSha,
-    ])
-    runCommand("git", ["fetch", "origin", "dev:refs/remotes/origin/dev"])
-    runCommand("git", ["switch", "dev"])
-    runCommand("git", ["merge", "--ff-only", "origin/dev"])
-    releaseSha = runCommand("git", ["rev-parse", "HEAD"], {
-      capture: true,
-    }).stdout.trim()
-  }
-  await waitForWorkflow("validate.yml", "push", releaseSha, undefined, "dev")
-  await applyMigrations("dev")
-  await ensureDispatchedWorkflow("deploy-dev.yml", "dev", releaseSha)
-  console.log(`Development release complete at ${releaseSha}`)
+import { buildBoundPlan } from "../dev_loop/build_bound_plan.ts"
+import { canonicalJson } from "../dev_loop/canonical_json.ts"
+import { hashText } from "../dev_loop/hash_text.ts"
+import { applyMigrations } from "./apply_migrations.ts"
+import { assertPlanMatchesValidation } from "./assert_plan_matches_validation.ts"
+import { assertReleaseHead } from "./assert_release_head.ts"
+import { assertValidationPlanDigest } from "./assert_validation_plan_digest.ts"
+import { assertValidationJob } from "./assert_validation_job.ts"
+import { buildReleaseReceipt } from "./build_release_receipt.ts"
+import { ensureDispatchedWorkflow } from "./ensure_dispatched_workflow.ts"
+import { readValidationReceipt } from "./read_validation_receipt.ts"
+import { writeReleaseReceipt } from "./write_release_receipt.ts"
+
+export async function releaseDev(validationPath: string): Promise<void> {
+  const head = assertReleaseHead("dev")
+  const source = readFileSync(validationPath, "utf8")
+  const validation = readValidationReceipt(validationPath)
+  assertValidationJob(validation)
+  const validatedPlan = await buildBoundPlan(
+    validation.identities.base_sha!,
+    validation.identities.head_sha!,
+  )
+  assertPlanMatchesValidation(validatedPlan, validation)
+  assertValidationPlanDigest(validatedPlan, validation)
+  const plan = await buildBoundPlan(validation.identities.base_sha!, head)
+  assertPlanMatchesValidation(plan, validation)
+  const databaseApplied = plan.impact.release.database !== "none"
+  if (databaseApplied) await applyMigrations("dev")
+  const planDigest = hashText(canonicalJson(plan))
+  const run = plan.impact.release.functions.length === 0
+    ? undefined
+    : await ensureDispatchedWorkflow("deploy-dev.yml", "dev", head, "deploy", {
+      expected_sha: head,
+      base_sha: plan.base.sha,
+      services: plan.impact.release.services.join(","),
+      plan_sha256: planDigest,
+      validated_tree: plan.head.tree,
+    })
+  const receipt = buildReleaseReceipt(
+    "dev",
+    plan,
+    validation,
+    hashText(source),
+    databaseApplied,
+    run?.databaseId,
+  )
+  const path = writeReleaseReceipt(receipt)
+  console.log(`Development release receipt: ${path}`)
 }

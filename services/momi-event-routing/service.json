@@ -8,7 +8,11 @@
   "lifecycle_status": "active",
   "functions": ["momi-event-router-v1"],
   "contracts": {
-    "provides": ["momi.events.route.v1", "momi.events.delivery_lifecycle.v1"],
+    "provides": [
+      "momi.events.append.v1",
+      "momi.events.route.v1",
+      "momi.events.delivery_lifecycle.v1"
+    ],
     "consumes": []
   },
   "database": {
@@ -53,7 +57,7 @@
       "momi_events.subscriptions"
     ],
     "private_routines": [
-      "momi_events.ack_delivery", "momi_events.begin_delivery",
+      "momi_events.ack_delivery", "momi_events.append_event_v1", "momi_events.begin_delivery",
       "momi_events.claim_routing_work", "momi_events.claim_routing_work_item",
       "momi_events.enqueue_due_delivery_retries", "momi_events.enqueue_routing_work",
       "momi_events.event_message", "momi_events.fail_delivery",
@@ -64,9 +68,11 @@
     "public_reads": [],
     "public_commands": [
       "momi.events.delivery_lifecycle.v1",
+      "momi.events.append.v1",
       "momi.events.route.v1"
     ],
     "public_routine_commands": [
+      { "contract": "momi.events.append.v1", "routine": "momi_events.append_event_v1" },
       { "contract": "momi.events.delivery_lifecycle.v1", "routine": "momi_events.ack_delivery" },
       { "contract": "momi.events.delivery_lifecycle.v1", "routine": "momi_events.begin_delivery" },
       { "contract": "momi.events.delivery_lifecycle.v1", "routine": "momi_events.fail_delivery" },

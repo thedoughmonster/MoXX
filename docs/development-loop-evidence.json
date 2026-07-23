@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "base_sha": "749488acc0fac20e9c9ed8f82d02279921a639f1",
+  "basis": {
+    "legacy_validate_run_id": 30017479094,
+    "legacy_function_manifest_count": 21,
+    "legacy_sources": [
+      ".github/workflows/validate.yml@base",
+      "scripts/release/assert_release_preflight.ts@base",
+      "scripts/run_deploy_apply.ts@base"
+    ],
+    "replacement_sources": [
+      ".github/workflows/validate.yml",
+      "scripts/dev_loop/build_impact_plan.ts",
+      "scripts/release/release_dev.ts",
+      "scripts/release/release_prod.ts"
+    ]
+  },
+  "representative_repository_only_dev_and_prod": {
+    "before": {
+      "authoritative_check_commands": 8,
+      "full_suite_count": 8,
+      "deployment_workflow_count": 2,
+      "function_deployment_targets": 42,
+      "database_access_count": 1
+    },
+    "after": {
+      "authoritative_check_commands": 3,
+      "full_suite_count": 0,
+      "path_scoped_final_gate_count": 1,
+      "deployment_workflow_count": 0,
+      "function_deployment_targets": 0,
+      "database_access_count": 0
+    }
+  },
+  "wall_time_evidence": {
+    "legacy_final_seconds": null,
+    "replacement_final_seconds": null,
+    "focused_fixture_seconds": 16.789,
+    "status": "final CI timing pending",
+    "reason": "Connected run metadata exposed status and steps but no timestamps; successful logs were intentionally not ingested."
+  },
+  "context_evidence": {
+    "successful_log_body_characters_in_receipt": 0,
+    "failure_excerpt_max_characters": 2000,
+    "failure_excerpt_max_lines": 20,
+    "estimated_success_log_context_reduction_percent": 100,
+    "scope": "successful command log bodies only"
+  }
+}
