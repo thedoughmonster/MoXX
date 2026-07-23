@@ -2,23 +2,21 @@ import assert from "node:assert/strict"
 import { readFile } from "node:fs/promises"
 import test from "node:test"
 
-const workflow = await readFile(
-  new URL("../.github/workflows/validate.yml", import.meta.url),
-  "utf8",
-)
+const workflow = await readFile(".github/workflows/validate.yml", "utf8")
 
-test("anchors development pushes to the last successful validation", () => {
-  assert.match(workflow, /actions: read/)
-  assert.doesNotMatch(workflow, /github\.event\.before/)
-  assert.match(workflow, /actions\/workflows\/validate\.yml\/runs/)
-  assert.match(workflow, /status=success/)
-  assert.match(workflow, /\.head_sha != \$current/)
+test("runs one exact path-derived final gate for pull requests", () => {
+  assert.match(workflow, /pull_request:\n    branches: \[dev\]/)
+  assert.match(workflow, /validate-final:/)
+  assert.match(workflow, /name: validate-final/)
   assert.match(workflow, /github\.event\.pull_request\.base\.sha/)
-  assert.match(workflow, /select\(\.head_sha == \$dev\)/)
-  assert.match(workflow, /\^\[0-9a-f\]\{40\}\$/)
-  assert.match(workflow, /merge-base --is-ancestor "\$baseline" "\$GITHUB_SHA"/)
-  assert.match(workflow, /MOMI_DEV_REF=\$baseline/)
-  assert.match(workflow, /refs\/heads\/prod/)
-  assert.match(workflow, /baseline="\$GITHUB_SHA"/)
   assert.match(workflow, /github\.event\.pull_request\.head\.sha/)
+  assert.match(workflow, /momi-impact plan/)
+  assert.match(workflow, /momi-check changed --final/)
+  assert.match(workflow, /validation-receipt\.json/)
+})
+
+test("does not repeat final validation on dev or prod pushes", () => {
+  assert.doesNotMatch(workflow, /^\s*push:/m)
+  assert.doesNotMatch(workflow, /actions\/workflows\/validate\.yml\/runs/)
+  assert.doesNotMatch(workflow, /status=success|gh run watch/)
 })

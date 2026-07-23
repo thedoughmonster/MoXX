@@ -1,6 +1,7 @@
 import { appendFile, writeFile } from "node:fs/promises"
 
 import { githubRequest } from "./github_request.ts"
+import { loadTriageConfig } from "./load_triage_config.ts"
 
 type GitHubIssue = {
   number: number
@@ -40,6 +41,7 @@ export async function prepareContext(): Promise<void> {
       candidate_title_characters_each: 200,
     },
     issue_number: issue.number,
+    triage_config: loadTriageConfig(),
     issue: {
       title: issue.title.slice(0, 256),
       body: (issue.body ?? "").slice(0, 12000),

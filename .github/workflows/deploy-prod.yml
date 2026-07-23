@@ -1,10 +1,27 @@
 name: Deploy production
+run-name: deploy-prod ${{ inputs.expected_sha }} ${{ inputs.plan_sha256 }}
 
 on:
   workflow_dispatch:
     inputs:
       expected_sha:
         description: Exact prod commit already promoted from development
+        required: true
+        type: string
+      base_sha:
+        description: Exact development release diff base
+        required: true
+        type: string
+      services:
+        description: Comma-separated services from the exact dev receipt
+        required: true
+        type: string
+      plan_sha256:
+        description: Exact dev release plan digest
+        required: true
+        type: string
+      validated_tree:
+        description: Exact tree previously validated in development
         required: true
         type: string
 
@@ -23,7 +40,8 @@ jobs:
     env:
       MOMI_PROD_REF: origin/prod
       MOMI_EXPECTED_SHA: ${{ inputs.expected_sha }}
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      MOMI_PLAN_SHA256: ${{ inputs.plan_sha256 }}
+      MOMI_VALIDATED_TREE: ${{ inputs.validated_tree }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -43,7 +61,19 @@ jobs:
           node-version-file: .node-version
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm run deploy:apply -- --env prod --service all
+      - name: Recompute and verify development release plan
+        run: |
+          pnpm momi-impact plan --base "${{ inputs.base_sha }}" \
+            --head "$MOMI_EXPECTED_SHA" --output .momi/release-plan.json
+          node scripts/assert_bound_deployment_plan.ts \
+            --plan .momi/release-plan.json \
+            --digest "$MOMI_PLAN_SHA256" \
+            --head "$MOMI_EXPECTED_SHA" \
+            --tree "$MOMI_VALIDATED_TREE" \
+            --services "${{ inputs.services }}"
+      - run: pnpm run deploy:apply -- --env prod --services "${{ inputs.services }}"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       - uses: actions/upload-artifact@v4
         with:
           name: prod-release-${{ github.sha }}

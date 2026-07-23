@@ -20,19 +20,14 @@ test("uses one exact linked CLI target for preview, apply, and parity", async ()
 })
 
 test("uses the credential-free native CLI runner for release database work", async () => {
-  const preflight = await readFile(
-    new URL("../scripts/release/assert_release_preflight.ts", import.meta.url),
-    "utf8",
-  )
   const apply = await readFile(
     new URL("../scripts/release/apply_migrations.ts", import.meta.url),
     "utf8",
   )
-  assert.match(preflight, /runSupabase/)
   assert.match(apply, /runSupabase/)
-  assert.match(preflight + apply, /"db",\s*"(?:query|push)",\s*"--linked"/)
+  assert.match(apply, /"db",\s*"(?:query|push)",\s*"--linked"/)
   assert.doesNotMatch(
-    preflight + apply,
+    apply,
     /runSupabaseDatabase|SUPABASE_DB_PASSWORD|PGPASSWORD|--db-url/,
   )
 })

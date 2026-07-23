@@ -1,7 +1,6 @@
 # MoMi Backend Agent Contract
 
 ## Ownership
-
 This repository owns MoMi backend services, database migrations, and their
 explicit contracts. Modules are separated by business capability even when
 they deploy from the same repository.
@@ -12,7 +11,6 @@ they deploy from the same repository.
 - Frontend and mobile applications belong in their own repositories.
 
 ## Hard Rules
-
 - Do not require Docker or WSL for the normal development workflow.
 - Target 120 physical lines for handwritten non-SQL files; CI warns above 120 and fails above 140.
 - Each TypeScript file may declare at most one function.
@@ -51,6 +49,8 @@ they deploy from the same repository.
 - Land an ownership transfer as a manifest-only change before any later migration mutates it; checks pin existing authority to trusted `dev`.
 - Never deploy with `--prune`; retire hosted functions through an expiring manifest and explicit caller-verified removal.
 - GitHub Actions is the sole authority for repository code and Edge Function deployments. Local apply, Supabase Git deployment, and second deployers are forbidden by ADR `0006`.
+- Run focused changed-path checks while iterating and exactly one final
+  authoritative validation gate for the committed tree.
 - Only `.github/workflows/deploy-dev.yml` and `deploy-prod.yml` may invoke the
   deployment apply command.
 - The Node 24 release coordinator is the sole normal database migration
@@ -104,18 +104,16 @@ they deploy from the same repository.
   short-lived database login role, and never reuse the account token as a
   Postgres password.
 ## Default Development Loop
-- Use `$develop-repository-change` for ordinary work; every change has one open issue and follows `docs/development-issue-ledger.md`.
-- Use focused tests while iterating, then run the required full check once.
-- Keep mechanical enforcement in tests and CI; do not manually re-audit passes.
-- Perform one final semantic review. Classify findings as `BLOCKING`, `FIX_NOW`, `FOLLOW_UP`, or `NO_ACTION`; only the first two normally trigger another edit.
+- Bind every change to one open issue and an isolated feature worktree.
+- Use `momi-context pack` for a fresh executor and `momi-check changed` while
+  iterating; do not duplicate the PR's final gate locally.
+- Keep mechanical enforcement in the one impact-selected PR gate.
 - Escalate to Architect or Repo Guard only for a new ownership/contract boundary,
   material security/privacy/cost/exposure decision, destructive migration,
   production infrastructure change, or irreconcilable repository-law conflict.
-- Keep routine work with one owner; for complex or context-heavy work, use the compact fresh-context handoff in `docs/development-execution-handoffs.md`.
-- Release code-only work with `pnpm release:dev`, migrations with `/root/momi-release dev`, and promote with `/root/momi-release prod`.
-- Verify hosted behavior with one controlled acceptance event. Applied migrations
-  are immutable; add a new migration for later corrections.
-
+- Publish one PR with owning-issue disposition; release its exact validation
+  receipt to development, then promote only its exact development receipt.
+- Verify changed hosted behavior with one controlled acceptance event.
 ## Code Review Rules
 - Block unauthorized ownership, private-data, public-contract, or deployer changes.
 - Block material correctness, security, privacy, data-loss, or rollback defects.

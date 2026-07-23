@@ -1,47 +1,55 @@
-import { applyMigrations } from "./apply_migrations.ts"
-import { assertReleasePreflight } from "./assert_release_preflight.ts"
-import { ensureDispatchedWorkflow } from "./ensure_dispatched_workflow.ts"
-import { getOrCreatePullRequest } from "./get_or_create_pull_request.ts"
-import { runCommand } from "./run_command.ts"
-import { waitForPullRequest } from "./wait_for_pull_request.ts"
-import { waitForWorkflow } from "./wait_for_workflow.ts"
+import { readFileSync } from "node:fs"
 
-export async function releaseProd(): Promise<void> {
-  const preflight = await assertReleasePreflight("prod")
+import { buildBoundPlan } from "../dev_loop/build_bound_plan.ts"
+import { canonicalJson } from "../dev_loop/canonical_json.ts"
+import { hashText } from "../dev_loop/hash_text.ts"
+import { applyMigrations } from "./apply_migrations.ts"
+import { assertPlanMatchesValidation } from "./assert_plan_matches_validation.ts"
+import { assertReleaseHead } from "./assert_release_head.ts"
+import { buildReleaseReceipt } from "./build_release_receipt.ts"
+import { ensureDispatchedWorkflow } from "./ensure_dispatched_workflow.ts"
+import { readReleaseReceipt } from "./read_release_receipt.ts"
+import { runCommand } from "./run_command.ts"
+import { writeReleaseReceipt } from "./write_release_receipt.ts"
+
+export async function releaseProd(devReceiptPath: string): Promise<void> {
+  const head = assertReleaseHead("prod")
+  const devSource = readFileSync(devReceiptPath, "utf8")
+  const devReceipt = readReleaseReceipt(devReceiptPath)
+  if (devReceipt.head_sha !== head) {
+    throw new Error("Production must consume the exact development release receipt")
+  }
   const productionBefore = runCommand("git", ["rev-parse", "origin/prod"], {
     capture: true,
   }).stdout.trim()
-  if (productionBefore !== preflight.headSha) {
-    const pullRequest = getOrCreatePullRequest(
-      "prod",
-      "dev",
-      preflight.headSha,
-      "Promote development to production",
-      "Promotes the exact development commit after checks and database migration.",
-    )
-    await waitForPullRequest(pullRequest.number)
+  const plan = productionBefore === head
+    ? devReceipt.plan
+    : await buildBoundPlan(productionBefore, head)
+  assertPlanMatchesValidation(plan, devReceipt.validation)
+  if (plan.diff_sha256 !== devReceipt.diff_sha256) {
+    throw new Error("Production diff differs from the development release")
   }
-  await waitForWorkflow(
-    "validate.yml", "push", preflight.headSha, undefined, "dev",
+  const databaseApplied = plan.impact.release.database !== "none"
+  if (databaseApplied) await applyMigrations("prod")
+  if (plan.base.sha !== plan.head.sha) {
+    await ensureDispatchedWorkflow("promote-prod.yml", "dev", head, "promote", {
+      expected_sha: head,
+      dev_receipt_sha256: hashText(devSource),
+    })
+    runCommand("git", ["fetch", "origin", "prod:refs/remotes/origin/prod"])
+  }
+  const run = plan.impact.release.functions.length === 0
+    ? undefined
+    : await ensureDispatchedWorkflow("deploy-prod.yml", "prod", head, "deploy", {
+      expected_sha: head,
+      base_sha: plan.base.sha,
+      services: plan.impact.release.services.join(","),
+      plan_sha256: hashText(canonicalJson(plan)),
+      validated_tree: plan.head.tree,
+    })
+  const receipt = buildReleaseReceipt(
+    "prod", plan, devReceipt.validation, devReceipt.validation_receipt_sha256,
+    databaseApplied, run?.databaseId,
   )
-  await applyMigrations("prod")
-  if (productionBefore !== preflight.headSha) {
-    await ensureDispatchedWorkflow(
-      "promote-prod.yml",
-      "dev",
-      preflight.headSha,
-    )
-  }
-  runCommand("git", ["fetch", "origin", "prod:refs/remotes/origin/prod"])
-  const productionSha = runCommand("git", ["rev-parse", "origin/prod"], {
-    capture: true,
-  }).stdout.trim()
-  if (productionSha !== preflight.headSha) {
-    throw new Error("Production did not reach the approved development commit")
-  }
-  await waitForWorkflow(
-    "validate.yml", "push", preflight.headSha, undefined, "prod",
-  )
-  await ensureDispatchedWorkflow("deploy-prod.yml", "prod", preflight.headSha)
-  console.log(`Production release complete at ${productionSha}`)
+  console.log(`Production release receipt: ${writeReleaseReceipt(receipt)}`)
 }

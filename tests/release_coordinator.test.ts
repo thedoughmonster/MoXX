@@ -3,110 +3,68 @@ import { readFile, readdir } from "node:fs/promises"
 import { join } from "node:path"
 import test from "node:test"
 
-import { parseMigrationQuery } from
-  "../scripts/release/parse_migration_query.ts"
-
-test("parses the machine-readable migration query", () => {
-  const source = JSON.stringify({ rows: [
-    { version: "20260714090036" },
-    { version: "20260714090044" },
-  ] })
-  assert.deepEqual(parseMigrationQuery(source), [
-    "20260714090036",
-    "20260714090044",
-  ])
+test("exposes the replacement tool surface and literal release commands", async () => {
+  const json = JSON.parse(await readFile("package.json", "utf8")) as {
+    scripts: Record<string, string>
+  }
+  assert.match(json.scripts["momi-context"], /run_context_pack/)
+  assert.match(json.scripts["momi-impact"], /run_impact_plan/)
+  assert.match(json.scripts["momi-check"], /run_check_changed/)
+  assert.match(json.scripts["momi-receipt"], /run_receipt_summarize/)
+  assert.equal(json.scripts["release:dev"], "node scripts/run_release.ts --env dev")
+  assert.equal(json.scripts["release:prod"], "node scripts/run_release.ts --env prod")
 })
 
-test("exposes literal one-command releases", async () => {
-  const packageSource = await readFile(new URL("../package.json", import.meta.url), "utf8")
-  const packageJson = JSON.parse(packageSource) as { scripts: Record<string, string> }
-  assert.equal(packageJson.scripts["release:dev"], "node scripts/run_release.ts --env dev")
-  assert.equal(packageJson.scripts["release:prod"], "node scripts/run_release.ts --env prod")
-})
-
-test("keeps migration apply in one local coordinator module", async () => {
-  const directory = new URL("../scripts/", import.meta.url)
-  const entries = await readdir(directory, { recursive: true, withFileTypes: true })
+test("keeps migration apply in one model-opaque local coordinator module", async () => {
+  const entries = await readdir("scripts", { recursive: true, withFileTypes: true })
   const callers: string[] = []
   for (const entry of entries) {
     if (!entry.isFile() || !entry.name.endsWith(".ts")) continue
     const path = join(entry.parentPath, entry.name)
     const source = await readFile(path, "utf8")
-    if (/['"]db['"]\s*,\s*['"]push['"]/.test(source)) {
+    if (/["']db["']\s*,\s*["']push["']/.test(source)) {
       callers.push(path.replaceAll("\\", "/").split("/scripts/")[1] ?? path)
     }
   }
-  assert.deepEqual(callers, ["release/apply_migrations.ts"])
+  assert.deepEqual(callers, ["scripts/release/apply_migrations.ts"])
 })
 
-test("disables optional Supabase CLI telemetry during releases", async () => {
-  const source = await readFile(
-    new URL("../scripts/deploy/supabase_environment.ts", import.meta.url),
-    "utf8",
-  )
-  assert.match(source, /SUPABASE_TELEMETRY_DISABLED:\s*"1"/)
+test("development uses one validation receipt and affected-only deployment", async () => {
+  const source = await readFile("scripts/release/release_dev.ts", "utf8")
+  assert.match(source, /readValidationReceipt/)
+  assert.match(source, /assertValidationJob/)
+  assert.match(source, /assertPlanMatchesValidation/)
+  assert.match(source, /release\.functions\.length === 0/)
+  assert.match(source, /release\.services\.join/)
+  assert.match(source, /applyMigrations\("dev"\)/)
+  assert.doesNotMatch(source, /scripts\/check|--service|waitForPullRequest/)
 })
 
-test("keeps database apply out of GitHub workflows", async () => {
-  const directory = new URL("../.github/workflows/", import.meta.url)
-  const names = await readdir(directory)
+test("production consumes the exact dev receipt without revalidation", async () => {
+  const source = await readFile("scripts/release/release_prod.ts", "utf8")
+  assert.match(source, /readReleaseReceipt/)
+  assert.match(source, /devReceipt\.head_sha !== head/)
+  assert.match(source, /applyMigrations\("prod"\)/)
+  assert.match(source, /promote-prod\.yml/)
+  assert.match(source, /deploy-prod\.yml/)
+  assert.doesNotMatch(source, /scripts\/check|validate\.yml/)
+})
+
+test("workflow polling is bounded and never shells out to run watch", async () => {
+  const source = await readFile("scripts/release/wait_for_workflow.ts", "utf8")
+  const finder = await readFile("scripts/release/find_workflow_run.ts", "utf8")
+  assert.match(source, /attempt < 90/)
+  assert.match(source, /findRequiredJob/)
+  assert.match(source, /requiredJobState/)
+  assert.doesNotMatch(source, /run", "watch"|while\s*\(true\)/)
+  assert.match(finder, /displayTitle/)
+  assert.match(finder, /includes\(identity\)/)
+})
+
+test("database apply remains outside GitHub workflows", async () => {
+  const names = await readdir(".github/workflows")
   for (const name of names) {
-    const source = await readFile(new URL(name, directory), "utf8")
+    const source = await readFile(`.github/workflows/${name}`, "utf8")
     assert.doesNotMatch(source, /\bdb\s+push\b|\bmigration\s+repair\b/)
   }
-})
-
-test("requires migration completion before development deployment", async () => {
-  const workflow = await readFile(
-    new URL("../.github/workflows/deploy-dev.yml", import.meta.url),
-    "utf8",
-  )
-  const release = await readFile(
-    new URL("../scripts/release/release_dev.ts", import.meta.url),
-    "utf8",
-  )
-  assert.match(workflow, /workflow_dispatch:/)
-  assert.match(workflow, /expected_sha:/)
-  assert.match(workflow, /ref: dev/)
-  assert.match(workflow, /MOMI_EXPECTED_SHA" = "\$GITHUB_SHA/)
-  const validation = release.indexOf("await waitForWorkflow")
-  const apply = release.indexOf('await applyMigrations("dev")')
-  const deploy = release.indexOf('await ensureDispatchedWorkflow("deploy-dev.yml"')
-  assert.ok(validation >= 0 && validation < apply)
-  assert.ok(apply >= 0 && apply < deploy)
-  assert.match(release, /if \(preflight\.requiresMigrationApply\)/)
-  assert.match(release, /"switch", "--detach", "origin\/dev"/)
-  assert.doesNotMatch(release, /"switch", "dev"/)
-  assert.doesNotMatch(release, /--delete-branch/)
-})
-
-test("dispatches production only after promotion", async () => {
-  const workflow = await readFile(
-    new URL("../.github/workflows/deploy-prod.yml", import.meta.url),
-    "utf8",
-  )
-  const release = await readFile(
-    new URL("../scripts/release/release_prod.ts", import.meta.url),
-    "utf8",
-  )
-  const resolver = await readFile(
-    new URL("../scripts/release/resolve_development_baseline.ts", import.meta.url),
-    "utf8",
-  )
-  assert.match(workflow, /workflow_dispatch:/)
-  assert.match(workflow, /ref: prod/)
-  assert.match(workflow, /MOMI_EXPECTED_SHA" = "\$GITHUB_SHA/)
-  const apply = release.indexOf('await applyMigrations("prod")')
-  const promote = release.indexOf('"promote-prod.yml"')
-  const deploy = release.indexOf('"deploy-prod.yml"')
-  assert.ok(release.indexOf("await waitForWorkflow") < apply)
-  assert.ok(apply >= 0 && apply < promote)
-  assert.ok(promote < release.lastIndexOf("await waitForWorkflow"))
-  assert.ok(release.lastIndexOf("await waitForWorkflow") < deploy)
-  assert.match(release, /productionBefore !== preflight\.headSha/)
-  assert.match(release, /undefined, "dev"/)
-  assert.match(release, /undefined, "prod"/)
-  assert.match(resolver, /--branch", "dev"/)
-  assert.match(resolver, /run\.conclusion === "success"/)
-  assert.match(resolver, /merge-base", "--is-ancestor"/)
 })

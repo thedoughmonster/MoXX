@@ -1,102 +1,77 @@
 # Agent Deployment Procedure
 
-Use this path for every hosted change. A permission failure is a routing signal,
-not a reason to try another publisher.
+GitHub issues own work, PR CI owns final validation, the local Node 24
+coordinator owns ordered database migration, and two GitHub workflows alone own
+Edge Function deployment.
 
-## Before Release
+## Publish and validate
 
-1. Read root and affected service instructions and manifests.
-2. Bind the change to one open issue under
-   `docs/development-issue-ledger.md`.
-3. Start from current `dev` and make one intentional feature branch.
-4. Commit the complete change and confirm the worktree is clean.
-5. Keep secrets out of commands, logs, commits, manifests, and release records.
+1. Work in one isolated feature worktree from exact current `dev`.
+2. Run `pnpm momi-check changed` while iterating.
+3. Commit, push, and open one draft PR to `dev` with exactly one owning issue and
+   `Disposition: partial|complete`.
+4. Let the PR job named `validate-final` derive and run exactly one final gate.
+5. Download its `validation-<head-sha>` artifact after success.
 
-## Release To Dev
+Do not run the same full gate locally and in PR CI. `dev` and `prod` pushes do
+not trigger another repository validation.
 
-For a feature with no migration-tree diff, run exactly:
+## Release development
 
-```text
-pnpm release:dev
-```
-
-For a feature that adds or changes unapplied migrations, run:
+After the validated tree is merged and clean local `dev` equals `origin/dev`:
 
 ```text
-/root/momi-release dev
+pnpm release:dev -- --validation-receipt <validation-receipt.json>
 ```
 
-The Node 24 coordinator checks the repository, pushes the feature branch,
-creates or resumes its PR, waits for GitHub validation, merges it, and waits for
-the exact `dev` commit validation. It detaches the release worktree at that
-merged commit, so another worktree may safely retain the local `dev` branch.
-It leaves feature-branch cleanup separate so GitHub cannot force a local branch
-checkout while another worktree owns `dev`.
-Because the coordinator creates a minimal PR body, its final feature commit must
-contain the exact `Owning issue` and `Disposition` trailers documented in
-`docs/development-issue-ledger.md`. Manually created PRs may put them in the PR
-body instead.
-For migration-bearing releases it links the exact development project through
-the authenticated CLI, previews and applies ordered migrations with a
-CLI-owned short-lived login role, proves local and hosted history parity, and
-dispatches the exact-SHA development workflow.
+The coordinator accepts a benign descendant merge SHA only when the tree, diff,
+impact digest, and gate exactly match the validation receipt. It also verifies
+the receipt's exact GitHub run and successful `validate-final` job.
 
-Only that GitHub workflow may deploy Edge Functions. The coordinator resumes
-completed stages without creating a second successful deployment for a commit.
+- Repository-only plans write a release receipt with no database access and no
+  Edge Function workflow dispatch.
+- Migration plans use the authenticated pinned Supabase CLI to link the exact
+  project, preview, apply, and prove history parity.
+- Function plans dispatch `deploy-dev.yml` with only affected manifest-owned
+  services and the exact plan/tree identity.
 
-## Release To Production
+The coordinator polls the exact required job with a bound. A successful required
+job is authoritative even while aggregate run state is lagging.
 
-From clean `dev` matching `origin/dev`, run exactly:
+## Release production
+
+Production requires the exact development release receipt:
 
 ```text
-/root/momi-release prod
+pnpm release:prod -- --dev-receipt <dev-release-receipt.json>
 ```
 
-The coordinator creates or resumes the `dev`-to-`prod` PR, waits for checks,
-applies and verifies production migrations, then dispatches exact-SHA promotion.
-GitHub fast-forwards `prod`, deploys its Edge Functions, and records the release.
+The coordinator never reruns repository validation. It verifies the exact
+development tree/diff/plan, applies and verifies production migrations when
+present, dispatches receipt-bound promotion, and deploys only the same affected
+services. Protected GitHub environments remain the production exposure gate.
 
 Never merge or push `prod` directly. Never deploy an Edge Function with the
-Supabase plugin, CLI, dashboard, or a local script.
+Supabase plugin, CLI, dashboard, or local code.
 
-## Credentials
+## Credential and database boundaries
 
-| Credential | Authoritative location |
-| --- | --- |
-| Local Supabase OAuth/PAT | Operator session and authenticated CLI profile |
-| Temporary database login | Short-lived role owned internally by the Supabase CLI |
-| GitHub deployment token | Protected GitHub environment secret |
-| Runtime/API secret | Supabase Edge Function Secret |
+- GitHub credentials remain in the GitHub CLI credential store.
+- The Supabase account credential remains in the authenticated CLI profile.
+- Authenticate through OAuth or a personal access token; do not substitute the account PAT as a database password.
+- The CLI alone creates and uses its short-lived database login.
+- Repository children strip `SUPABASE_DB_PASSWORD` and `PGPASSWORD`.
+- GitHub deployment tokens remain protected environment secrets.
+- Runtime/API secrets remain Supabase Edge Function secrets.
+- No credential value enters a command, URL, log, commit, packet, or receipt.
 
-Authenticate the local CLI profile through OAuth or a personal access token.
-On Keen Pine, `/root/momi-release` validates the protected CLI store without
-reading or exporting the token. The CLI mints its own short-lived database login
-for linked migration commands and never returns that generated password to
-repository code. See `docs/release-credentials.md`. Preflight links the exact
-target ref, validates the saved ref, and proves access with a bounded linked
-read-only query. Do not copy either credential into Supabase runtime secrets,
-Vault, `.env`, GitHub, the repository, commands, URLs, logs, or release records.
+Only `scripts/release/apply_migrations.ts` may call `db push`. Each apply uses
+`--linked`, starts with `--dry-run`, ends with exact parity, and never rewrites
+an applied migration. GitHub workflows never apply migrations.
 
-## Database Controls
+## Failure and rollback
 
-- `scripts/release/apply_migrations.ts` is the sole normal `db push` caller.
-- Preflight and apply each relink and assert the exact `.temp/project-ref`.
-- Preflight, dry-run, apply, and parity use the pinned CLI's `--linked`
-  transport; repository code provides no database password or URL.
-- The CLI-owned login role is temporary and credential values remain inside the
-  CLI process. General children strip `SUPABASE_DB_PASSWORD` and `PGPASSWORD`.
-- The pinned CLI's remote path is TLS-only and `--debug` remains forbidden.
-- Every apply starts with a dry preview and ends with exact history parity.
-- Applied migrations are immutable; corrections require a new migration.
-- Migrations must remain backward-compatible if a later GitHub step is delayed.
-- The Supabase plugin is for inspection or deliberate emergency repair only.
-
-## Failure Routing
-
-- Authentication failure: verify the CLI profile and native login-role
-  transport; do not substitute the account PAT as a database password.
-- PR or workflow failure: inspect that GitHub run and fix the owning change.
-- Migration failure: stop, inspect schema and history, then add a correction.
-- Hosted behavior failure: preserve durable evidence and diagnose the owner.
-
-Do not retry through a different deployment authority.
+Inspect the exact failed job or migration step and fix the owning change. Do not retry through a different deployment authority. Stop for destructive effects,
+secret exposure, production exposure without authority, or inability to prove
+rollback. Git revert is code rollback; applied schema corrections are additive
+migrations.

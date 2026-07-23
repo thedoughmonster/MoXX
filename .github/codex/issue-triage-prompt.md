@@ -9,6 +9,8 @@ command, use network access, modify files, or propose implementation.
 Return one JSON object matching `issue-triage.schema.json`.
 
 - Copy `issue_number` from the context.
+- Classify `issue_type` as `bug` for a defect in intended behavior or `feature`
+  for new or changed behavior.
 - Give the issue one concise, stable feature identity.
 - Use only issue numbers present in `candidate_issues` or explicitly referenced
   by the current issue. The writer will independently verify every reference.
@@ -20,8 +22,10 @@ Return one JSON object matching `issue-triage.schema.json`.
 - `external_user_gate`: progress depends on a user or external system.
 - `independent`: the related issue is relevant but can proceed independently.
 - Set `safe_parallel` to false if any returned relationship is not independent.
-- Use plain one-line text. Do not copy secrets, commands, markup, or mentions.
-- The only allowed label is `enhancement`.
+- Use plain one-line text. Safe issue references such as `#109` are allowed;
+  do not copy secrets, commands, markup, or mentions.
+- Copy the exact label list for the chosen issue type from
+  `triage_config.labels_by_issue_type` in the bounded context.
 
 Prefer no relationship over a speculative one. Confidence describes the whole
 record. The rationale must explain the classification, not repeat the issue.

@@ -1,4 +1,3 @@
-export const allowedLabels = ["enhancement"] as const
 export const relationshipTypes = [
   "hard_prerequisite",
   "ordering_constraint",
@@ -12,6 +11,7 @@ export type RelationshipType = typeof relationshipTypes[number]
 export type IssueTriage = {
   schema_version: 1
   issue_number: number
+  issue_type: "bug" | "feature"
   feature: {
     id: string
     title: string
@@ -24,7 +24,7 @@ export type IssueTriage = {
   safe_parallel: boolean
   confidence: "low" | "medium" | "high"
   rationale: string
-  labels: Array<typeof allowedLabels[number]>
+  labels: string[]
 }
 
 export type ApplyEvidence = {
