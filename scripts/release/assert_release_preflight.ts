@@ -1,15 +1,13 @@
 import { loadWorkspace } from "../architecture/load_workspace.ts"
 import { workspaceRoot } from "../architecture/paths.ts"
 import { linkProject } from "../deploy/link_project.ts"
-import { runSupabaseDatabase } from "../deploy/run_supabase_database.ts"
+import { runSupabase } from "../deploy/run_supabase.ts"
 import type { EnvironmentKey } from "../deploy/types.ts"
 import { assertDeployedDevelopmentBaseline } from
   "./assert_deployed_development_baseline.ts"
 import { assertLinkedSupabaseAccess } from
   "./assert_linked_supabase_access.ts"
-import { assertLinkedSupabaseTarget } from
-  "./assert_linked_supabase_target.ts"
-import { migrationDatabaseUrl } from "./migration_database_url.ts"
+import { assertLinkedProjectRef } from "./assert_linked_project_ref.ts"
 import { releaseRequiresMigrations } from
   "./release_requires_migrations.ts"
 import { runCommand } from "./run_command.ts"
@@ -56,8 +54,9 @@ export async function assertReleasePreflight(
     )
     if (ancestry.status !== 0) throw new Error("Feature branch must include current dev")
   }
+  const migrationBase = environment === "prod" ? "origin/prod" : "origin/dev"
   const migrationDiff = runCommand("git", [
-    "diff", "--quiet", "origin/dev...HEAD", "--", "supabase/migrations",
+    "diff", "--quiet", `${migrationBase}...HEAD`, "--", "supabase/migrations",
   ], { allowFailure: true })
   const requiresMigrationApply = releaseRequiresMigrations(
     environment,
@@ -68,10 +67,9 @@ export async function assertReleasePreflight(
     const workspace = await loadWorkspace()
     const projectRef = workspace.environments[environment].project_ref
     linkProject(projectRef)
-    const poolerUrl = assertLinkedSupabaseTarget(projectRef)
-    const databaseUrl = migrationDatabaseUrl(poolerUrl, projectRef)
-    const access = runSupabaseDatabase([
-      "db", "query", "--db-url", databaseUrl,
+    assertLinkedProjectRef(projectRef)
+    const access = runSupabase([
+      "db", "query", "--linked",
       "--workdir", workspaceRoot, "--output", "json",
       "select 1::integer as release_access_check",
     ], true)

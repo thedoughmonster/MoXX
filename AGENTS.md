@@ -54,7 +54,8 @@ they deploy from the same repository.
 - Only `.github/workflows/deploy-dev.yml` and `deploy-prod.yml` may invoke the
   deployment apply command.
 - The Node 24 release coordinator is the sole normal database migration
-  authority. It must use the pinned Supabase CLI and IPv4 session pooler.
+  authority. It must use the pinned Supabase CLI's exact-project `--linked`
+  transport and CLI-owned short-lived login role.
 - A development deployment may start only after its exact commit is validated
   and its migrations have reached parity; migration-free features may inherit
   parity only from the exact deployed `dev` baseline and an empty migration diff.
@@ -99,7 +100,9 @@ they deploy from the same repository.
 - Build joins and projections as explicitly named, versioned database views.
 - Treat the Toast event GUID as the delivery idempotency key.
 - Store runtime secrets in Supabase, deployment secrets in GitHub, and local CLI credentials in the approved release host's credential store.
-- Authenticate the pinned Supabase CLI by OAuth/PAT; supply its temporary token as `SUPABASE_DB_PASSWORD`, never the long-lived Postgres role password.
+- Authenticate the pinned Supabase CLI by OAuth/PAT; let the CLI mint its own
+  short-lived database login role, and never reuse the account token as a
+  Postgres password.
 ## Default Development Loop
 - Use `$develop-repository-change` for ordinary work; every change has one open issue and follows `docs/development-issue-ledger.md`.
 - Use focused tests while iterating, then run the required full check once.

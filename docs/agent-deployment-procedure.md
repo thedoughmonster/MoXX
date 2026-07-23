@@ -36,9 +36,10 @@ Because the coordinator creates a minimal PR body, its final feature commit must
 contain the exact `Owning issue` and `Disposition` trailers documented in
 `docs/development-issue-ledger.md`. Manually created PRs may put them in the PR
 body instead.
-For migration-bearing releases it then links the development database over
-the IPv4 session pooler, previews and applies ordered migrations, proves local
-and hosted history parity, and dispatches the exact-SHA development workflow.
+For migration-bearing releases it links the exact development project through
+the authenticated CLI, previews and applies ordered migrations with a
+CLI-owned short-lived login role, proves local and hosted history parity, and
+dispatches the exact-SHA development workflow.
 
 Only that GitHub workflow may deploy Edge Functions. The coordinator resumes
 completed stages without creating a second successful deployment for a commit.
@@ -63,34 +64,28 @@ Supabase plugin, CLI, dashboard, or a local script.
 | Credential | Authoritative location |
 | --- | --- |
 | Local Supabase OAuth/PAT | Operator session and authenticated CLI profile |
-| Temporary database login | `SUPABASE_DB_PASSWORD` for the release process |
+| Temporary database login | Short-lived role owned internally by the Supabase CLI |
 | GitHub deployment token | Protected GitHub environment secret |
 | Runtime/API secret | Supabase Edge Function Secret |
 
-Authenticate the local CLI profile through OAuth or personal access token.
-Export that temporary-access token as `SUPABASE_DB_PASSWORD`; it is the database
-password for temporary access, not the long-lived Postgres role password.
-On Keen Pine, `/root/momi-release` performs that export from the protected
-Supabase CLI store without exposing the token. See `docs/release-credentials.md`.
-Preflight links the exact target ref, validates the saved ref and password-free
-pooler evidence, builds the exact JIT URL, and proves access with a bounded
-read-only query. Repository code never reads a fixed token path. Do not copy the
-token into Supabase runtime secrets, Vault, `.env`, GitHub, the repository,
-commands, URLs, logs, or release records.
+Authenticate the local CLI profile through OAuth or a personal access token.
+On Keen Pine, `/root/momi-release` validates the protected CLI store without
+reading or exporting the token. The CLI mints its own short-lived database login
+for linked migration commands and never returns that generated password to
+repository code. See `docs/release-credentials.md`. Preflight links the exact
+target ref, validates the saved ref, and proves access with a bounded linked
+read-only query. Do not copy either credential into Supabase runtime secrets,
+Vault, `.env`, GitHub, the repository, commands, URLs, logs, or release records.
 
 ## Database Controls
 
 - `scripts/release/apply_migrations.ts` is the sole normal `db push` caller.
 - Preflight and apply each relink and assert the exact `.temp/project-ref`.
-- The linked URL must use the exact ref username, approved Supabase pooler
-  domain, IPv4 session pooler port 5432, session database, no secret, and only
-  the decoded option `options=-c jit=true`.
-- The pinned CLI's remote path is TLS-only; do not claim `verify-full` without
-  the Supabase dashboard CA or bypass its exact profile/ref validation.
-- Only the database child receives `SUPABASE_DB_PASSWORD`, mirrored to
-  `PGPASSWORD`; every general child strips both variables.
-- The coordinator rejects the Supabase CLI `--debug` flag because debug mode
-  changes the database transport and cannot prove normal TLS connectivity.
+- Preflight, dry-run, apply, and parity use the pinned CLI's `--linked`
+  transport; repository code provides no database password or URL.
+- The CLI-owned login role is temporary and credential values remain inside the
+  CLI process. General children strip `SUPABASE_DB_PASSWORD` and `PGPASSWORD`.
+- The pinned CLI's remote path is TLS-only and `--debug` remains forbidden.
 - Every apply starts with a dry preview and ends with exact history parity.
 - Applied migrations are immutable; corrections require a new migration.
 - Migrations must remain backward-compatible if a later GitHub step is delayed.
@@ -98,7 +93,8 @@ commands, URLs, logs, or release records.
 
 ## Failure Routing
 
-- Authentication failure: repair the named credential, then rerun the command.
+- Authentication failure: verify the CLI profile and native login-role
+  transport; do not substitute the account PAT as a database password.
 - PR or workflow failure: inspect that GitHub run and fix the owning change.
 - Migration failure: stop, inspect schema and history, then add a correction.
 - Hosted behavior failure: preserve durable evidence and diagnose the owner.

@@ -13,28 +13,27 @@ repository content.
 
 ## Supabase
 
-- Purpose: Supabase CLI management calls and PAT-based temporary Postgres
-  access when a release contains migrations.
+- Purpose: authenticate Supabase CLI management calls. The CLI separately mints
+  a short-lived database login role when a release contains migrations.
 - Custody: `/root/.supabase/access-token`, a root-owned `0600` regular file.
 - Verify management access without exposing it: `pnpm exec supabase projects list`.
 - Code-only development release: `pnpm release:dev`.
 - Migration-bearing development release: `/root/momi-release dev`.
 - Production release: `/root/momi-release prod`.
 
-The host wrapper validates the credential file, loads its value only into the
-release process as `SUPABASE_DB_PASSWORD`, and never prints, hashes, copies, or
-places it in an argument or URL. The database-only child mirrors it to
-`PGPASSWORD`; all other children strip both variables.
+The host wrapper validates the credential file metadata without reading or
+exporting its value. Linked database commands let the CLI create and use its
+own short-lived login role internally. Repository code never receives the PAT
+or generated database password. Every child strips ambient
+`SUPABASE_DB_PASSWORD` and `PGPASSWORD`.
 
-The PAT and its database mapping are separate controls. The PAT may be
-non-expiring, while Supabase project membership, temporary-access enablement,
-role mapping, IP restrictions, or an explicit revocation can still deny a
-database connection.
+The PAT may be non-expiring, while project membership or explicit revocation
+still denies CLI access. The database login is independently short-lived and
+exists only for the native CLI operation.
 
 Official behavior:
 
-- <https://supabase.com/docs/guides/platform/temporary-access>
-- <https://supabase.com/changelog/46346-feature-preview-temporary-token-based-database-access>
+- <https://supabase.com/docs/reference/api/introduction>
 
 ## Runtime secrets
 
@@ -50,8 +49,8 @@ An authentication failure names the failed control:
    GitHub network access. A sandbox can report an inaccessible token as invalid.
    Only repair the CLI session if the network-enabled check also fails.
 2. Supabase project-list failure: repair only the Supabase CLI PAT.
-3. Migration database failure: inspect temporary-access enablement, the mapped
-   user and role, Keen Pine's allowed IP, and project membership.
+3. Migration database failure: verify the authenticated CLI profile, exact
+   linked ref, short-lived login-role creation, and project membership.
 4. Code-only release: no database credential is required; a database login
    failure must not block it.
 

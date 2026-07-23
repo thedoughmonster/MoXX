@@ -15,16 +15,15 @@ for (const workflow of workflows) {
   })
 }
 
-test("uses one password-free exact-project JIT migration target", async () => {
+test("uses the exact linked project through the native CLI login role", async () => {
   const source = await readFile(
     new URL("../scripts/release/apply_migrations.ts", import.meta.url),
     "utf8",
   )
-  assert.match(source, /"db", "push", "--db-url", databaseUrl, "--dry-run", "--yes"/)
-  assert.match(source, /"db", "push", "--db-url", databaseUrl, "--yes"/)
-  assert.match(source, /"db", "query", "--db-url", databaseUrl/)
-  assert.match(source, /assertLinkedSupabaseTarget\(projectRef\)/)
-  assert.match(source, /migrationDatabaseUrl\(poolerUrl, projectRef\)/)
-  assert.match(source, /IPv4 session pooler/)
-  assert.doesNotMatch(source, /SUPABASE_DB_PASSWORD|PGPASSWORD|--linked/)
+  assert.match(source, /"db", "push", "--linked", "--dry-run", "--yes"/)
+  assert.match(source, /"db", "push", "--linked", "--yes"/)
+  assert.match(source, /"db", "query", "--linked"/)
+  assert.match(source, /assertLinkedProjectRef\(projectRef\)/)
+  assert.match(source, /temporary CLI login role/)
+  assert.doesNotMatch(source, /SUPABASE_DB_PASSWORD|PGPASSWORD|--db-url/)
 })
