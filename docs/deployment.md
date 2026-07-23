@@ -53,23 +53,23 @@ JWT-protected function may instead prove reachability with `401` or `403`.
 
 ## Migration Boundary
 
-Migration preflight links the exact selected ref, validates `.temp/project-ref` and the
-password-free `.temp/pooler-url`, builds an explicit password-free connection
-URL with only the decoded option `options=-c jit=true`, then proves access with
-one bounded read-only database query. It does not depend on top-level project
-enumeration because persistent branches may not appear there.
+Migration preflight links the exact selected ref, validates `.temp/project-ref`,
+then proves access with one bounded `db query --linked` call. It does not depend
+on top-level project enumeration because persistent branches may not appear
+there.
+
+Code-only feature releases and code-only production promotions open no database
+connection. A direct `dev` rerun retains database preflight so it can recover a
+previously merged migration release that stopped before parity.
 
 Migration apply links and validates the exact ref again, previews with
-`db push --db-url <validated-url> --dry-run --yes`, applies with that same URL,
-and queries migration history with it for exact parity. The validated IPv4
-session-pooler URL uses port 5432, the approved Supabase pooler domain, exact
-project username, and `/postgres`; it carries no password, fragment, or other
-query option. Remote CLI database connections are TLS-only; the policy does not
-claim certificate `verify-full` without the dashboard CA. Only the narrowly
-scoped database child receives `SUPABASE_DB_PASSWORD`, mirrored to `PGPASSWORD`.
-Every general child strips both. The coordinator rejects `--debug`, which
-changes the database transport. GitHub workflows never apply migrations and
-local code never deploys Edge Functions.
+`db push --linked --dry-run --yes`, applies through the same linked project,
+and queries migration history for exact parity. The authenticated pinned CLI
+creates a short-lived database login role and keeps its generated password
+inside the CLI process. Repository code passes no database password, URL, or
+JIT option. Remote CLI database connections are TLS-only. The coordinator
+rejects `--debug`. GitHub workflows never apply migrations and local code never
+deploys Edge Functions.
 
 Files already present on `prod` are immutable. A migration not present in the
 production baseline has exactly one ownership header on physical line 1:
@@ -83,12 +83,11 @@ non-executable `.sql` files.
 
 ## Credentials
 
-For migration-bearing development releases and every production release,
-`/root/momi-release` loads the existing Supabase CLI PAT into
-`SUPABASE_DB_PASSWORD`. The database-only child mirrors it to `PGPASSWORD`;
-repository code never reads a fixed token file or puts the token in the
-password-free URL, CLI arguments, logs, or release records. Code-only
-development releases never receive either variable. GitHub environment secrets
+`/root/momi-release` validates the authenticated Supabase CLI profile and starts
+the coordinator without reading or exporting its PAT. Migration-bearing
+releases let the CLI mint a short-lived login role internally. Code-only
+feature releases and production promotions open no database connection; a
+direct `dev` recovery rerun still checks parity. GitHub environment secrets
 authorize GitHub's function deployment. Supabase project secrets authorize
 runtime integrations. No credential value belongs in a repository file or
 `.env`. See `docs/release-credentials.md`.

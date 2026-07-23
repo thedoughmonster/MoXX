@@ -9,8 +9,24 @@ test("requires database access only when a release can change migrations", () =>
   assert.equal(releaseRequiresMigrations("dev", "fix/code-only", 0), false)
   assert.equal(releaseRequiresMigrations("dev", "fix/with-migration", 1), true)
   assert.equal(releaseRequiresMigrations("dev", "dev", 0), true)
-  assert.equal(releaseRequiresMigrations("prod", "dev", 0), true)
+  assert.equal(releaseRequiresMigrations("prod", "dev", 0), false)
+  assert.equal(releaseRequiresMigrations("prod", "dev", 1), true)
   assert.throws(() => releaseRequiresMigrations("dev", "fix/unknown", 128))
+})
+
+test("compares migrations with the selected environment baseline", async () => {
+  const source = await readFile(
+    new URL(
+      "../scripts/release/assert_release_preflight.ts",
+      import.meta.url,
+    ),
+    "utf8",
+  )
+  assert.match(
+    source,
+    /environment === "prod" \? "origin\/prod" : "origin\/dev"/,
+  )
+  assert.match(source, /`\$\{migrationBase\}\.\.\.HEAD`/)
 })
 
 test("inherits parity only from an exact successful development deployment", async () => {

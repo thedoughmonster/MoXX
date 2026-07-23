@@ -24,19 +24,18 @@ test("opens database access only for migration-bearing releases", async () => {
     "utf8",
   )
   const link = preflight.indexOf("linkProject(projectRef)")
-  const target = preflight.indexOf("assertLinkedSupabaseTarget(projectRef)")
-  const url = preflight.indexOf("migrationDatabaseUrl(poolerUrl, projectRef)")
-  const query = preflight.indexOf('"db", "query", "--db-url", databaseUrl')
+  const target = preflight.indexOf("assertLinkedProjectRef(projectRef)")
+  const query = preflight.indexOf('"db", "query", "--linked"')
   const access = preflight.indexOf("assertLinkedSupabaseAccess(access)")
   const conditional = preflight.indexOf("if (requiresMigrationApply)")
   const baseline = preflight.indexOf("assertDeployedDevelopmentBaseline(devSha)")
   const validation = preflight.indexOf('"scripts/check.ts"')
   assert.ok(conditional >= 0 && conditional < link)
-  assert.ok(link < target && target < url && url < query)
+  assert.ok(link < target && target < query)
   assert.ok(query < access && access < validation)
   assert.ok(access < baseline && baseline < validation)
   assert.match(preflight, /select 1::integer as release_access_check/)
-  assert.doesNotMatch(preflight, /projects.*list|--linked/)
+  assert.doesNotMatch(preflight, /projects.*list|--db-url/)
   const linker = await readFile(
     new URL("../scripts/deploy/link_project.ts", import.meta.url),
     "utf8",
@@ -68,22 +67,23 @@ test("keeps database credentials out of every general child", async () => {
   assert.doesNotMatch(environment, /environment\.PGPASSWORD\s*=/)
 })
 
-test("uses no fixed credential file or credential-bearing URL", async () => {
-  const databaseRunner = await readFile(
-    new URL("../scripts/deploy/run_supabase_database.ts", import.meta.url),
+test("leaves temporary database credentials entirely inside the CLI", async () => {
+  const runner = await readFile(
+    new URL("../scripts/deploy/run_supabase.ts", import.meta.url),
     "utf8",
   )
-  const databaseEnvironment = await readFile(
-    new URL("../scripts/deploy/supabase_database_environment.ts", import.meta.url),
+  const environment = await readFile(
+    new URL("../scripts/deploy/supabase_environment.ts", import.meta.url),
     "utf8",
   )
-  const databaseUrl = await readFile(
-    new URL("../scripts/release/migration_database_url.ts", import.meta.url),
+  const apply = await readFile(
+    new URL("../scripts/release/apply_migrations.ts", import.meta.url),
     "utf8",
   )
-  const combined = databaseRunner + databaseEnvironment + databaseUrl
+  const combined = runner + environment + apply
   assert.doesNotMatch(combined, /\.supabase\/access-token|readFile|credential store/)
-  assert.match(databaseEnvironment, /environment\.PGPASSWORD = temporaryAccessToken/)
-  assert.match(databaseEnvironment, /environment\.SUPABASE_DB_PASSWORD = temporaryAccessToken/)
-  assert.doesNotMatch(databaseUrl, /SUPABASE_DB_PASSWORD|PGPASSWORD|password\s*=/)
+  assert.match(environment, /delete environment\.SUPABASE_DB_PASSWORD/)
+  assert.match(environment, /delete environment\.PGPASSWORD/)
+  assert.match(apply, /"--linked"/)
+  assert.doesNotMatch(combined, /"--password"|--db-url/)
 })
