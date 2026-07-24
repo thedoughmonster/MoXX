@@ -104,13 +104,15 @@ they deploy from the same repository.
   short-lived database login role, and never reuse the account token as a
   Postgres password.
 ## Default Development Loop
+- Keep one agent responsible for each change from diagnosis through handoff.
 - Bind every change to one open issue and an isolated feature worktree.
-- Use `momi-context pack` for a fresh executor and `momi-check changed` while
-  iterating; do not duplicate the PR's final gate locally.
+- Run focused checks while iterating; do not duplicate the PR's final gate
+  locally.
 - Keep mechanical enforcement in the one impact-selected PR gate.
-- Escalate to Architect or Repo Guard only for a new ownership/contract boundary,
-  material security/privacy/cost/exposure decision, destructive migration,
+- Pause for the user only for a new ownership or public-contract boundary,
+  material security, privacy, cost, or exposure decision, destructive migration,
   production infrastructure change, or irreconcilable repository-law conflict.
+- Do not create role ceremonies, readiness packets, or repeated review loops.
 - Publish one PR with owning-issue disposition; release its exact validation
   receipt to development, then promote only its exact development receipt.
 - Verify changed hosted behavior with one controlled acceptance event.

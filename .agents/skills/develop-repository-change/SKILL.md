@@ -20,13 +20,8 @@ and deterministic checks authoritative; do not create role ceremony around them.
    Preserve unrelated user changes.
 
 Use plan mode only when dependency ordering or a material user decision is
-unclear. A routine task does not need a separate planning agent or artifact.
-
-For complex, long-running, or context-polluted changes, follow
-`docs/development-execution-handoffs.md`. The planning owner produces one compact
-execution packet and hands implementation to one fresh-context executor. A fork
-or product Handoff retains history and does not satisfy that boundary. Do not
-carry exploratory chatter or raw logs into the executor.
+unclear. Keep routine work with this one owner. Use additional agents only when
+the user explicitly requests parallel work or a bounded independent check.
 
 ## Escalate only when necessary
 
@@ -38,9 +33,10 @@ Continue with the normal loop unless the change introduces or materially alters:
 - production infrastructure, provider control-plane state, or recovery policy;
 - conflicting repository law that cannot be resolved from current evidence.
 
-Use Architect for an unresolved design or ownership decision. Use Repo Guard for
-a high-risk readiness or authority decision. Use Sysadmin for bounded host work.
-Do not invoke those roles merely to restate valid repository rules or rerun checks.
+Pause and ask the user only when one of these material boundaries is genuinely
+unresolved. Use a specialized operational skill only when the requested action
+actually requires it. Do not create role agents, readiness packets, or repeated
+approval layers merely to restate repository rules or rerun checks.
 
 ## Implement and verify
 

@@ -20,7 +20,6 @@
     "edge:check": "node scripts/check_edge_functions.ts",
     "inventory": "node scripts/run_inventory.ts",
     "momi-check": "node scripts/run_check_changed.ts",
-    "momi-context": "node scripts/run_context_pack.ts",
     "momi-impact": "node scripts/run_impact_plan.ts",
     "momi-receipt": "node scripts/run_receipt_summarize.ts",
     "local:db-export": "node local-tools/postgres-nas-export/export.ts",

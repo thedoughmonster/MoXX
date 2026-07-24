@@ -51,7 +51,7 @@ receipts, configuration artifacts, or source control.
 Repository artifacts, migrations, routes, provider bindings, and cohorts land
 inactive. Activation requires reviewed backend release receipts, a bounded host
 probe, exact allowlist and limit configuration, secret-negative verification,
-and Repo Guard authorization. Rollback disables the cohort and relay and
+and explicit user authorization. Rollback disables the cohort and relay and
 returns the hostname to the pinned private synthetic foundation without
 deleting archive, gateway, curated-log, or OpenWebUI persistent state.
 

@@ -3,11 +3,10 @@ import { readFile, readdir } from "node:fs/promises"
 import { join } from "node:path"
 import test from "node:test"
 
-test("exposes the replacement tool surface and literal release commands", async () => {
+test("exposes the validation and literal release commands", async () => {
   const json = JSON.parse(await readFile("package.json", "utf8")) as {
     scripts: Record<string, string>
   }
-  assert.match(json.scripts["momi-context"], /run_context_pack/)
   assert.match(json.scripts["momi-impact"], /run_impact_plan/)
   assert.match(json.scripts["momi-check"], /run_check_changed/)
   assert.match(json.scripts["momi-receipt"], /run_receipt_summarize/)

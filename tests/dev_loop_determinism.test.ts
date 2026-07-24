@@ -4,25 +4,14 @@ import test from "node:test"
 
 import { buildBoundPlan } from "../scripts/dev_loop/build_bound_plan.ts"
 import { buildCompactReceipt } from "../scripts/dev_loop/build_compact_receipt.ts"
-import { buildContextPacket } from "../scripts/dev_loop/build_context_packet.ts"
 import { canonicalJson } from "../scripts/dev_loop/canonical_json.ts"
 import { redactValue } from "../scripts/dev_loop/redact_value.ts"
 
-test("same-state plans and context packets are byte-identical", async () => {
+test("same-state validation plans are byte-identical", async () => {
   const plan = await buildBoundPlan("HEAD", "HEAD")
   const firstPlan = canonicalJson(plan)
   const secondPlan = canonicalJson(await buildBoundPlan("HEAD", "HEAD"))
   assert.equal(firstPlan, secondPlan)
-  assert.ok(plan.materiality.continue.some((item) => item.includes("timing")))
-  assert.ok(plan.materiality.stop.some((item) => item.includes("user-visible")))
-  assert.ok(plan.materiality.stop.some((item) => item.includes("data loss")))
-  const firstPacket = canonicalJson(redactValue(
-    await buildContextPacket(109, "Rebuild loop", "HEAD", "HEAD"),
-  ))
-  const secondPacket = canonicalJson(redactValue(
-    await buildContextPacket(109, "Rebuild loop", "HEAD", "HEAD"),
-  ))
-  assert.equal(firstPacket, secondPacket)
 })
 
 test("canonical JSON is independent of object insertion order", () => {
@@ -70,7 +59,7 @@ test("committed receipt evidence summarizes byte-identically", async () => {
   assert.doesNotMatch(first, /fixture-secret|successful raw output/)
 })
 
-test("credential-shaped packet data is redacted recursively", () => {
+test("credential-shaped receipt data is redacted recursively", () => {
   const value = redactValue({
     note: "password=hunter2",
     access_token: "ghp_abcdefghijklmnopqrstuvwxyz123456",

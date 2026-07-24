@@ -87,8 +87,6 @@ test("release receipts bind the exact plan and validation digest", () => {
     diff_sha256: "e".repeat(64),
     impact_sha256: "f".repeat(64),
     impact,
-    materiality: { continue: [], stop: [] },
-    rollback: "revert",
   } as BoundPlan
   const validation = {
     schema_version: 1,

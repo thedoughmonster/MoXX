@@ -42,11 +42,6 @@ export type BoundPlan = {
   diff_sha256: string
   impact_sha256: string
   impact: ImpactPlan
-  materiality: {
-    continue: string[]
-    stop: string[]
-  }
-  rollback: string
 }
 
 export type CommandEvidence = {

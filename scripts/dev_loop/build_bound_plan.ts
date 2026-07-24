@@ -26,22 +26,5 @@ export async function buildBoundPlan(baseRef: string, headRef: string): Promise<
     diff_sha256: hashDiff(base.sha, head.sha),
     impact_sha256: hashText(canonicalJson(impact)),
     impact,
-    materiality: {
-      continue: [
-        "validated descendant commit with the same tree and diff",
-        "equivalent identifiers or regenerated metadata",
-        "bounded timing, status propagation, or tooling correction",
-      ],
-      stop: [
-        "user-visible scope or outcome",
-        "billing or cost",
-        "privacy or security",
-        "data loss or irreversible state",
-        "external terms or production exposure",
-        "new authority or repository-law conflict",
-        "inability to prove safe rollback",
-      ],
-    },
-    rollback: "Revert the exact Git commit; never rewrite applied migrations.",
   }
 }

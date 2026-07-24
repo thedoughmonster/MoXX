@@ -5,8 +5,8 @@ export function selectTestPaths(
 ): string[] {
   const selected = new Set([
     "tests/dev_loop_determinism.test.ts",
-    "tests/dev_loop_evidence.test.ts",
     "tests/dev_loop_release_plan.test.ts",
+    "tests/retired_development_protocol.test.ts",
   ])
   for (const paths of Object.values(classifications)) {
     for (const path of paths) {
@@ -24,7 +24,7 @@ export function selectTestPaths(
   if (
     classifications.workflow.length > 0 ||
     classifications.repository_tooling.some((path) =>
-      /(?:release|deploy|dev_loop|run_(?:release|deploy|impact|check|context|receipt))/
+      /(?:release|deploy|dev_loop|run_(?:release|deploy|impact|check|receipt))/
         .test(path)
     )
   ) {

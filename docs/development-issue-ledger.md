@@ -16,13 +16,6 @@ Use `partial` when accepted scope or live acceptance remains. Use `complete`
 only when all remaining acceptance is satisfied. CI rejects absent, duplicate,
 invalid, closed, or pull-request targets.
 
-## Fresh execution
-
-For complex or stale-context work, create one deterministic packet with
-`momi-context pack` and use one fresh transcript-free executor. The owning issue
-does not change, and the executor does not spawn children. Routine work remains
-with one owner.
-
 ## After merge
 
 The privileged ledger job never checks out or executes PR code. It parses only
