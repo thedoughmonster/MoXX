@@ -3,5 +3,17 @@
   "labels_by_issue_type": {
     "bug": ["bug"],
     "feature": ["enhancement"]
+  },
+  "context": {
+    "issue_body_characters": 10000,
+    "comments": 8,
+    "comment_characters_each": 800,
+    "candidate_issues": 30,
+    "candidate_title_characters_each": 160,
+    "soft_estimated_tokens": 5000,
+    "hard_estimated_tokens": 7000
+  },
+  "queue": {
+    "pending_label": "triage:pending"
   }
 }

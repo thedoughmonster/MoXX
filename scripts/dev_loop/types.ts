@@ -110,4 +110,16 @@ export type TriageConfig = {
     bug: string[]
     feature: string[]
   }
+  context: {
+    issue_body_characters: number
+    comments: number
+    comment_characters_each: number
+    candidate_issues: number
+    candidate_title_characters_each: number
+    soft_estimated_tokens: number
+    hard_estimated_tokens: number
+  }
+  queue: {
+    pending_label: string
+  }
 }
