@@ -7,6 +7,17 @@ history. The warehouse is the system of record. Modules communicate through
 durable records, versioned views, and the MoMi-owned API rather than direct
 source reads or service-to-service HTTP calls.
 
+## Product Planes
+
+- **MoMi** is the Dough Monster operating system and business-authority plane.
+- **MoSi** is Monster Sensory Infrastructure, pronounced “mosey,” and names the
+  topology-neutral shop sensory and IoT plane.
+- **MoXi** is Monster Experience Interface, pronounced “moxie,” and names the
+  human-interaction platform for POS, kiosk, KDS, Expo, and related surfaces.
+
+ADR `0018` defines their exact boundaries and naming rules. Technical
+identifiers use `momi`, `mosi`, and `moxi`.
+
 ```mermaid
 flowchart LR
   toast["Toast Orders webhook"]
