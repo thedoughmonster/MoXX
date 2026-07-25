@@ -40,7 +40,10 @@ test("writer has narrow write authority and no OpenAI credential", () => {
   assert.match(writer, /node-version: 24\.14\.0/)
   assert.doesNotMatch(writer, /OPENAI|openai-api-key|codex-action/)
   assert.match(writer, /timeout-minutes: 5/)
-  assert.match(writer, /needs\.model\.outputs\.result/)
+  assert.match(
+    writer,
+    /if: always\(\) && needs\.model\.result == 'success' && needs\.model\.outputs\.result != ''/,
+  )
   assert.match(writer, /run_apply_triage\.ts/)
   assert.match(apply, /queue\.pending_label/)
   assert.match(apply, /method: "DELETE"/)
