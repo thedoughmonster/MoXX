@@ -33,6 +33,7 @@ export function classifyPath(path: string): ImpactClass {
   ) return "docs"
   if (
     path.startsWith("scripts/") || path.startsWith("tests/") ||
+    path.startsWith(".agents/skills/") ||
     path === "package.json" || path === "pnpm-lock.yaml" ||
     path === ".node-version" || path === ".gitignore"
   ) return "repository_tooling"
