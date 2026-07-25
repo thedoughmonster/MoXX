@@ -26,3 +26,14 @@ test("keeps provider bodies out of the operational ledger", () => {
   assert.doesNotMatch(migration,
     /\b(?:request_body|response_body|prompt|completion_body|authorization_header)\b/i)
 })
+
+test("seeds the required provider endpoint for every execution profile", () => {
+  const seed = migration.match(
+    /insert into momi_model_execution\.profiles[\s\S]*?create function/,
+  )?.[0] ?? ""
+  assert.match(seed, /\(purpose_key, profile_key, provider_endpoint,/)
+  assert.equal(
+    seed.match(/https:\/\/api\.openai\.com\/v1\/responses/g)?.length,
+    7,
+  )
+})

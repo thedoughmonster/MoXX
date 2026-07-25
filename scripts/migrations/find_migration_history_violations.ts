@@ -1,10 +1,16 @@
 import { createHash } from "node:crypto"
 
+export interface DevelopmentMigrationCorrection {
+  from: string
+  to: string
+}
+
 export function findMigrationHistoryViolations(
   baseline: Map<string, string>,
   current: Map<string, string>,
   serviceKeys: Set<string>,
   baselineName = "production",
+  corrections: Map<string, DevelopmentMigrationCorrection> = new Map(),
 ): string[] {
   const violations: string[] = []
   const normalize = (value: string) => value.replaceAll("\r\n", "\n")
@@ -15,9 +21,13 @@ export function findMigrationHistoryViolations(
       violations.push(`${name}: ${baselineName} migration was deleted`)
     } else if (source.startsWith("git-blob-sha1:")) {
       const bytes = Buffer.from(normalize(local), "utf8")
-      const hash = createHash("sha1")
-        .update(`blob ${bytes.length}\0`).update(bytes).digest("hex")
-      if (source !== `git-blob-sha1:${hash}`) {
+      const current = `git-blob-sha1:${createHash("sha1")
+        .update(`blob ${bytes.length}\0`).update(bytes).digest("hex")}`
+      const correction = corrections.get(name)
+      if (
+        source !== current &&
+        !(correction?.from === source && correction.to === current)
+      ) {
         violations.push(`${name}: ${baselineName} migration was modified`)
       }
     } else if (normalize(local) !== normalize(source)) {
