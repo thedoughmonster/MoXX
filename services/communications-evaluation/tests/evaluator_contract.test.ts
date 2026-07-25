@@ -104,14 +104,17 @@ test("disables the evaluator after a failed canary", async () => {
     /momi_communications\.(archive_items|evaluation_jobs)/)
 })
 
-test("limits evaluator network authority to the OpenAI Responses API", async () => {
+test("limits evaluator network authority to the model gateway", async () => {
   const service = JSON.parse(await readFile(new URL("../service.json", import.meta.url),
     "utf8")) as Record<string, Record<string, string[]>>
   const source = await readFile(new URL(
     "../functions/momi-communications-evaluate-item-v1/src/call_openai_evaluation.ts",
     import.meta.url,
   ), "utf8")
-  assert.deepEqual(service.network.outbound_hosts, ["api.openai.com"])
-  assert.match(source, /fetchImpl\("https:\/\/api\.openai\.com\/v1\/responses"/)
+  assert.deepEqual(service.network.outbound_hosts,
+    ["same-origin:supabase-edge-functions"])
+  assert.match(source, /MOMI_MODEL_EXECUTION_GATEWAY_URL/)
+  assert.match(source, /purpose_key: "communications\.evaluation"/)
+  assert.doesNotMatch(source, /api\.openai\.com|OPENAI_API_KEY/)
   assert.doesNotMatch(source, /clickup|github\.com|slack\.com/i)
 })

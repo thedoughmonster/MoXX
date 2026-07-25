@@ -1,7 +1,7 @@
 const requiredSettings = [
   "SUPABASE_DB_URL",
-  "OPENAI_API_KEY",
-  "MOMI_COMMUNICATIONS_EVALUATOR_MODEL",
+  "MOMI_MODEL_EXECUTION_GATEWAY_URL",
+  "MOMI_MODEL_GATEWAY_EVALUATION_SECRET",
 ] as const
 
 export function isEvaluatorConfigured(

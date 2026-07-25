@@ -14,15 +14,17 @@
       "momi.communications.get_evaluation_job_status.v1",
       "momi.communications.get_evaluation_queue_status.v1"
     ],
-    "consumes": []
+    "consumes": [
+      {"service": "model-execution-gateway", "contract": "momi.model_execution.execute.v1"}
+    ]
   },
   "database": {
     "read": ["momi_communications"],
     "write": ["momi_communications"]
   },
-  "network": { "outbound_hosts": ["api.openai.com"] },
-  "secrets": ["SUPABASE_DB_URL", "OPENAI_API_KEY"],
-  "configuration": ["MOMI_COMMUNICATIONS_EVALUATOR_MODEL"],
+  "network": { "outbound_hosts": ["same-origin:supabase-edge-functions"] },
+  "secrets": ["SUPABASE_DB_URL", "MOMI_MODEL_GATEWAY_EVALUATION_SECRET"],
+  "configuration": ["MOMI_MODEL_EXECUTION_GATEWAY_URL"],
   "deployment": {
     "owns": [
       { "kind": "cron_job", "key": "momi-communications-evaluator-wakeup-v1" }

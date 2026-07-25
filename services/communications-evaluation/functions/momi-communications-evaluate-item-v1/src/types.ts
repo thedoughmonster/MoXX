@@ -45,6 +45,11 @@ export type EvaluationOutput = {
   derived_records: DerivedCandidate[]
 }
 
+export type EvaluatedOutput = {
+  output: EvaluationOutput
+  provider_model: string
+}
+
 export type EvaluationCompletion = {
   evaluation_id: string
   derived_count: number
@@ -52,10 +57,10 @@ export type EvaluationCompletion = {
 
 export type EvaluationStore = {
   claim: (input: EvaluationInput) => Promise<EvaluationCandidate | null>
-  evaluate: (candidate: EvaluationCandidate) => Promise<EvaluationOutput>
+  evaluate: (candidate: EvaluationCandidate) => Promise<EvaluatedOutput>
   complete: (
     candidate: EvaluationCandidate,
-    output: EvaluationOutput,
+    evaluated: EvaluatedOutput,
   ) => Promise<EvaluationCompletion | null>
   fail: (input: EvaluationInput, code: string, message: string) => Promise<boolean>
 }

@@ -15,7 +15,6 @@ import { responseCompleted } from "./response_completed.ts"
 import { responseText } from "./response_text.ts"
 import { responseToolCalls } from "./response_tool_calls.ts"
 import { usage } from "./provider_usage.ts"
-import { remainingDeadlineSeconds } from "./remaining_deadline_seconds.ts"
 import { runToolCall } from "./run_tool_call.ts"
 import { successResponse } from "./success_response.ts"
 import { terminalLimitationCodes } from "./terminal_limitation_response.ts"
@@ -37,15 +36,14 @@ export async function executeAdmittedChat(input: ChatInput, admission: Admission
   if (begun.failure) return begun.failure
   if (!begun.route) throw new Error("route_selection_failed")
   const route = begun.route
-  let request = providerRequest(input.messages, input.user.id, admission,
-    route, tools, instructions)
+  let request = providerRequest(input.messages, input.user.id, tools, instructions)
   const toolContext = { input, invocationId: admission.invocation_id,
     archiveReceiptId: begun.archiveReceiptId }
   await captureEvidence(input, admission.invocation_id, begun.evidenceOrder,
     "selected_provider_request", { selected_route: route.route_key,
-      routing_source: route.source, reasoning_effort: route.reasoning_effort,
+      routing_source: route.source,
       provider_request: request }, admission.provider_key,
-    route.provider_model, "pending")
+    `profile:communications.answer/${route.route_key}`, "pending")
   let providerRound = begun.providerRound as number
   let answerRound = 1
   let evidenceOrder = begun.evidenceOrder
@@ -54,11 +52,11 @@ export async function executeAdmittedChat(input: ChatInput, admission: Admission
       estimateProviderPayloadTokens(request), providerRound)) {
       throw new Error("provider_round_not_authorized")
     }
-    const remaining = remainingDeadlineSeconds(admission.invocation_deadline)
-    const initial = await callProvider(route.provider_endpoint, request,
-      request.background === true ? Math.min(15, remaining) : remaining)
+    const initial = await callProvider("communications.answer", route.route_key,
+      admission.invocation_id, `${admission.invocation_id}:answer:${answerRound}`,
+      request, Math.min(admission.maximum_output_tokens, route.maximum_output_tokens),
+      route.route_key === "maximum", admission.invocation_deadline)
     const background = await waitForBackgroundResponse(
-      route.provider_endpoint,
       initial,
       admission.invocation_deadline,
     )
@@ -73,7 +71,7 @@ export async function executeAdmittedChat(input: ChatInput, admission: Admission
       ++evidenceOrder, `provider_round_${answerRound}`,
       { provider_request: request, provider_response: result.body,
         provider_observations: background.observations },
-      admission.provider_key, route.provider_model, terminal, usage(result.body),
+      admission.provider_key, result.provider_model, terminal, usage(result.body),
       { duration_ms: result.duration_ms, http_status: result.status })
     if (result.ambiguous || !result.ok || !completed || !toolCalls.length) {
       const state = terminal === "completed" ? "completed"
@@ -119,7 +117,8 @@ export async function executeAdmittedChat(input: ChatInput, admission: Admission
     await captureEvidence(input, admission.invocation_id, ++evidenceOrder,
       "tool_round_request", { answer_round: answerRound,
         tool_calls: toolCalls as unknown as JSONValue[], tool_results: toolOutputs,
-        provider_request: request }, admission.provider_key, route.provider_model, "pending")
+        provider_request: request }, admission.provider_key,
+      `profile:communications.answer/${route.route_key}`, "pending")
     providerRound += 1
     answerRound += 1
   }

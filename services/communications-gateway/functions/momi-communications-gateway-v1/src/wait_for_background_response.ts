@@ -10,7 +10,6 @@ export type BackgroundProviderResult = {
 const pending = new Set(["queued", "in_progress"])
 
 export async function waitForBackgroundResponse(
-  endpoint: string,
   initial: ProviderResult,
   deadline: string,
   fetchImpl: typeof fetch = fetch,
@@ -32,13 +31,13 @@ export async function waitForBackgroundResponse(
     const responseId = result.body.id
     const remaining = Date.parse(deadline) - Date.now()
     if (typeof responseId !== "string" || responseId.length < 1) {
-      result = { ok: false, ambiguous: false, status: 0,
+      result = { ...result, ok: false, ambiguous: false, status: 0,
         body: { error: { type: "provider_background_id_missing" } },
         duration_ms: duration }
       break
     }
     if (!Number.isFinite(remaining) || remaining <= pollDelayMilliseconds) {
-      result = { ok: false, ambiguous: false, status: 0,
+      result = { ...result, ok: false, ambiguous: false, status: 0,
         body: { error: { type: "provider_background_deadline_exceeded" } },
         duration_ms: duration }
       break
@@ -46,12 +45,10 @@ export async function waitForBackgroundResponse(
     if (pollDelayMilliseconds > 0) {
       await new Promise((resolve) => setTimeout(resolve, pollDelayMilliseconds))
     }
-    const timeout = Math.max(1, Math.min(10,
-      Math.floor((Date.parse(deadline) - Date.now()) / 1000)))
     const retrieved = await retrieveProviderResponse(
-      endpoint,
+      initial.gateway_call_id,
       responseId,
-      timeout,
+      deadline,
       fetchImpl,
     )
     duration += retrieved.duration_ms

@@ -5,15 +5,13 @@ import {
   promptVersion,
   type EvaluationCandidate,
   type EvaluationCompletion,
-  type EvaluationOutput,
+  type EvaluatedOutput,
 } from "./types.ts"
 
 export async function completeEvaluation(
   candidate: EvaluationCandidate,
-  output: EvaluationOutput,
+  evaluated: EvaluatedOutput,
 ): Promise<EvaluationCompletion | null> {
-  const model = Deno.env.get("MOMI_COMMUNICATIONS_EVALUATOR_MODEL")?.trim()
-  if (!model) throw new Error("Evaluator model configuration is missing")
   const sql = getDatabase()
   const rows = await sql<EvaluationCompletion[]>`
     select completed.evaluation_id::text as evaluation_id,
@@ -23,9 +21,9 @@ export async function completeEvaluation(
       ${candidate.capability_token}::uuid,
       ${evaluatorKey},
       ${classifierVersion},
-      ${model},
+      ${evaluated.provider_model},
       ${promptVersion},
-      ${sql.json(output)}
+      ${sql.json(evaluated.output)}
     ) as completed
   `
   return rows[0] ?? null

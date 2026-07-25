@@ -87,3 +87,6 @@ verify_jwt = false
 
 [functions.momi-communications-capture-human-message-v1]
 verify_jwt = false
+
+[functions.momi-model-execution-gateway-v1]
+verify_jwt = false

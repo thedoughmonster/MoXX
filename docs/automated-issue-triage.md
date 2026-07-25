@@ -6,10 +6,11 @@ new issue and supports explicit manual re-triage.
 ## Authority split
 
 The model job has read-only repository/issue authority and no write token. Issue
-text is untrusted. It reads only the generated bounded context, uses the pinned
-official Codex action, and emits schema-constrained JSON.
+text is untrusted. It sends only the generated bounded context and contract to
+the model-execution gateway, which selects the provider mapping and records
+safe operational metadata. The job emits schema-constrained JSON.
 
-The writer is a separate job with issue-write authority and no OpenAI
+The writer is a separate job with issue-write authority and no model-gateway
 credential. Before mutation it verifies the current open issue, related issue
 existence/type, configured labels, safe text, and one idempotency marker.
 
@@ -35,4 +36,4 @@ label without duplication. Multiple markers fail closed.
 Only `issues.opened` and bounded `workflow_dispatch` trigger the workflow.
 Invalid output, nonexistent references, unavailable labels, or model failure
 causes no mutation. Inspect the exact failed job, correct the source defect, and
-dispatch once. Cost remains one low-effort call over capped context.
+dispatch once. Cost remains one mapped low-cost call over capped context.

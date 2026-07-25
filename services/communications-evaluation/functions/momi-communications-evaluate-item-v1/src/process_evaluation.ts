@@ -15,8 +15,8 @@ export async function processEvaluation(
       evaluation_job_id: input.evaluation_job_id, disposition: "duplicate" } }
   }
   try {
-    const output = await store.evaluate(candidate)
-    const completed = await store.complete(candidate, output)
+    const evaluated = await store.evaluate(candidate)
+    const completed = await store.complete(candidate, evaluated)
     if (!completed) {
       return { status: 202, body: { ok: true, function_key: functionKey,
         evaluation_job_id: input.evaluation_job_id, disposition: "duplicate" } }
