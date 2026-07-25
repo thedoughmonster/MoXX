@@ -20,8 +20,8 @@ schedule selects due work every 30 seconds and sends only this exact envelope.
 }
 ```
 
-The runtime requires `SUPABASE_DB_URL`, `OPENAI_API_KEY`, and
-`MOMI_COMMUNICATIONS_EVALUATOR_MODEL`. The route and schedule stay inactive
+The runtime requires `SUPABASE_DB_URL`, `MOMI_MODEL_EXECUTION_GATEWAY_URL`, and
+`MOMI_MODEL_GATEWAY_EVALUATION_SECRET`. The route and schedule stay inactive
 until those secrets and the hosted function have been verified.
 
 For rollout, `dispatch_evaluation_job_v1` wakes one exact due job without
@@ -37,7 +37,7 @@ the derived-record count. Recoverable failures return `retrying`.
 ## Side Effects
 
 The function claims a five-minute lease through an owned database function,
-calls only `https://api.openai.com/v1/responses`, and atomically appends strict
+calls only the model-execution gateway contract, and atomically appends strict
 evaluation output, optional linked derived records, and audit evidence. It
 emits routing hints but never calls ClickUp, GitHub, or another destination.
 

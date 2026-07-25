@@ -6,7 +6,6 @@ const maximumCandidateCharacters = 120_000
 
 export function buildOpenAiRequest(
   candidate: EvaluationCandidate,
-  model: string,
 ): Record<string, unknown> {
   const candidateDocument = JSON.stringify({
     evaluation_job_id: candidate.evaluation_job_id,
@@ -28,12 +27,9 @@ export function buildOpenAiRequest(
     ? candidateDocument.slice(0, maximumCandidateCharacters) + "\n[truncated]"
     : candidateDocument
   return {
-    model,
     instructions: evaluatorInstructions,
     input,
     text: { format: evaluationTextFormat },
-    max_output_tokens: 4000,
-    store: false,
     metadata: {
       evaluation_job_id: candidate.evaluation_job_id,
       archive_item_id: candidate.archive_item_id,

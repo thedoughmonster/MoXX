@@ -43,8 +43,10 @@ provider admission. The native OpenWebUI Action sends an authenticated,
 persisted message selection to `POST /log`; both paths call only the
 communications-operations owner contract and replay one durable receipt.
 
-Provider execution prefers the beta-specific `MOMI_BETA_PROVIDER_API_KEY` and
-may reuse the existing project-scoped `OPENAI_API_KEY` during beta activation.
+Provider execution uses only `MOMI_MODEL_EXECUTION_GATEWAY_URL` and the
+purpose-bound `MOMI_MODEL_GATEWAY_COMMUNICATIONS_SECRET`. Model identity,
+reasoning, provider credentials, and provider egress belong exclusively to the
+model-execution gateway.
 Neither value is returned, logged, archived, or exposed to OpenWebUI. Provider
 requests use the authenticated user's opaque UUID as `safety_identifier` and
 the current Responses API `max_output_tokens` field. The routing policy owns

@@ -54,7 +54,7 @@ jobs:
       issues: read
     outputs:
       issue_number: ${{ steps.context.outputs.issue_number }}
-      result: ${{ steps.codex.outputs.final-message }}
+      result: ${{ steps.model.outputs.result }}
     steps:
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
         with:
@@ -75,20 +75,14 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           TRIAGE_ISSUE_NUMBER: ${{ github.event.issue.number || inputs.issue_number }}
         run: node scripts/issue_triage/run_prepare_context.ts
-      - name: Run schema-constrained read-only triage
+      - name: Run schema-constrained triage through the model gateway
         if: steps.context.outputs.should_triage == 'true'
-        id: codex
-        uses: openai/codex-action@e469131063221562acfb9ea6bbc9fd7f27226ffb # v1.8
-        with:
-          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
-          prompt-file: .github/codex/issue-triage-prompt.md
-          output-schema-file: .github/codex/issue-triage.schema.json
-          codex-version: 0.145.0
-          model: gpt-5.4-mini
-          effort: low
-          sandbox: read-only
-          safety-strategy: drop-sudo
-          allow-users: "*"
+        id: model
+        env:
+          MOMI_MODEL_EXECUTION_GATEWAY_URL: ${{ vars.MOMI_MODEL_EXECUTION_GATEWAY_URL }}
+          MOMI_MODEL_GATEWAY_TRIAGE_SECRET: ${{ secrets.MOMI_MODEL_GATEWAY_TRIAGE_SECRET }}
+          TRIAGE_ISSUE_NUMBER: ${{ steps.context.outputs.issue_number }}
+        run: node scripts/issue_triage/run_model_triage.ts
 
   writer:
     needs: model

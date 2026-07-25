@@ -8,40 +8,31 @@ import { responseCompleted } from "../src/response_completed.ts"
 import { responseText } from "../src/response_text.ts"
 import { responseToolCalls } from "../src/response_tool_calls.ts"
 import { successResponse } from "../src/success_response.ts"
-import type { Admission, Message, RouteSelection } from "../src/types.ts"
+import type { Message } from "../src/types.ts"
 
 test("uses the selected routed Responses tool contract", () => {
-  const admission = ({ provider_model: "provider-model",
-    maximum_output_tokens: 4000 } as Admission)
   const messages: Message[] = [{ role: "user", content: "question" }]
-  const route = { route_key: "deep", route_rank: 3, provider_model: "gpt-5.6-sol",
-    reasoning_effort: "high", maximum_output_tokens: 2000, automatic_enabled: true,
-    source: "router", reason: "analysis", confidence: 0.9 } as RouteSelection
   const request = providerRequest(messages,
-    "c03fbd6e-65b7-4b23-8e65-2e5a8ec00123", admission, route,
+    "c03fbd6e-65b7-4b23-8e65-2e5a8ec00123",
     [{ type: "function", function: { name: "read", parameters: {} } }],
     "mapped context")
-  assert.equal(request.model, "gpt-5.6-sol")
-  assert.deepEqual(request.reasoning, { effort: "high" })
-  assert.equal(request.max_output_tokens, 2000)
+  assert.equal(request.model, undefined)
+  assert.equal(request.reasoning, undefined)
+  assert.equal(request.max_output_tokens, undefined)
   assert.equal(request.instructions, "mapped context")
   assert.deepEqual(request.input, [{ role: "user", content: "question" }])
   assert.deepEqual(request.tools, [{ type: "function", name: "read", parameters: {} }])
   assert.equal(request.tool_choice, "auto")
   assert.equal(request.parallel_tool_calls, true)
-  assert.equal(request.store, false)
-  assert.equal(request.background, undefined)
+  assert.equal(request.store, undefined)
   assert.equal(request.safety_identifier, "c03fbd6e-65b7-4b23-8e65-2e5a8ec00123")
 })
 
-test("uses background mode only for Maximum", () => {
-  const admission = ({ maximum_output_tokens: 16000 } as Admission)
-  const route = { route_key: "maximum", provider_model: "gpt-5.6-sol",
-    reasoning_effort: "max", maximum_output_tokens: 16000 } as RouteSelection
+test("leaves background and model selection to the gateway envelope", () => {
   const request = providerRequest([{ role: "user", content: "deep analysis" }],
-    "user-id", admission, route, [], "mapped context")
-  assert.equal(request.background, true)
-  assert.equal(request.store, false)
+    "user-id", [], "mapped context")
+  assert.equal(request.background, undefined)
+  assert.equal(request.model, undefined)
 })
 
 test("replays every Responses output item before a matching function result", () => {

@@ -22,6 +22,8 @@
       {"service": "communications-archive", "contract": "momi.communications.capture_gateway_exchange.v1"},
       {"service": "communications-archive", "contract": "momi.communications.get_gateway_exchange_receipt.v1"},
       {"service": "communications-operations", "contract": "momi.communications.create_user_flagged_shop_log.v1"},
+      {"service": "model-execution-gateway", "contract": "momi.model_execution.execute.v1"},
+      {"service": "model-execution-gateway", "contract": "momi.model_execution.retrieve.v1"},
       {"service": "warehouse-read-api", "contract": "momi.canonical_beta_query.v1"},
       {"service": "warehouse-read-api", "contract": "momi.shop_analysis_query.v1"}
     ]
@@ -36,15 +38,15 @@
     ],
     "write": ["momi_communications_gateway"]
   },
-  "network": {"outbound_hosts": ["api.openai.com"]},
+  "network": {"outbound_hosts": ["same-origin:supabase-edge-functions"]},
   "secrets": [
     "SUPABASE_DB_URL",
-    "MOMI_BETA_PROVIDER_API_KEY",
-    "OPENAI_API_KEY",
+    "MOMI_MODEL_GATEWAY_COMMUNICATIONS_SECRET",
     "MOMI_OPENWEBUI_GATEWAY_SECRET",
     "MOMI_GATEWAY_ADMIN_SECRET"
   ],
-  "configuration": ["DENO_DEPLOYMENT_ID", "MOMI_BETA_ADMIN_USER_ID"],
+  "configuration": ["DENO_DEPLOYMENT_ID", "MOMI_BETA_ADMIN_USER_ID",
+    "MOMI_MODEL_EXECUTION_GATEWAY_URL"],
   "deployment": {"owns": [], "depends_on": []},
   "runtime_dependencies": [
     "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",

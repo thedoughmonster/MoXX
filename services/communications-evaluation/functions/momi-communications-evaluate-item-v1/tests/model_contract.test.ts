@@ -42,10 +42,10 @@ const output: EvaluationOutput = {
   }],
 }
 
-test("builds a strict non-stored Responses API request", () => {
-  const request = buildOpenAiRequest(candidate, "configured-model")
-  assert.equal(request.model, "configured-model")
-  assert.equal(request.store, false)
+test("builds a strict provider-neutral evaluation request", () => {
+  const request = buildOpenAiRequest(candidate)
+  assert.equal(request.model, undefined)
+  assert.equal(request.store, undefined)
   assert.equal((request.text as Record<string, unknown>).format !== undefined, true)
   assert.equal(JSON.stringify(request).includes(candidate.capability_token), false)
 })

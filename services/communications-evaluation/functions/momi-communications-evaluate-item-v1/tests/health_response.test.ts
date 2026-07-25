@@ -6,11 +6,11 @@ import { isEvaluatorConfigured } from "../src/is_evaluator_configured.ts"
 test("requires every evaluator runtime setting", () => {
   const configured = new Map([
     ["SUPABASE_DB_URL", "postgres://configured"],
-    ["OPENAI_API_KEY", "configured"],
-    ["MOMI_COMMUNICATIONS_EVALUATOR_MODEL", "gpt-5.6-terra"],
+    ["MOMI_MODEL_EXECUTION_GATEWAY_URL", "https://example.test/gateway"],
+    ["MOMI_MODEL_GATEWAY_EVALUATION_SECRET", "configured"],
   ])
   assert.equal(isEvaluatorConfigured((key) => configured.get(key)), true)
-  configured.delete("OPENAI_API_KEY")
+  configured.delete("MOMI_MODEL_GATEWAY_EVALUATION_SECRET")
   assert.equal(isEvaluatorConfigured((key) => configured.get(key)), false)
 })
 

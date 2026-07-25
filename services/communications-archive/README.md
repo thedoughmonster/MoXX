@@ -54,9 +54,9 @@ Gateway-exchange and committed human-message beta evidence is archive-only and
 does not recursively enqueue model evaluation.
 
 The registry route and schedule ship inactive. After the hosted function has
-the `OPENAI_API_KEY` and `MOMI_COMMUNICATIONS_EVALUATOR_MODEL` secrets, the
-canary migration activates only the exact route. It explicitly leaves the
-30-second schedule inactive until controlled canaries pass.
+its purpose-bound model-gateway URL and credential, the canary migration
+activates only the exact route. It explicitly leaves the 30-second schedule
+inactive until controlled canaries pass.
 
 Evaluator dispatch and status contracts belong to `communications-evaluation`.
 

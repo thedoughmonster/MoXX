@@ -8,7 +8,6 @@ export function routerRequest(input: ChatInput, policy: RoutingPolicy): Record<s
     profile.route_rank <= maximumRank).map((profile) => profile.route_key)
   if (!allowed.length) throw new Error("routing_policy_unavailable")
   return {
-    model: policy.router_model,
     input: [{ role: "developer", content:
       `Route the request; never answer it. Choose one allowed route: ${allowed.join(", ")}. ` +
       "Use quick only for conversation or simple writing that needs no tool. Use standard for any " +
@@ -24,10 +23,7 @@ export function routerRequest(input: ChatInput, policy: RoutingPolicy): Record<s
           reason: { type: "string", minLength: 1, maxLength: 240 },
         } },
     } },
-    reasoning: { effort: policy.router_reasoning_effort },
-    max_output_tokens: 500,
     safety_identifier: input.user.id,
     metadata: { momi_router_prompt_version: policy.router_prompt_version },
-    store: false,
   }
 }

@@ -7,28 +7,26 @@ import { routerRequest } from "../src/router_request.ts"
 import type { ChatInput, RoutingPolicy } from "../src/types.ts"
 
 const profiles: RoutingPolicy["profiles"] = [
-  { route_key: "quick", route_rank: 1, provider_model: "luna",
-    reasoning_effort: "low", maximum_output_tokens: 1000, automatic_enabled: true },
-  { route_key: "standard", route_rank: 2, provider_model: "terra",
-    reasoning_effort: "medium", maximum_output_tokens: 4000, automatic_enabled: true },
-  { route_key: "deep", route_rank: 3, provider_model: "sol",
-    reasoning_effort: "high", maximum_output_tokens: 8000, automatic_enabled: true },
-  { route_key: "maximum", route_rank: 4, provider_model: "sol",
-    reasoning_effort: "max", maximum_output_tokens: 16000, automatic_enabled: false },
+  { route_key: "quick", route_rank: 1,
+    maximum_output_tokens: 1000, automatic_enabled: true },
+  { route_key: "standard", route_rank: 2,
+    maximum_output_tokens: 4000, automatic_enabled: true },
+  { route_key: "deep", route_rank: 3,
+    maximum_output_tokens: 8000, automatic_enabled: true },
+  { route_key: "maximum", route_rank: 4,
+    maximum_output_tokens: 16000, automatic_enabled: false },
 ]
-const policy: RoutingPolicy = { router_endpoint: "https://api.openai.com/v1/responses",
-  answer_endpoint: "https://api.openai.com/v1/responses",
-  router_model: "luna", router_reasoning_effort: "low",
-  router_prompt_version: "momi-router-v2", default_route: "standard",
+const policy: RoutingPolicy = { router_prompt_version: "momi-router-v2",
+  default_route: "standard",
   maximum_route: "deep", profiles }
 const input = { messages: [{ role: "user", content: "compare the last four weeks" }],
   user: { id: "c03fbd6e-65b7-4b23-8e65-2e5a8ec00123", email: "user@example.com" } } as ChatInput
 
 test("builds a bounded structured-output router request", () => {
   const request = routerRequest(input, policy)
-  assert.equal(request.model, "luna")
-  assert.deepEqual(request.reasoning, { effort: "low" })
-  assert.equal(request.max_output_tokens, 500)
+  assert.equal(request.model, undefined)
+  assert.equal(request.reasoning, undefined)
+  assert.equal(request.max_output_tokens, undefined)
   assert.equal(request.tools, undefined)
   assert.deepEqual(request.metadata, { momi_router_prompt_version: "momi-router-v2" })
   const instructions = (request.input as { content: string }[])[0].content

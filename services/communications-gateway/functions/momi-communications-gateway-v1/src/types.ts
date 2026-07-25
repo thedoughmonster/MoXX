@@ -86,18 +86,12 @@ export type InvocationReplay = {
 export type RouteProfile = {
   route_key: RouteKey
   route_rank: number
-  provider_model: string
-  reasoning_effort: "none" | "low" | "medium" | "high" | "xhigh" | "max"
   maximum_output_tokens: number
   maximum_answer_calls: number
   automatic_enabled: boolean
 }
 
 export type RoutingPolicy = {
-  router_endpoint: string
-  answer_endpoint: string
-  router_model: string
-  router_reasoning_effort: "none" | "low" | "medium"
   router_prompt_version: string
   default_route: RouteKey
   maximum_route: RouteKey
@@ -105,7 +99,6 @@ export type RoutingPolicy = {
 }
 
 export type RouteSelection = RouteProfile & {
-  provider_endpoint: string
   source: "explicit" | "router" | "fallback"
   reason: string
   confidence: number
@@ -123,6 +116,8 @@ export type ProviderResult = {
   status: number
   body: Record<string, JSONValue>
   duration_ms: number
+  gateway_call_id: string
+  provider_model: string
 }
 
 export type ToolContext = {

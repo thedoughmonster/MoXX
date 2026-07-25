@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "oneOf": [
+    {
+      "additionalProperties": false,
+      "required": ["schema_version", "operation", "purpose_key", "profile_key",
+        "parent_invocation_id", "idempotency_key", "deadline_at",
+        "requested_output_tokens", "background", "payload"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "operation": {"const": "create"},
+        "purpose_key": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]+$"},
+        "profile_key": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]+$"},
+        "parent_invocation_id": {"type": "string", "minLength": 1, "maxLength": 240},
+        "idempotency_key": {"type": "string", "minLength": 1, "maxLength": 240},
+        "deadline_at": {"type": "string", "format": "date-time"},
+        "requested_output_tokens": {"type": "integer", "minimum": 1, "maximum": 32000},
+        "background": {"type": "boolean"},
+        "payload": {"type": "object"}
+      }
+    },
+    {
+      "additionalProperties": false,
+      "required": ["schema_version", "operation", "call_id", "provider_response_id", "deadline_at"],
+      "properties": {
+        "schema_version": {"const": 1},
+        "operation": {"const": "retrieve"},
+        "call_id": {"type": "string", "format": "uuid"},
+        "provider_response_id": {"type": "string", "minLength": 1, "maxLength": 240},
+        "deadline_at": {"type": "string", "format": "date-time"}
+      }
+    }
+  ]
+}
