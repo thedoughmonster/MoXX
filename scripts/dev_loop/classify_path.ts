@@ -3,6 +3,7 @@ import type { ImpactClass } from "./types.ts"
 export function classifyPath(path: string): ImpactClass {
   if (path.startsWith("supabase/migrations/")) return "migration"
   if (
+    path === "supabase/config.toml" ||
     /^(?:services\/[^/]+\/service\.json|services\/[^/]+\/functions\/[^/]+\/function\.json)$/
       .test(path)
   ) return "manifest"
