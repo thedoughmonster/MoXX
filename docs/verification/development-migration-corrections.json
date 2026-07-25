@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "corrections": [
+    {
+      "migration": "20260725191244_create_model_execution_gateway.sql",
+      "from_blob_sha1": "a6081a8bd1d023339213d28ee8ebd1b72918ee4f",
+      "to_blob_sha1": "531d62d8d9b71294ca4af7eec57ed83c1f3c09c1",
+      "issue": 179,
+      "reason": "Dev apply rolled back before recording the version because the profile seed omitted its required provider endpoint.",
+      "hosted_dev_status": "absent",
+      "verified_at": "2026-07-25T20:02:00Z"
+    }
+  ]
+}

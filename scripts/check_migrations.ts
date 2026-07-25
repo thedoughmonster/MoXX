@@ -13,6 +13,8 @@ import { loadDevelopmentMigrationChanges } from
   "./migrations/load_development_migration_changes.ts"
 import { loadDevelopmentMigrations } from
   "./migrations/load_development_migrations.ts"
+import { loadDevelopmentMigrationCorrections } from
+  "./migrations/load_development_migration_corrections.ts"
 import { loadLocalMigrations } from "./migrations/load_local_migrations.ts"
 import { loadProductionMigrations } from "./migrations/load_production_migrations.ts"
 
@@ -21,16 +23,18 @@ const path = architecture.workspace.paths.migrations
 const current = await loadLocalMigrations(join(workspaceRoot, path))
 const baseline = loadProductionMigrations(path)
 const development = loadDevelopmentMigrations(path)
+const corrections = loadDevelopmentMigrationCorrections()
 const serviceKeys = new Set(
   architecture.services.map((service) => service.manifest.service_key),
 )
 const violations = [...new Set([
   ...findMigrationHistoryViolations(baseline, current, serviceKeys),
   ...findMigrationHistoryViolations(
-    development, current, serviceKeys, "development",
+    development, current, serviceKeys, "development", corrections,
   ),
   ...findDevelopmentMigrationChangeViolations(
     loadDevelopmentMigrationChanges(path), path, new Set(baseline.keys()),
+    new Set(corrections.keys()),
   ),
     ...findNewMigrationAuthorityViolations(
       development,

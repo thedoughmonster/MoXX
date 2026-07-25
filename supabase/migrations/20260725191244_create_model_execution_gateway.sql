@@ -93,25 +93,32 @@ alter table momi_model_execution.http_exchanges enable row level security;
 revoke all on all tables in schema momi_model_execution from public, anon, authenticated;
 
 insert into momi_model_execution.profiles
-  (purpose_key, profile_key, provider_model, reasoning_effort,
+  (purpose_key, profile_key, provider_endpoint, provider_model, reasoning_effort,
     maximum_input_tokens, maximum_output_tokens, timeout_seconds,
     requests_per_minute, requests_per_day, daily_budget_micros,
     input_micros_per_token, output_micros_per_token,
     background_allowed, enabled)
 values
-  ('communications.router', 'auto', 'gpt-5.6-luna', 'low',
+  ('communications.router', 'auto', 'https://api.openai.com/v1/responses',
+    'gpt-5.6-luna', 'low',
     8000, 500, 30, 30, 1000, 50000000, 1, 6, false, true),
-  ('communications.answer', 'quick', 'gpt-5.6-luna', 'low',
+  ('communications.answer', 'quick', 'https://api.openai.com/v1/responses',
+    'gpt-5.6-luna', 'low',
     8000, 1000, 60, 30, 1000, 50000000, 1, 6, false, true),
-  ('communications.answer', 'standard', 'gpt-5.6-terra', 'medium',
+  ('communications.answer', 'standard', 'https://api.openai.com/v1/responses',
+    'gpt-5.6-terra', 'medium',
     8000, 4000, 60, 30, 1000, 50000000, 2.5, 15, false, true),
-  ('communications.answer', 'deep', 'gpt-5.6-sol', 'high',
+  ('communications.answer', 'deep', 'https://api.openai.com/v1/responses',
+    'gpt-5.6-sol', 'high',
     8000, 8000, 120, 20, 500, 100000000, 5, 30, false, true),
-  ('communications.answer', 'maximum', 'gpt-5.6-sol', 'max',
+  ('communications.answer', 'maximum', 'https://api.openai.com/v1/responses',
+    'gpt-5.6-sol', 'max',
     8000, 16000, 400, 10, 200, 200000000, 5, 30, true, true),
-  ('communications.evaluation', 'default', 'gpt-5.6-terra', 'medium',
+  ('communications.evaluation', 'default', 'https://api.openai.com/v1/responses',
+    'gpt-5.6-terra', 'medium',
     32000, 4000, 120, 10, 1000, 100000000, 2.5, 15, false, true),
-  ('github.issue-triage', 'default', 'gpt-5.4-mini', 'low',
+  ('github.issue-triage', 'default', 'https://api.openai.com/v1/responses',
+    'gpt-5.4-mini', 'low',
     8000, 2000, 120, 6, 500, 50000000, 1, 6, false, true);
 
 create function momi_model_execution.admit_call_v1(

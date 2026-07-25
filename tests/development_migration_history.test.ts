@@ -42,6 +42,17 @@ test("ignores production history and one-time development additions", () => {
   ), [])
 })
 
+test("permits only a named development correction", () => {
+  const path = "supabase/migrations"
+  const source = `M\t${path}/001_corrected.sql\nM\t${path}/002_other.sql`
+  assert.deepEqual(findDevelopmentMigrationChangeViolations(
+    source,
+    path,
+    new Set(),
+    new Set(["001_corrected.sql"]),
+  ), ["002_other.sql: development migration changed after landing"])
+})
+
 test("loads development history from the exact accepted ref", async () => {
   const source = await readFile(new URL(
     "../scripts/migrations/load_development_migration_changes.ts",

@@ -2,6 +2,7 @@ export function findDevelopmentMigrationChangeViolations(
   source: string,
   migrationPath: string,
   productionNames: Set<string>,
+  correctedNames: Set<string> = new Set(),
 ): string[] {
   const prefix = `${migrationPath.replace(/\/+$/, "")}/`
   const states = new Map<string, "added" | "deleted">()
@@ -16,7 +17,9 @@ export function findDevelopmentMigrationChangeViolations(
       if (state) violations.push(`${name}: development migration was re-added`)
       states.set(name, "added")
     } else if (match[1] === "M") {
-      violations.push(`${name}: development migration changed after landing`)
+      if (!correctedNames.has(name)) {
+        violations.push(`${name}: development migration changed after landing`)
+      }
     } else {
       violations.push(`${name}: development migration was deleted after landing`)
       states.set(name, "deleted")
