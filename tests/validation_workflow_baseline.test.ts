@@ -10,6 +10,9 @@ test("runs one exact path-derived final gate for pull requests", () => {
   assert.match(workflow, /name: validate-final/)
   assert.match(workflow, /github\.event\.pull_request\.base\.sha/)
   assert.match(workflow, /github\.event\.pull_request\.head\.sha/)
+  assert.match(workflow, /development_baseline_sha:\n\s+description:[^\n]+\n\s+required: true/)
+  assert.match(workflow,
+    /MOMI_DEV_REF: \$\{\{ github\.event\.pull_request\.base\.sha \|\| inputs\.development_baseline_sha \}\}/)
   assert.match(workflow, /momi-impact plan/)
   assert.match(workflow, /momi-check changed --final/)
   assert.match(workflow, /validation-receipt\.json/)

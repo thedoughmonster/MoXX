@@ -13,6 +13,10 @@ on:
         description: Exact candidate commit
         required: true
         type: string
+      development_baseline_sha:
+        description: Exact trusted dev commit for migration immutability checks
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -30,7 +34,7 @@ jobs:
       MOMI_BASE_REF: ${{ github.event.pull_request.base.sha || inputs.base_sha }}
       MOMI_HEAD_REF: ${{ github.event.pull_request.head.sha || inputs.head_sha }}
       MOMI_PROD_REF: origin/prod
-      MOMI_DEV_REF: ${{ github.event.pull_request.base.sha || inputs.base_sha }}
+      MOMI_DEV_REF: ${{ github.event.pull_request.base.sha || inputs.development_baseline_sha }}
     steps:
       - uses: actions/checkout@v4
         with:
