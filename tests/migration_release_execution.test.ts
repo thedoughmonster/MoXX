@@ -49,6 +49,21 @@ test("previews and applies the same selected include-all path", () => {
   assert.deepEqual(events, ["hosted", "preview:true", "apply:true", "hosted"])
 })
 
+test("proves parity without previewing or applying already-applied authorized migrations", () => {
+  const events: string[] = []
+  const plan = executeMigrationRelease(
+    ["20260101000000_first.sql", "20260102000000_second.sql"],
+    ["20260102000000"],
+    makeIo(
+      [["20260101000000", "20260102000000"]],
+      "unexpected preview",
+      events,
+    ),
+  )
+  assert.deepEqual(plan.missingVersions, [])
+  assert.deepEqual(events, ["hosted"])
+})
+
 test("rejects preview output with an extra or missing migration", () => {
   const local = [
     "20260101000000_first.sql",

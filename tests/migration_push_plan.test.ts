@@ -52,14 +52,23 @@ test("rejects any unplanned older migration", () => {
   )
 })
 
-test("rejects an authorized migration that is not locally missing", () => {
+test("accepts an authorized migration that is already applied", () => {
+  const plan = buildMigrationPushPlan(
+    files.slice(0, 2),
+    ["20260101000000", "20260102000000"],
+    ["20260102000000"],
+  )
+  assert.deepEqual(plan.missingVersions, [])
+})
+
+test("rejects an authorized migration that is not local", () => {
   assert.throws(
     () => buildMigrationPushPlan(
       files.slice(0, 2),
       ["20260101000000", "20260102000000"],
-      ["20260102000000"],
+      ["20260103000000"],
     ),
-    /authorized but not missing: 20260102000000/,
+    /authorized but not local: 20260103000000/,
   )
 })
 

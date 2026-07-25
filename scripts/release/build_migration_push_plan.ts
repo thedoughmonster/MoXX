@@ -37,12 +37,12 @@ export function buildMigrationPushPlan(
   }
   const missingVersions = local.filter((version) => !hostedSet.has(version))
   const unplanned = missingVersions.filter((version) => !authorizedSet.has(version))
-  const unexplained = authorizedVersions.filter((version) => !missingVersions.includes(version))
-  if (unplanned.length > 0 || unexplained.length > 0) {
+  const unknownAuthorized = authorizedVersions.filter((version) => !localSet.has(version))
+  if (unplanned.length > 0 || unknownAuthorized.length > 0) {
     throw new Error(
       `Migration authorization differs; unplanned local missing: ` +
-      `${unplanned.join(", ") || "none"}; authorized but not missing: ` +
-      `${unexplained.join(", ") || "none"}`,
+      `${unplanned.join(", ") || "none"}; authorized but not local: ` +
+      `${unknownAuthorized.join(", ") || "none"}`,
     )
   }
   const hostedTip = [...hostedVersions].sort().at(-1)
