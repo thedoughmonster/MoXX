@@ -40,7 +40,7 @@ without rewriting immutable source records. Every new archive item creates one
 durable pending evaluator job; actual classification and derived actions remain
 separate future work.
 
-This decision does not add Slack, email, SMS, ClickUp, MoMe/PTT, hardware, or
+This decision does not add Slack, email, SMS, ClickUp, MoSi/PTT, hardware, or
 general orchestration adapters.
 
 ## Consequences
