@@ -1,12 +1,14 @@
 import { buildApplyPlan } from "./build_apply_plan.ts"
 import { githubPaginate } from "./github_paginate.ts"
 import { githubRequest } from "./github_request.ts"
+import { loadTriageConfig } from "./load_triage_config.ts"
 import { parseTriage } from "./parse_triage.ts"
 
 type GitHubIssue = {
   number: number
   state: string
   pull_request?: object
+  labels: Array<{ name: string }>
 }
 
 type GitHubComment = {
@@ -63,4 +65,11 @@ export async function applyTriage(): Promise<void> {
     method: "POST",
     body: JSON.stringify({ labels: plan.labels }),
   })
+  const pendingLabel = loadTriageConfig().queue.pending_label
+  if (current.labels.some((label) => label.name === pendingLabel)) {
+    await githubRequest(
+      `/issues/${plan.issueNumber}/labels/${encodeURIComponent(pendingLabel)}`,
+      { method: "DELETE" },
+    )
+  }
 }
