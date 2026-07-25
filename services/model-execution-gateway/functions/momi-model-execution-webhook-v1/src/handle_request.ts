@@ -21,7 +21,7 @@ export async function handleRequest(request: Request): Promise<Response> {
   let value: unknown
   try {
     const client = new OpenAI({ webhookSecret: secret })
-    value = client.webhooks.unwrap(rawBody, request.headers)
+    value = await client.webhooks.unwrap(rawBody, request.headers)
   } catch {
     return new Response("invalid signature", { status: 400 })
   }

@@ -29,7 +29,7 @@ test("webhook verifies the untouched raw body and deduplicates webhook-id", asyn
   const source = await readFile(new URL(
     "../../momi-model-execution-webhook-v1/src/handle_request.ts", import.meta.url), "utf8")
   const rawIndex = source.indexOf("await request.text()")
-  const verifyIndex = source.indexOf("client.webhooks.unwrap(rawBody, request.headers)")
+  const verifyIndex = source.indexOf("await client.webhooks.unwrap(rawBody, request.headers)")
   assert.ok(rawIndex >= 0 && verifyIndex > rawIndex)
   assert.match(source, /request\.headers\.get\("webhook-id"\)/)
   assert.doesNotMatch(source, /console\.(?:log|error)\([^\n]*(?:rawBody|event|data)/)
