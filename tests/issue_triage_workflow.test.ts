@@ -7,6 +7,10 @@ const model = workflow.slice(
   workflow.indexOf("  model:"),
   workflow.indexOf("  writer:"),
 )
+const enqueue = workflow.slice(
+  workflow.indexOf("  enqueue:"),
+  workflow.indexOf("  model:"),
+)
 const writer = workflow.slice(workflow.indexOf("  writer:"))
 const apply = await readFile("scripts/issue_triage/apply_triage.ts", "utf8")
 const prompt = await readFile(".github/codex/issue-triage-prompt.md", "utf8")
@@ -38,12 +42,21 @@ test("writer has narrow write authority and no OpenAI credential", () => {
   assert.match(writer, /timeout-minutes: 5/)
   assert.match(writer, /needs\.model\.outputs\.result/)
   assert.match(writer, /run_apply_triage\.ts/)
+  assert.match(apply, /queue\.pending_label/)
+  assert.match(apply, /method: "DELETE"/)
 })
 
 test("triggers and concurrency support bounded non-looping re-triage", () => {
   assert.match(workflow, /issues:\n    types: \[opened\]/)
+  assert.match(workflow, /schedule:\n    - cron: "\*\/10 \* \* \* \*"/)
   assert.match(workflow, /workflow_dispatch:/)
+  assert.match(workflow, /group: issue-triage-model/)
   assert.match(workflow, /cancel-in-progress: false/)
+  assert.match(enqueue, /issues: write/)
+  assert.match(enqueue, /run_enqueue_issue\.ts/)
+  assert.doesNotMatch(enqueue, /OPENAI|openai-api-key|codex-action/)
+  assert.match(model, /if: steps\.context\.outputs\.should_triage == 'true'/)
+  assert.doesNotMatch(workflow, /group: issue-triage-\$\{\{/)
   assert.doesNotMatch(workflow, /issue_comment:|types: \[(edited|labeled)/)
 })
 
