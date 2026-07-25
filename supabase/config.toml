@@ -90,3 +90,9 @@ verify_jwt = false
 
 [functions.momi-model-execution-gateway-v1]
 verify_jwt = false
+
+[functions.momi-model-execution-webhook-v1]
+verify_jwt = false
+
+[functions.momi-model-execution-completion-worker-v1]
+verify_jwt = false
