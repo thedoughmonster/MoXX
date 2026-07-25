@@ -92,7 +92,7 @@ jobs:
 
   writer:
     needs: model
-    if: needs.model.result == 'success' && needs.model.outputs.result != ''
+    if: always() && needs.model.result == 'success' && needs.model.outputs.result != ''
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
