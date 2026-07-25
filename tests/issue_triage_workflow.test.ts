@@ -55,6 +55,8 @@ test("triggers and concurrency support bounded non-looping re-triage", () => {
   assert.match(enqueue, /issues: write/)
   assert.match(enqueue, /run_enqueue_issue\.ts/)
   assert.doesNotMatch(enqueue, /OPENAI|openai-api-key|codex-action/)
+  assert.equal(workflow.match(/ref: \$\{\{ github\.sha \}\}/g)?.length, 3)
+  assert.doesNotMatch(workflow, /github\.event\.repository\.default_branch/)
   assert.match(model, /if: steps\.context\.outputs\.should_triage == 'true'/)
   assert.doesNotMatch(workflow, /group: issue-triage-\$\{\{/)
   assert.doesNotMatch(workflow, /issue_comment:|types: \[(edited|labeled)/)
