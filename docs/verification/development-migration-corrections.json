@@ -8,7 +8,7 @@
       "issue": 179,
       "reason": "Dev apply rolled back before recording the version because the profile seed omitted its required provider endpoint.",
       "hosted_dev_status": "absent",
-      "verified_at": "2026-07-25T20:02:00Z"
+      "verified_at": "2026-07-25T20:11:07.106925Z"
     }
   ]
 }
