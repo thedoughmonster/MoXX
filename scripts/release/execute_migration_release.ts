@@ -19,6 +19,7 @@ export function executeMigrationRelease(
     hostedBefore,
     authorizedVersions,
   )
+  if (plan.missingVersions.length === 0) return plan
   const previewed = parseMigrationPreview(io.preview(plan.includeAll))
   assertMigrationPreview(plan.missingFilenames, previewed)
   io.apply(plan.includeAll)
