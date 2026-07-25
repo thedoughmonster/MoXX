@@ -44,6 +44,13 @@ test("runtime plans deploy only manifest-owned affected functions", () => {
   assert.equal(plan.release.database, "none")
 })
 
+test("Supabase function registry changes are manifest impact", () => {
+  const plan = buildImpactPlan(["supabase/config.toml"], architecture, new Map())
+  assert.deepEqual(plan.classifications.manifest, ["supabase/config.toml"])
+  assert.deepEqual(plan.classifications.unknown, [])
+  assert.equal(plan.final_gate.kind, "full")
+})
+
 test("migration plans select official DB flow then owner-only services", () => {
   const path = "supabase/migrations/20260723000000_alpha.sql"
   const plan = buildImpactPlan([path], architecture, new Map([[path, "alpha"]]))
