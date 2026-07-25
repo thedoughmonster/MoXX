@@ -17,7 +17,7 @@
     "owner_service": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
     "function_type": { "enum": ["ingest", "primitive_source", "read", "action", "coordinator"] },
     "capability": { "enum": ["ingest", "hydrate", "read", "decide", "deliver"] },
-    "boundary": { "enum": ["toast_inbound", "toast_outbound", "momi_internal", "slack_outbound"] },
+    "boundary": { "enum": ["toast_inbound", "toast_outbound", "openai_inbound", "momi_internal", "slack_outbound"] },
     "runtime": { "const": "supabase_edge" },
     "route_path": { "type": "string", "pattern": "^/functions/v1/[a-z0-9-]+-v[0-9]+$" },
     "authentication_policy_key": { "type": "string", "minLength": 1 },
