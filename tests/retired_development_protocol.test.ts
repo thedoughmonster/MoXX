@@ -21,6 +21,21 @@ const markers = [
   ["repo", "guard-delegation"].join("-"),
 ]
 
+const defaultDevelopmentLoop = [
+  "## Default Development Loop (momi-default-development-loop/v1)",
+  "- Keep one agent responsible for each change from diagnosis through handoff.",
+  "- Bind every change to one open issue and an isolated feature worktree.",
+  "- Run focused checks while iterating; do not duplicate the PR's final gate",
+  "  locally.",
+  "- Keep mechanical enforcement in the one impact-selected PR gate.",
+  "- Pause for the user only for a new ownership or public-contract boundary,",
+  "  material security, privacy, cost, or exposure decision, destructive migration,",
+  "  production infrastructure change, or irreconcilable repository-law conflict.",
+  "- Do not create role ceremonies, readiness packets, or repeated review loops.",
+  "- Publish one PR with owning-issue disposition.",
+  "- Verify changed hosted behavior with one controlled acceptance event.",
+].join("\n")
+
 async function collectFiles(directory = "."): Promise<string[]> {
   const paths: string[] = []
   for (const entry of await readdir(directory, { withFileTypes: true })) {
@@ -46,4 +61,8 @@ test("repository files exclude retired development orchestration", async () => {
     }
   }
   assert.deepEqual(findings, [])
+})
+
+test("repository carries the shared default development loop verbatim", async () => {
+  assert.ok((await readFile("AGENTS.md", "utf8")).includes(defaultDevelopmentLoop))
 })
