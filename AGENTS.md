@@ -103,7 +103,7 @@ they deploy from the same repository.
 - Authenticate the pinned Supabase CLI by OAuth/PAT; let the CLI mint its own
   short-lived database login role, and never reuse the account token as a
   Postgres password.
-## Default Development Loop
+## Default Development Loop (momi-default-development-loop/v1)
 - Keep one agent responsible for each change from diagnosis through handoff.
 - Bind every change to one open issue and an isolated feature worktree.
 - Run focused checks while iterating; do not duplicate the PR's final gate
@@ -113,9 +113,11 @@ they deploy from the same repository.
   material security, privacy, cost, or exposure decision, destructive migration,
   production infrastructure change, or irreconcilable repository-law conflict.
 - Do not create role ceremonies, readiness packets, or repeated review loops.
-- Publish one PR with owning-issue disposition; release its exact validation
-  receipt to development, then promote only its exact development receipt.
+- Publish one PR with owning-issue disposition.
 - Verify changed hosted behavior with one controlled acceptance event.
+## Backend Release Rules
+- For hosted backend changes, release the exact PR validation receipt to
+  development, then promote only that exact development receipt.
 ## Code Review Rules
 - Block unauthorized ownership, private-data, public-contract, or deployer changes.
 - Block material correctness, security, privacy, data-loss, or rollback defects.
