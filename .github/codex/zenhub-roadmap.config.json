@@ -1,0 +1,61 @@
+{
+  "$schema": "./zenhub-roadmap.schema.json",
+  "schema_version": 1,
+  "initiative": {
+    "issue_number": 208,
+    "order": "00",
+    "title": "Dough Monster development roadmap"
+  },
+  "projects": [
+    {
+      "issue_number": 128,
+      "order": "01A",
+      "title": "Track the current MoMi communications beta roadmap"
+    },
+    {
+      "issue_number": 156,
+      "order": "01B",
+      "title": "Add sales-based pre-opening daily briefing and doughnut production plan"
+    },
+    {
+      "issue_number": 167,
+      "order": "02A",
+      "title": "Launch a MoMi-owned first-party preorder page"
+    },
+    {
+      "issue_number": 166,
+      "order": "02B",
+      "title": "Design asynchronous chat-memory distillation and context-aware Log enrichment"
+    },
+    {
+      "issue_number": 162,
+      "order": "03A",
+      "title": "Establish the Square proxy, financial, payment, and hardware integration"
+    },
+    {
+      "issue_number": 164,
+      "order": "03B",
+      "title": "Build independent data-integrity verification and enforcement infrastructure"
+    },
+    {
+      "issue_number": 163,
+      "order": "04",
+      "title": "Build MoXi, the unified POS, kiosk, KDS, and Expo platform"
+    },
+    {
+      "issue_number": 165,
+      "order": "05",
+      "title": "Build the public Dough Monster website and integrate first-party ordering"
+    },
+    {
+      "issue_number": 168,
+      "order": "06",
+      "title": "Build MoMi workforce staffing, scheduling, and time-tracking interfaces"
+    },
+    {
+      "issue_number": 169,
+      "order": "07",
+      "title": "Establish provider-neutral payroll synchronization and reconciliation"
+    }
+  ]
+}

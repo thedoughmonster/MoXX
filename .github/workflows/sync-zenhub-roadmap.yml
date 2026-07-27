@@ -1,0 +1,52 @@
+name: Sync Zenhub roadmap
+
+on:
+  issues:
+    types: [edited]
+  push:
+    branches: [prod]
+    paths:
+      - ".github/codex/zenhub-roadmap.config.json"
+      - ".github/workflows/sync-zenhub-roadmap.yml"
+      - "scripts/run_zenhub_roadmap_sync.ts"
+      - "scripts/zenhub_roadmap_sync/**"
+  schedule:
+    - cron: "43 3 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: zenhub-roadmap-contract
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout: |
+            .github/codex/zenhub-roadmap.config.json
+            scripts/run_zenhub_roadmap_sync.ts
+            scripts/zenhub_pipeline_sync/zenhub_graphql.ts
+            scripts/zenhub_roadmap_sync
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 24.14.0
+      - name: Reconcile the repository-owned roadmap contract
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY_ID: ${{ github.event.repository.id }}
+          ZENHUB_API_TOKEN: ${{ secrets.ZENHUB_API_TOKEN }}
+          ZENHUB_ROADMAP_ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ZENHUB_WORKSPACE_ID: ${{ vars.ZENHUB_WORKSPACE_ID }}
+        run: node scripts/run_zenhub_roadmap_sync.ts
