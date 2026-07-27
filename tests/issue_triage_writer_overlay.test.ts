@@ -30,12 +30,17 @@ test("writer overlays the latest body declaration over stale model output", asyn
   process.env.TRIAGE_ISSUE_NUMBER = "136"
   process.env.TRIAGE_OUTPUT = JSON.stringify(stale)
   let rendered = ""
+  let appliedLabels: string[] = []
   globalThis.fetch = (async (input, init) => {
     const url = String(input)
     if (url.endsWith("/issues/136")) return new Response(JSON.stringify({
       number: 136,
       state: "open",
-      labels: [],
+      labels: [
+        { name: "enhancement" },
+        { name: "area:platform" },
+        { name: "triage:pending" },
+      ],
       body: `<!-- momi-issue-relationships:v1\n${JSON.stringify({
         schema_version: 1,
         issue_number: 136,
@@ -53,7 +58,8 @@ test("writer overlays the latest body declaration over stale model output", asyn
       rendered = JSON.parse(String(init.body)).body
       return new Response("{}")
     }
-    if (url.endsWith("/issues/136/labels") && init?.method === "POST") {
+    if (url.endsWith("/issues/136/labels") && init?.method === "PUT") {
+      appliedLabels = JSON.parse(String(init.body)).labels
       return new Response("{}")
     }
     throw new Error(`Unexpected test request: ${url}`)
@@ -63,6 +69,7 @@ test("writer overlays the latest body declaration over stale model output", asyn
     assert.match(rendered, /#109 - ordering_constraint; current_before_related;/)
     assert.match(rendered, /issuer-declared/)
     assert.doesNotMatch(rendered, /#109 - hard_prerequisite/)
+    assert.deepEqual(appliedLabels, ["area:platform", "bug"])
   } finally {
     globalThis.fetch = originalFetch
     if (original.token === undefined) delete process.env.GH_TOKEN

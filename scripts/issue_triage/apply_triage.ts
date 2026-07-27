@@ -70,15 +70,14 @@ export async function applyTriage(): Promise<void> {
     method: plan.commentId ? "PATCH" : "POST",
     body: JSON.stringify({ body: plan.body }),
   })
+  const config = loadTriageConfig()
+  const pendingLabel = config.queue.pending_label
+  const managedTypeLabels = new Set(Object.values(config.labels_by_issue_type).flat())
+  const preservedLabels = current.labels
+    .map((label) => label.name)
+    .filter((label) => label !== pendingLabel && !managedTypeLabels.has(label))
   await githubRequest(`/issues/${plan.issueNumber}/labels`, {
-    method: "POST",
-    body: JSON.stringify({ labels: plan.labels }),
+    method: "PUT",
+    body: JSON.stringify({ labels: [...preservedLabels, ...plan.labels] }),
   })
-  const pendingLabel = loadTriageConfig().queue.pending_label
-  if (current.labels.some((label) => label.name === pendingLabel)) {
-    await githubRequest(
-      `/issues/${plan.issueNumber}/labels/${encodeURIComponent(pendingLabel)}`,
-      { method: "DELETE" },
-    )
-  }
 }

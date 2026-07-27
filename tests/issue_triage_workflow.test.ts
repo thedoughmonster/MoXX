@@ -48,7 +48,8 @@ test("writer has narrow write authority and no OpenAI credential", () => {
   )
   assert.match(writer, /run_apply_triage\.ts/)
   assert.match(apply, /queue\.pending_label/)
-  assert.match(apply, /method: "DELETE"/)
+  assert.match(apply, /labels_by_issue_type/)
+  assert.match(apply, /method: "PUT"/)
 })
 
 test("triggers and concurrency support bounded non-looping re-triage", () => {

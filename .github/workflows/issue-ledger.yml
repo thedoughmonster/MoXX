@@ -92,9 +92,17 @@ jobs:
               })
             }
             if (disposition === "complete") {
+              const issue = await github.rest.issues.get({
+                ...context.repo,
+                issue_number,
+              })
+              const labels = issue.data.labels
+                .map((label) => typeof label === "string" ? label : label.name)
+                .filter((label) => label && !label.startsWith("status:"))
               await github.rest.issues.update({
                 ...context.repo,
                 issue_number,
+                labels,
                 state: "closed",
               })
             }
