@@ -55,7 +55,7 @@ test("rejects GraphQL errors returned with HTTP 200", async () => {
 
 test("workflow reconciles drift and keeps configuration external", async () => {
   const workflow = await readFile(".github/workflows/sync-zenhub-pipeline.yml", "utf8")
-  assert.match(workflow, /issues:\n    types: \[opened, labeled, unlabeled, reopened\]/)
+  assert.match(workflow, /issues:\n    types: \[opened, labeled, unlabeled, closed, reopened\]/)
   assert.match(workflow, /schedule:\n    - cron: "17 3 \* \* \*"/)
   assert.match(workflow, /workflow_dispatch:/)
   assert.match(workflow, /required: false/)

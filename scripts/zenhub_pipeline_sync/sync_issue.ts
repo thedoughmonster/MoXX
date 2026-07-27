@@ -1,5 +1,6 @@
 import { addGitHubIssueLabel } from "./add_github_issue_label.ts"
 import type { GitHubIssue } from "./github_issue.ts"
+import { removeGitHubIssueLabel } from "./remove_github_issue_label.ts"
 import { selectPipeline } from "./select_pipeline.ts"
 import { zenhubGraphQL } from "./zenhub_graphql.ts"
 
@@ -29,6 +30,20 @@ export async function syncIssue(input: SyncIssueInput): Promise<string> {
   const labels = input.githubIssue.labels.map((label) =>
     typeof label === "string" ? label : label.name
   )
+  if (input.githubIssue.state === "closed") {
+    const statusLabels = labels.filter((label) => label.startsWith("status:"))
+    await Promise.all(statusLabels.map((label) =>
+      removeGitHubIssueLabel(
+        input.githubToken,
+        input.repository,
+        input.githubIssue.number,
+        label,
+      )
+    ))
+    return statusLabels.length
+      ? `Removed ${statusLabels.join(", ")} from closed issue #${input.githubIssue.number}.`
+      : `Closed issue #${input.githubIssue.number} has no planning status labels.`
+  }
   let selected = selectPipeline(labels, input.pipelineMap)
   let defaulted = false
   if (!selected) {

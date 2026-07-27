@@ -2,13 +2,13 @@ name: Sync Zenhub pipeline
 
 on:
   issues:
-    types: [opened, labeled, unlabeled, reopened]
+    types: [opened, labeled, unlabeled, closed, reopened]
   schedule:
     - cron: "17 3 * * *"
   workflow_dispatch:
     inputs:
       issue_number:
-        description: GitHub issue number; blank reconciles every open issue
+        description: GitHub issue number; blank reconciles open and closed issues
         required: false
         type: string
 

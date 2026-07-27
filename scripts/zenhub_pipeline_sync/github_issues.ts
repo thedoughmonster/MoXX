@@ -11,7 +11,7 @@ export async function getGitHubIssues(
     url.search = new URLSearchParams({
       page: String(page),
       per_page: "100",
-      state: "open",
+      state: "all",
     }).toString()
     const response = await fetch(url, {
       headers: {

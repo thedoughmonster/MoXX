@@ -3,6 +3,7 @@ export type GitHubIssue = {
   labels: Array<string | { name: string }>
   number: number
   pull_request?: unknown
+  state: "closed" | "open"
 }
 
 export async function getGitHubIssue(
