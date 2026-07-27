@@ -1,10 +1,11 @@
-import type { IssueTriage } from "./types.ts"
+import type { AuthoritativeTriage } from "./types.ts"
 
-export function renderComment(triage: IssueTriage, marker: string): string {
+export function renderComment(triage: AuthoritativeTriage, marker: string): string {
   const relationships = triage.relationships.length === 0
     ? ["- None identified."]
     : triage.relationships.map((relationship) =>
-      `- #${relationship.issue_number} - ${relationship.type}: ${relationship.rationale}`
+      `- #${relationship.issue_number} - ${relationship.type}; ` +
+        `${relationship.direction}; ${relationship.authority}: ${relationship.rationale}`
     )
   return [
     marker,
@@ -12,10 +13,10 @@ export function renderComment(triage: IssueTriage, marker: string): string {
     "",
     `- Issue type: **${triage.issue_type}**`,
     `- Feature: **${triage.feature.title}** (\`${triage.feature.id}\`)`,
-    `- Safe parallel work: **${triage.safe_parallel ? "yes" : "no"}**`,
+    `- Safe parallel work (deterministic): **${triage.safe_parallel ? "yes" : "no"}**`,
     `- Confidence: **${triage.confidence}**`,
     "",
-    "### Explicit relationships",
+    "### Relationships",
     "",
     ...relationships,
     "",

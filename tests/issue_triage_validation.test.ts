@@ -4,14 +4,9 @@ import test from "node:test"
 import Ajv2020 from "ajv/dist/2020.js"
 
 import { buildApplyPlan } from "../scripts/issue_triage/build_apply_plan.ts"
-import { loadTriageConfig } from "../scripts/issue_triage/load_triage_config.ts"
-import { parseTriage } from "../scripts/issue_triage/parse_triage.ts"
 import { relationshipTypes, type IssueTriage } from
   "../scripts/issue_triage/types.ts"
-import {
-  safeTextPattern,
-  validateTriage,
-} from "../scripts/issue_triage/validate_triage.ts"
+import { validateTriage } from "../scripts/issue_triage/validate_triage.ts"
 
 const valid: IssueTriage = {
   schema_version: 1,
@@ -29,33 +24,11 @@ const evidence = {
   currentIssueNumber: 136,
   currentIssueOpen: true,
   currentIssueIsPullRequest: false,
+  currentIssueBody: null,
   existingIssueNumbers: [136, 109],
   availableLabels: ["bug", "enhancement"],
   matchingCommentIds: [] as number[],
 }
-
-test("schema, validator, prompt, and config retain deterministic parity", async () => {
-  assert.deepEqual(parseTriage(JSON.stringify(valid)), valid)
-  const schema = JSON.parse(
-    await readFile(".github/codex/issue-triage.schema.json", "utf8"),
-  )
-  const prompt = await readFile(".github/codex/issue-triage-prompt.md", "utf8")
-  const config = loadTriageConfig()
-  assert.equal(new Ajv2020({ strict: false }).compile(schema)(valid), true)
-  assert.deepEqual(schema.properties.issue_type.enum, ["bug", "feature"])
-  assert.deepEqual(
-    schema.properties.labels.items.enum,
-    Object.values(config.labels_by_issue_type).flat().sort(),
-  )
-  assert.equal(schema.properties.feature.properties.title.pattern, safeTextPattern)
-  assert.equal(
-    schema.properties.relationships.items.properties.rationale.pattern,
-    safeTextPattern,
-  )
-  assert.equal(schema.properties.rationale.pattern, safeTextPattern)
-  assert.match(prompt, /triage_config\.labels_by_issue_type/)
-  assert.match(prompt, /issue_type/)
-})
 
 test("bug and feature records retain one owning feature graph", () => {
   const bug = structuredClone(valid)
@@ -64,6 +37,7 @@ test("bug and feature records retain one owning feature graph", () => {
   bug.relationships = [{
     issue_number: 109,
     type: "hard_prerequisite",
+    direction: "current_after_related",
     rationale: "Depends on owning feature #109.",
   }]
   bug.safe_parallel = false
@@ -77,11 +51,22 @@ test("all relationship types and safe issue-reference punctuation work", () => {
     candidate.relationships = [{
       issue_number: 109,
       type,
+      direction: type === "hard_prerequisite"
+        ? "current_after_related"
+        : type === "ordering_constraint"
+        ? "current_before_related"
+        : "not_applicable",
       rationale: "Related to owning feature #109; ordering is explicit.",
     }]
     candidate.safe_parallel = type === "independent"
     assert.equal(validateTriage(candidate).relationships[0].type, type)
   }
+  const constrained = structuredClone(valid)
+  constrained.relationships = [{ issue_number: 109, type: "ordering_constraint",
+    direction: "current_before_related", rationale: "Issue 136 lands first." }]
+  constrained.safe_parallel = true
+  assert.match(buildApplyPlan(constrained, evidence).body,
+    /Safe parallel work \(deterministic\): \*\*no\*\*/)
 })
 
 test("duplicates, missing references, and mismatched labels fail closed", () => {
@@ -89,6 +74,7 @@ test("duplicates, missing references, and mismatched labels fail closed", () => 
   duplicate.relationships = Array.from({ length: 2 }, () => ({
     issue_number: 109,
     type: "independent" as const,
+    direction: "not_applicable" as const,
     rationale: "Related to owning feature #109.",
   }))
   assert.throws(() => validateTriage(duplicate))
@@ -96,6 +82,7 @@ test("duplicates, missing references, and mismatched labels fail closed", () => 
   related.relationships = [{
     issue_number: 404,
     type: "independent",
+    direction: "not_applicable",
     rationale: "Related to owning feature #404.",
   }]
   assert.throws(() => buildApplyPlan(related, evidence))

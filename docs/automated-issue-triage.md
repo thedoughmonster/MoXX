@@ -11,8 +11,9 @@ the model-execution gateway, which selects the provider mapping and records
 safe operational metadata. The job emits schema-constrained JSON.
 
 The writer is a separate job with issue-write authority and no model-gateway
-credential. Before mutation it verifies the current open issue, related issue
-existence/type, configured labels, safe text, and one idempotency marker.
+credential. Before mutation it refetches the current open issue and verifies
+issuer declarations, related open issue existence/type, configured labels, safe
+text, and one idempotency marker.
 
 ## Authoritative contract
 
@@ -23,9 +24,47 @@ check parity with that configuration.
 Both `bug` and `feature` records retain one owning feature identity and the same
 typed dependency graph. Relationship types are hard prerequisite, ordering
 constraint, shared mutation/release boundary, external/user gate, and
-independent. Labels are not relationship evidence. Safe rationale punctuation
-includes issue references such as `#109`; markup, mentions, and
-credential-shaped data remain forbidden.
+independent. Direction is `current_before_related`, `current_after_related`, or
+`not_applicable`. Hard prerequisites require current-after; ordering constraints
+require current-before or current-after; all other types require not-applicable.
+Labels are not relationship evidence. Safe rationale punctuation includes issue
+references such as `#109`; markup, mentions, and credential-shaped data remain
+forbidden.
+
+## Issuer-declared relationships
+
+Issue-authoring agents may place one declaration anywhere in the complete issue
+body. Put it early enough for human review even though parsing is not limited by
+the model-context body truncation:
+
+```text
+<!-- momi-issue-relationships:v1
+{
+  "schema_version": 1,
+  "issue_number": 200,
+  "relationships": [
+    {
+      "issue_number": 199,
+      "type": "ordering_constraint",
+      "direction": "current_before_related",
+      "rationale": "This P0 slice lands before the remaining issue 199 implementation."
+    }
+  ]
+}
+-->
+```
+
+The declaration permits at most eight unique related issue numbers. Duplicate
+markers or references, malformed JSON, mismatched current issue numbers, unsafe
+text, unsupported fields/values, or incompatible type/direction pairs fail
+closed before a model call or issue write.
+
+Declarations enter model context separately from truncated prose. The model may
+infer only undeclared issue numbers. Immediately before mutation, the writer
+parses the latest body again, replaces any conflicting or omitted model record
+with issuer-owned data, validates all final references, caps the final graph at
+eight, and derives safe-parallel status from the final graph. Rendered records
+identify `issuer-declared` or `model-inferred` authority and explicit direction.
 
 ## Idempotency and recovery
 

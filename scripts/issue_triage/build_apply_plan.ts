@@ -1,13 +1,20 @@
-import type { ApplyEvidence, ApplyPlan, IssueTriage } from "./types.ts"
+import { buildAuthoritativeTriage } from "./build_authoritative_triage.ts"
 import { loadTriageConfig } from "./load_triage_config.ts"
+import { parseDeclaredRelationships } from "./parse_declared_relationships.ts"
 import { renderComment } from "./render_comment.ts"
+import type { ApplyEvidence, ApplyPlan } from "./types.ts"
 import { validateTriage } from "./validate_triage.ts"
 
 export function buildApplyPlan(
   candidate: unknown,
   evidence: ApplyEvidence,
 ): ApplyPlan {
-  const triage = validateTriage(candidate)
+  const inferred = validateTriage(candidate)
+  const declared = parseDeclaredRelationships(
+    evidence.currentIssueNumber,
+    evidence.currentIssueBody ?? "",
+  )
+  const triage = buildAuthoritativeTriage(inferred, declared)
   if (
     triage.issue_number !== evidence.targetIssueNumber ||
     triage.issue_number !== evidence.currentIssueNumber

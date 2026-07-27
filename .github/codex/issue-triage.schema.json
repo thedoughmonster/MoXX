@@ -15,7 +15,7 @@
   ],
   "properties": {
     "schema_version": { "type": "integer", "const": 1 },
-    "issue_number": { "type": "integer", "minimum": 1 },
+    "issue_number": { "type": "integer", "minimum": 1, "maximum": 999999999 },
     "issue_type": { "type": "string", "enum": ["bug", "feature"] },
     "feature": {
       "type": "object",
@@ -41,9 +41,13 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["issue_number", "type", "rationale"],
+        "required": ["issue_number", "type", "direction", "rationale"],
         "properties": {
-          "issue_number": { "type": "integer", "minimum": 1 },
+          "issue_number": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 999999999
+          },
           "type": {
             "type": "string",
             "enum": [
@@ -52,6 +56,14 @@
               "shared_mutation_release_boundary",
               "external_user_gate",
               "independent"
+            ]
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "current_before_related",
+              "current_after_related",
+              "not_applicable"
             ]
           },
           "rationale": {

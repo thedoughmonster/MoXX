@@ -1,12 +1,15 @@
+import { buildAuthoritativeTriage } from "./build_authoritative_triage.ts"
 import { buildApplyPlan } from "./build_apply_plan.ts"
 import { githubPaginate } from "./github_paginate.ts"
 import { githubRequest } from "./github_request.ts"
 import { loadTriageConfig } from "./load_triage_config.ts"
 import { parseTriage } from "./parse_triage.ts"
+import { parseDeclaredRelationships } from "./parse_declared_relationships.ts"
 
 type GitHubIssue = {
   number: number
   state: string
+  body: string | null
   pull_request?: object
   labels: Array<{ name: string }>
 }
@@ -30,11 +33,16 @@ export async function applyTriage(): Promise<void> {
   const current = await githubRequest<GitHubIssue>(
     `/issues/${targetIssueNumber}`,
   )
-  const related = await Promise.all(triage.relationships.map((relationship) =>
+  const declared = parseDeclaredRelationships(
+    targetIssueNumber,
+    current.body ?? "",
+  )
+  const authoritative = buildAuthoritativeTriage(triage, declared)
+  const related = await Promise.all(authoritative.relationships.map((relationship) =>
     githubRequest<GitHubIssue>(`/issues/${relationship.issue_number}`)
   ))
-  if (related.some((issue) => issue.pull_request)) {
-    throw new Error("Relationship references must be issues, not pull requests")
+  if (related.some((issue) => issue.pull_request || issue.state !== "open")) {
+    throw new Error("Relationship references must be open issues, not pull requests")
   }
   await Promise.all(triage.labels.map((label) =>
     githubRequest(`/labels/${encodeURIComponent(label)}`)
@@ -48,6 +56,7 @@ export async function applyTriage(): Promise<void> {
     currentIssueNumber: current.number,
     currentIssueOpen: current.state === "open",
     currentIssueIsPullRequest: Boolean(current.pull_request),
+    currentIssueBody: current.body,
     existingIssueNumbers: [current.number, ...related.map((issue) => issue.number)],
     availableLabels: [...triage.labels],
     matchingCommentIds: comments.filter((comment) =>

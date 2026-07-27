@@ -8,6 +8,25 @@ export const relationshipTypes = [
 
 export type RelationshipType = typeof relationshipTypes[number]
 
+export const relationshipDirections = [
+  "current_before_related",
+  "current_after_related",
+  "not_applicable",
+] as const
+
+export type RelationshipDirection = typeof relationshipDirections[number]
+
+export type IssueRelationship = {
+  issue_number: number
+  type: RelationshipType
+  direction: RelationshipDirection
+  rationale: string
+}
+
+export type AuthoritativeRelationship = IssueRelationship & {
+  authority: "issuer-declared" | "model-inferred"
+}
+
 export type IssueTriage = {
   schema_version: 1
   issue_number: number
@@ -16,15 +35,15 @@ export type IssueTriage = {
     id: string
     title: string
   }
-  relationships: Array<{
-    issue_number: number
-    type: RelationshipType
-    rationale: string
-  }>
+  relationships: IssueRelationship[]
   safe_parallel: boolean
   confidence: "low" | "medium" | "high"
   rationale: string
   labels: string[]
+}
+
+export type AuthoritativeTriage = Omit<IssueTriage, "relationships"> & {
+  relationships: AuthoritativeRelationship[]
 }
 
 export type ApplyEvidence = {
@@ -32,6 +51,7 @@ export type ApplyEvidence = {
   currentIssueNumber: number
   currentIssueOpen: boolean
   currentIssueIsPullRequest: boolean
+  currentIssueBody: string | null
   existingIssueNumbers: number[]
   availableLabels: string[]
   matchingCommentIds: number[]
