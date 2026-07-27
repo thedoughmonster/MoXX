@@ -1,4 +1,5 @@
 import type { TriageConfig } from "../dev_loop/types.ts"
+import { parseDeclaredIssueType } from "./parse_declared_issue_type.ts"
 import { parseDeclaredRelationships } from "./parse_declared_relationships.ts"
 
 type Issue = { number: number; title: string; body: string | null }
@@ -16,6 +17,7 @@ export function buildContext(
     issue.number,
     issue.body ?? "",
   )
+  const declaredIssueType = parseDeclaredIssueType(issue.number, issue.body ?? "")
   const context = {
     limits,
     issue_number: issue.number,
@@ -27,6 +29,7 @@ export function buildContext(
       body: (issue.body ?? "").slice(0, limits.issue_body_characters),
     },
     declared_relationships: declaredRelationships,
+    declared_issue_type: declaredIssueType,
     comments: comments.slice(0, limits.comments).map((comment) => ({
       id: comment.id,
       body: (comment.body ?? "").slice(0, limits.comment_characters_each),

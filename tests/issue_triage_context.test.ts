@@ -47,8 +47,15 @@ ${JSON.stringify({
     }],
   })}
 -->`
+  const classification = `<!-- momi-issue-classification:v1
+${JSON.stringify({ schema_version: 1, issue_number: 200, issue_type: "feature" })}
+-->`
   const measured = buildContext(
-    { number: 200, title: "P0", body: `${"x".repeat(10_001)}${marker}` },
+    {
+      number: 200,
+      title: "P0",
+      body: `${"x".repeat(10_001)}${marker}${classification}`,
+    },
     [],
     [],
     config,
@@ -62,6 +69,7 @@ ${JSON.stringify({
     direction: "current_before_related",
     rationale: "This P0 slice lands before issue 199.",
   })
+  assert.equal(context.declared_issue_type, "feature")
 })
 
 test("catch-up selects the oldest issue with the pending label", async () => {

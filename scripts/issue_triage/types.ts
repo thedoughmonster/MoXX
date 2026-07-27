@@ -43,6 +43,7 @@ export type IssueTriage = {
 }
 
 export type AuthoritativeTriage = Omit<IssueTriage, "relationships"> & {
+  issue_type_authority: "issuer-declared" | "model-inferred"
   relationships: AuthoritativeRelationship[]
 }
 

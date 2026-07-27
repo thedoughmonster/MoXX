@@ -12,6 +12,7 @@ export function renderComment(triage: AuthoritativeTriage, marker: string): stri
     "## Automated feature triage",
     "",
     `- Issue type: **${triage.issue_type}**`,
+    `- Issue type authority: **${triage.issue_type_authority}**`,
     `- Feature: **${triage.feature.title}** (\`${triage.feature.id}\`)`,
     `- Safe parallel work (deterministic): **${triage.safe_parallel ? "yes" : "no"}**`,
     `- Confidence: **${triage.confidence}**`,

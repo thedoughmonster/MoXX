@@ -41,7 +41,12 @@ test("writer overlays the latest body declaration over stale model output", asyn
         { name: "area:platform" },
         { name: "triage:pending" },
       ],
-      body: `<!-- momi-issue-relationships:v1\n${JSON.stringify({
+      body: `<!-- momi-issue-classification:v1\n${JSON.stringify({
+        schema_version: 1,
+        issue_number: 136,
+        issue_type: "feature",
+      })}\n-->
+<!-- momi-issue-relationships:v1\n${JSON.stringify({
         schema_version: 1,
         issue_number: 136,
         relationships: [{ issue_number: 109, type: "ordering_constraint",
@@ -52,7 +57,7 @@ test("writer overlays the latest body declaration over stale model output", asyn
     if (url.endsWith("/issues/109")) return new Response(JSON.stringify({
       number: 109, state: "open", body: null, labels: [],
     }))
-    if (url.endsWith("/labels/bug")) return new Response("{}")
+    if (url.endsWith("/labels/enhancement")) return new Response("{}")
     if (url.includes("/issues/136/comments?")) return new Response("[]")
     if (url.endsWith("/issues/136/comments") && init?.method === "POST") {
       rendered = JSON.parse(String(init.body)).body
@@ -69,7 +74,9 @@ test("writer overlays the latest body declaration over stale model output", asyn
     assert.match(rendered, /#109 - ordering_constraint; current_before_related;/)
     assert.match(rendered, /issuer-declared/)
     assert.doesNotMatch(rendered, /#109 - hard_prerequisite/)
-    assert.deepEqual(appliedLabels, ["area:platform", "bug"])
+    assert.match(rendered, /Issue type: \*\*feature\*\*/)
+    assert.match(rendered, /Issue type authority: \*\*issuer-declared\*\*/)
+    assert.deepEqual(appliedLabels, ["area:platform", "enhancement"])
   } finally {
     globalThis.fetch = originalFetch
     if (original.token === undefined) delete process.env.GH_TOKEN

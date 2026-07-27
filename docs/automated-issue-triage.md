@@ -66,11 +66,30 @@ with issuer-owned data, validates all final references, caps the final graph at
 eight, and derives safe-parallel status from the final graph. Rendered records
 identify `issuer-declared` or `model-inferred` authority and explicit direction.
 
+## Issuer-declared issue type
+
+Issue-authoring agents may bind semantic classification with one bounded block:
+
+```text
+<!-- momi-issue-classification:v1
+{"schema_version":1,"issue_number":219,"issue_type":"feature"}
+-->
+```
+
+Only `bug` and `feature` are supported. The complete body is parsed before model
+context truncation and again immediately before mutation. Duplicate markers,
+malformed or oversized JSON, unknown fields, unsupported values, versions, or a
+mismatched issue number fail closed. A valid declaration overrides model output
+and selects the configured managed label; undeclared issues retain bounded model
+inference. The rendered triage record identifies the authority source.
+
 ## Idempotency and recovery
 
 The marker is `momi-issue-triage:v1 issue=<number>`. First run creates one
 structured comment; rerun updates that comment and reapplies the same configured
-label without duplication. Multiple markers fail closed.
+label without duplication. The exact-label write removes the opposing managed
+type and the pending label while preserving unrelated labels. Multiple markers
+fail closed.
 
 Only `issues.opened` and bounded `workflow_dispatch` trigger the workflow.
 Invalid output, nonexistent references, unavailable labels, or model failure

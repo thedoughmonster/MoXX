@@ -8,8 +8,9 @@ request tools, network access, repository access, or implementation work.
 Return one JSON object matching `issue-triage.schema.json`.
 
 - Copy `issue_number` from the context.
-- Classify `issue_type` as `bug` for a defect in intended behavior or `feature`
-  for new or changed behavior.
+- If `declared_issue_type` is non-null, copy it exactly. Otherwise classify
+  `issue_type` as `bug` for a defect in intended behavior or `feature` for new
+  or changed behavior. The writer independently reapplies issuer authority.
 - Give the issue one concise, stable feature identity.
 - Use only issue numbers present in `candidate_issues` or explicitly referenced
   by the current issue. The writer will independently verify every reference.
