@@ -14,8 +14,8 @@ These fields explain what the function is and who owns it:
 - `owner_service`: stable owning module identifier.
 - `function_type`: registry-compatible implementation category.
 - `capability`: one of `ingest`, `hydrate`, `read`, `decide`, or `deliver`.
-- `boundary`: one of `toast_inbound`, `toast_outbound`, `momi_internal`, or
-  `slack_outbound`.
+- `boundary`: one of `toast_inbound`, `toast_outbound`, `openai_inbound`,
+  `momi_internal`, `momi_public`, or `slack_outbound`.
 
 Logical identity is authoritative. A function's directory or runtime does not
 define its business purpose.

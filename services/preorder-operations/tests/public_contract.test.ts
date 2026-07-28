@@ -44,7 +44,7 @@ test("manifest and OpenAPI declare the same public contracts", async () => {
     operation.path.endsWith("-v1")
   ))
   assert.deepEqual(manifest.network.outbound_hosts, [])
-  assert.deepEqual(manifest.secrets, [])
+  assert.deepEqual(manifest.secrets, ["SUPABASE_DB_URL"])
 })
 
 test("order and payment routes require header authority", async () => {

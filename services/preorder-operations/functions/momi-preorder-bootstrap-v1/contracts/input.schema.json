@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://momi.preorder.bootstrap.read.v1/input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["surface_key"],
+  "properties": {
+    "surface_key": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{1,63}$"
+    },
+    "fulfillment_date": {
+      "type": "string",
+      "format": "date"
+    }
+  }
+}

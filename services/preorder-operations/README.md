@@ -15,9 +15,10 @@ capacity, quotes, holds, order intents, customer-safe status, and change
 requests.
 
 The browser uses only the versioned Edge Function routes declared in
-contracts/preorder-public-v1.openapi.json. Database objects and functions will
-land additively in later issue #226 slices. Until then, the OpenAPI document
-and synthetic fixtures are the implementation boundary shared with issue #225.
+contracts/preorder-public-v1.openapi.json. The first implementation slice owns
+the private `momi_preorder` schema and exposes the customer-safe bootstrap read
+through `momi-preorder-bootstrap-v1`. Quote, hold, order, and payment routes
+remain fixture-backed until their additive issue #226 slices land.
 
 Square owns payment and financial facts. This service exposes a customer-safe
 payment workflow but has no direct Square network or secret authority. Square
