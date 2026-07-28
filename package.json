@@ -13,18 +13,26 @@
     "worker:types": "wrangler types",
     "worker:types:check": "wrangler types --check",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "cloudflare:dry-run": "wrangler deploy --dry-run --env preview --outdir .wrangler/dry-run-preview && wrangler deploy --dry-run --env production --outdir .wrangler/dry-run-production",
-    "check": "pnpm run lint && pnpm run typecheck && pnpm run worker:types:check && pnpm run test && pnpm run build && pnpm run cloudflare:dry-run",
+    "check": "pnpm run lint && pnpm run typecheck && pnpm run worker:types:check && pnpm run test && pnpm run test:e2e && pnpm run build && pnpm run cloudflare:dry-run",
     "ci:check": "pnpm run check"
   },
   "dependencies": {
     "@sentry/react": "10.68.0",
+    "@tanstack/react-query": "^5.101.4",
+    "@xstate/react": "^6.1.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-aria-components": "^1.19.0",
+    "react-dom": "19.2.8",
+    "react-hook-form": "^7.83.0",
+    "xstate": "^5.32.5",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "5.20260728.1",
     "@eslint/js": "10.0.1",
+    "@playwright/test": "^1.62.0",
     "@types/node": "^24.0.0",
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
