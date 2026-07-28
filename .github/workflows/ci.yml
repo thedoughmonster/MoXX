@@ -44,7 +44,7 @@ jobs:
 
       - name: Verify exact worker custom domain
         run: |
-          if ! rg '"pattern": "preorder\.dough\.monster"' wrangler.jsonc; then
+          if ! grep -F '"pattern": "preorder.dough.monster"' wrangler.jsonc; then
             echo "wrangler.jsonc must include the exact production hostname preorder.dough.monster" >&2
             exit 1
           fi
