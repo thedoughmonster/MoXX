@@ -52,6 +52,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Install Chromium for interaction tests
+        if: inputs.operation == 'deploy'
+        run: pnpm exec playwright install --with-deps chromium
+
       - name: Validate preview release
         if: inputs.operation == 'deploy'
         run: pnpm check
