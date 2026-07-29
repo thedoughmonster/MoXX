@@ -8,12 +8,18 @@ export async function probeFunctions(
 ): Promise<ProbeResult[]> {
   return await Promise.all(functions.map(async (item) => {
     const url = `https://${projectRef}.supabase.co${item.manifest.route_path}`
-    const response = await fetch(url, { signal: AbortSignal.timeout(15000) })
+    const response = await fetch(url, {
+      method: item.manifest.probe?.method ?? "GET",
+      signal: AbortSignal.timeout(15000),
+    })
     await response.body?.cancel()
     return {
       slug: item.slug,
       status: response.status,
-      ok: isAcceptableProbeStatus(response.status),
+      ok: isAcceptableProbeStatus(
+        response.status,
+        item.manifest.probe?.acceptable_statuses,
+      ),
     }
   }))
 }

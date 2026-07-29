@@ -75,6 +75,10 @@ export type FunctionManifest = {
   entrypoint: string
   input_schema: string
   output_schema: string
+  probe?: {
+    method: "GET" | "OPTIONS"
+    acceptable_statuses: number[]
+  }
   required_capabilities: string[]
   declared_side_effects: string[]
 }
