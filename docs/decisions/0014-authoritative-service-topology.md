@@ -32,6 +32,10 @@ MoMi will use this target topology:
 | `runtime-registry` | `dataset_owner` | Runtime registry |
 | `archive-governance` | `dataset_owner` | Archive governance |
 | `legacy-recipe-transform` | `transform` | Legacy transform operations |
+| `trello-data-acquisition` | `procurement_adapter` | Trello acquisition control |
+| `trello-evidence-ingestion` | `transform` | Trello evidence admission control |
+| `kitchen-task-management` | `dataset_owner` | Kitchen task operations and audit history |
+| `trello-task-delivery` | `destination_adapter` | Trello task delivery operations |
 
 `communications-archive` becomes the generic raw JSON evidence archive. Its
 historical name may remain during migration, but source-specific adapters must

@@ -16,7 +16,8 @@
       "momi.communications.capture_operational_note.v1",
       "momi.communications.capture_gateway_exchange.v1",
       "momi.communications.capture_human_message.v1",
-      "momi.communications.get_gateway_exchange_receipt.v1"
+      "momi.communications.get_gateway_exchange_receipt.v1",
+      "momi.raw_json.capture_evidence.v1"
     ],
     "consumes": [
       { "service": "momi-event-routing", "contract": "momi.events.append.v1" }
@@ -58,6 +59,7 @@
       "momi_communications.capture_operational_note_v1",
       "momi_communications.capture_gateway_exchange_v1",
       "momi_communications.capture_human_message_v1",
+      "momi_communications.capture_raw_json_evidence_v1",
       "momi_communications.get_gateway_exchange_receipt_v1",
       "momi_communications.reject_archive_item_mutation",
       "momi_events.emit_toast_resource_observation",
@@ -72,15 +74,17 @@
       "momi.communications.capture_openai_message.v1",
       "momi.communications.capture_operational_note.v1",
       "momi.communications.capture_gateway_exchange.v1",
-      "momi.communications.capture_human_message.v1"
+      "momi.communications.capture_human_message.v1",
+      "momi.raw_json.capture_evidence.v1"
     ],
     "public_routine_reads": [
       {"contract": "momi.communications.get_gateway_exchange_receipt.v1", "routine": "momi_communications.get_gateway_exchange_receipt_v1"}
     ],
     "public_routine_commands": [
       {"contract": "momi.communications.capture_gateway_exchange.v1", "routine": "momi_communications.capture_gateway_exchange_v1"},
-      {"contract": "momi.communications.capture_human_message.v1", "routine": "momi_communications.capture_human_message_v1"}
+      {"contract": "momi.communications.capture_human_message.v1", "routine": "momi_communications.capture_human_message_v1"},
+      {"contract": "momi.raw_json.capture_evidence.v1", "routine": "momi_communications.capture_raw_json_evidence_v1"}
     ],
-    "emitted_events": []
+    "emitted_events": ["archive.raw_json.captured"]
   }
 }

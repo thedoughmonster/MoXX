@@ -15,8 +15,8 @@ test("replays the exact current application relation inventory", async () => {
   ))
   const inventory = replayRelationInventory(migrations)
   const kinds = [...inventory.values()]
-  assert.equal(inventory.size, 138)
-  assert.equal(kinds.filter((kind) => kind === "table").length, 107)
+  assert.equal(inventory.size, 140)
+  assert.equal(kinds.filter((kind) => kind === "table").length, 109)
   assert.equal(kinds.filter((kind) => kind === "view").length, 31)
   for (const relation of [
     "momi_preorder.catalog_items",

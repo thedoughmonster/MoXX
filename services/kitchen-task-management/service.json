@@ -1,0 +1,41 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "kitchen-task-management",
+  "purpose": "Own durable kitchen tasks, assignments, workflow, and audit history.",
+  "kind": "core_capability",
+  "service_type": "dataset_owner",
+  "lifecycle_status": "active",
+  "functions": [],
+  "contracts": {
+    "provides": [
+      "momi.kitchen_tasks.command.v1",
+      "momi.kitchen_tasks.consume_trello_evidence.v1"
+    ],
+    "consumes": [
+      { "service": "momi-event-routing", "contract": "momi.events.append.v1" },
+      { "service": "momi-event-routing", "contract": "momi.events.delivery_lifecycle.v1" },
+      { "service": "trello-task-delivery", "contract": "momi.trello.task_delivery.enqueue.v1" }
+    ]
+  },
+  "database": { "read": ["momi_kitchen_tasks"], "write": ["momi_kitchen_tasks"] },
+  "network": { "outbound_hosts": [] },
+  "secrets": [],
+  "configuration": ["KITCHEN_TASK_TIME_ZONE"],
+  "deployment": { "owns": [], "depends_on": [] },
+  "runtime_dependencies": [],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "momi.kitchen_tasks",
+    "dataset_class": "domain",
+    "private_schema": "momi_kitchen_tasks",
+    "private_relations": [],
+    "private_routines": [],
+    "public_reads": [],
+    "public_commands": [
+      "momi.kitchen_tasks.command.v1",
+      "momi.kitchen_tasks.consume_trello_evidence.v1"
+    ],
+    "emitted_events": ["kitchen.task.changed"]
+  }
+}

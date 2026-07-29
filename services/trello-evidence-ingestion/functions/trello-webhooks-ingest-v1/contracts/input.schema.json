@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["action", "model", "webhook"],
+  "properties": {
+    "action": {
+      "type": "object",
+      "required": ["id", "type", "date"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "type": { "type": "string", "minLength": 1 },
+        "date": { "type": "string", "format": "date-time" },
+        "idMemberCreator": { "type": "string", "minLength": 1 },
+        "memberCreator": { "type": "object" },
+        "data": { "type": "object" }
+      },
+      "additionalProperties": true
+    },
+    "model": {
+      "type": "object",
+      "required": ["id"],
+      "properties": { "id": { "type": "string", "minLength": 1 } },
+      "additionalProperties": true
+    },
+    "webhook": {
+      "type": "object",
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "idModel": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

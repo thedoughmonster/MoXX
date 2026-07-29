@@ -9,5 +9,7 @@
 - Never call a model, source API, or destination API.
 - Do not call Slack, ClickUp, GitHub, email, SMS, hardware, or destination APIs.
 - Use structured capture functions; do not grant agents direct table writes.
+- Admit declared evidence-ingestion services only through the generic raw-evidence
+  capture contract; never place source-specific HTTP or authentication code here.
 - Hand evaluation work to the evaluation owner's versioned contract.
 - Mark operational notes as conversation syntheses; never present them as raw turns.
