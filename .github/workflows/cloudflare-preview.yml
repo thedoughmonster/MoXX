@@ -1,6 +1,11 @@
 name: cloudflare-preview
 
 on:
+  push:
+    branches:
+      - agent/223-cloudflare-credential-preflight
+    paths:
+      - .github/workflows/cloudflare-preview.yml
   workflow_dispatch:
     inputs:
       operation:
@@ -25,7 +30,7 @@ concurrency:
 
 jobs:
   preview:
-    name: ${{ inputs.operation }}-preview
+    name: ${{ inputs.operation || 'deploy' }}-preview
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
@@ -52,11 +57,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Validate preview release
-        if: inputs.operation == 'deploy'
+        if: github.event_name == 'push' || inputs.operation == 'deploy'
         run: pnpm check
 
       - name: Deploy bounded preview Worker
-        if: inputs.operation == 'deploy'
+        if: github.event_name == 'push' || inputs.operation == 'deploy'
         run: >-
           pnpm exec wrangler deploy
           --env preview
