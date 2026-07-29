@@ -28,6 +28,9 @@ Production-shaped local bootstrap for `preorder.dough.monster`.
 - Edge function endpoint format:
   - `/functions/v1/preorder-<version>/<route>`
 - Browser integration never uses table paths or direct DB queries.
+- `VITE_PREORDER_EXPERIENCE_MODE=toast_handoff` activates the bounded launch
+  fallback and requires an HTTPS `VITE_PREORDER_CHECKOUT_URL`. It displays no
+  fixture menu and sends checkout to the existing live provider path.
 
 ## Static health/smoke
 

@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const handoffMode = process.env.MOXI_E2E_MODE === 'toast_handoff';
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
@@ -36,9 +38,11 @@ export default defineConfig({
     env: {
       ...process.env,
       VITE_APP_STAGE: 'preview',
-      VITE_PREORDER_DATA_MODE: 'fixture'
+      VITE_PREORDER_DATA_MODE: 'fixture',
+      VITE_PREORDER_EXPERIENCE_MODE: handoffMode ? 'toast_handoff' : 'first_party',
+      VITE_PREORDER_CHECKOUT_URL: 'https://www.toasttab.com/local/order/dough-monster'
     },
     url: 'http://127.0.0.1:4174',
-    reuseExistingServer: !process.env.CI
+    reuseExistingServer: false
   }
 });

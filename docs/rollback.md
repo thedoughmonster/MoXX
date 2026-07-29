@@ -1,6 +1,6 @@
 # Rollback for moxi-web bootstrap
 
-This contract is local-only. No hosted mutation is performed by this scaffold.
+Production is published only by the guarded `cloudflare-production` workflow.
 
 1. Disable new preorder submissions through the owning backend flag before a rollback that could strand an order/payment attempt.
 2. Reconcile every pending or indeterminate order/payment through #226; never infer failure from missing client telemetry.
