@@ -15,9 +15,15 @@ test("replays the exact current application relation inventory", async () => {
   ))
   const inventory = replayRelationInventory(migrations)
   const kinds = [...inventory.values()]
-  assert.equal(inventory.size, 136)
-  assert.equal(kinds.filter((kind) => kind === "table").length, 105)
+  assert.equal(inventory.size, 140)
+  assert.equal(kinds.filter((kind) => kind === "table").length, 109)
   assert.equal(kinds.filter((kind) => kind === "view").length, 31)
+  for (const relation of [
+    "momi_preorder.catalog_items",
+    "momi_preorder.fulfillment_windows",
+    "momi_preorder.public_read_rate_buckets",
+    "momi_preorder.surfaces",
+  ]) assert.equal(inventory.get(relation), "table")
 })
 
 test("applies schema moves, relation renames, and drops in statement order", () => {

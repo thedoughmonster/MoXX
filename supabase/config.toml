@@ -105,3 +105,6 @@ verify_jwt = false
 
 [functions.momi-model-execution-completion-worker-v1]
 verify_jwt = false
+
+[functions.momi-preorder-bootstrap-v1]
+verify_jwt = false
