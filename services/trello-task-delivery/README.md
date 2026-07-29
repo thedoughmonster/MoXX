@@ -12,7 +12,8 @@ The destination adapter owns prepared Trello mutation work, delivery attempts,
 rate-limit retries, ambiguous outcomes, and success references. It emits only
 reference-based outcomes and cannot read kitchen task truth.
 
-The first runtime slice accepts a durable prepared `create_list` operation. It
-records complete responses and marks uncertain outcomes ambiguous instead of
-retrying them. It remains undeployed until credentials and release are
-separately authorized.
+The runtime slices accept durable prepared `create_list`, `move_card`, and
+`register_webhook` operations. Registration requires opaque references to a
+fresh acquisition-owned inventory and a successful callback HEAD probe. The
+service records complete responses and marks uncertain mutation outcomes
+ambiguous instead of retrying them.

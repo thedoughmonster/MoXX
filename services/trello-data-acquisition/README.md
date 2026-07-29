@@ -10,8 +10,9 @@ archive or interpret them.
 
 The service owns canonical Trello resource discovery, rate-limit handling, and
 acquisition control. It calls Trello only and consumes no MoMi-owned contract.
-The first runtime slice durably acquires one complete board snapshot for a
-capability-authorized job. It remains undeployed until release is authorized.
+The runtime slices durably acquire either one complete board snapshot or one
+complete token webhook inventory for a capability-authorized job. They remain
+separate from interpretation and delivery.
 
 ## Security
 

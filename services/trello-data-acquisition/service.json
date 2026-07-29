@@ -6,7 +6,7 @@
   "kind": "source_adapter",
   "service_type": "procurement_adapter",
   "lifecycle_status": "active",
-  "functions": ["trello-board-snapshot-v1"],
+  "functions": ["trello-board-snapshot-v1", "trello-webhook-inventory-v1"],
   "contracts": {
     "provides": ["trello.data.acquisition.request.v1"],
     "consumes": []
@@ -25,11 +25,17 @@
     "dataset_key": "trello.acquisition_control",
     "dataset_class": "operational",
     "private_schema": "trello_acquisition",
-    "private_relations": ["trello_acquisition.board_snapshot_jobs"],
+    "private_relations": [
+      "trello_acquisition.board_snapshot_jobs",
+      "trello_acquisition.webhook_inventory_jobs"
+    ],
     "private_routines": [
       "trello_acquisition.claim_board_snapshot_v1",
       "trello_acquisition.enqueue_board_snapshot_v1",
-      "trello_acquisition.finish_board_snapshot_v1"
+      "trello_acquisition.finish_board_snapshot_v1",
+      "trello_acquisition.claim_webhook_inventory_v1",
+      "trello_acquisition.enqueue_webhook_inventory_v1",
+      "trello_acquisition.finish_webhook_inventory_v1"
     ],
     "public_reads": [],
     "public_commands": ["trello.data.acquisition.request.v1"],
@@ -37,6 +43,10 @@
       {
         "contract": "trello.data.acquisition.request.v1",
         "routine": "trello_acquisition.enqueue_board_snapshot_v1"
+      },
+      {
+        "contract": "trello.data.acquisition.request.v1",
+        "routine": "trello_acquisition.enqueue_webhook_inventory_v1"
       }
     ],
     "emitted_events": []
