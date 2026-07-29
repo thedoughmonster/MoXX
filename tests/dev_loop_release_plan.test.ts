@@ -32,6 +32,12 @@ test("repository-only plans use a path gate and deploy nothing", () => {
   assert.deepEqual(plan.release.functions, [])
 })
 
+test("repository plans do not execute intentionally retired tests", () => {
+  const retired = "tests/intentionally_retired.test.ts"
+  const plan = buildImpactPlan([retired], architecture, new Map())
+  assert.ok(!plan.iteration_checks[0]?.args.includes(retired))
+})
+
 test("runtime plans deploy only manifest-owned affected functions", () => {
   const plan = buildImpactPlan(
     ["services/alpha/functions/alpha-v1/src/index.ts"],
