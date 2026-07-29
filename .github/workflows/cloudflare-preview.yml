@@ -6,6 +6,14 @@ on:
       - agent/223-cloudflare-credential-preflight
     paths:
       - .github/workflows/cloudflare-preview.yml
+      - index.html
+      - package.json
+      - pnpm-lock.yaml
+      - src/**
+      - vite.config.ts
+      - worker/**
+      - worker-configuration.d.ts
+      - wrangler.jsonc
   workflow_dispatch:
     inputs:
       operation:
