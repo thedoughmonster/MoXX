@@ -46,12 +46,14 @@
     "private_schema": "momi_preorder",
     "private_relations": [
       "momi_preorder.catalog_items",
+      "momi_preorder.configuration_publications",
       "momi_preorder.fulfillment_windows",
       "momi_preorder.public_read_rate_buckets",
       "momi_preorder.surfaces"
     ],
     "private_routines": [
       "momi_preorder.admit_public_read_v1",
+      "momi_preorder.publish_configuration_v1",
       "momi_preorder.read_bootstrap_v1"
     ],
     "public_reads": ["momi.preorder.bootstrap.read.v1"],

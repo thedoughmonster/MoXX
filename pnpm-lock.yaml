@@ -17,6 +17,9 @@ importers:
       pgsql-ast-parser:
         specifier: 12.0.2
         version: 12.0.2
+      postgres:
+        specifier: 3.4.3
+        version: 3.4.3
       supabase:
         specifier: 2.109.1
         version: 2.109.1
@@ -159,6 +162,10 @@ packages:
   pgsql-ast-parser@12.0.2:
     resolution: {integrity: sha512-1WWa96Sw6h4uv9GLw98EzH/+xoBTC8j2TwV/AMW3E+Ir/fHOu/jLLbj6kPiz3y2bGISTKNYvKWwHoqvQ5FLuAw==}
 
+  postgres@3.4.3:
+    resolution: {integrity: sha512-iHJn4+M9vbTdHSdDzNkC0crHq+1CUdFhx+YqCE+SqWxPjm+Zu63jq7yZborOBF64c8pc58O5uMudyL1FQcHacA==}
+    engines: {node: '>=12'}
+
   railroad-diagrams@1.0.0:
     resolution: {integrity: sha512-cz93DjNeLY0idrCNOH6PviZGRN9GJhsdm9hpn1YCS879fj4W+x5IFJhhkRZcwVgMmFF7R82UA/7Oh+R8lLZg6A==}
 
@@ -287,6 +294,8 @@ snapshots:
     dependencies:
       moo: 0.5.3
       nearley: 2.20.1
+
+  postgres@3.4.3: {}
 
   railroad-diagrams@1.0.0: {}
 

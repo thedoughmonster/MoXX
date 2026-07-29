@@ -30,11 +30,20 @@
       {
         "item_id": "10000000-0000-4000-8000-000000000005",
         "item_version": 1,
+        "category": "Synthetic Doughnuts",
         "name": "Synthetic Doughnut Box",
         "description": "Synthetic fixture item for contract acceptance.",
         "base_price": {
           "currency": "USD",
           "amount_minor": 2400
+        },
+        "shop_price": {
+          "currency": "USD",
+          "amount_minor": 2600
+        },
+        "price_floor": {
+          "currency": "USD",
+          "amount_minor": 2200
         },
         "media": [
           {
@@ -42,6 +51,7 @@
             "alt": "Synthetic doughnut box"
           }
         ],
+        "allergens": ["milk", "egg", "wheat"],
         "allergen_status": "contains_declared",
         "seasonal_eligibility": "eligible",
         "available": true,

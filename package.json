@@ -26,6 +26,7 @@
     "local:db-restore-drill": "node local-tools/postgres-nas-export/restore_drill.ts",
     "local:db-verify": "node local-tools/postgres-nas-export/verify.ts",
     "local:legacy-recipe-import": "node local-tools/legacy-recipe-import/main.ts",
+    "local:preorder-config": "node local-tools/preorder-config/main.ts",
     "test:legacy-recipe-postgres": "node tests/run_legacy_recipe_postgres_integration.ts",
     "migration:check": "node scripts/check_migrations.ts",
     "quality:check": "node scripts/check_source_quality.ts && node scripts/check_quality_report.ts",
@@ -39,6 +40,7 @@
     "ajv": "8.20.0",
     "deno": "2.9.2",
     "pgsql-ast-parser": "12.0.2",
+    "postgres": "3.4.3",
     "supabase": "2.109.1",
     "typescript": "6.0.3"
   }
