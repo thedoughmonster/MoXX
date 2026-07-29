@@ -1,6 +1,7 @@
 import { type PreorderFixture } from './model';
 
 export const preorderFixture: PreorderFixture = {
+  source: 'fixture',
   surfaceName: 'Weekend preorder',
   locationName: 'Dough Monster · Long Beach',
   freshnessLabel: 'Menu updated just now',

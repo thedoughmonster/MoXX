@@ -42,6 +42,7 @@ jobs:
           VITE_APP_STAGE: preview
           VITE_PREORDER_API_ORIGIN: https://preorder-api.invalid
           VITE_PREORDER_API_VERSION: v1
+          VITE_PREORDER_DATA_MODE: fixture
           VITE_RELEASE_ID: ${{ github.sha }}
         run: pnpm run check
 

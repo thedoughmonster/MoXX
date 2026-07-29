@@ -33,6 +33,11 @@ export default defineConfig({
   ],
   webServer: {
     command: 'pnpm dev --host 127.0.0.1 --port 4174',
+    env: {
+      ...process.env,
+      VITE_APP_STAGE: 'preview',
+      VITE_PREORDER_DATA_MODE: 'fixture'
+    },
     url: 'http://127.0.0.1:4174',
     reuseExistingServer: !process.env.CI
   }

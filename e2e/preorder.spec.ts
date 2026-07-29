@@ -2,6 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
+  await expect(page.getByText('Preview menu · Test data only')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Pick your doughnuts.' })).toBeVisible();
 });
 

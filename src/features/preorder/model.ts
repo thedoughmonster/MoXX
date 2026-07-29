@@ -1,5 +1,5 @@
 export type Money = {
-  currency: 'USD';
+  currency: string;
   amountMinor: number;
 };
 
@@ -9,7 +9,7 @@ export type FulfillmentWindow = {
   day: string;
   date: string;
   time: string;
-  availability: 'available' | 'limited';
+  availability: 'available' | 'limited' | 'closed' | 'sold_out';
 };
 
 export type Product = {
@@ -25,6 +25,7 @@ export type Product = {
 };
 
 export type PreorderFixture = {
+  source: 'fixture' | 'live';
   surfaceName: string;
   locationName: string;
   freshnessLabel: string;

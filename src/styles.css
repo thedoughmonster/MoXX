@@ -47,6 +47,17 @@ a {
   min-height: 100vh;
 }
 
+.preview-banner {
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--line);
+  background: var(--berry-dark);
+  color: var(--white);
+  text-align: center;
+  font-size: 0.84rem;
+  font-weight: 750;
+  letter-spacing: 0.01em;
+}
+
 .site-header {
   min-height: 84px;
   padding: 14px clamp(20px, 4vw, 64px);
@@ -108,6 +119,11 @@ a {
   border-radius: 50%;
   background: var(--leaf);
   box-shadow: 0 0 0 4px rgba(71, 114, 76, 0.13);
+}
+
+.date-card[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.58;
 }
 
 .quiet-button,

@@ -17,9 +17,12 @@ export function ProductCard({
   onIncrease
 }: ProductCardProps) {
   const unverified = product.allergenStatus === 'unverified';
-  const unavailable = unverified || blockedBy.length > 0;
+  const soldOut = product.maximumQuantity === 0;
+  const unavailable = unverified || soldOut || blockedBy.length > 0;
   const reason = unverified
     ? 'Allergen details are still being verified'
+    : soldOut
+      ? 'Not available for this pickup window'
     : blockedBy.length > 0
       ? 'Contains ' + blockedBy.join(', ')
       : null;

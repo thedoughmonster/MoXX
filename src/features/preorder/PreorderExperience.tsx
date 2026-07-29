@@ -8,16 +8,18 @@ import {
   Radio,
   RadioGroup
 } from 'react-aria-components';
+import { PreorderApiError } from '../../lib/api';
+import { preorderDataMode } from '../../lib/config';
 import { CartSummary } from './CartSummary';
-import { loadPreorderFixture } from './fixture';
+import { loadPreorder } from './loadPreorder';
 import { type CartQuantities } from './model';
 import { preorderMachine } from './preorderMachine';
 import { ProductCard } from './ProductCard';
 
 export function PreorderExperience() {
-  const { data, status } = useQuery({
-    queryKey: ['preorder-bootstrap-fixture'],
-    queryFn: loadPreorderFixture
+  const { data, error, refetch, status } = useQuery({
+    queryKey: ['preorder-bootstrap', preorderDataMode],
+    queryFn: loadPreorder
   });
   const [selectedWindow, setSelectedWindow] = useState('saturday-august-1');
   const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
@@ -34,22 +36,31 @@ export function PreorderExperience() {
   }
 
   if (status === 'error' || !data) {
+    const unpublished = error instanceof PreorderApiError && error.status === 409;
     return (
       <main className="state-page">
         <span className="brand-mark" aria-hidden="true">DM</span>
-        <h1>We couldn’t open preorders.</h1>
-        <p>Your cart is safe. Please try again in a moment.</p>
-        <Button className="primary-button" onPress={() => window.location.reload()}>
-          Try again
+        <h1>{unpublished ? 'Preorders aren’t open yet.' : 'We couldn’t open preorders.'}</h1>
+        <p>
+          {unpublished
+            ? 'The service is connected, but no preorder menu has been published.'
+            : 'Your cart is safe. Please try again in a moment.'}
+        </p>
+        <Button className="primary-button" onPress={() => void refetch()}>
+          Check again
         </Button>
       </main>
     );
   }
 
-  const selectedPickupWindow = data.fulfillmentWindows.find(
+  const selectableWindows = data.fulfillmentWindows.filter(
+    (item) => item.availability === 'available' || item.availability === 'limited'
+  );
+  const selectedPickupWindow = selectableWindows.find(
     (item) => item.id === selectedWindow
   )
-    ?? data.fulfillmentWindows[0];
+    ?? selectableWindows[0];
+  const effectiveSelectedWindow = selectedPickupWindow?.id ?? '';
   const pickupLabel = selectedPickupWindow
     ? selectedPickupWindow.day + ', ' + selectedPickupWindow.date + ' · '
       + selectedPickupWindow.time
@@ -95,9 +106,15 @@ export function PreorderExperience() {
         </a>
         <div className="header-meta">
           <span className="open-dot" aria-hidden="true" />
-          <span>Preorders open</span>
+          <span>{data.source === 'fixture' ? 'Preview only' : 'Preorders open'}</span>
         </div>
       </header>
+
+      {data.source === 'fixture' && (
+        <div className="preview-banner" role="status">
+          Preview menu · Test data only · Ordering and payment are disabled
+        </div>
+      )}
 
       <div className="progress-shell" aria-label="Preorder progress">
         <ol className="progress-list">
@@ -139,19 +156,24 @@ export function PreorderExperience() {
             </div>
             <RadioGroup
               className="date-grid"
-              value={selectedWindow}
+              value={effectiveSelectedWindow}
               onChange={setSelectedWindow}
               aria-label="Pickup window"
             >
               {data.fulfillmentWindows.map((item) => (
-                <Radio className="date-card" key={item.id} value={item.id}>
+                <Radio
+                  className="date-card"
+                  key={item.id}
+                  value={item.id}
+                  isDisabled={item.availability === 'closed' || item.availability === 'sold_out'}
+                >
                   {({ isSelected }) => (
                     <>
                       <span className="date-eyebrow">{item.eyebrow}</span>
                       <strong>{item.day}</strong>
                       <span>{item.date} · {item.time}</span>
                       <span className={'availability availability-' + item.availability}>
-                        {item.availability === 'limited' ? 'Filling up' : 'Available'}
+                        {availabilityLabel(item.availability)}
                       </span>
                       <span className="radio-check" aria-hidden="true">
                         {isSelected ? '✓' : ''}
@@ -176,25 +198,32 @@ export function PreorderExperience() {
                 Clear all
               </Button>
             </div>
-            <CheckboxGroup
-              className="allergen-grid"
-              value={selectedAllergens}
-              onChange={setSelectedAllergens}
-              aria-label="Allergens to avoid"
-            >
-              {data.allergenOptions.map((option) => (
-                <Checkbox className="allergen-chip" key={option.id} value={option.id}>
-                  {({ isSelected }) => (
-                    <>
-                      <span className="chip-check" aria-hidden="true">
-                        {isSelected ? '✓' : ''}
-                      </span>
-                      {option.label}
-                    </>
-                  )}
-                </Checkbox>
-              ))}
-            </CheckboxGroup>
+            {data.allergenOptions.length > 0 ? (
+              <CheckboxGroup
+                className="allergen-grid"
+                value={selectedAllergens}
+                onChange={setSelectedAllergens}
+                aria-label="Allergens to avoid"
+              >
+                {data.allergenOptions.map((option) => (
+                  <Checkbox className="allergen-chip" key={option.id} value={option.id}>
+                    {({ isSelected }) => (
+                      <>
+                        <span className="chip-check" aria-hidden="true">
+                          {isSelected ? '✓' : ''}
+                        </span>
+                        {option.label}
+                      </>
+                    )}
+                  </Checkbox>
+                ))}
+              </CheckboxGroup>
+            ) : (
+              <p className="cross-contact-note">
+                Exact allergen filtering is unavailable. Products without verified details
+                remain disabled.
+              </p>
+            )}
             <p className="cross-contact-note">
               <span aria-hidden="true">i</span>
               All doughnuts are made in a shared kitchen. We’ll show verified
@@ -248,6 +277,13 @@ export function PreorderExperience() {
       </footer>
     </div>
   );
+}
+
+function availabilityLabel(availability: 'available' | 'limited' | 'closed' | 'sold_out') {
+  if (availability === 'limited') return 'Filling up';
+  if (availability === 'closed') return 'Closed';
+  if (availability === 'sold_out') return 'Sold out';
+  return 'Available';
 }
 
 function PreorderSkeleton() {
