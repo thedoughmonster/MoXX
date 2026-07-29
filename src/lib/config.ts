@@ -6,6 +6,11 @@ export const runningStage = import.meta.env.VITE_APP_STAGE?.trim() || 'preview';
 export const preorderApiVersion =
   import.meta.env.VITE_PREORDER_API_VERSION?.trim() || PREORDER_API_DEFAULT_VERSION;
 
+const requestedDataMode = import.meta.env.VITE_PREORDER_DATA_MODE?.trim();
+
+export const preorderDataMode =
+  runningStage !== 'production' && requestedDataMode === 'fixture' ? 'fixture' : 'live';
+
 const rawOrigin = import.meta.env.VITE_PREORDER_API_ORIGIN?.trim();
 const releaseFromEnv = import.meta.env.VITE_RELEASE_ID?.trim();
 
@@ -26,5 +31,3 @@ export const apiOrigin =
     : DEFAULT_ORIGIN);
 
 export const releaseIdentity = releaseFromEnv || 'local-dev';
-
-export const healthEndpoint = `${apiOrigin}/functions/v1/preorder-${preorderApiVersion}/health`;

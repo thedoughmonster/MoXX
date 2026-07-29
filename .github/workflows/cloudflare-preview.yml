@@ -32,8 +32,9 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       VITE_APP_STAGE: preview
-      VITE_PREORDER_API_ORIGIN: https://viodfldzuoypnpqaagag.supabase.co
+      VITE_PREORDER_API_ORIGIN: https://xtbraqnlskmqxinjxxdn.supabase.co
       VITE_PREORDER_API_VERSION: v1
+      VITE_PREORDER_DATA_MODE: fixture
       VITE_RELEASE_ID: ${{ github.sha }}
     steps:
       - name: Checkout exact release

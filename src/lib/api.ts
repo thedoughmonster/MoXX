@@ -1,35 +1,37 @@
-import { PREORDER_API_DEFAULT_VERSION } from './config';
-import { apiOrigin, preorderApiVersion } from './config';
-import { type PreorderHealthEnvelope, type PreorderHealthResponse } from './contracts';
+import { apiOrigin } from './config';
+import {
+  preorderBootstrapEnvelope,
+  type PreorderBootstrapEnvelope
+} from './contracts';
 
-export function buildPreorderFunctionUrl(functionName: string): string {
-  const normalizedName = functionName.replace(/^\//, '');
-  const version = preorderApiVersion || PREORDER_API_DEFAULT_VERSION;
-  return `${apiOrigin}/functions/v1/preorder-${version}/${normalizedName}`;
+export class PreorderApiError extends Error {
+  constructor(message: string, readonly status: number) {
+    super(message);
+    this.name = 'PreorderApiError';
+  }
 }
 
-export function isHealthResponse(payload: PreorderHealthEnvelope): payload is PreorderHealthResponse {
-  return payload?.ok === true;
+export function buildPreorderBootstrapUrl(surfaceKey = 'preorder'): string {
+  const url = new URL('/functions/v1/momi-preorder-bootstrap-v1', apiOrigin);
+  url.searchParams.set('surface_key', surfaceKey);
+  return url.toString();
 }
 
-export async function queryPreorderHealth(): Promise<PreorderHealthResponse> {
-  const response = await fetch(buildPreorderFunctionUrl('health'), {
+export async function queryPreorderBootstrap(): Promise<PreorderBootstrapEnvelope> {
+  const response = await fetch(buildPreorderBootstrapUrl(), {
     method: 'GET',
     headers: {
-      'content-type': 'application/json'
+      accept: 'application/json'
     },
-    // No direct table access and no secret-bearing headers in this layer.
-    credentials: 'include'
+    credentials: 'omit'
   });
 
   if (!response.ok) {
-    throw new Error(`edge health failed: ${response.status}`);
+    const message = response.status === 409
+      ? 'Preorders are not published yet.'
+      : `Preorder service returned ${response.status}.`;
+    throw new PreorderApiError(message, response.status);
   }
 
-  const payload = (await response.json()) as PreorderHealthEnvelope;
-  if (!isHealthResponse(payload)) {
-    throw new Error('unexpected edge function response shape');
-  }
-
-  return payload;
+  return preorderBootstrapEnvelope.parse(await response.json());
 }
