@@ -6,7 +6,7 @@
   "kind": "core_capability",
   "service_type": "dataset_owner",
   "lifecycle_status": "active",
-  "functions": ["momi-preorder-bootstrap-v1"],
+  "functions": ["momi-preorder-bootstrap-v1", "momi-preorder-quote-v1"],
   "contracts": {
     "provides": [
       "momi.preorder.bootstrap.read.v1",
@@ -49,19 +49,32 @@
       "momi_preorder.configuration_publications",
       "momi_preorder.fulfillment_windows",
       "momi_preorder.public_read_rate_buckets",
+      "momi_preorder.quotes",
       "momi_preorder.surfaces"
     ],
     "private_routines": [
       "momi_preorder.admit_public_read_v1",
+      "momi_preorder.create_quote_v1",
+      "momi_preorder.ensure_fulfillment_windows_v1",
       "momi_preorder.publish_configuration_v1",
-      "momi_preorder.read_bootstrap_v1"
+      "momi_preorder.quote_failure_v1",
+      "momi_preorder.read_bootstrap_v1",
+      "momi_preorder.refresh_fulfillment_windows_on_surface_v1",
+      "momi_preorder.refresh_fulfillment_windows_v1",
+      "momi_preorder.validate_active_savings_policy_v1"
     ],
     "public_reads": ["momi.preorder.bootstrap.read.v1"],
-    "public_commands": [],
+    "public_commands": ["momi.preorder.quote.create.v1"],
     "public_routine_reads": [
       {
         "contract": "momi.preorder.bootstrap.read.v1",
         "routine": "momi_preorder.read_bootstrap_v1"
+      }
+    ],
+    "public_routine_commands": [
+      {
+        "contract": "momi.preorder.quote.create.v1",
+        "routine": "momi_preorder.create_quote_v1"
       }
     ],
     "emitted_events": []

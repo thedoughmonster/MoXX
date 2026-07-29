@@ -117,3 +117,6 @@ verify_jwt = false
 
 [functions.momi-preorder-bootstrap-v1]
 verify_jwt = false
+
+[functions.momi-preorder-quote-v1]
+verify_jwt = false

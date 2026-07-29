@@ -10,6 +10,7 @@
       "mapping_version": 1
     },
     "cart_version": 1,
+    "avoided_allergens": [],
     "lines": [
       {
         "line_id": "20000000-0000-4000-8000-000000000002",
@@ -55,6 +56,23 @@
         "currency": "USD",
         "amount_minor": 2400
       },
+      "shop_comparison_total": {
+        "currency": "USD",
+        "amount_minor": 2500
+      },
+      "preorder_savings_total": {
+        "currency": "USD",
+        "amount_minor": 100
+      },
+      "quantity_progress": {
+        "current_level": "Base",
+        "current_threshold": 0,
+        "current_discount_bps": 0,
+        "next_level": "Level 1",
+        "next_threshold": 6,
+        "quantity_needed": 5
+      },
+      "advance_discount_bps": 0,
       "capacity_result": "available",
       "versions": {
         "surface_version": 1,

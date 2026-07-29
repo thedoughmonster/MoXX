@@ -17,7 +17,10 @@ export async function validateConfig(
     allErrors: true,
     strict: false,
   });
-  ajv.addFormat("uuid", /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+  ajv.addFormat(
+    "uuid",
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+  );
   ajv.addFormat("date", /^\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12]\d|3[01])$/);
   ajv.addFormat("date-time", (value) => !Number.isNaN(Date.parse(value)));
   const validate = ajv.compile(schema);
@@ -68,6 +71,26 @@ export async function validateConfig(
     throw new Error(
       "Active configuration requires 2/5/10-day and quantity savings",
     );
+  }
+  const advance = config.savings_policy.advance_tiers.map((tier) =>
+    tier.multiplier_bps as number
+  );
+  if (advance.some((value, index) => index > 0 && value < advance[index - 1])) {
+    throw new Error("Advance savings must improve at 2, 5, and 10 days");
+  }
+  const quantity = [...config.savings_policy.quantity_levels].sort((a, b) =>
+    a.minimum_quantity - b.minimum_quantity
+  );
+  if (
+    quantity.some((level, index) =>
+      index > 0 && (
+        level.minimum_quantity === quantity[index - 1].minimum_quantity ||
+        (level.discount_bps as number) <
+          (quantity[index - 1].discount_bps as number)
+      )
+    )
+  ) {
+    throw new Error("Quantity savings thresholds must be unique and monotonic");
   }
   const available = config.catalog.filter((item) => item.available);
   if (available.length === 0) {
