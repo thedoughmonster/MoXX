@@ -14,11 +14,13 @@ export function reconcileInventory(
   const applicable = architecture.retirements.filter((item) =>
     item.environments.includes(environment)
   )
+  const hostedSlugs = new Set(hosted.map((item) => item.slug))
   const retired = applicable.filter((item) => item.remove_after >= today)
     .map((item) => item.function_slug).sort()
-  const expired = applicable.filter((item) => item.remove_after < today)
+  const expired = applicable.filter((item) =>
+    item.remove_after < today && hostedSlugs.has(item.function_slug)
+  )
     .map((item) => item.function_slug).sort()
-  const hostedSlugs = new Set(hosted.map((item) => item.slug))
   const allowed = new Set([...active, ...retired])
   return {
     environment,

@@ -67,6 +67,20 @@ test("rejects missing, unexpected, and expired hosted functions", () => {
   assert.deepEqual(result.invalid_metadata, [])
 })
 
+test("clears an expired retirement after its hosted function is removed", () => {
+  const result = reconcileInventory(
+    architecture,
+    "dev",
+    [hostedFunction("active-v1")],
+    "2026-07-21",
+    new Map([["active-v1", false]]),
+  )
+  assert.deepEqual(result.missing, [])
+  assert.deepEqual(result.unexpected, [])
+  assert.deepEqual(result.expired, [])
+  assert.deepEqual(result.invalid_metadata, [])
+})
+
 test("reports every invalid active hosted function attestation deterministically", () => {
   const result = reconcileInventory(architecture, "dev", [{
     ...hostedFunction("active-v1"),
