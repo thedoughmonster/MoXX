@@ -64,6 +64,8 @@ test("accepts an authorization challenge as healthy reachability", () => {
   assert.equal(isAcceptableProbeStatus(200), true)
   assert.equal(isAcceptableProbeStatus(401), true)
   assert.equal(isAcceptableProbeStatus(403), true)
+  assert.equal(isAcceptableProbeStatus(204, [204]), true)
+  assert.equal(isAcceptableProbeStatus(200, [204]), false)
   assert.equal(isAcceptableProbeStatus(404), false)
   assert.equal(isAcceptableProbeStatus(500), false)
 })

@@ -28,6 +28,9 @@ define its business purpose.
 - `authentication_policy_key` names the authentication contract.
 - `entrypoint` names the matching adapter entrypoint.
 - `input_schema` and `output_schema` are function-relative contract paths.
+- `probe`, when present, declares the safe HTTP method and exact acceptable
+  statuses for deployment reachability checks. Use it when a bare `GET` is not
+  a valid request for the function contract.
 
 ## Authority Declaration
 
