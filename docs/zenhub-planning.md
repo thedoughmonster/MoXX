@@ -17,20 +17,26 @@ their absence or delay must not block repository work.
 
 ## Hierarchy
 
-The hierarchy is Initiative → Project → Feature → Issue → Sub-task.
+The hierarchy is Initiative → Project → Epic → Feature/Task/Bug → Sub-task.
 
-1. **Initiative** — a strategic objective spanning multiple quarters or years.
-2. **Project** — a large body of work contributing to an Initiative, usually
-   spanning several months.
-3. **Feature** — an executable capability or theme grouping related Issues.
-4. **Issue** — a Story, Task, or Bug completed in days and directly connected
-   to repository work.
-5. **Sub-task** — specific work within an Issue, usually completed in hours.
+1. **Initiative** — one permanent product plane: MoMi, MoSi, or MoXi. It defines
+   an ownership boundary rather than a schedule or temporary goal.
+2. **Project** — a durable business or platform capability within one
+   Initiative, generally spanning multiple Epics and several months.
+3. **Epic** — a substantial, coherent outcome within a Project, usually
+   spanning multiple executable issues over weeks or months.
+4. **Feature**, **Task**, or **Bug** — the normal delivery level:
+   - a Feature adds bounded, testable behavior;
+   - a Task performs bounded technical or operational work without presenting
+     independent product behavior; and
+   - a Bug corrects behavior that violates an accepted contract or experience.
+5. **Sub-task** — an optional, hour-scale execution step within a Feature,
+   Task, or Bug. Use Sub-tasks to expose meaningful Feature steps without
+   turning each step into another roadmap item.
 
-Enable Levels 4 and 5 in **Edit issue types and hierarchy** so strategy and
-execution remain visible together. Rename the default Level 3 **Epic** type to
-**Feature**. Rename the default Level 4 **Feature** type to **Story**, leaving
-**Task** and **Bug** alongside it, so “Feature” has one unambiguous level.
+Use Zenhub's existing issue types without renaming them. Levels 1 through 3
+belong in Goals and Planning; Levels 4 and 5 belong in the Work Tracker. Views
+may include additional levels when a complete hierarchy is useful.
 
 The complete Level 1 set follows ADR `0018`:
 
@@ -53,9 +59,12 @@ ownership. Do not add a fourth umbrella Initiative.
 ## Agent behavior
 
 Agents create one GitHub-backed issue for one repository change and reference
-that issue from the pull request. Agents may place or correct the item in
-Zenhub, but must not infer missing planning metadata, recreate a repository
-mirror, or stop development over visual-only drift.
+the lowest issue that accurately owns the pull request. A Feature may own a
+small change directly; when a Feature has Sub-tasks, a pull request normally
+references the Sub-task it completes while preserving the Feature parent.
+Agents may place or correct the item in Zenhub, but must not infer missing
+planning metadata, recreate a repository mirror, or stop development over
+visual-only drift.
 
 Strategic organization is edited in Zenhub. Repository review and CI validate
 only the GitHub engineering record and owning-issue disposition.
