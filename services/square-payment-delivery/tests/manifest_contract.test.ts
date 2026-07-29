@@ -1,0 +1,18 @@
+import assert from "node:assert/strict"
+import { readFile } from "node:fs/promises"
+import test from "node:test"
+
+test("declares one Sandbox-only destination boundary without runtime activation", async () => {
+  const directory = new URL("../", import.meta.url)
+  const manifest = JSON.parse(await readFile(new URL("service.json", directory), "utf8"))
+  const contract = JSON.parse(await readFile(
+    new URL("contracts/payment-command-v1.schema.json", directory), "utf8",
+  ))
+
+  assert.equal(manifest.service_type, "destination_adapter")
+  assert.deepEqual(manifest.network.outbound_hosts, ["connect.squareupsandbox.com"])
+  assert.deepEqual(manifest.secrets, ["SQUARE_SANDBOX_ACCESS_TOKEN"])
+  assert.deepEqual(manifest.functions, [])
+  assert.equal(contract.$id, "momi://square.payment.execute.v1/input")
+  assert.equal(contract.properties.source_token.writeOnly, true)
+})

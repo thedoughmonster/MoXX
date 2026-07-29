@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://square.payment.execute.v1/input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["payment_attempt_id", "momi_order_id", "amount_minor", "currency", "source_token"],
+  "properties": {
+    "payment_attempt_id": { "type": "string", "format": "uuid" },
+    "momi_order_id": { "type": "string", "format": "uuid" },
+    "amount_minor": { "type": "integer", "minimum": 1 },
+    "currency": { "const": "USD" },
+    "source_token": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "writeOnly": true,
+      "description": "Square-hosted single-use token. Never persist or log."
+    }
+  }
+}
