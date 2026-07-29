@@ -10,6 +10,8 @@ does not authorize deployment or provider mutation by itself.
 - Open list order: `Unassigned`, `Today`, `In Progress`, `Blocked`, `Done`.
 - Preserve every existing card, including `Turn off burners and broiler` and
   `Dispose of doughnuts`.
+- Move those preserved cards to `Unassigned` by exact canonical card and list
+  IDs after the list order is proven.
 - Create no card, checklist, assignment, member invitation, or automation.
 
 ## Credential Handoff
@@ -29,19 +31,25 @@ value in Git, logs, issue text, task prompts, or chat.
 
 1. Release the exact validated commit through the repository's GitHub-owned
    development release path.
-2. Enqueue and execute one durable board snapshot for `qdzZg93X`.
-3. Stop if the board name differs, any target list name is duplicated, the first
-   three lists are out of order, or either preserved card is absent.
-4. If `Blocked` is absent, enqueue and execute one prepared bottom-position list
-   creation, then reacquire the board snapshot.
-5. If `Done` is absent, enqueue and execute one prepared bottom-position list
-   creation, then reacquire the board snapshot.
-6. Verify the exact target order and unchanged existing card identities.
-7. Register exactly one board webhook only after the callback HEAD probe returns
-   `200`, then preserve its canonical webhook and board IDs as external refs.
+2. Enqueue and execute one durable board snapshot for `qdzZg93X`; stop on a
+   board-name mismatch, duplicate target name, incorrect list order, or missing
+   preserved card.
+3. Enqueue and execute one acquisition-owned complete webhook inventory. Stop
+   if it shows a conflicting board or callback registration.
+4. Probe the exact configured callback with HEAD and require `200`.
+5. If no exact active webhook exists, enqueue one prepared registration with
+   the inventory job reference and HEAD evidence reference, then execute its
+   single POST. Never inventory provider state from the delivery service.
+6. Enqueue one desired-state move for each preserved card using the exact board,
+   card, and `Unassigned` list IDs.
+7. Reacquire both the board snapshot and webhook inventory. Verify exact list
+   order, unchanged card identities, both cards in `Unassigned`, and exactly one
+   active webhook for the board and callback.
+8. After a controlled Trello action, verify one authenticated, member-attributed
+   webhook evidence row and confirm the non-secret client marker is preserved.
 
-An ambiguous create outcome stops activation. Reacquire the board before any
-new operation; never retry the create blindly.
+An ambiguous list or webhook create stops activation. Reacquire through the
+owning acquisition function before any follow-up; never retry a create blindly.
 
 ## Rollback
 

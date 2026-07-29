@@ -52,7 +52,16 @@ verify_jwt = false
 [functions.trello-board-snapshot-v1]
 verify_jwt = false
 
+[functions.trello-webhook-inventory-v1]
+verify_jwt = false
+
 [functions.trello-create-list-v1]
+verify_jwt = false
+
+[functions.trello-move-card-v1]
+verify_jwt = false
+
+[functions.trello-register-webhook-v1]
 verify_jwt = false
 
 [functions.toast-data-acquisition-v1]
