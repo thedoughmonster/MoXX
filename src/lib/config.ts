@@ -3,6 +3,23 @@ export const PREORDER_API_DEFAULT_VERSION = 'v1';
 
 export const runningStage = import.meta.env.VITE_APP_STAGE?.trim() || 'preview';
 
+export const preorderExperienceMode =
+  import.meta.env.VITE_PREORDER_EXPERIENCE_MODE?.trim() === 'toast_handoff'
+    ? 'toast_handoff'
+    : 'first_party';
+
+const rawCheckoutUrl = import.meta.env.VITE_PREORDER_CHECKOUT_URL?.trim();
+
+export const preorderCheckoutUrl = (() => {
+  if (!rawCheckoutUrl) return null;
+  try {
+    const url = new URL(rawCheckoutUrl);
+    return url.protocol === 'https:' ? url.toString() : null;
+  } catch {
+    return null;
+  }
+})();
+
 export const preorderApiVersion =
   import.meta.env.VITE_PREORDER_API_VERSION?.trim() || PREORDER_API_DEFAULT_VERSION;
 

@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+test.skip(process.env.MOXI_E2E_MODE === 'toast_handoff', 'first-party fixture suite');
+
 test.beforeEach(async ({ page }) => {
   await page.goto('/');
   await expect(page.getByText('Preview menu · Test data only')).toBeVisible();
