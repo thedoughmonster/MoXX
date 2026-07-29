@@ -12,6 +12,10 @@
   "entrypoint": "index.ts",
   "input_schema": "contracts/input.schema.json",
   "output_schema": "contracts/output.schema.json",
+  "probe": {
+    "method": "GET",
+    "acceptable_statuses": [405]
+  },
   "idempotency_policy_key": "momi.trello.delivery.operation_id.v1",
   "required_capabilities": ["database_write", "external_http"],
   "declared_side_effects": ["registers_trello_webhook", "records_delivery_outcome"]
