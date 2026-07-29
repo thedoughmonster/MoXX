@@ -5,7 +5,7 @@ import test from "node:test"
 const workflow = await readFile(".github/workflows/validate.yml", "utf8")
 
 test("runs one exact path-derived final gate for pull requests", () => {
-  assert.match(workflow, /pull_request:\n    branches: \[dev\]/)
+  assert.match(workflow, /pull_request:\n    branches: \[dev, prod\]/)
   assert.match(workflow, /validate-final:/)
   assert.match(workflow, /name: validate-final/)
   assert.match(workflow, /github\.event\.pull_request\.base\.sha/)

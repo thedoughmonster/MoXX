@@ -118,6 +118,22 @@ they deploy from the same repository.
 ## Backend Release Rules
 - For hosted backend changes, release the exact PR validation receipt to
   development, then promote only that exact development receipt.
+## Issue Tracking and Planning
+- Use GitHub-backed issues and Zenhub's native GitHub webhook synchronization.
+- GitHub owns the engineering record: issue identity, body, state, comments,
+  repository linkage, and pull-request closure.
+- Zenhub owns human-facing planning metadata: hierarchy, pipeline, priority,
+  estimate, sprint, dates, and roadmap placement.
+- Use `Initiative → Project → Epic → Feature/Task/Bug/Spike → Sub-task`; use
+  `Idea → Shaping → Designed → Active → Cleanup → Closed`, with Closed as Done.
+- Use Sub-tasks for bounded implementation steps inside a Feature when the
+  breakdown improves execution visibility; do not require them for small work.
+- Keep Levels 4 and 5 visible in Zenhub.
+- Do not mirror Zenhub planning metadata into GitHub labels, checked-in
+  manifests, scheduled workflows, or reconciliation scripts.
+- Missing or stale Zenhub planning metadata is correctable visual drift, not a
+  development blocker.
+- Follow `docs/zenhub-planning.md` when creating or organizing work.
 ## Code Review Rules
 - Block unauthorized ownership, private-data, public-contract, or deployer changes.
 - Block material correctness, security, privacy, data-loss, or rollback defects.
