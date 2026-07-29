@@ -39,6 +39,13 @@ OpenWebUI user-to-user messages. Both contracts are idempotent and immutable.
 The purpose-bound receipt reader returns identifiers, content hashes, order,
 status, usage, and timing only; it never returns protected values.
 
+Evidence-ingestion services use the versioned
+`momi.raw_json.capture_evidence.v1` command to preserve complete JSON evidence
+with its exact raw text and without direct table access. Registered source types
+receive replay-safe capture through the archive owner's routine; conflicting
+content under one source idempotency key is rejected. Authorized dataset owners
+will use a purpose-bound read contract only from immutable archive references.
+
 ## Evaluation Handoff
 
 Every original source item captured through an evaluation intake contract inserts one `pending` row in

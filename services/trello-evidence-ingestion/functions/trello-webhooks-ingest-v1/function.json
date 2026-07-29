@@ -1,0 +1,18 @@
+{
+  "function_key": "trello.webhooks.webhook_ingest.v1",
+  "contract_version": 1,
+  "purpose": "Authenticate and archive one complete Trello webhook action.",
+  "owner_service": "trello-evidence-ingestion",
+  "function_type": "ingest",
+  "capability": "ingest",
+  "boundary": "trello_inbound",
+  "runtime": "supabase_edge",
+  "route_path": "/functions/v1/trello-webhooks-ingest-v1",
+  "authentication_policy_key": "trello.webhooks.hmac_sha1.v1",
+  "entrypoint": "index.ts",
+  "input_schema": "contracts/input.schema.json",
+  "output_schema": "contracts/output.schema.json",
+  "idempotency_policy_key": "trello.webhook.action_id.v1",
+  "required_capabilities": ["database_write"],
+  "declared_side_effects": ["captures_raw_json_evidence"]
+}

@@ -46,6 +46,15 @@ verify_jwt = false
 [functions.toast-webhooks-ingest-v1]
 verify_jwt = false
 
+[functions.trello-webhooks-ingest-v1]
+verify_jwt = false
+
+[functions.trello-board-snapshot-v1]
+verify_jwt = false
+
+[functions.trello-create-list-v1]
+verify_jwt = false
+
 [functions.toast-data-acquisition-v1]
 verify_jwt = false
 
