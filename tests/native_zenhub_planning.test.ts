@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import { readdir, readFile } from "node:fs/promises"
 import test from "node:test"
 
-const hierarchy = "Initiative → Project → Feature → Issue → Sub-task"
+const hierarchy = "Initiative → Project → Epic → Feature/Task/Bug → Sub-task"
 const forbidden = [
   ".github/codex/zenhub-roadmap.config.json",
   ".github/codex/zenhub-roadmap.schema.json",
@@ -41,8 +41,9 @@ test("native Zenhub sync owns planning projection", async () => {
   assert.match(planning, /MoSi.*Monster Sensory Infrastructure/u)
   assert.match(planning, /MoXi.*Monster Experience Interface/u)
   assert.match(planning, /follows ADR `0018`/u)
-  assert.match(planning, /Level 3 \*\*Epic\*\* type to\s+\*\*Feature\*\*/u)
-  assert.match(planning, /Level 4 \*\*Feature\*\* type to \*\*Story\*\*/u)
+  assert.match(planning, /existing issue types without renaming/u)
+  assert.match(planning, /Sub-tasks to expose meaningful Feature steps/u)
+  assert.match(planning, /lowest issue that accurately owns the pull request/u)
   assert.match(planning, /native repository\s+webhooks/u)
   assert.match(planning, /must not block repository work/u)
 })

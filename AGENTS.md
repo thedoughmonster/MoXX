@@ -124,7 +124,10 @@ they deploy from the same repository.
   repository linkage, and pull-request closure.
 - Zenhub owns human-facing planning metadata: hierarchy, pipeline, priority,
   estimate, sprint, dates, and roadmap placement.
-- Use the five-level hierarchy Initiative → Project → Feature → Issue → Sub-task.
+- Use Zenhub's native five-level hierarchy:
+  `Initiative → Project → Epic → Feature/Task/Bug → Sub-task`.
+- Use Sub-tasks for bounded implementation steps inside a Feature when the
+  breakdown improves execution visibility; do not require them for small work.
 - Keep Levels 4 and 5 visible in Zenhub.
 - Do not mirror Zenhub planning metadata into GitHub labels, checked-in
   manifests, scheduled workflows, or reconciliation scripts.
