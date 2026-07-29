@@ -1,19 +1,6 @@
 name: cloudflare-preview
 
 on:
-  push:
-    branches:
-      - agent/223-cloudflare-credential-preflight
-    paths:
-      - .github/workflows/cloudflare-preview.yml
-      - index.html
-      - package.json
-      - pnpm-lock.yaml
-      - src/**
-      - vite.config.ts
-      - worker/**
-      - worker-configuration.d.ts
-      - wrangler.jsonc
   workflow_dispatch:
     inputs:
       operation:
@@ -45,7 +32,7 @@ jobs:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       VITE_APP_STAGE: preview
-      VITE_PREORDER_API_ORIGIN: https://preorder-api.invalid
+      VITE_PREORDER_API_ORIGIN: https://viodfldzuoypnpqaagag.supabase.co
       VITE_PREORDER_API_VERSION: v1
       VITE_RELEASE_ID: ${{ github.sha }}
     steps:
@@ -65,11 +52,11 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Validate preview release
-        if: github.event_name == 'push' || inputs.operation == 'deploy'
+        if: inputs.operation == 'deploy'
         run: pnpm check
 
       - name: Deploy bounded preview Worker
-        if: github.event_name == 'push' || inputs.operation == 'deploy'
+        if: inputs.operation == 'deploy'
         run: >-
           pnpm exec wrangler deploy
           --env preview
