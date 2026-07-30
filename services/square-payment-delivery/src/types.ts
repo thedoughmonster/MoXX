@@ -2,7 +2,7 @@ export type Money = { amount: number; currency: string }
 
 export type PaymentCommand = {
   payment_attempt_id: string
-  momi_order_id: string
+  owner_order_id: string
   amount_minor: number
   currency: "USD"
   source_token: string

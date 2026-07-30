@@ -2,7 +2,7 @@
   "$schema": "../../schemas/service-manifest-v1.schema.json",
   "schema_version": 1,
   "service_key": "square-payment-delivery",
-  "purpose": "Execute Square online payments from durable MoMi payment attempts.",
+  "purpose": "Execute Square online payments from payment attempts durably owned by governed ordering services.",
   "kind": "destination_adapter",
   "service_type": "destination_adapter",
   "lifecycle_status": "active",

@@ -3,7 +3,7 @@ import type { PaymentCommand } from "./types.ts"
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 export const assertPaymentCommand = (command: PaymentCommand): void => {
-  if (!uuid.test(command.payment_attempt_id) || !uuid.test(command.momi_order_id)) {
+  if (!uuid.test(command.payment_attempt_id) || !uuid.test(command.owner_order_id)) {
     throw new Error("invalid_payment_identity")
   }
   if (!Number.isSafeInteger(command.amount_minor) || command.amount_minor < 1) {

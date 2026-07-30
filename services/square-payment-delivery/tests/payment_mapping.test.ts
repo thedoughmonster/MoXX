@@ -6,7 +6,7 @@ import type { PaymentCommand } from "../src/types.ts"
 
 const command: PaymentCommand = {
   payment_attempt_id: "70000000-0000-4000-8000-000000000274",
-  momi_order_id: "70000000-0000-4000-8000-000000000273",
+  owner_order_id: "70000000-0000-4000-8000-000000000273",
   amount_minor: 2400,
   currency: "USD",
   source_token: crypto.randomUUID(),
@@ -19,7 +19,7 @@ test("create request binds exact idempotency, order, location, and money", () =>
   const body = JSON.parse(String(request.init.body))
   assert.equal(request.url, "https://connect.squareupsandbox.com/v2/payments")
   assert.equal(body.idempotency_key, command.payment_attempt_id)
-  assert.equal(body.reference_id, command.momi_order_id)
+  assert.equal(body.reference_id, command.owner_order_id)
   assert.equal(body.location_id, "sandbox-location")
   assert.deepEqual(body.amount_money, { amount: 2400, currency: "USD" })
   assert.equal(body.source_id, command.source_token)
@@ -35,7 +35,7 @@ test("duplicate construction preserves one Square idempotency identity", () => {
 test("success, pending, and decline map to deterministic safe states", () => {
   const common = {
     id: "sandbox-payment",
-    reference_id: command.momi_order_id,
+    reference_id: command.owner_order_id,
     location_id: "sandbox-location",
     amount_money: { amount: 2400, currency: "USD" },
   }
@@ -48,7 +48,7 @@ test("unknown and mismatched provider results fail indeterminate", () => {
   const mismatch = classifySquareEnvelope({ payment: {
     id: "sandbox-payment",
     status: "COMPLETED",
-    reference_id: command.momi_order_id,
+    reference_id: command.owner_order_id,
     location_id: "sandbox-location",
     amount_money: { amount: 2401, currency: "USD" },
   } }, command, "sandbox-location")

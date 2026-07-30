@@ -6,5 +6,5 @@
 - Reject invalid signatures before parsing or persisting provider content.
 - Never log signature headers, keys, payload bodies, or customer data.
 - Preserve authenticated evidence and deduplicate provider event identity later.
-- Never mutate Square or preorder business state.
+- Never mutate Square or an ordering service's business state.
 - Call only the declared Square Sandbox Payments API host for retrieval.

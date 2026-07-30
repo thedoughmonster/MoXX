@@ -10,8 +10,8 @@ wrong signature fails.
 
 This is the sole Square payment observation boundary. It may retrieve one known
 payment by provider identity but does not create payments, own financial truth,
-or update preorder state. The current issue #274 slice contains pure Sandbox
-retrieval and exact-byte signature verification with tests. It adds no public
+or update any ordering owner's state. The current issue #274 slice contains
+pure Sandbox retrieval and exact-byte signature verification with tests. It adds no public
 webhook, storage, provider
 subscription, secret value, or hosted behavior.
 

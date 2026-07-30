@@ -22,17 +22,20 @@ establish those owner records before a hosted payment call can be safe.
 Introduce exactly two provider-boundary services with non-overlapping roles:
 
 - `square-payment-delivery` is the sole destination adapter for outbound Square
-  Payments API mutations. It maps one already-durable MoMi
-  payment-attempt identity to Square's idempotency key, sends exact money and
-  order-reference values, and returns only a sanitized versioned receipt.
+  Payments API mutations. It maps one already-durable, owner-issued payment
+  attempt identity to Square's idempotency key, sends exact money and
+  order-reference values, and returns only a sanitized versioned receipt. It is
+  shared by governed MoXi online-ordering services; preorder is only its first
+  consumer.
 - `square-payment-acquisition` is the sole acquisition adapter for independent
   Square payment retrieval and webhook authentication. It verifies the
   signature over the configured notification URL plus the exact raw request
   bytes before any JSON parsing.
 
 Neither adapter owns payment truth. Square remains authoritative for financial
-facts, while `preorder-operations` owns the customer-safe order and payment
-workflow. Terminal and other card-present paths are separate future adapters.
+facts, while each governed ordering service owns its customer-safe order and
+payment workflow. For issue #274, `preorder-operations` is that owner.
+Terminal and other card-present paths are separate future adapters.
 
 This first change is a non-hosted foundation. It declares the Sandbox host,
 secret names, request mapping, response classification, and signature
@@ -40,7 +43,7 @@ verification, but adds no Edge Function, relation, migration, provider
 configuration, or secret value. A later change may make the adapters callable
 only after it can prove all of the following:
 
-1. an authoritative quote and durable MoMi order already exist;
+1. an authoritative quote and durable owner-issued order already exist;
 2. one durable payment attempt owns the stable idempotency identity;
 3. the single-use source token is neither persisted nor logged;
 4. a timeout becomes indeterminate and enters reconciliation;
@@ -52,7 +55,7 @@ For online card-not-present payment, the browser may use Square Web Payments SDK
 only to obtain one single-use token. The outbound adapter maps:
 
 - `payment_attempt_id` to Square `idempotency_key`;
-- `momi_order_id` to Square `reference_id`;
+- `owner_order_id` to Square `reference_id`;
 - exact minor units and ISO currency to `amount_money`;
 - the server-configured location to `location_id`.
 

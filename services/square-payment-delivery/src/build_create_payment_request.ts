@@ -30,7 +30,7 @@ export const buildCreatePaymentRequest = (
         },
         autocomplete: true,
         location_id: locationId,
-        reference_id: command.momi_order_id,
+        reference_id: command.owner_order_id,
       }),
     },
   }
