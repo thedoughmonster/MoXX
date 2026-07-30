@@ -120,3 +120,12 @@ verify_jwt = false
 
 [functions.momi-preorder-quote-v1]
 verify_jwt = false
+
+[functions.momi-preorder-checkout-hold-v1]
+verify_jwt = false
+
+[functions.momi-preorder-order-intent-v1]
+verify_jwt = false
+
+[functions.momi-preorder-order-status-v1]
+verify_jwt = false

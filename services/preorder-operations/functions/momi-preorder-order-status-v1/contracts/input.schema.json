@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"momi://momi.preorder.order_status.read.v1/input","type":"object","additionalProperties":false,"required":["order_id"],"properties":{"order_id":{"$ref":"../../../contracts/preorder-public-v1.openapi.json#/components/schemas/Identifier"}}}
