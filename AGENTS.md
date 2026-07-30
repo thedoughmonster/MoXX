@@ -119,21 +119,16 @@ they deploy from the same repository.
 - For hosted backend changes, release the exact PR validation receipt to
   development, then promote only that exact development receipt.
 ## Issue Tracking and Planning
-- Use GitHub-backed issues and Zenhub's native GitHub webhook synchronization.
-- GitHub owns the engineering record: issue identity, body, state, comments,
-  repository linkage, and pull-request closure.
-- Zenhub owns human-facing planning metadata: hierarchy, pipeline, priority,
-  estimate, sprint, dates, and roadmap placement.
-- Use Zenhub's native five-level hierarchy:
-  `Initiative → Project → Epic → Feature/Task/Bug → Sub-task`.
-- Use Sub-tasks for bounded implementation steps inside a Feature when the
-  breakdown improves execution visibility; do not require them for small work.
-- Keep Levels 4 and 5 visible in Zenhub.
-- Do not mirror Zenhub planning metadata into GitHub labels, checked-in
-  manifests, scheduled workflows, or reconciliation scripts.
-- Missing or stale Zenhub planning metadata is correctable visual drift, not a
-  development blocker.
-- Follow `docs/zenhub-planning.md` when creating or organizing work.
+- Use GitHub-backed issues and Zenhub's native webhook; GitHub owns the engineering record.
+- Zenhub owns hierarchy, pipeline, order, priority, estimate, sprint, dates, and roadmap.
+- Use `Initiative → Project → Epic → Feature/Task/Bug → Sub-task`.
+- Initiatives are business outcomes; MoMi, MoSi, MoXi, and shared are surfaces, not roots.
+- Opened is L1-L3 only; keep possible decomposition in `Future decomposition candidates`.
+- Create L4/L5 directly in Designing only while their immediate parent is in Designing.
+- L4/L5 may regress to Discovering with the unresolved question recorded, never to Opened.
+- Before Building, L4 is independently closable and L5 is the smallest useful slice.
+- Do not mirror Zenhub planning metadata into repository automation or manifests.
+- Correct planning drift before implementation; follow `docs/zenhub-planning.md`.
 ## Code Review Rules
 - Block unauthorized ownership, private-data, public-contract, or deployer changes.
 - Block material correctness, security, privacy, data-loss, or rollback defects.
