@@ -27,10 +27,45 @@ test('supports fulfillment, allergen, cart, and review interactions', async ({ p
   await expect(page.getByText('$4.50').last()).toBeVisible();
 
   await page.getByRole('button', { name: /Review preorder/ }).click();
-  await expect(page.getByRole('heading', { name: 'Your draft is ready for a fresh quote.' }))
-    .toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Who’s picking up?' })).toBeVisible();
+  await page.getByLabel('Pickup name').fill('Zac Monster');
+  await page.getByLabel('Email').fill('zac@example.test');
+  await page.getByLabel('Mobile phone').fill('562-555-0100');
+  await page.getByRole('button', { name: 'Review preorder →' }).click();
+  await expect(page.getByRole('heading', { name: 'Review your preorder' })).toBeVisible();
+  await expect(page.getByText('Fresh authoritative quote required')).toBeVisible();
+  await expect(page.getByText('Ordering remains disabled')).toBeVisible();
+  await page.getByRole('button', { name: '← Edit details' }).click();
+  await expect(page.getByLabel('Pickup name')).toHaveValue('Zac Monster');
   await page.getByRole('button', { name: '← Keep shopping' }).click();
   await expect(strawberryCard.getByLabel('1 selected')).toHaveText('1');
+});
+
+test('restores a bounded draft and requires revalidation', async ({ page }) => {
+  const strawberryCard = page.getByRole('article').filter({ hasText: 'Strawberry Cloud' });
+  await strawberryCard.getByRole('button', { name: 'Add one Strawberry Cloud' }).click();
+  await page.getByRole('button', { name: /Review preorder/ }).click();
+  await page.getByLabel('Pickup name').fill('Lydia Monster');
+  await page.getByLabel('Email').fill('lydia@example.test');
+  await page.getByLabel('Mobile phone').fill('562-555-0111');
+  await page.reload();
+  await expect(
+    page.getByText('Draft restored and revalidated against the current preview menu'),
+  ).toBeVisible();
+  await expect(strawberryCard.getByLabel('1 selected')).toHaveText('1');
+  await page.getByRole('button', { name: /Review preorder/ }).click();
+  await expect(page.getByLabel('Pickup name')).toHaveValue('Lydia Monster');
+});
+
+test('shows field errors without creating an order', async ({ page }) => {
+  const strawberryCard = page.getByRole('article').filter({ hasText: 'Strawberry Cloud' });
+  await strawberryCard.getByRole('button', { name: 'Add one Strawberry Cloud' }).click();
+  await page.getByRole('button', { name: /Review preorder/ }).click();
+  await page.getByRole('button', { name: 'Review preorder →' }).click();
+  await expect(page.getByText('Enter the pickup name.')).toBeVisible();
+  await expect(page.getByText('Enter a valid email address.')).toBeVisible();
+  await expect(page.getByText('Enter a valid phone number.')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Review your preorder' })).not.toBeVisible();
 });
 
 test('keeps every quantity control at least 48 by 48 CSS pixels', async ({ page }) => {

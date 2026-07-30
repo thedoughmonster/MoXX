@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useMachine } from '@xstate/react';
 import {
@@ -11,25 +11,27 @@ import {
 import { PreorderApiError } from '../../lib/api';
 import { preorderDataMode } from '../../lib/config';
 import { CartSummary } from './CartSummary';
+import { CustomerDetailsStep } from './CustomerDetailsStep';
+import {
+  clearRecoverableDraft,
+  emptyCustomerDetails,
+  loadRecoverableDraft,
+  revalidateRecoveredDraft,
+  saveRecoverableDraft,
+  type RecoverableDraft
+} from './draft';
 import { loadPreorder } from './loadPreorder';
-import { type CartQuantities } from './model';
+import { type CartQuantities, type PreorderFixture } from './model';
 import { preorderMachine } from './preorderMachine';
 import { ProductCard } from './ProductCard';
+import { ReviewPreorder } from './ReviewPreorder';
 
 export function PreorderExperience() {
+  const [recoveredDraft] = useState(loadRecoverableDraft);
   const { data, error, refetch, status } = useQuery({
     queryKey: ['preorder-bootstrap', preorderDataMode],
     queryFn: loadPreorder
   });
-  const [selectedWindow, setSelectedWindow] = useState('saturday-august-1');
-  const [selectedAllergens, setSelectedAllergens] = useState<string[]>([]);
-  const [quantities, setQuantities] = useState<CartQuantities>({});
-  const [flow, send] = useMachine(preorderMachine);
-
-  const allergenLabels = useMemo(
-    () => new Map(data?.allergenOptions.map((item) => [item.id, item.label]) ?? []),
-    [data]
-  );
 
   if (status === 'pending') {
     return <PreorderSkeleton />;
@@ -52,6 +54,51 @@ export function PreorderExperience() {
       </main>
     );
   }
+
+  return <LoadedPreorderExperience data={data} recoveredDraft={recoveredDraft} />;
+}
+
+function LoadedPreorderExperience({
+  data,
+  recoveredDraft
+}: {
+  data: PreorderFixture;
+  recoveredDraft: RecoverableDraft | null;
+}) {
+  const initialDraft = useMemo(
+    () => recoveredDraft ? revalidateRecoveredDraft(recoveredDraft, data) : null,
+    [data, recoveredDraft]
+  );
+  const [selectedWindow, setSelectedWindow] = useState(
+    initialDraft?.selectedWindow ?? 'saturday-august-1'
+  );
+  const [selectedAllergens, setSelectedAllergens] = useState<string[]>(
+    initialDraft?.selectedAllergens ?? []
+  );
+  const [quantities, setQuantities] = useState<CartQuantities>(
+    initialDraft?.quantities ?? {}
+  );
+  const [customerDetails, setCustomerDetails] = useState(
+    recoveredDraft?.customerDetails ?? emptyCustomerDetails
+  );
+  const [draftStatus, setDraftStatus] = useState<'validated' | 'adjusted' | null>(
+    initialDraft ? (initialDraft.adjusted ? 'adjusted' : 'validated') : null
+  );
+  const [flow, send] = useMachine(preorderMachine);
+
+  const allergenLabels = useMemo(
+    () => new Map(data?.allergenOptions.map((item) => [item.id, item.label]) ?? []),
+    [data]
+  );
+
+  useEffect(() => {
+    saveRecoverableDraft({
+      selectedWindow,
+      selectedAllergens,
+      quantities,
+      customerDetails
+    });
+  }, [customerDetails, quantities, selectedAllergens, selectedWindow]);
 
   const selectableWindows = data.fulfillmentWindows.filter(
     (item) => item.availability === 'available' || item.availability === 'limited'
@@ -78,19 +125,31 @@ export function PreorderExperience() {
     });
   };
 
+  if (flow.matches('details')) {
+    return (
+      <CustomerDetailsStep
+        initialDetails={customerDetails}
+        pickupLabel={pickupLabel}
+        onBack={() => send({ type: 'KEEP_SHOPPING' })}
+        onDraftChange={setCustomerDetails}
+        onContinue={(details) => {
+          setCustomerDetails(details);
+          send({ type: 'REVIEW' });
+        }}
+      />
+    );
+  }
+
   if (flow.matches('reviewing')) {
     return (
-      <main className="review-placeholder">
-        <span className="eyebrow">Next slice</span>
-        <h1>Your draft is ready for a fresh quote.</h1>
-        <p>
-          Customer details, authoritative quote comparison, and Square-hosted
-          payment will be added only after their contract paths are active.
-        </p>
-        <Button className="secondary-button" onPress={() => send({ type: 'KEEP_SHOPPING' })}>
-          ← Keep shopping
-        </Button>
-      </main>
+      <ReviewPreorder
+        customerDetails={customerDetails}
+        pickupLabel={pickupLabel}
+        products={data.products}
+        quantities={quantities}
+        onEditDetails={() => send({ type: 'EDIT_DETAILS' })}
+        onKeepShopping={() => send({ type: 'KEEP_SHOPPING' })}
+      />
     );
   }
 
@@ -113,6 +172,29 @@ export function PreorderExperience() {
       {data.source === 'fixture' && (
         <div className="preview-banner" role="status">
           Preview menu · Test data only · Ordering and payment are disabled
+        </div>
+      )}
+
+      {draftStatus && (
+        <div className="draft-restored" role="status">
+          <span>
+            {draftStatus === 'adjusted'
+              ? 'Draft restored · Unavailable items or quantities were adjusted'
+              : 'Draft restored and revalidated against the current preview menu'}
+          </span>
+          <Button
+            className="quiet-button"
+            onPress={() => {
+              clearRecoverableDraft();
+              setSelectedWindow(selectableWindows[0]?.id ?? '');
+              setSelectedAllergens([]);
+              setQuantities({});
+              setCustomerDetails(emptyCustomerDetails);
+              setDraftStatus(null);
+            }}
+          >
+            Clear draft
+          </Button>
         </div>
       )}
 
@@ -266,7 +348,7 @@ export function PreorderExperience() {
           products={data.products}
           quantities={quantities}
           pickupLabel={pickupLabel}
-          onReview={() => send({ type: 'REVIEW' })}
+          onReview={() => send({ type: 'DETAILS' })}
         />
       </main>
 
