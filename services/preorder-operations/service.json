@@ -22,9 +22,6 @@
       "momi.preorder.order_status.read.v1",
       "momi.preorder.payment.initiate.v1",
       "momi.preorder.payment.reconcile.v1",
-      "momi.preorder.payment_attempt.claim.v1",
-      "momi.preorder.payment_attempt.resolve.v1",
-      "momi.preorder.payment_evidence.project.v1",
       "momi.preorder.quote.create.v1"
     ],
     "consumes": [
