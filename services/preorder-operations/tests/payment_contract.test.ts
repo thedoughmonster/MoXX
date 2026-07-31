@@ -7,14 +7,17 @@ import Ajv2020 from "ajv/dist/2020.js";
 test("freezes payment lifecycle and internal integration contracts", async () => {
   const read = async (name: string) => JSON.parse(await readFile(
     new URL(`../contracts/${name}`, import.meta.url), "utf8"));
-  const [claimSchema, evidenceSchema, lifecycle, api] = await Promise.all([
-    read("payment-attempt-claim-v1.schema.json"),
-    read("payment-financial-evidence-v1.schema.json"),
-    read("payment-lifecycle-v1.json"),
-    read("preorder-public-v1.openapi.json"),
-  ]);
+  const [claimSchema, resolveSchema, evidenceSchema, lifecycle, api] =
+    await Promise.all([
+      read("payment-attempt-claim-v1.schema.json"),
+      read("payment-attempt-resolve-v1.schema.json"),
+      read("payment-financial-evidence-v1.schema.json"),
+      read("payment-lifecycle-v1.json"),
+      read("preorder-public-v1.openapi.json"),
+    ]);
   const ajv = new Ajv2020({ strict: false, validateFormats: false });
   assert.equal(ajv.validateSchema(claimSchema), true, ajv.errorsText());
+  assert.equal(ajv.validateSchema(resolveSchema), true, ajv.errorsText());
   assert.equal(ajv.validateSchema(evidenceSchema), true, ajv.errorsText());
   const statuses = ["pending", "authorized", "paid", "declined", "canceled",
     "refund_pending", "refunded", "indeterminate"];

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://preorder.payment-attempt.resolve.v1",
+  "$defs": {
+    "request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider_payment_id", "order_id", "amount_minor", "currency", "location_id"],
+      "properties": {
+        "provider_payment_id": { "type": ["string", "null"], "minLength": 1, "maxLength": 192 },
+        "order_id": { "type": "string", "format": "uuid" },
+        "amount_minor": { "type": "integer", "minimum": 1 },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "location_id": { "type": "string", "minLength": 1, "maxLength": 64 }
+      }
+    },
+    "response": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["payment_attempt_id"],
+      "properties": {
+        "payment_attempt_id": { "type": ["string", "null"], "format": "uuid" }
+      }
+    }
+  }
+}
