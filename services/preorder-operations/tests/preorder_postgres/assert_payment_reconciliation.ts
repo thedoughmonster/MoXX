@@ -14,6 +14,16 @@ export async function assertPaymentReconciliation(sql: Sql, windowId: string) {
   const claim = claimed.claim as Record<string, unknown>;
   const receipt = claimed.receipt as Record<string, unknown>;
   const attemptId = String(receipt.payment_attempt_id);
+  const [resolved] = await sql<{ attempt_id: string | null }[]>`
+    select momi_preorder.resolve_payment_attempt_v1(
+      'square-payment-ordering-1', ${orderId}::uuid, 280, 'USD',
+      'sandbox-location-logic-test') as attempt_id`;
+  assert.equal(resolved?.attempt_id, attemptId);
+  const [wrongMoney] = await sql<{ attempt_id: string | null }[]>`
+    select momi_preorder.resolve_payment_attempt_v1(
+      'square-payment-ordering-1', ${orderId}::uuid, 281, 'USD',
+      'sandbox-location-logic-test') as attempt_id`;
+  assert.equal(wrongMoney?.attempt_id, null);
   const pending = await paymentFixture.project(sql, attemptId,
     String(claim.claim_id), paymentFixture.evidence({
       evidenceId: "delivery-pending-1", source: "delivery", status: "pending",

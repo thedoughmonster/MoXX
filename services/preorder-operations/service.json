@@ -23,6 +23,7 @@
       "momi.preorder.payment.initiate.v1",
       "momi.preorder.payment.reconcile.v1",
       "momi.preorder.payment_attempt.claim.v1",
+      "momi.preorder.payment_attempt.resolve.v1",
       "momi.preorder.payment_evidence.project.v1",
       "momi.preorder.quote.create.v1"
     ],
@@ -93,6 +94,7 @@
       "momi_preorder.read_payment_attempt_v1",
       "momi_preorder.read_order_status_v1",
       "momi_preorder.recovery_authority_v1",
+      "momi_preorder.resolve_payment_attempt_v1",
       "momi_preorder.request_digest_v1",
       "momi_preorder.refresh_fulfillment_windows_on_surface_v1",
       "momi_preorder.refresh_fulfillment_windows_v1",

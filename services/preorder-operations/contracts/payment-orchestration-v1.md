@@ -48,7 +48,11 @@ through `project_payment_evidence_v1`.
 
 Square acquisition verifies the configured notification URL plus exact raw
 request bytes before parsing. After authentication, it maps the provider event
-to `payment-financial-evidence-v1` and calls
+to `payment-financial-evidence-v1`. It resolves the owner attempt through
+`resolve_payment_attempt_v1(provider_payment_id, order_id, amount_minor,
+currency, location_id)`; the resolver returns an identity only for one exact
+match and supports a webhook that wins the race with delivery projection. It
+then calls
 `project_payment_evidence_v1(payment_attempt_id, null, evidence)`. Evidence IDs
 are durably hashed and deduplicated. Older provider timestamps cannot regress
 state; equal conflicting facts and identity or money mismatches require review.

@@ -489,6 +489,35 @@ exception when invalid_text_representation or numeric_value_out_of_range
 end;
 $$;
 
+create function momi_preorder.resolve_payment_attempt_v1(
+  p_provider_payment_id text, p_order_id uuid, p_amount_minor integer,
+  p_currency text, p_location_id text
+) returns uuid language plpgsql security definer set search_path = '' stable as $$
+declare
+  v_matches uuid[];
+begin
+  if p_order_id is null or p_amount_minor < 1
+      or p_currency !~ '^[A-Z]{3}$'
+      or length(p_location_id) not between 1 and 64
+      or (p_provider_payment_id is not null
+        and length(p_provider_payment_id) not between 1 and 192) then
+    return null;
+  end if;
+  select array_agg(payment_attempt_id order by attempt_number desc)
+    into v_matches from momi_preorder.payment_attempts
+    where order_id = p_order_id and amount_minor = p_amount_minor
+      and currency = p_currency and payment_location_id = p_location_id
+      and case when p_provider_payment_id is not null
+        then provider_payment_id = p_provider_payment_id
+          or (provider_payment_id is null and payment_status in (
+            'pending', 'authorized', 'indeterminate'))
+        else provider_payment_id is null and payment_status in (
+          'pending', 'authorized', 'indeterminate') end;
+  if coalesce(array_length(v_matches, 1), 0) <> 1 then return null; end if;
+  return v_matches[1];
+end;
+$$;
+
 create function momi_preorder.project_payment_evidence_v1(
   p_payment_attempt_id uuid, p_claim_id uuid, p_evidence jsonb
 ) returns jsonb language plpgsql security definer set search_path = '' as $$
@@ -820,6 +849,8 @@ grant execute on function momi_preorder.claim_payment_attempt_v1(jsonb, text, te
   to service_role;
 grant execute on function momi_preorder.claim_payment_reconciliation_v1(
   jsonb, text, text) to service_role;
+grant execute on function momi_preorder.resolve_payment_attempt_v1(
+  text, uuid, integer, text, text) to service_role;
 grant execute on function momi_preorder.project_payment_evidence_v1(
   uuid, uuid, jsonb) to service_role;
 grant execute on function momi_preorder.read_payment_attempt_v1(uuid, uuid, text)

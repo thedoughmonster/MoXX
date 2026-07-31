@@ -32,7 +32,7 @@ export async function assertPaymentSecurity(sql: Sql) {
   const [security] = await sql<{
     anon_attempts: boolean; authenticated_evidence: boolean;
     rls_count: number; service_claim: boolean; anon_claim: boolean;
-    service_project: boolean; helper_public: boolean;
+    service_project: boolean; service_resolve: boolean; helper_public: boolean;
   }[]>`
     select
       has_table_privilege('anon', 'momi_preorder.payment_attempts', 'select')
@@ -52,12 +52,15 @@ export async function assertPaymentSecurity(sql: Sql) {
       has_function_privilege('service_role',
         'momi_preorder.project_payment_evidence_v1(uuid,uuid,jsonb)', 'execute')
         as service_project,
+      has_function_privilege('service_role',
+        'momi_preorder.resolve_payment_attempt_v1(text,uuid,integer,text,text)',
+        'execute') as service_resolve,
       has_function_privilege('public',
         'momi_preorder.payment_receipt_v1(uuid)', 'execute') as helper_public`;
   assert.deepEqual(security, {
     anon_attempts: false, authenticated_evidence: false, rls_count: 2,
     service_claim: true, anon_claim: false, service_project: true,
-    helper_public: false,
+    service_resolve: true, helper_public: false,
   });
   const [privacy] = await sql<{
     token_columns: number; payload_columns: number; customer_rows: number;
