@@ -6,9 +6,10 @@ export const classifySquarePayment = (
   command: PaymentCommand,
   locationId: string,
 ): PaymentReceipt => {
-  const provider_updated_at = payment.updated_at ?? null
+  const provider_updated_at = payment.updated_at &&
+      Number.isFinite(Date.parse(payment.updated_at))
+    ? payment.updated_at : null
   if (!payment.id || !provider_updated_at ||
-      !Number.isFinite(Date.parse(provider_updated_at)) ||
       !isPaymentMatch(payment, command, locationId)) {
     return {
       outcome: "indeterminate", payment_status: "indeterminate",

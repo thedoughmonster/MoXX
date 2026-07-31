@@ -49,9 +49,11 @@ export async function retrieveSquarePayment(
   }
   const record = payment as Record<string, unknown>
   const money = record.amount_money as Record<string, unknown> | undefined
+  const updatedAt = record.updated_at
   return {
     providerPaymentId: typeof record.id === "string" ? record.id : null,
-    providerUpdatedAt: typeof record.updated_at === "string" ? record.updated_at : null,
+    providerUpdatedAt: typeof updatedAt === "string" &&
+        Number.isFinite(Date.parse(updatedAt)) ? updatedAt : null,
     providerStatus: typeof record.status === "string" ? record.status : null,
     providerRequestId,
     orderId: typeof record.reference_id === "string" ? record.reference_id : null,

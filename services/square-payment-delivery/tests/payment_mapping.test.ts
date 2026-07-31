@@ -82,4 +82,12 @@ test("non-success and mismatched provider results fail indeterminate", async () 
     updated_at: "2026-07-31T15:30:00Z",
   } })
   assert.equal(mismatch.recovery, "operator_review")
+  const invalidTimestamp = await run({ payment: {
+    id: "sandbox-payment", status: "COMPLETED",
+    reference_id: command.owner_order_id, location_id: "sandbox-location",
+    amount_money: { amount: 2400, currency: "USD" },
+    updated_at: "not-a-timestamp",
+  } })
+  assert.equal(invalidTimestamp.provider_updated_at, null)
+  assert.equal(invalidTimestamp.recovery, "operator_review")
 })

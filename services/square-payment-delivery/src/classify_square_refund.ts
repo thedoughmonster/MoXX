@@ -5,14 +5,17 @@ export function classifySquareRefund(
   command: RefundCommand,
 ): RefundReceipt {
   const money = refund.amount_money
+  const provider_updated_at = refund.updated_at &&
+      Number.isFinite(Date.parse(refund.updated_at))
+    ? refund.updated_at : null
   const matches = refund.id && refund.payment_id === command.provider_payment_id &&
     refund.location_id === command.location_id &&
     money?.amount === command.amount_minor && money.currency === command.currency &&
-    refund.updated_at && Number.isFinite(Date.parse(refund.updated_at))
+    provider_updated_at
   const base = {
     provider_payment_id: command.provider_payment_id,
     provider_refund_id: refund.id ?? null,
-    provider_updated_at: refund.updated_at ?? null,
+    provider_updated_at,
     provider_request_id: null,
   }
   if (!matches) return {

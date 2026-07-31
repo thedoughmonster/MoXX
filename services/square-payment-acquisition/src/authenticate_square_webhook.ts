@@ -19,7 +19,7 @@ export async function authenticateSquareWebhook(
   const eventId = envelope.event_id
   const eventType = envelope.type
   const data = envelope.data
-  if (typeof eventId !== "string" || eventId.length > 192 ||
+  if (typeof eventId !== "string" || eventId.length < 1 || eventId.length > 192 ||
       !["payment.created", "payment.updated", "refund.created", "refund.updated"]
         .includes(String(eventType)) || !data || typeof data !== "object" ||
       Array.isArray(data)) return null
@@ -39,13 +39,15 @@ export async function authenticateSquareWebhook(
   const locationId = record.location_id
   const orderId = isPayment && typeof record.reference_id === "string"
     ? record.reference_id : null
-  if (typeof providerPaymentId !== "string" || providerPaymentId.length > 192 ||
+  if (typeof providerPaymentId !== "string" || providerPaymentId.length < 1 ||
+      providerPaymentId.length > 192 ||
       typeof providerUpdatedAt !== "string" ||
       !Number.isFinite(Date.parse(providerUpdatedAt)) ||
-      typeof providerStatus !== "string" ||
+      typeof providerStatus !== "string" || providerStatus.length < 1 ||
       !Number.isSafeInteger(amountMinor) || Number(amountMinor) < 1 ||
       typeof currency !== "string" || !/^[A-Z]{3}$/.test(currency) ||
-      typeof locationId !== "string" || locationId.length > 64) return null
+      typeof locationId !== "string" || locationId.length < 1 ||
+      locationId.length > 64) return null
   return {
     eventId,
     eventType: eventType as AuthenticatedWebhookEvent["eventType"],
