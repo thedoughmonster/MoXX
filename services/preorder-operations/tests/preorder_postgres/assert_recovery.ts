@@ -51,7 +51,9 @@ export async function assertRecovery(
     payment_status = 'indeterminate' where order_id = ${orderId}::uuid`;
   const [pending] = await sql<{ data: Record<string, unknown> }[]>`
     select momi_preorder.read_order_status_v1(${orderId}::uuid, ${authority}) as data`;
-  assert.deepEqual(pending?.data.allowed_actions, ["view_status", "reconcile_payment"]);
+  assert.deepEqual(pending?.data.allowed_actions, [
+    "view_status", "reconcile_payment", "contact_shop",
+  ]);
   await sql`update momi_preorder.orders set order_status = 'completed',
     payment_status = 'paid', fulfillment_status = 'completed'
     where order_id = ${orderId}::uuid`;

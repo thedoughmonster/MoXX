@@ -20,12 +20,27 @@ the private `momi_preorder` schema and exposes the customer-safe bootstrap read
 through `momi-preorder-bootstrap-v1`. `momi-preorder-quote-v1` creates durable,
 idempotent quote receipts from the current versions, fourteen-day window,
 capacity, allergen evidence, and configured 2/5/10-day plus quantity savings.
-Hold, order, and payment routes remain fixture-backed until their additive
-issue #226 slices land.
+Hold and order-intent routes persist capacity and recovery state. The payment
+boundary durably claims one exact attempt before provider work, freezes its
+money, location, order, quote, and accepted-policy evidence, and projects only
+sanitized financial observations into customer-safe preorder status.
 
 Square owns payment and financial facts. This service exposes a customer-safe
 payment workflow but has no direct Square network or secret authority. Square
 adapters introduced under issue #162 must preserve that separation.
+
+## Payment attempt boundary
+
+`claim_payment_attempt_v1` creates one owner-issued attempt and an expiring
+execution claim without receiving or storing the Square-hosted source token.
+Duplicate initiation cannot reacquire paid work; an expired initiate claim
+becomes indeterminate and must reconcile. `claim_payment_reconciliation_v1`
+permits repeatable provider reads only when a known provider identity exists.
+`project_payment_evidence_v1` deduplicates canonical evidence, checks the exact
+order, money, currency, location, provider identity, and provider timestamp,
+then applies only an allowed lifecycle transition. Missing, mismatched,
+conflicting, or disordered evidence fails closed without inventing payment
+success or fulfillment truth.
 
 ## Configuration publication
 

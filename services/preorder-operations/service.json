@@ -22,9 +22,15 @@
       "momi.preorder.order_status.read.v1",
       "momi.preorder.payment.initiate.v1",
       "momi.preorder.payment.reconcile.v1",
+      "momi.preorder.payment_attempt.claim.v1",
+      "momi.preorder.payment_evidence.project.v1",
       "momi.preorder.quote.create.v1"
     ],
-    "consumes": []
+    "consumes": [
+      { "service": "square-payment-delivery", "contract": "square.payment.execute.v1" },
+      { "service": "square-payment-acquisition", "contract": "square.payment.retrieve.v1" },
+      { "service": "square-payment-acquisition", "contract": "square.payment.webhook.authenticate.v1" }
+    ]
   },
   "database": {
     "read": ["momi_preorder"],
@@ -57,6 +63,8 @@
       "momi_preorder.configuration_publications",
       "momi_preorder.fulfillment_windows",
       "momi_preorder.orders",
+      "momi_preorder.payment_attempts",
+      "momi_preorder.payment_evidence",
       "momi_preorder.public_read_rate_buckets",
       "momi_preorder.public_request_rate_buckets",
       "momi_preorder.quotes",
@@ -68,13 +76,21 @@
       "momi_preorder.authority_hash_v1",
       "momi_preorder.create_order_intent_v1",
       "momi_preorder.create_quote_v1",
+      "momi_preorder.claim_payment_attempt_v1",
+      "momi_preorder.claim_payment_reconciliation_v1",
       "momi_preorder.ensure_fulfillment_windows_v1",
       "momi_preorder.expire_checkout_holds_v1",
       "momi_preorder.lifecycle_failure_v1",
       "momi_preorder.manage_checkout_hold_v1",
+      "momi_preorder.payment_claim_envelope_v1",
+      "momi_preorder.payment_next_actions_v1",
+      "momi_preorder.payment_receipt_v1",
+      "momi_preorder.payment_transition_allowed_v1",
       "momi_preorder.publish_configuration_v1",
+      "momi_preorder.project_payment_evidence_v1",
       "momi_preorder.quote_failure_v1",
       "momi_preorder.read_bootstrap_v1",
+      "momi_preorder.read_payment_attempt_v1",
       "momi_preorder.read_order_status_v1",
       "momi_preorder.recovery_authority_v1",
       "momi_preorder.request_digest_v1",

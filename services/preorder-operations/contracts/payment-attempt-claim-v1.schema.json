@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://preorder.payment-attempt.claim.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["disposition", "receipt", "claim"],
+  "properties": {
+    "disposition": {
+      "enum": ["claimed", "replay", "busy", "already_terminal", "operator_review"]
+    },
+    "receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome", "order_id", "order_version", "payment_attempt_id", "payment_status", "amount", "next_actions"],
+      "properties": {
+        "outcome": { "enum": ["accepted", "rejected", "pending", "conflict", "indeterminate"] },
+        "order_id": { "type": "string", "format": "uuid" },
+        "order_version": { "type": "integer", "minimum": 1 },
+        "payment_attempt_id": { "type": "string", "format": "uuid" },
+        "payment_status": { "enum": ["not_started", "pending", "authorized", "paid", "declined", "canceled", "refund_pending", "refunded", "indeterminate"] },
+        "amount": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["currency", "amount_minor"],
+          "properties": {
+            "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+            "amount_minor": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "next_actions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["retry_payment", "reconcile_payment", "view_status", "request_cancellation", "request_modification", "contact_shop"] }
+        }
+      }
+    },
+    "claim": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "required": ["claim_id", "claim_kind", "payment_attempt_id", "owner_order_id", "amount_minor", "currency", "location_id", "provider_payment_id"],
+      "properties": {
+        "claim_id": { "type": "string", "format": "uuid" },
+        "claim_kind": { "enum": ["initiate", "reconcile"] },
+        "payment_attempt_id": { "type": "string", "format": "uuid" },
+        "owner_order_id": { "type": "string", "format": "uuid" },
+        "amount_minor": { "type": "integer", "minimum": 1 },
+        "currency": { "const": "USD" },
+        "location_id": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "provider_payment_id": { "type": ["string", "null"], "minLength": 1, "maxLength": 192 }
+      }
+    }
+  }
+}
