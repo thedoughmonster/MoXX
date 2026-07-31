@@ -30,8 +30,3 @@ export type PaymentReceipt = {
   provider_payment_id?: string
   recovery: "none" | "retrieve" | "operator_review"
 }
-
-export type SquareRequest = {
-  url: string
-  init: RequestInit
-}

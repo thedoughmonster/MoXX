@@ -6,11 +6,10 @@ export const assertPaymentCommand = (command: PaymentCommand): void => {
   if (!uuid.test(command.payment_attempt_id) || !uuid.test(command.owner_order_id)) {
     throw new Error("invalid_payment_identity")
   }
-  if (!Number.isSafeInteger(command.amount_minor) || command.amount_minor < 1) {
-    throw new Error("invalid_payment_amount")
-  }
-  if (command.currency !== "USD") throw new Error("invalid_payment_currency")
-  if (!command.source_token || command.source_token.length > 512) {
-    throw new Error("invalid_payment_source")
-  }
+  const failure = [
+    [!Number.isSafeInteger(command.amount_minor) || command.amount_minor < 1, "invalid_payment_amount"],
+    [command.currency !== "USD", "invalid_payment_currency"],
+    [!command.source_token || command.source_token.length > 512, "invalid_payment_source"],
+  ].find(([invalid]) => invalid)?.[1]
+  if (failure) throw new Error(String(failure))
 }

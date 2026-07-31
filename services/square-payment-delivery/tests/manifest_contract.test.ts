@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import { readFile } from "node:fs/promises"
 import test from "node:test"
 
-test("declares one Sandbox-only destination boundary without runtime activation", async () => {
+test("declares one Sandbox-only host-ready boundary without deployment", async () => {
   const directory = new URL("../", import.meta.url)
   const manifest = JSON.parse(await readFile(new URL("service.json", directory), "utf8"))
   const contract = JSON.parse(await readFile(

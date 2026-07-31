@@ -1,25 +1,15 @@
 # Square Payment Acquisition
-
 ## ELI5
-
-This adapter independently reads one payment from Square Sandbox and checks
-that a payment update really came from Square. A changed byte, wrong URL, or
-wrong signature fails.
-
+This adapter independently reads one Sandbox payment and proves webhook bytes
+came from Square. A changed byte, URL, or signature fails.
 ## Boundary
-
-This is the sole Square payment observation boundary. It may retrieve one known
-payment by provider identity but does not create payments, own financial truth,
-or update any ordering owner's state. The current issue #274 slice contains
-pure Sandbox retrieval and exact-byte signature verification with tests. It adds no public
-webhook, storage, provider
-subscription, secret value, or hosted behavior.
-
-Later webhook receipt work must archive authenticated evidence durably,
-deduplicate provider event identity, and acknowledge transport separately from
-business reconciliation. Reconciliation remains correct without webhook
-delivery.
-
+This is the sole Square observation boundary. It retrieves known provider
+identity but does not create payments, own truth, or update ordering state.
+It adds no public webhook, storage, subscription, secret, or hosted behavior.
+Later receipt work must archive authenticated evidence, deduplicate provider
+event identity, and acknowledge transport separately from reconciliation.
+Correctness never depends on webhook delivery.
 ## Tests
-
+Focused tests verify retrieval identity, missing and mismatched payments,
+transport ambiguity, and exact raw-byte signature authentication.
 Run `pnpm check --service square-payment-acquisition` with Node.js 24.
