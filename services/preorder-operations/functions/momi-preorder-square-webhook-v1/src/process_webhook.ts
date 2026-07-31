@@ -3,6 +3,7 @@ import { archiveContext } from "./archive_context.ts"
 import { digestRawBody } from "./digest_raw_body.ts"
 import { parseRawPayload } from "./parse_raw_payload.ts"
 import { readRawBody } from "./read_raw_body.ts"
+import { readWebhookIdentity } from "./read_webhook_identity.ts"
 import { successResponse } from "./success_response.ts"
 import type { WebhookDependencies } from "./types.ts"
 
@@ -45,8 +46,10 @@ export async function processWebhook(
     return new Response("invalid provider evidence", { status: 503 })
   }
   try {
+    const rawDigest = await digestRawBody(rawBody)
+    const identity = readWebhookIdentity(parsed.payload, rawDigest)
     const context = archiveContext(
-      result, evidence, await digestRawBody(rawBody), dependencies.getLocationId(),
+      result, evidence, identity, dependencies.getLocationId(),
     )
     if (context.locationId.length < 1 || context.locationId.length > 64) {
       return new Response("service unavailable", { status: 503 })

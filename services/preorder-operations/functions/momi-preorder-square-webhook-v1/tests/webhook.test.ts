@@ -60,6 +60,28 @@ test("fails closed on unresolved owner identity", async () => {
   assert.equal(calls.includes("project"), false)
 })
 
+
+test("keeps one archive identity across transient and successful replay", async () => {
+  const calls: string[] = []
+  const deps = dependencies(calls)
+  const authenticated = deps.authenticate
+  const identities: string[] = []
+  deps.capture = (_raw, _payload, context) => {
+    identities.push(context.evidenceId)
+    return Promise.resolve({ disposition: "stored", archiveItemId: "archive",
+      contentHash: "a".repeat(64) })
+  }
+  deps.authenticate = () => Promise.resolve({ disposition: "retryable",
+    evidence: null, error_code: "provider_indeterminate" })
+  const first = await processWebhook(request(), deps)
+  deps.authenticate = authenticated
+  const second = await processWebhook(request(), deps)
+  assert.equal(first.status, 503)
+  assert.equal(second.status, 200)
+  assert.equal(identities[0], identities[1])
+  assert.match(identities[0], /^square:webhook:event:square-event$/)
+})
+
 test("rejects oversized requests before authentication", async () => {
   const calls: string[] = []
   const response = await processWebhook(
