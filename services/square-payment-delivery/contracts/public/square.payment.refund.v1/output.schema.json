@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://square.payment.refund.v1/output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["outcome", "payment_status", "provider_payment_id", "provider_refund_id", "provider_updated_at", "provider_request_id", "recovery"],
+  "properties": {
+    "outcome": { "enum": ["accepted", "pending", "rejected", "indeterminate"] },
+    "payment_status": { "enum": ["refund_pending", "refunded", "paid", "indeterminate"] },
+    "provider_payment_id": { "type": "string", "minLength": 1, "maxLength": 192 },
+    "provider_refund_id": { "type": ["string", "null"], "maxLength": 255 },
+    "provider_updated_at": { "type": ["string", "null"], "format": "date-time" },
+    "provider_request_id": { "type": ["string", "null"], "maxLength": 192 },
+    "recovery": { "enum": ["none", "retrieve", "operator_review"] }
+  }
+}

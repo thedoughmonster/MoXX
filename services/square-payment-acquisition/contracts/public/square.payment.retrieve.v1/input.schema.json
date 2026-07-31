@@ -4,19 +4,12 @@
   "title": "Square payment observation acquisition v1",
   "type": "object",
   "additionalProperties": false,
-  "required": ["provider_payment_id", "order_id", "amount", "location_id"],
+  "required": ["provider_payment_id", "order_id", "amount_minor", "currency", "location_id"],
   "properties": {
     "provider_payment_id": { "type": "string", "minLength": 1, "maxLength": 192 },
     "order_id": { "type": "string", "format": "uuid", "maxLength": 40 },
-    "amount": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["amount_minor", "currency"],
-      "properties": {
-        "amount_minor": { "type": "integer", "minimum": 1 },
-        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
-      }
-    },
+    "amount_minor": { "type": "integer", "minimum": 1 },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
     "location_id": { "type": "string", "minLength": 1, "maxLength": 64 }
   }
 }

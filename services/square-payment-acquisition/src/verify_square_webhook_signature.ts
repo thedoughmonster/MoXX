@@ -24,7 +24,7 @@ export async function verifySquareWebhookSignature(
       "raw", new TextEncoder().encode(signatureKey),
       { name: "HMAC", hash: "SHA-256" }, false, ["verify"],
     )
-    return crypto.subtle.verify("HMAC", key, signature, signedBytes)
+    return crypto.subtle.verify("HMAC", key, signature.buffer as ArrayBuffer, signedBytes)
   } catch {
     return false
   }

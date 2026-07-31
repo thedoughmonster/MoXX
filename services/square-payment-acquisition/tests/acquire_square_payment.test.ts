@@ -16,6 +16,7 @@ test("retrieves provider state independently and requires exact parity", async (
     assert.equal(new Headers(init?.headers).get("Square-Version"), SQUARE_API_VERSION)
     return Response.json({ payment: {
       id: expected.providerPaymentId, status: "COMPLETED",
+      updated_at: "2026-07-31T15:30:00Z",
       amount_money: { amount: expected.amountMinor, currency: expected.currency },
       location_id: expected.locationId, reference_id: expected.orderId,
     } })
@@ -23,6 +24,7 @@ test("retrieves provider state independently and requires exact parity", async (
   const mismatch = await acquireSquarePayment(expected, secret, async () =>
     Response.json({ payment: {
       id: expected.providerPaymentId, status: "COMPLETED",
+      updated_at: "2026-07-31T15:30:00Z",
       amount_money: { amount: expected.amountMinor, currency: "CAD" },
       location_id: expected.locationId, reference_id: expected.orderId,
     } }))
@@ -32,4 +34,6 @@ test("retrieves provider state independently and requires exact parity", async (
   assert.equal(matched.disposition, "matched")
   assert.equal(mismatch.disposition, "mismatch")
   assert.equal(missing.disposition, "missing")
+  assert.equal(matched.paymentStatus, "paid")
+  assert.equal(matched.providerUpdatedAt, "2026-07-31T15:30:00Z")
 })
