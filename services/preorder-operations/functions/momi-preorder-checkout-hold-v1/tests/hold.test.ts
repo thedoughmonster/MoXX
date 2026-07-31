@@ -78,3 +78,32 @@ test("fails safely for conflicts, limits, and unavailable storage", async () => 
   assert.equal(unavailable.status, 503);
   assert.doesNotMatch(await unavailable.text(), /private failure/);
 });
+
+test("rejects untrusted browser origins before database work", async () => {
+  let executed = false;
+  const response = await handleRequestWithExecutor(new Request(
+    "https://api.example.test/",
+    {
+      method: "POST",
+      headers: { origin: "https://evil.example" },
+      body: JSON.stringify(request),
+    },
+  ), () => {
+    executed = true;
+    return Promise.resolve({ admitted: true, result: null });
+  });
+  assert.equal(response.status, 403);
+  assert.equal(executed, false);
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), null);
+});
+
+test("echoes the exact persistent preview origin on preflight", async () => {
+  const origin = "https://moxi-web-preorder-preview.thedoughmonster.workers.dev";
+  const response = await handleRequestWithExecutor(new Request(
+    "https://api.example.test/",
+    { method: "OPTIONS", headers: { origin } },
+  ), () => Promise.resolve({ admitted: true, result: null }));
+  assert.equal(response.status, 204);
+  assert.equal(response.headers.get("Access-Control-Allow-Origin"), origin);
+  assert.equal(response.headers.get("Vary"), "Origin");
+});

@@ -12,6 +12,14 @@ create table momi_preorder.commands (
   ))
 );
 
+create table momi_preorder.public_request_rate_buckets (
+  contract_key text not null,
+  principal_hash text not null check (principal_hash ~ '^[0-9a-f]{64}$'),
+  bucket_started_at timestamptz not null,
+  request_count integer not null check (request_count between 1 and 600),
+  primary key (contract_key, principal_hash, bucket_started_at)
+);
+
 create table momi_preorder.checkout_holds (
   hold_id uuid primary key default gen_random_uuid(),
   quote_id uuid not null unique references momi_preorder.quotes(quote_id),
@@ -53,6 +61,13 @@ create table momi_preorder.orders (
   currency text not null default 'USD' check (currency ~ '^[A-Z]{3}$'),
   contact jsonb not null check (jsonb_typeof(contact) = 'object'),
   quote_snapshot jsonb not null check (jsonb_typeof(quote_snapshot) = 'object'),
+  policy_snapshot jsonb not null check (
+    jsonb_typeof(policy_snapshot) = 'object'
+    and jsonb_typeof(policy_snapshot->'summary') = 'string'
+    and jsonb_typeof(policy_snapshot->'customer_cancellation_allowed') = 'boolean'
+    and jsonb_typeof(policy_snapshot->'customer_modification_allowed') = 'boolean'
+    and jsonb_typeof(policy_snapshot->'policy_version') = 'number'
+  ),
   recovery_authority_hash text not null unique
     check (recovery_authority_hash ~ '^[0-9a-f]{64}$'),
   created_at timestamptz not null default now(),
@@ -60,14 +75,69 @@ create table momi_preorder.orders (
 );
 
 alter table momi_preorder.commands enable row level security;
+alter table momi_preorder.public_request_rate_buckets enable row level security;
 alter table momi_preorder.checkout_holds enable row level security;
 alter table momi_preorder.orders enable row level security;
-revoke all on momi_preorder.commands, momi_preorder.checkout_holds,
-  momi_preorder.orders from public, anon, authenticated, service_role;
+revoke all on momi_preorder.commands, momi_preorder.public_request_rate_buckets,
+  momi_preorder.checkout_holds, momi_preorder.orders
+  from public, anon, authenticated, service_role;
 
 create function momi_preorder.authority_hash_v1(p_authority text)
 returns text language sql immutable set search_path = '' as $$
   select encode(extensions.digest(convert_to(p_authority, 'UTF8'), 'sha256'), 'hex')
+$$;
+
+create function momi_preorder.admit_public_request_v1(
+  p_contract_key text, p_principal text
+) returns boolean language plpgsql security definer set search_path = '' as $$
+declare
+  admitted boolean;
+  bucket timestamptz := date_trunc('minute', clock_timestamp());
+  global_limit integer;
+  principal_limit integer;
+  global_hash text := momi_preorder.authority_hash_v1(
+    'momi.preorder.global_request_rate.v1');
+  v_principal_hash text;
+begin
+  principal_limit := case p_contract_key
+    when 'momi.preorder.checkout_hold.manage.v1' then 60
+    when 'momi.preorder.order_intent.create.v1' then 20
+    when 'momi.preorder.order_status.read.v1' then 120
+    else null
+  end;
+  global_limit := case p_contract_key
+    when 'momi.preorder.checkout_hold.manage.v1' then 300
+    when 'momi.preorder.order_intent.create.v1' then 120
+    when 'momi.preorder.order_status.read.v1' then 600
+    else null
+  end;
+  if principal_limit is null or p_principal is null
+      or length(p_principal) not between 32 and 512 then
+    return false;
+  end if;
+  v_principal_hash := momi_preorder.authority_hash_v1(p_principal);
+  delete from momi_preorder.public_request_rate_buckets
+    where bucket_started_at < bucket - interval '10 minutes';
+  insert into momi_preorder.public_request_rate_buckets (
+    contract_key, principal_hash, bucket_started_at, request_count
+  ) values (p_contract_key, global_hash, bucket, 1)
+  on conflict (contract_key, principal_hash, bucket_started_at) do update
+    set request_count =
+      momi_preorder.public_request_rate_buckets.request_count + 1
+    where momi_preorder.public_request_rate_buckets.request_count < global_limit
+  returning true into admitted;
+  if not coalesce(admitted, false) then return false; end if;
+  admitted := null;
+  insert into momi_preorder.public_request_rate_buckets (
+    contract_key, principal_hash, bucket_started_at, request_count
+  ) values (p_contract_key, v_principal_hash, bucket, 1)
+  on conflict (contract_key, principal_hash, bucket_started_at) do update
+    set request_count =
+      momi_preorder.public_request_rate_buckets.request_count + 1
+    where momi_preorder.public_request_rate_buckets.request_count < principal_limit
+  returning true into admitted;
+  return coalesce(admitted, false);
+end;
 $$;
 
 create function momi_preorder.request_digest_v1(p_request jsonb)
@@ -92,7 +162,7 @@ declare
 begin
   for v_hold in select * from momi_preorder.checkout_holds
     where hold_status = 'active' and expires_at <= clock_timestamp()
-    order by expires_at for update skip locked
+    order by expires_at limit 100 for update skip locked
   loop
     update momi_preorder.fulfillment_windows set
       held_quantity = held_quantity - v_hold.held_quantity
@@ -126,6 +196,7 @@ declare
   v_existing momi_preorder.commands%rowtype;
   v_quote momi_preorder.quotes%rowtype;
   v_hold momi_preorder.checkout_holds%rowtype;
+  v_surface momi_preorder.surfaces%rowtype;
   v_window momi_preorder.fulfillment_windows%rowtype;
   v_command_found boolean := false;
   v_request_digest text := momi_preorder.request_digest_v1(p_request);
@@ -137,11 +208,12 @@ begin
       'Checkout authority is invalid.', false, 'requote');
   end if;
   perform pg_catalog.pg_advisory_xact_lock(
-    pg_catalog.hashtext('momi_preorder.hold:' || v_command_id::text));
+    pg_catalog.hashtext('momi_preorder.command:' || v_command_id::text));
   select * into v_existing from momi_preorder.commands
     where command_id = v_command_id;
   v_command_found := found;
-  select * into v_quote from momi_preorder.quotes where quote_id = v_quote_id;
+  select * into v_quote from momi_preorder.quotes
+    where quote_id = v_quote_id for update;
   if not found or v_quote.response_snapshot#>>'{quote,revalidation_token}'
       is distinct from p_authority then
     return momi_preorder.lifecycle_failure_v1('rejected', 'not_authorized',
@@ -156,7 +228,9 @@ begin
     return v_existing.response_snapshot;
   end if;
   perform momi_preorder.expire_checkout_holds_v1();
-  if (p_request->>'expected_quote_version')::integer <> 1 then
+  if (p_request->>'expected_quote_version')::integer <>
+      coalesce((v_quote.response_snapshot#>>'{quote,quote_version}')::integer, 0)
+  then
     return momi_preorder.lifecycle_failure_v1('conflict', 'stale_version',
       'The quote version changed.', true, 'requote');
   end if;
@@ -165,10 +239,54 @@ begin
       return momi_preorder.lifecycle_failure_v1('conflict', 'quote_expired',
         'The quote expired.', true, 'requote');
     end if;
+    select * into v_surface from momi_preorder.surfaces
+      where surface_id = v_quote.surface_id;
+    if not found or not v_surface.enabled
+        or v_surface.surface_version <> v_quote.surface_version
+        or v_surface.catalog_version <> v_quote.catalog_version
+        or v_surface.policy_version <> v_quote.policy_version
+        or v_surface.mapping_version <> v_quote.mapping_version then
+      return momi_preorder.lifecycle_failure_v1('conflict', 'stale_version',
+        'The preorder configuration changed.', true, 'requote');
+    end if;
+    if exists (
+      select 1 from jsonb_array_elements(v_quote.request_snapshot->'lines') line
+      left join momi_preorder.catalog_items item
+        on item.surface_id = v_quote.surface_id
+        and item.catalog_version = v_quote.catalog_version
+        and item.item_id = (line->>'item_id')::uuid
+      where item.item_id is null or not item.available
+        or item.seasonal_eligibility <> 'eligible'
+        or item.item_version <> (line->>'item_version')::integer
+        or (line->>'quantity')::integer > item.maximum_quantity
+    ) then
+      return momi_preorder.lifecycle_failure_v1('rejected', 'item_unavailable',
+        'A selected item is no longer available.', true, 'requote');
+    end if;
+    if exists (
+      select 1 from jsonb_array_elements(v_quote.request_snapshot->'lines') line
+      join momi_preorder.catalog_items item
+        on item.surface_id = v_quote.surface_id
+        and item.catalog_version = v_quote.catalog_version
+        and item.item_id = (line->>'item_id')::uuid
+      where item.allergen_status = 'unverified'
+        or (item.allergen_status = 'cross_contact_possible'
+          and jsonb_array_length(v_quote.request_snapshot->'avoided_allergens') > 0)
+        or item.allergens ?| array(select jsonb_array_elements_text(
+          v_quote.request_snapshot->'avoided_allergens'))
+    ) then
+      return momi_preorder.lifecycle_failure_v1('rejected', 'allergen_unverified',
+        'Allergen evidence changed after quoting.', false, 'requote');
+    end if;
     select coalesce(sum((line->>'quantity')::integer), 0) into v_quantity
       from jsonb_array_elements(v_quote.request_snapshot->'lines') line;
     select * into v_window from momi_preorder.fulfillment_windows
       where window_id = v_quote.fulfillment_window_id for update;
+    if not found or not v_window.enabled
+        or clock_timestamp() >= v_window.order_cutoff_at then
+      return momi_preorder.lifecycle_failure_v1('conflict', 'window_closed',
+        'That pickup window is closed.', true, 'choose_another_window');
+    end if;
     if v_window.capacity_limit - v_window.held_quantity -
         v_window.committed_quantity < v_quantity then
       return momi_preorder.lifecycle_failure_v1('conflict',
@@ -195,6 +313,10 @@ begin
     if not found then
       return momi_preorder.lifecycle_failure_v1('rejected', 'not_found',
         'The checkout hold was not found.', false, 'requote');
+    end if;
+    if v_hold.hold_status = 'consumed' then
+      return momi_preorder.lifecycle_failure_v1('conflict', 'stale_version',
+        'The checkout hold was already committed to an order.', false, 'refresh');
     end if;
     if v_action in ('release', 'expire') and v_hold.hold_status = 'active' then
       if v_action = 'expire' and v_hold.expires_at > clock_timestamp() then
@@ -238,6 +360,7 @@ declare
   v_quote momi_preorder.quotes%rowtype;
   v_hold momi_preorder.checkout_holds%rowtype;
   v_order momi_preorder.orders%rowtype;
+  v_surface momi_preorder.surfaces%rowtype;
   v_window momi_preorder.fulfillment_windows%rowtype;
   v_command_found boolean := false;
   v_request_digest text := momi_preorder.request_digest_v1(p_request);
@@ -251,11 +374,12 @@ begin
       'Checkout authority is invalid.', false, 'requote');
   end if;
   perform pg_catalog.pg_advisory_xact_lock(
-    pg_catalog.hashtext('momi_preorder.order:' || v_command_id::text));
+    pg_catalog.hashtext('momi_preorder.command:' || v_command_id::text));
   select * into v_existing from momi_preorder.commands
     where command_id = v_command_id;
   v_command_found := found;
-  select * into v_quote from momi_preorder.quotes where quote_id = v_quote_id;
+  select * into v_quote from momi_preorder.quotes
+    where quote_id = v_quote_id for update;
   if not found or v_quote.response_snapshot#>>'{quote,revalidation_token}'
       is distinct from p_authority then
     return momi_preorder.lifecycle_failure_v1('rejected', 'not_authorized',
@@ -273,10 +397,50 @@ begin
       jsonb_build_object('recovery_authority', v_token);
   end if;
   perform momi_preorder.expire_checkout_holds_v1();
-  if (p_request->>'expected_quote_version')::integer <> 1
+  if (p_request->>'expected_quote_version')::integer <>
+      coalesce((v_quote.response_snapshot#>>'{quote,quote_version}')::integer, 0)
       or clock_timestamp() >= v_quote.expires_at then
     return momi_preorder.lifecycle_failure_v1('conflict', 'quote_expired',
       'The quote expired or changed.', true, 'requote');
+  end if;
+  select * into v_surface from momi_preorder.surfaces
+    where surface_id = v_quote.surface_id;
+  if not found or not v_surface.enabled
+      or v_surface.surface_version <> v_quote.surface_version
+      or v_surface.catalog_version <> v_quote.catalog_version
+      or v_surface.policy_version <> v_quote.policy_version
+      or v_surface.mapping_version <> v_quote.mapping_version then
+    return momi_preorder.lifecycle_failure_v1('conflict', 'stale_version',
+      'The preorder configuration changed.', true, 'requote');
+  end if;
+  if exists (
+    select 1 from jsonb_array_elements(v_quote.request_snapshot->'lines') line
+    left join momi_preorder.catalog_items item
+      on item.surface_id = v_quote.surface_id
+      and item.catalog_version = v_quote.catalog_version
+      and item.item_id = (line->>'item_id')::uuid
+    where item.item_id is null or not item.available
+      or item.seasonal_eligibility <> 'eligible'
+      or item.item_version <> (line->>'item_version')::integer
+      or (line->>'quantity')::integer > item.maximum_quantity
+  ) then
+    return momi_preorder.lifecycle_failure_v1('rejected', 'item_unavailable',
+      'A selected item is no longer available.', true, 'requote');
+  end if;
+  if exists (
+    select 1 from jsonb_array_elements(v_quote.request_snapshot->'lines') line
+    join momi_preorder.catalog_items item
+      on item.surface_id = v_quote.surface_id
+      and item.catalog_version = v_quote.catalog_version
+      and item.item_id = (line->>'item_id')::uuid
+    where item.allergen_status = 'unverified'
+      or (item.allergen_status = 'cross_contact_possible'
+        and jsonb_array_length(v_quote.request_snapshot->'avoided_allergens') > 0)
+      or item.allergens ?| array(select jsonb_array_elements_text(
+        v_quote.request_snapshot->'avoided_allergens'))
+  ) then
+    return momi_preorder.lifecycle_failure_v1('rejected', 'allergen_unverified',
+      'Allergen evidence changed after quoting.', false, 'requote');
   end if;
   if jsonb_typeof(p_request->'contact') <> 'object'
       or length(trim(p_request->'contact'->>'name')) not between 1 and 120
@@ -291,8 +455,6 @@ begin
   end if;
   select coalesce(sum((line->>'quantity')::integer), 0) into v_quantity
     from jsonb_array_elements(v_quote.request_snapshot->'lines') line;
-  select * into v_window from momi_preorder.fulfillment_windows
-    where window_id = v_quote.fulfillment_window_id for update;
   if v_hold_id is not null then
     select * into v_hold from momi_preorder.checkout_holds
       where hold_id = v_hold_id and quote_id = v_quote.quote_id for update;
@@ -301,6 +463,18 @@ begin
       return momi_preorder.lifecycle_failure_v1('conflict', 'quote_expired',
         'The checkout hold is no longer active.', true, 'requote');
     end if;
+    select * into v_window from momi_preorder.fulfillment_windows
+      where window_id = v_quote.fulfillment_window_id for update;
+  else
+    select * into v_window from momi_preorder.fulfillment_windows
+      where window_id = v_quote.fulfillment_window_id for update;
+  end if;
+  if not found or not v_window.enabled
+      or clock_timestamp() >= v_window.order_cutoff_at then
+    return momi_preorder.lifecycle_failure_v1('conflict', 'window_closed',
+      'That pickup window is closed.', true, 'choose_another_window');
+  end if;
+  if v_hold_id is not null then
     update momi_preorder.fulfillment_windows set
       held_quantity = held_quantity - v_hold.held_quantity,
       committed_quantity = committed_quantity + v_hold.held_quantity
@@ -327,10 +501,18 @@ begin
   insert into momi_preorder.orders (
     order_id, quote_id, hold_id, fulfillment_window_id, order_status, payment_status,
     fulfillment_status, requested_quantity, total_minor, currency, contact,
-    quote_snapshot, recovery_authority_hash
+    quote_snapshot, policy_snapshot, recovery_authority_hash
   ) values (v_order_id, v_quote.quote_id, v_hold_id, v_quote.fulfillment_window_id,
     'awaiting_payment', 'not_started', 'not_scheduled', v_quantity,
     v_quote.total_minor, 'USD', p_request->'contact', v_quote.response_snapshot,
+    jsonb_build_object(
+      'policy_version', v_surface.policy_version,
+      'summary', coalesce(v_surface.cancellation_policy->>'summary', ''),
+      'customer_cancellation_allowed', coalesce((v_surface.cancellation_policy->>
+        'customer_cancellation_allowed')::boolean, false),
+      'customer_modification_allowed', coalesce((v_surface.cancellation_policy->>
+        'customer_modification_allowed')::boolean, false)
+    ),
     momi_preorder.authority_hash_v1(v_token)) returning * into v_order;
   v_response := jsonb_build_object('outcome', 'accepted',
     'order_id', v_order.order_id, 'order_version', v_order.order_version,
@@ -355,8 +537,8 @@ create function momi_preorder.read_order_status_v1(
 declare
   v_order momi_preorder.orders%rowtype;
   v_window momi_preorder.fulfillment_windows%rowtype;
-  v_surface momi_preorder.surfaces%rowtype;
   v_actions jsonb := jsonb_build_array('view_status');
+  v_before_change_cutoff boolean;
 begin
   if p_authority is null or length(p_authority) < 32 then return null; end if;
   select * into v_order from momi_preorder.orders where order_id = p_order_id
@@ -364,20 +546,33 @@ begin
   if not found then return null; end if;
   select * into v_window from momi_preorder.fulfillment_windows
     where window_id = v_order.fulfillment_window_id;
-  select s.* into v_surface from momi_preorder.surfaces s
-    join momi_preorder.quotes q on q.surface_id = s.surface_id
-    where q.quote_id = v_order.quote_id;
-  if v_order.payment_status in ('declined', 'indeterminate') then
-    v_actions := v_actions || case when v_order.payment_status = 'declined'
-      then jsonb_build_array('retry_payment')
-      else jsonb_build_array('reconcile_payment') end;
+  v_before_change_cutoff := v_window.enabled
+    and statement_timestamp() < v_window.order_cutoff_at
+    and statement_timestamp() < v_window.starts_at
+    and v_order.fulfillment_status in ('not_scheduled', 'scheduled');
+  if v_before_change_cutoff and v_order.order_status = 'awaiting_payment'
+      and v_order.payment_status = 'declined' then
+    v_actions := v_actions || jsonb_build_array('retry_payment');
   end if;
-  if coalesce((v_surface.cancellation_policy->>
-      'customer_cancellation_allowed')::boolean, false) then
+  if v_order.order_status in ('payment_pending', 'attention_required')
+      and v_order.payment_status = 'indeterminate' then
+    v_actions := v_actions || jsonb_build_array('reconcile_payment');
+  end if;
+  if v_order.order_status = 'attention_required' then
+    v_actions := v_actions || jsonb_build_array('contact_shop');
+  end if;
+  if v_before_change_cutoff
+      and v_order.order_status in ('awaiting_payment', 'confirmed')
+      and v_order.payment_status in ('not_started', 'declined', 'authorized', 'paid')
+      and coalesce((v_order.policy_snapshot->>
+        'customer_cancellation_allowed')::boolean, false) then
     v_actions := v_actions || jsonb_build_array('request_cancellation');
   end if;
-  if coalesce((v_surface.cancellation_policy->>
-      'customer_modification_allowed')::boolean, false) then
+  if v_before_change_cutoff
+      and v_order.order_status in ('awaiting_payment', 'confirmed')
+      and v_order.payment_status in ('not_started', 'declined', 'authorized', 'paid')
+      and coalesce((v_order.policy_snapshot->>
+        'customer_modification_allowed')::boolean, false) then
     v_actions := v_actions || jsonb_build_array('request_modification');
   end if;
   return jsonb_build_object('order_id', v_order.order_id,
@@ -388,12 +583,17 @@ begin
       'date', to_char(v_window.fulfillment_date, 'YYYY-MM-DD'),
       'starts_at', v_window.starts_at, 'ends_at', v_window.ends_at,
       'order_cutoff_at', v_window.order_cutoff_at,
-      'availability', case when v_window.held_quantity +
-        v_window.committed_quantity >= v_window.capacity_limit then 'sold_out'
+      'availability', case
+        when not v_window.enabled or statement_timestamp() >=
+          v_window.order_cutoff_at then 'closed'
+        when v_window.held_quantity + v_window.committed_quantity >=
+          v_window.capacity_limit then 'sold_out'
+        when v_window.capacity_limit - v_window.held_quantity -
+          v_window.committed_quantity <= v_window.limited_threshold then 'limited'
         else 'available' end),
     'total', jsonb_build_object('currency', v_order.currency,
       'amount_minor', v_order.total_minor), 'allowed_actions', v_actions,
-    'policy_summary', v_surface.cancellation_policy->>'summary',
+    'policy_summary', v_order.policy_snapshot->>'summary',
     'updated_at', v_order.updated_at);
 end;
 $$;
@@ -402,6 +602,8 @@ revoke all on all functions in schema momi_preorder
   from public, anon, authenticated, service_role;
 grant usage on schema momi_preorder to service_role;
 grant execute on function momi_preorder.admit_public_read_v1(text)
+  to service_role;
+grant execute on function momi_preorder.admit_public_request_v1(text, text)
   to service_role;
 grant execute on function momi_preorder.read_bootstrap_v1(text, date)
   to service_role;

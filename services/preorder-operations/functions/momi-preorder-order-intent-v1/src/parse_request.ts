@@ -20,6 +20,8 @@ export function parseRequest(value: unknown): OrderInput | null {
     c.name.trim().length < 1 || c.name.length > 120 ||
     Object.keys(c).some((key) => !contactAllowed.has(key)) ||
     (typeof c.email !== "string" && typeof c.phone !== "string") ||
+    (c.email !== undefined && typeof c.email !== "string") ||
+    (c.phone !== undefined && typeof c.phone !== "string") ||
     (typeof c.email === "string" && (c.email.length > 254 || !c.email.includes("@"))) ||
     (typeof c.phone === "string" && (c.phone.length < 7 || c.phone.length > 32))) return null;
   return v as OrderInput;

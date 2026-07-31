@@ -58,11 +58,13 @@
       "momi_preorder.fulfillment_windows",
       "momi_preorder.orders",
       "momi_preorder.public_read_rate_buckets",
+      "momi_preorder.public_request_rate_buckets",
       "momi_preorder.quotes",
       "momi_preorder.surfaces"
     ],
     "private_routines": [
       "momi_preorder.admit_public_read_v1",
+      "momi_preorder.admit_public_request_v1",
       "momi_preorder.authority_hash_v1",
       "momi_preorder.create_order_intent_v1",
       "momi_preorder.create_quote_v1",

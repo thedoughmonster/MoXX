@@ -1,11 +1,9 @@
-export function responseHeaders(): Record<string, string> {
-  return {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "x-momi-recovery-authority",
-    "Access-Control-Allow-Methods": "GET, OPTIONS",
-    "Cache-Control": "no-store",
-    "Content-Type": "application/json",
-    "Referrer-Policy": "no-referrer",
-    "X-Content-Type-Options": "nosniff",
-  };
+import { publicOriginPolicy } from "../../../src/public_origin.ts";
+
+export function responseHeaders(request: Request): Record<string, string> {
+  return publicOriginPolicy.responseHeaders(
+    request,
+    "x-momi-recovery-authority",
+    "GET, OPTIONS",
+  );
 }

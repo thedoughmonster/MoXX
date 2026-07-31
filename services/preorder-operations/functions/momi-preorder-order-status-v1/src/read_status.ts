@@ -8,7 +8,9 @@ export async function readStatus(
   const sql = getDatabase();
   const rows = await sql<StatusRead[]>`
     with admission as (
-      select momi_preorder.admit_public_read_v1(${functionKey}) as admitted
+      select momi_preorder.admit_public_request_v1(
+        ${functionKey}, ${authority}
+      ) as admitted
     )
     select admission.admitted,
       case when admission.admitted then

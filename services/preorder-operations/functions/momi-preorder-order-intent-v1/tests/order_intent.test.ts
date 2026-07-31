@@ -17,6 +17,10 @@ test("parses minimum contact and rejects unowned fields", () => {
   assert.equal(parseRequest({ ...request, contact: { name: "Test" } }), null);
   assert.equal(parseRequest({
     ...request,
+    contact: { ...request.contact, phone: null },
+  }), null);
+  assert.equal(parseRequest({
+    ...request,
     contact: { ...request.contact, payment_token: "never" },
   }), null);
 });
