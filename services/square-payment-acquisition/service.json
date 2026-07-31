@@ -14,7 +14,7 @@
   "database": { "read": [], "write": [] },
   "network": { "outbound_hosts": ["connect.squareupsandbox.com"] },
   "secrets": ["SQUARE_SANDBOX_ACCESS_TOKEN", "SQUARE_WEBHOOK_SIGNATURE_KEY"],
-  "configuration": ["SQUARE_WEBHOOK_NOTIFICATION_URL"],
+  "configuration": ["SQUARE_SANDBOX_LOCATION_ID", "SQUARE_WEBHOOK_NOTIFICATION_URL"],
   "deployment": { "owns": [], "depends_on": [] },
   "runtime_dependencies": [],
   "approved_packages": []

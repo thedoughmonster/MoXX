@@ -3,7 +3,7 @@
   "$id": "momi://square.payment.execute.v1/input",
   "type": "object",
   "additionalProperties": false,
-  "required": ["payment_attempt_id", "owner_order_id", "amount_minor", "currency", "source_token"],
+  "required": ["payment_attempt_id", "owner_order_id", "amount_minor", "currency", "location_id", "source_token"],
   "properties": {
     "payment_attempt_id": { "type": "string", "format": "uuid" },
     "owner_order_id": {
@@ -13,6 +13,7 @@
     },
     "amount_minor": { "type": "integer", "minimum": 1 },
     "currency": { "const": "USD" },
+    "location_id": { "type": "string", "minLength": 1, "maxLength": 64 },
     "source_token": {
       "type": "string",
       "minLength": 1,

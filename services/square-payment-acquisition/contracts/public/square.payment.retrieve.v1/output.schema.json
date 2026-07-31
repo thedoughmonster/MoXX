@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://square.payment.retrieve.v1/output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["evidence_id", "source", "disposition", "payment_status", "provider_payment_id", "provider_updated_at", "order_id", "amount_minor", "currency", "location_id"],
+  "properties": {
+    "evidence_id": { "type": "string", "minLength": 1, "maxLength": 192 },
+    "source": { "const": "reconciliation" },
+    "disposition": { "enum": ["matched", "mismatch", "missing", "indeterminate"] },
+    "payment_status": { "enum": ["pending", "authorized", "paid", "declined", "canceled", "refund_pending", "refunded", "indeterminate"] },
+    "provider_payment_id": { "type": ["string", "null"], "maxLength": 192 },
+    "provider_updated_at": { "type": ["string", "null"], "format": "date-time" },
+    "order_id": { "type": "string", "format": "uuid" },
+    "amount_minor": { "type": "integer", "minimum": 1 },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "location_id": { "type": "string", "minLength": 1, "maxLength": 64 }
+  }
+}

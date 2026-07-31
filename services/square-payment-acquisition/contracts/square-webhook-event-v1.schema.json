@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "momi://square.payment.webhook.authenticate.v1/output",
+  "$id": "momi://square.payment.webhook.authenticate.v1/event",
   "type": "object",
   "additionalProperties": false,
   "required": ["eventId", "eventType", "kind", "providerPaymentId", "providerUpdatedAt", "providerStatus", "orderId", "amountMinor", "currency", "locationId"],
