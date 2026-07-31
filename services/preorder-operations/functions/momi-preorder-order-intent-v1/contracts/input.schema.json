@@ -1,0 +1,1 @@
+{"$schema":"https://json-schema.org/draft/2020-12/schema","$id":"momi://momi.preorder.order_intent.create.v1/input","$ref":"../../../contracts/preorder-public-v1.openapi.json#/components/schemas/OrderIntentRequest"}
