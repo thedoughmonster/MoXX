@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://square.payment.execute.v1/output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["outcome", "payment_status", "recovery"],
+  "properties": {
+    "outcome": { "enum": ["accepted", "rejected", "pending", "indeterminate"] },
+    "payment_status": { "enum": ["authorized", "paid", "declined", "canceled", "pending", "indeterminate"] },
+    "provider_payment_id": { "type": "string", "minLength": 1, "maxLength": 192 },
+    "recovery": { "enum": ["none", "retrieve", "operator_review"] }
+  }
+}
