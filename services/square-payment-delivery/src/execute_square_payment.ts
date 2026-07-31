@@ -35,13 +35,19 @@ export const executeSquarePayment = async (
   try {
     const response = await fetcher(`${squareSandboxOrigin}${squareCreatePaymentPath}`, init)
     const envelope = await response.json() as SquareEnvelope
+    const provider_request_id = response.headers.get("x-request-id")
     if (!response.ok) {
-      return classifySquareEnvelope({ errors: envelope.errors }, command, locationId)
+      return {
+        ...classifySquareEnvelope({ errors: envelope.errors }, command, locationId),
+        provider_request_id,
+      }
     }
-    return classifySquareEnvelope(envelope, command, locationId)
+    return { ...classifySquareEnvelope(envelope, command, locationId), provider_request_id }
   } catch {
     return {
-      outcome: "indeterminate", payment_status: "indeterminate", recovery: "retrieve",
+      outcome: "indeterminate", payment_status: "indeterminate",
+      provider_payment_id: null, provider_updated_at: null,
+      provider_request_id: null, recovery: "retrieve",
     }
   }
 }

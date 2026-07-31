@@ -2,7 +2,7 @@
   "$schema": "../../schemas/service-manifest-v1.schema.json",
   "schema_version": 1,
   "service_key": "square-payment-acquisition",
-  "purpose": "Retrieve Square payment observations and authenticate exact raw webhook evidence.",
+  "purpose": "Retrieve Square payment and refund observations and authenticate exact raw webhook evidence.",
   "kind": "source_adapter",
   "service_type": "procurement_adapter",
   "lifecycle_status": "active",

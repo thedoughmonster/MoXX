@@ -16,6 +16,7 @@ test("execution binds exact provider request and returns a safe receipt", async 
     return Response.json({ payment: {
       id: "sandbox-payment", status: "COMPLETED",
       reference_id: command.owner_order_id, location_id: "sandbox-location",
+      updated_at: "2026-07-31T15:30:00Z",
       amount_money: { amount: 2400, currency: "USD" },
     } })
   }) as typeof fetch
@@ -56,6 +57,7 @@ test("success, pending, and decline map through the hosted client", async () => 
   const common = {
     id: "sandbox-payment", reference_id: command.owner_order_id,
     location_id: "sandbox-location", amount_money: { amount: 2400, currency: "USD" },
+    updated_at: "2026-07-31T15:30:00Z",
   }
   const run = (envelope: SquareEnvelope) => executeSquarePayment(
     command, "sandbox-location", crypto.randomUUID(), "2026-07-15",
@@ -71,11 +73,13 @@ test("non-success and mismatched provider results fail indeterminate", async () 
     command, "sandbox-location", crypto.randomUUID(), "2026-07-15",
     (async () => Response.json(envelope, { status })) as typeof fetch,
   )
-  const failed = await run({ payment: { id: "false-paid", status: "COMPLETED" } }, 500)
+  const failed = await run({ payment: { id: "false-paid", status: "COMPLETED",
+    updated_at: "2026-07-31T15:30:00Z" } }, 500)
   assert.equal(failed.payment_status, "indeterminate")
   const mismatch = await run({ payment: {
     id: "sandbox-payment", status: "COMPLETED", reference_id: command.owner_order_id,
     location_id: "sandbox-location", amount_money: { amount: 2401, currency: "USD" },
+    updated_at: "2026-07-31T15:30:00Z",
   } })
   assert.equal(mismatch.recovery, "operator_review")
 })

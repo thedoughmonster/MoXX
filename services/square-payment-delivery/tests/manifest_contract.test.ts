@@ -8,6 +8,9 @@ test("declares one Sandbox-only host-ready boundary without deployment", async (
   const contract = JSON.parse(await readFile(
     new URL("contracts/payment-command-v1.schema.json", directory), "utf8",
   ))
+  const refundContract = JSON.parse(await readFile(
+    new URL("contracts/refund-command-v1.schema.json", directory), "utf8",
+  ))
 
   assert.equal(manifest.service_type, "destination_adapter")
   assert.deepEqual(manifest.network.outbound_hosts, ["connect.squareupsandbox.com"])
@@ -15,4 +18,6 @@ test("declares one Sandbox-only host-ready boundary without deployment", async (
   assert.deepEqual(manifest.functions, [])
   assert.equal(contract.$id, "momi://square.payment.execute.v1/input")
   assert.equal(contract.properties.source_token.writeOnly, true)
+  assert.equal(refundContract.$id, "momi://square.payment.refund.v1/input")
+  assert.equal(manifest.contracts.provides.includes("square.payment.refund.v1"), true)
 })

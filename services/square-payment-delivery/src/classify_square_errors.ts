@@ -7,12 +7,18 @@ export const classifySquareErrors = (errors: SquareError[]): PaymentReceipt => {
     return {
       outcome: "rejected",
       payment_status: "declined",
-      recovery: "none",
+      provider_payment_id: null,
+      provider_updated_at: null,
+      provider_request_id: null,
+      recovery: "operator_review",
     }
   }
   return {
     outcome: "indeterminate",
     payment_status: "indeterminate",
+    provider_payment_id: null,
+    provider_updated_at: null,
+    provider_request_id: null,
     recovery: "operator_review",
   }
 }
