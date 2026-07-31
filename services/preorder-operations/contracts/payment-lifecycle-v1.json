@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "initial_status": "pending",
+  "transitions": {
+    "pending": ["pending", "authorized", "paid", "declined", "canceled", "indeterminate"],
+    "authorized": ["authorized", "paid", "canceled", "indeterminate"],
+    "paid": ["paid", "refund_pending", "refunded"],
+    "declined": ["declined"],
+    "canceled": ["canceled"],
+    "refund_pending": ["refund_pending", "paid", "refunded", "indeterminate"],
+    "refunded": ["refunded"],
+    "indeterminate": ["indeterminate", "pending", "authorized", "paid", "declined", "canceled", "refund_pending", "refunded"]
+  },
+  "order_projection": {
+    "pending": "payment_pending",
+    "authorized": "payment_pending",
+    "paid": "confirmed",
+    "declined": "awaiting_payment",
+    "canceled": "awaiting_payment",
+    "refund_pending": "change_pending",
+    "refunded": "attention_required",
+    "indeterminate": "attention_required"
+  },
+  "recovery_actions": {
+    "pending": ["view_status", "reconcile_payment"],
+    "authorized": ["view_status", "reconcile_payment"],
+    "paid": ["view_status"],
+    "declined": ["view_status", "retry_payment"],
+    "canceled": ["view_status", "retry_payment"],
+    "refund_pending": ["view_status", "contact_shop"],
+    "refunded": ["view_status", "contact_shop"],
+    "indeterminate": ["view_status", "reconcile_payment", "contact_shop"]
+  },
+  "exact_match_fields": ["payment_attempt_id", "order_id", "amount_minor", "currency", "location_id", "provider_payment_id"],
+  "privacy": {
+    "persist_source_token": false,
+    "persist_raw_provider_payload": false,
+    "persist_customer_contact_in_payment_tables": false
+  }
+}
