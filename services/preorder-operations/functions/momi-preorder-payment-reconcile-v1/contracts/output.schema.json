@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["meta", "outcome", "order_id", "order_version", "payment_attempt_id", "payment_status", "amount", "next_actions"],
+  "properties": {
+    "meta": { "$ref": "#/$defs/meta" },
+    "outcome": { "enum": ["accepted", "rejected", "pending", "conflict", "indeterminate"] },
+    "order_id": { "type": "string", "format": "uuid" },
+    "order_version": { "type": "integer", "minimum": 1 },
+    "payment_attempt_id": { "type": "string", "format": "uuid" },
+    "payment_status": { "$ref": "#/$defs/status" },
+    "amount": { "$ref": "#/$defs/money" },
+    "next_actions": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/action" } }
+  },
+  "$defs": {
+    "meta": { "type": "object", "additionalProperties": false, "required": ["contract_key", "request_id", "generated_at"], "properties": { "contract_key": { "const": "momi.preorder.payment.reconcile.v1" }, "request_id": { "type": "string", "format": "uuid" }, "generated_at": { "type": "string", "format": "date-time" } } },
+    "money": { "type": "object", "additionalProperties": false, "required": ["currency", "amount_minor"], "properties": { "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }, "amount_minor": { "type": "integer", "minimum": 1 } } },
+    "status": { "enum": ["not_started", "pending", "authorized", "paid", "declined", "canceled", "refund_pending", "refunded", "indeterminate"] },
+    "action": { "enum": ["retry_payment", "reconcile_payment", "view_status", "request_cancellation", "request_modification", "contact_shop"] }
+  }
+}

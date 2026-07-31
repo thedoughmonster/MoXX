@@ -26,6 +26,14 @@ money, location, order, quote, and accepted-policy evidence, and projects only
 sanitized financial observations into customer-safe preorder status.
 
 Square owns payment and financial facts. This service exposes a customer-safe
+
+The payment initiation and reconciliation Edge handlers compose only the
+declared Square public contract modules in-process. Initiation removes the
+single-use source token before durable claim work, calls Square only for one
+owner-issued claim, and projects ambiguity as indeterminate. Reconciliation
+retrieves only a known provider identity. The Square webhook handler verifies
+exact bytes through the acquisition contract, archives authenticated raw
+evidence, then resolves and projects one exact attempt.
 payment workflow but has no direct Square network or secret authority. Square
 adapters introduced under issue #162 must preserve that separation.
 

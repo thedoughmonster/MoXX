@@ -11,6 +11,9 @@
     "momi-preorder-checkout-hold-v1",
     "momi-preorder-order-intent-v1",
     "momi-preorder-order-status-v1",
+    "momi-preorder-payment-initiate-v1",
+    "momi-preorder-payment-reconcile-v1",
+    "momi-preorder-square-webhook-v1",
     "momi-preorder-quote-v1"
   ],
   "contracts": {
@@ -25,6 +28,7 @@
       "momi.preorder.quote.create.v1"
     ],
     "consumes": [
+      { "service": "communications-archive", "contract": "momi.raw_json.capture_evidence.v1" },
       { "service": "square-payment-delivery", "contract": "square.payment.execute.v1" },
       { "service": "square-payment-acquisition", "contract": "square.payment.retrieve.v1" },
       { "service": "square-payment-acquisition", "contract": "square.payment.webhook.authenticate.v1" }
@@ -32,13 +36,13 @@
   },
   "database": {
     "read": ["momi_preorder"],
-    "write": ["momi_preorder"]
+    "write": ["momi_communications", "momi_preorder"]
   },
   "network": {
     "outbound_hosts": []
   },
   "secrets": ["SUPABASE_DB_URL"],
-  "configuration": [],
+  "configuration": ["SQUARE_SANDBOX_LOCATION_ID"],
   "deployment": {
     "owns": [],
     "depends_on": []
