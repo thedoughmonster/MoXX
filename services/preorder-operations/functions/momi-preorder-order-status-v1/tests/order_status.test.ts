@@ -18,8 +18,9 @@ test("returns customer-safe durable status", async () => {
         order_id: orderId,
         order_version: 1,
         order_status: "awaiting_payment",
+        payment_attempt_id: null,
         payment_status: "not_started",
-        allowed_actions: ["view_status"],
+        allowed_actions: ["view_status", "initiate_payment"],
       },
     });
   });
@@ -28,6 +29,7 @@ test("returns customer-safe durable status", async () => {
   assert.equal(capturedAuthority, "recovery-authority");
   assert.equal(body.meta.contract_key, "momi.preorder.order_status.read.v1");
   assert.equal(body.data.order_status, "awaiting_payment");
+  assert.equal(body.data.payment_attempt_id, null);
   assert.doesNotMatch(JSON.stringify(body), /recovery-authority/);
 });
 

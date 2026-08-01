@@ -24,6 +24,9 @@ test("freezes payment lifecycle and internal integration contracts", async () =>
   assert.deepEqual(Object.keys(lifecycle.transitions), statuses);
   assert.deepEqual(Object.keys(lifecycle.order_projection), statuses);
   assert.deepEqual(Object.keys(lifecycle.recovery_actions), statuses);
+  assert.deepEqual(lifecycle.pre_attempt_actions, [
+    "view_status", "initiate_payment",
+  ]);
   assert.deepEqual(lifecycle.privacy, {
     persist_source_token: false,
     persist_raw_provider_payload: false,

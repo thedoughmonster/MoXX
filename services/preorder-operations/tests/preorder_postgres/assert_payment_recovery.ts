@@ -21,6 +21,13 @@ export async function assertPaymentRecovery(sql: Sql, windowId: string) {
   assert.equal((replay.receipt as Record<string, unknown>).payment_status,
     "indeterminate");
   assert.equal(replay.claim, null);
+  const [pendingStatus] = await sql<{ data: Record<string, unknown> }[]>`
+    select momi_preorder.read_order_status_v1(
+      ${orderId}::uuid, ${created.authority}) as data`;
+  assert.equal(pendingStatus?.data.payment_attempt_id, attemptId);
+  assert.deepEqual(pendingStatus?.data.allowed_actions, [
+    "view_status", "reconcile_payment", "contact_shop",
+  ]);
   const reconcile = await paymentFixture.reconcile(sql, {
     command_id: crypto.randomUUID(), order_id: orderId,
     expected_order_version: 3, payment_attempt_id: attemptId,
@@ -50,6 +57,13 @@ export async function assertPaymentRecovery(sql: Sql, windowId: string) {
   assert.equal((decline.receipt as Record<string, unknown>).outcome, "rejected");
   assert.deepEqual((decline.receipt as Record<string, unknown>).next_actions,
     ["view_status", "retry_payment"]);
+  const [declinedStatus] = await sql<{ data: Record<string, unknown> }[]>`
+    select momi_preorder.read_order_status_v1(
+      ${declinedOrderId}::uuid, ${declinedOrder.authority}) as data`;
+  assert.equal(declinedStatus?.data.payment_attempt_id,
+    declinedReceipt.payment_attempt_id);
+  assert.ok((declinedStatus?.data.allowed_actions as string[]).includes(
+    "retry_payment"));
   const retry = await paymentFixture.claim(sql, {
     command_id: crypto.randomUUID(), order_id: declinedOrderId,
     expected_order_version: 3,
@@ -57,4 +71,9 @@ export async function assertPaymentRecovery(sql: Sql, windowId: string) {
   assert.equal(retry.disposition, "claimed");
   assert.notEqual((retry.receipt as Record<string, unknown>).payment_attempt_id,
     declinedReceipt.payment_attempt_id);
+  const [retryStatus] = await sql<{ data: Record<string, unknown> }[]>`
+    select momi_preorder.read_order_status_v1(
+      ${declinedOrderId}::uuid, ${declinedOrder.authority}) as data`;
+  assert.equal(retryStatus?.data.payment_attempt_id,
+    (retry.receipt as Record<string, unknown>).payment_attempt_id);
 }

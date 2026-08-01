@@ -10,7 +10,9 @@ Authenticated `GET` with `X-MoMi-Recovery-Authority` and `order_id`.
 
 ## Output
 
-Current order, payment, fulfillment, window, total, and allowed actions.
+Current order, latest payment-attempt identity, payment, fulfillment, window,
+total, and allowed actions. The attempt identity is null until payment starts
+and is always present when reconciliation is authorized.
 
 ## Side Effects
 

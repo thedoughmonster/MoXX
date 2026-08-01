@@ -1,6 +1,7 @@
 {
   "schema_version": 1,
   "initial_status": "pending",
+  "pre_attempt_actions": ["view_status", "initiate_payment"],
   "transitions": {
     "pending": ["pending", "authorized", "paid", "declined", "canceled", "indeterminate"],
     "authorized": ["authorized", "paid", "canceled", "indeterminate"],

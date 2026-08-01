@@ -30,7 +30,7 @@
         "next_actions": {
           "type": "array",
           "uniqueItems": true,
-          "items": { "enum": ["retry_payment", "reconcile_payment", "view_status", "request_cancellation", "request_modification", "contact_shop"] }
+          "items": { "enum": ["initiate_payment", "retry_payment", "reconcile_payment", "view_status", "request_cancellation", "request_modification", "contact_shop"] }
         }
       }
     },
