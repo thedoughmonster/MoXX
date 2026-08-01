@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import test from "node:test"
 
 import { processWebhook } from "../src/process_webhook.ts"
+import { readWebhookIdentity } from "../src/read_webhook_identity.ts"
 import { dependencies } from "./fixture_dependencies.ts"
 import { request } from "./fixture_request.ts"
 
@@ -79,7 +80,20 @@ test("keeps one archive identity across transient and successful replay", async 
   assert.equal(first.status, 503)
   assert.equal(second.status, 200)
   assert.equal(identities[0], identities[1])
-  assert.match(identities[0], /^square:webhook:event:square-event$/)
+  assert.match(identities[0], /^square:webhook:event:payment\.updated:square-event$/)
+})
+
+test("namespaces provider fixture identities by event type", () => {
+  const eventId = "bc316346-6691-4243-88ed-6d651a0d0c47"
+  const created = readWebhookIdentity(
+    { event_id: eventId, type: "refund.created" }, "a".repeat(64),
+  )
+  const updated = readWebhookIdentity(
+    { event_id: eventId, type: "refund.updated" }, "b".repeat(64),
+  )
+  assert.notEqual(created, updated)
+  assert.equal(created, `square:webhook:event:refund.created:${eventId}`)
+  assert.equal(updated, `square:webhook:event:refund.updated:${eventId}`)
 })
 
 test("rejects oversized requests before authentication", async () => {

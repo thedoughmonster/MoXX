@@ -1,5 +1,6 @@
 export const rawText = JSON.stringify({
   event_id: "square-event",
+  type: "payment.updated",
   private: "raw-provider",
 })
 
