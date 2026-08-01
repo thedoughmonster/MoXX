@@ -129,3 +129,12 @@ verify_jwt = false
 
 [functions.momi-preorder-order-status-v1]
 verify_jwt = false
+
+[functions.momi-preorder-payment-initiate-v1]
+verify_jwt = false
+
+[functions.momi-preorder-payment-reconcile-v1]
+verify_jwt = false
+
+[functions.momi-preorder-square-webhook-v1]
+verify_jwt = false

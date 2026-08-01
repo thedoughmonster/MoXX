@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["command_id", "order_id", "expected_order_version", "source_token"],
+  "properties": {
+    "command_id": { "type": "string", "format": "uuid" },
+    "order_id": { "type": "string", "format": "uuid" },
+    "expected_order_version": { "type": "integer", "minimum": 1 },
+    "source_token": { "type": "string", "minLength": 1, "maxLength": 512, "writeOnly": true }
+  }
+}
