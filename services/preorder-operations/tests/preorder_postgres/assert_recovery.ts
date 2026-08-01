@@ -15,8 +15,10 @@ export async function assertRecovery(
     select momi_preorder.read_order_status_v1(
       ${orderId}::uuid, ${authority}) as data`;
   assert.deepEqual(status?.data?.allowed_actions, [
-    "view_status", "request_cancellation", "request_modification",
+    "view_status", "initiate_payment", "request_cancellation",
+    "request_modification",
   ]);
+  assert.equal(status?.data?.payment_attempt_id, null);
   assert.equal(
     status?.data?.policy_summary,
     "Changes are accepted before fulfillment begins.",
@@ -52,8 +54,9 @@ export async function assertRecovery(
   const [pending] = await sql<{ data: Record<string, unknown> }[]>`
     select momi_preorder.read_order_status_v1(${orderId}::uuid, ${authority}) as data`;
   assert.deepEqual(pending?.data.allowed_actions, [
-    "view_status", "reconcile_payment", "contact_shop",
+    "view_status", "contact_shop",
   ]);
+  assert.equal(pending?.data.payment_attempt_id, null);
   await sql`update momi_preorder.orders set order_status = 'completed',
     payment_status = 'paid', fulfillment_status = 'completed'
     where order_id = ${orderId}::uuid`;

@@ -40,6 +40,7 @@ export const postgresHarness = {
       "20260729203650_add_preorder_quote_authority.sql",
       "20260729211630_add_preorder_intent_lifecycle.sql",
       "20260731135356_add_preorder_payment_attempt_boundary.sql",
+      "20260801184632_expose_preorder_payment_recovery_identity.sql",
     ]) {
       const source = await readFile(new URL(
         `../../../../supabase/migrations/${migration}`,
