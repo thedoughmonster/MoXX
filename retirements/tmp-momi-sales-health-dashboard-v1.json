@@ -1,0 +1,10 @@
+{
+  "$schema": "../schemas/retirement-manifest-v1.schema.json",
+  "schema_version": 1,
+  "function_slug": "tmp-momi-sales-health-dashboard-v1",
+  "owner_service": "warehouse-read-api",
+  "reason": "The temporary owner-only Sites preview is the sole audited caller; no official MoMi workflow depends on this function.",
+  "replacement": "No direct replacement; remove the Sites preview, dev function, Vault secret, and expiring read-only role after the preview is retired.",
+  "environments": ["dev"],
+  "remove_after": "2026-08-08"
+}
