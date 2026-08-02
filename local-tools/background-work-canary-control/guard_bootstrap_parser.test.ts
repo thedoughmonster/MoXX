@@ -91,7 +91,7 @@ test("parser never accepts command text, extra fields, rows, or envelope drift",
 test("parser classifies expiry, hash, identity, type, key, and envelope rejection", () => {
   const cases = [
     [encode({ ...VALID_GUARD_BOOTSTRAP_RESULT,
-      expiryUtc: "1970-01-01T00:00:00.000000Z" }), "command_hash"],
+      expiryUtc: "2024-06-21T00:00:00.000000Z" }), "command_hash"],
     [encode({ ...VALID_GUARD_BOOTSTRAP_RESULT,
       expiryUtc: "2026-02-30T00:00:00.000000Z" }), "expiry"],
     [encode({ ...VALID_GUARD_BOOTSTRAP_RESULT,
@@ -110,7 +110,7 @@ test("parser classifies expiry, hash, identity, type, key, and envelope rejectio
     assert.throws(() => parseGuardBootstrapOutput(output, context), (error) => {
       assert.ok(error instanceof ProviderSchemaError)
       assert.equal(error.diagnostic.subreason, subreason)
-      assert.equal(JSON.stringify(error.diagnostic).includes("1970-01-01"), false)
+      assert.equal(JSON.stringify(error.diagnostic).includes("2024-06-21"), false)
       return true
     })
   }

@@ -2,6 +2,7 @@ import type { SamplingExecutionState } from "./sampling_execution_state.ts"
 import type { SamplingPhaseDependencies } from "./sampling_phase_dependencies.ts"
 import type { SamplingFailureReason } from "./sampling_phase_types.ts"
 import type { ProviderParseDiagnostic } from "./provider_parse_diagnostic.ts"
+import type { ProviderStderrCode } from "./provider_stderr_codes.ts"
 
 export async function appendSamplingFailureReceipt(
   state: SamplingExecutionState,
@@ -9,6 +10,8 @@ export async function appendSamplingFailureReceipt(
   reason: SamplingFailureReason | "provider_deadman_fallback_pending",
   rollbackInvoked: boolean,
   diagnostic?: ProviderParseDiagnostic,
+  childExitCode?: number,
+  providerCode?: ProviderStderrCode,
 ): Promise<boolean> {
   if (!state.receipt || state.receipt.poisoned) return false
   try {
@@ -18,6 +21,8 @@ export async function appendSamplingFailureReceipt(
       metrics: {
         status: "failed", error_class: reason,
         rollback_invoked: rollbackInvoked,
+        ...(childExitCode === undefined ? {} : { child_exit_code: childExitCode }),
+        ...(providerCode === undefined ? {} : { provider_code: providerCode }),
         ...(diagnostic ? {
           parse_subreason: diagnostic.subreason,
           observed_top_level_type: diagnostic.topLevelType,

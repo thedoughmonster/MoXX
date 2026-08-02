@@ -21,12 +21,12 @@ test("fast-only and resource heartbeat variants are byte deterministic", () => {
   const resource = generateCombinedHeartbeatSql({
     ...VALID_GUARD_HEARTBEAT_INPUT, includeResource: true,
   })
-  assert.equal(Buffer.byteLength(fast), 23_948)
+  assert.equal(Buffer.byteLength(fast), 23_936)
   assert.equal(createHash("sha256").update(fast).digest("hex"),
-    "45516960288d812ede28789e8d49fc21dcd8c2044e173f7c887a2b59817168da")
-  assert.equal(Buffer.byteLength(resource), 26_613)
+    "c88cf437591e698b96e56590b09a3d3c6c3593376e927427507d61aebf67bf48")
+  assert.equal(Buffer.byteLength(resource), 26_601)
   assert.equal(createHash("sha256").update(resource).digest("hex"),
-    "0a99338003fcf5e1467f5c4818279451cbb9daf79c887898c780c152f4b7f728")
+    "ad855e32aa5f75185fcbf99590baa50982bd20b3daff7b685904f95ff4e94ec0")
   assert.equal(fast, generateCombinedHeartbeatSql({
     ...structuredClone(VALID_GUARD_HEARTBEAT_INPUT), includeResource: false,
   }))
@@ -61,7 +61,7 @@ test("sample observation derives from the single heartbeat DB clock", () => {
     .replace(VALID_GUARD_HEARTBEAT_INPUT.nextDeadmanCommand, "NEXT")
   assert.equal((outer.match(/clock_timestamp\(\)/g) ?? []).length, 1)
   assert.match(outer,
-    /substring\(j\.command from 'timestamptz ''\(\[\^''\]\+\)'''\)::timestamptz\n    - interval '30 seconds' as observed_at/)
+    /substring\(j\.command from 'expiry_at constant timestamptz := timestamptz ''\(\[\^''\]\+\)'''\)::timestamptz\n    - interval '30 seconds' as observed_at/)
   assert.equal((outer.match(/select observed_at from heartbeat_clock/g) ?? []).length, 2)
 })
 

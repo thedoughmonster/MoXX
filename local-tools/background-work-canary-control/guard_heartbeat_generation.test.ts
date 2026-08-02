@@ -16,9 +16,9 @@ import { VALID_GUARD_HEARTBEAT_INPUT } from "./guard_heartbeat.test_fixture.ts"
 test("heartbeat transaction is deterministic and structurally parseable", () => {
   const sql = generateGuardHeartbeatSql(VALID_GUARD_HEARTBEAT_INPUT)
   assert.equal(sql, generateGuardHeartbeatSql(structuredClone(VALID_GUARD_HEARTBEAT_INPUT)))
-  assert.equal(Buffer.byteLength(sql), 16_366)
+  assert.equal(Buffer.byteLength(sql), 16_320)
   assert.equal(createHash("sha256").update(sql).digest("hex"),
-    "341ef56a8d7621a7795d46bb6b73cb030114eddb4767ca00ba8cfc6d3b895689")
+    "c87d3d8dc2edbd04cfab73931690936fcafbb78faf87cff15af6121245916055")
   const current = generateDeadmanCommand(VALID_DEADMAN_INPUT)
   const masked = sql
     .replace(`${CURRENT_DEADMAN_TEMPLATE_TAG}${current}${CURRENT_DEADMAN_TEMPLATE_TAG}`,

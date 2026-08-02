@@ -22,7 +22,8 @@ export const RECEIPT_METRIC_GROUPS: readonly ReceiptMetricGroup[] = [
 ]
 
 export const RECEIPT_NUMBER_KEYS: readonly ReceiptMetricKey[] = [
-  "active_before_mask", "active_cron_executions", "count", "cron_history_bytes", "database_bytes",
+  "active_before_mask", "active_cron_executions", "child_exit_code", "count",
+  "cron_history_bytes", "database_bytes",
   "deadlocks", "delivery_ready", "duration_ms", "guard_failures", "job_id",
   "exact_identity_mask", "inactive_after_mask", "missed_samples",
   "numbackends", "observed_outer_unexpected_keys", "observed_row_count",
@@ -41,6 +42,6 @@ export const RECEIPT_STRING_KEYS: readonly ReceiptMetricKey[] = [
   "guard_run_status", "job_name", "original_command_md5",
   "original_command_sha256", "observed_outer_keys", "observed_sample_keys",
   "observed_top_level_type", "observed_value_types", "parse_subreason",
-  "project_ref", "sample_kind", "schedule", "status",
+  "project_ref", "provider_code", "sample_kind", "schedule", "status",
   "terminal_command_md5", "terminal_command_sha256", "terminal_guard_start_utc",
 ]

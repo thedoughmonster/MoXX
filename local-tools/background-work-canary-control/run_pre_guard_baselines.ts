@@ -31,7 +31,10 @@ export async function runPreGuardBaselines(
   })
   if (resource.status === "failure") {
     assertSamplingLockHeld(state, "preflight_resource")
-    throw new SamplingPhaseError("preflight_resource", resource.reason)
+    throw new SamplingPhaseError(
+      "preflight_resource", resource.reason, resource.schemaDiagnostic,
+      resource.childExitCode, resource.providerCode,
+    )
   }
   assertSamplingLockHeld(state, "preflight_resource")
   try {
@@ -64,7 +67,10 @@ export async function runPreGuardBaselines(
   })
   if (fast.status === "failure") {
     assertSamplingLockHeld(state, "preflight_fast")
-    throw new SamplingPhaseError("preflight_fast", fast.reason)
+    throw new SamplingPhaseError(
+      "preflight_fast", fast.reason, fast.schemaDiagnostic,
+      fast.childExitCode, fast.providerCode,
+    )
   }
   assertSamplingLockHeld(state, "preflight_fast")
   let work

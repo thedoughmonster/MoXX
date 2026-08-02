@@ -42,7 +42,10 @@ export async function runGuardBootstrap(
   }
   if (result.status === "failure") {
     assertSamplingLockHeld(state, "bootstrap")
-    throw new SamplingPhaseError("bootstrap", result.reason, result.schemaDiagnostic)
+    throw new SamplingPhaseError(
+      "bootstrap", result.reason, result.schemaDiagnostic,
+      result.childExitCode, result.providerCode,
+    )
   }
   assertSamplingLockHeld(state, "bootstrap")
   state.guard = result.value

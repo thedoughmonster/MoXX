@@ -2,6 +2,7 @@ import type { SamplingPhaseDependencies,
   SamplingPhaseInput } from "./sampling_phase_dependencies.ts"
 import type { InternalProviderSqlKind,
   ProviderQueryFailureReason } from "./runtime_adapter_types.ts"
+import type { ProviderStderrCode } from "./provider_stderr_codes.ts"
 
 export type SamplingHarnessOptions = {
   thresholdAt?: number
@@ -9,6 +10,8 @@ export type SamplingHarnessOptions = {
     kind: InternalProviderSqlKind
     combinedIndex?: number
     reason: ProviderQueryFailureReason
+    childExitCode?: number
+    providerCode?: ProviderStderrCode
   }
   receiptFailureAt?: number
   cancelAt?: number

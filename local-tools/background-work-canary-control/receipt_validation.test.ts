@@ -40,7 +40,9 @@ test("receipt schema rejects unsafe identities, keys, and values", () => {
   }), /error_class/)
   assert.doesNotThrow(validateReceiptInput.bind(null, {
     ...base,
-    metrics: { ...base.metrics, parse_subreason: "expiry",
+    metrics: { ...base.metrics, child_exit_code: 1,
+      provider_code: "momi_guard_heartbeat_current_command",
+      parse_subreason: "expiry",
       observed_top_level_type: "array", observed_row_count: 1,
       observed_outer_keys: "marker,sample,schema_version",
       observed_outer_unexpected_keys: 0,
@@ -51,6 +53,12 @@ test("receipt schema rejects unsafe identities, keys, and values", () => {
   assert.throws(validateReceiptInput.bind(null, {
     ...base, metrics: { ...base.metrics, parse_subreason: "raw_provider_error" },
   }), /parse_subreason/)
+  for (const child_exit_code of [0, 256]) assert.throws(validateReceiptInput.bind(null, {
+    ...base, metrics: { ...base.metrics, child_exit_code },
+  }), /child_exit_code/)
+  assert.throws(validateReceiptInput.bind(null, {
+    ...base, metrics: { ...base.metrics, provider_code: "raw_provider_error" },
+  }), /provider_code/)
   assert.throws(validateReceiptInput.bind(null, {
     ...base, metrics: { ...base.metrics, observed_sample_keys: "token=https" },
   }), /observed_sample_keys/)

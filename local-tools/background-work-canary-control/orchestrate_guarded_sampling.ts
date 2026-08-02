@@ -68,7 +68,10 @@ export async function orchestrateGuardedSampling(
     state.lastObservedAtUtcMs = sampling.lastObservedAtUtcMs
     state.stopReasons = sampling.status === "failed" ? sampling.stopReasons : []
     if (sampling.status === "failed") {
-      throw new SamplingPhaseError(sampling.stage, sampling.reason)
+      throw new SamplingPhaseError(
+        sampling.stage, sampling.reason, sampling.schemaDiagnostic,
+        sampling.childExitCode, sampling.providerCode,
+      )
     }
     if (!state.receipt) throw new SamplingPhaseError("receipt", "receipt_failure")
     try {

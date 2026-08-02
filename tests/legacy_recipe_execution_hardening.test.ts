@@ -93,7 +93,7 @@ test("rejects a changed SQL file before invoking the linked CLI", async () => {
     directory: root,
     plan: {
       schema_version: 1, import_run_id: "x", source_package_id: "x",
-      manifest_sha256: "0".repeat(64), generated_at: new Date(0).toISOString(),
+      manifest_sha256: "0".repeat(64), generated_at: "2024-06-21T00:00:00.000Z",
       files: [file],
     },
   } as PlanOutput

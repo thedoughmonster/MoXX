@@ -9,6 +9,7 @@ import type {
 } from "./runtime_adapter_types.ts"
 import { sha256Text } from "./sha256_text.ts"
 import { ProviderSchemaError } from "./provider_schema_error.ts"
+import { classifyProviderStderr } from "./classify_provider_stderr.ts"
 
 export async function executeProviderQuery<T>(
   request: ProviderQueryRequest<T>,
@@ -61,7 +62,14 @@ export async function executeProviderQuery<T>(
       const reason = child.stdout.byteLength > CHILD_OUTPUT_LIMIT_BYTES
         ? "output_limit" : child.outcome.status === "success"
           ? "exit_failure" : child.outcome.status
-      result = { status: "failure", reason }
+      const childExitCode = reason === "exit_failure" &&
+        Number.isSafeInteger(child.outcome.exitCode) && (child.outcome.exitCode as number) > 0
+        ? child.outcome.exitCode as number : undefined
+      const providerCode = reason === "exit_failure"
+        ? classifyProviderStderr(child.stderr) : undefined
+      result = { status: "failure", reason,
+        ...(childExitCode === undefined ? {} : { childExitCode }),
+        ...(providerCode === undefined ? {} : { providerCode }) }
     } else {
       try {
         result = { status: "success", value: request.parser(child.stdout) }

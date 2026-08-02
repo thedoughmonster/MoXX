@@ -55,6 +55,9 @@ export async function runSamplingBoundaries(
     ? schedulerResult.reason : "unexpected_failure")
   return {
     status: "failed", stage: failure?.stage ?? "sampling", reason,
+    schemaDiagnostic: failure?.schemaDiagnostic,
+    childExitCode: failure?.childExitCode,
+    providerCode: failure?.providerCode,
     stopReasons: state.stopReasons,
     currentGenerationSha256: state.currentGenerationSha256,
     samplesCompleted: state.samplesCompleted,

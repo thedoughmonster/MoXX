@@ -1,8 +1,10 @@
 import { loadWorkspace } from "./architecture/load_workspace.ts"
 import { findSourceQualityFindings } from "./find_source_quality_violations.ts"
+import { findPreopeningTimestampViolations } from "./find_preopening_timestamp_violations.ts"
 
 const workspace = await loadWorkspace()
 const { warnings, violations } = await findSourceQualityFindings(workspace)
+violations.push(...await findPreopeningTimestampViolations())
 
 if (warnings.length > 0) {
   console.warn(`Source quality warnings:\n- ${warnings.join("\n- ")}`)

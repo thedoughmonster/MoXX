@@ -65,7 +65,7 @@ export async function createSamplingHarness(
       const combinedIndex = telemetry.combinedCalls
       if (failure?.kind === request.sql.kind &&
         (failure.combinedIndex === undefined || failure.combinedIndex === combinedIndex)) {
-        return { status: "failure", reason: failure.reason }
+        return { status: "failure", reason: failure.reason, childExitCode: failure.childExitCode, providerCode: failure.providerCode }
       }
       try {
         return { status: "success", value: request.parser(buildTestProviderOutput(

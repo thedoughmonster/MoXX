@@ -12,9 +12,9 @@ import { generateDeadmanCommand } from "./generate_deadman_command.ts"
 test("dead-man command generation is byte deterministic", () => {
   const command = generateDeadmanCommand(VALID_DEADMAN_INPUT)
   assert.equal(command, generateDeadmanCommand(structuredClone(VALID_DEADMAN_INPUT)))
-  assert.equal(Buffer.byteLength(command), 4_367)
+  assert.equal(Buffer.byteLength(command), 4_310)
   assert.equal(createHash("sha256").update(command).digest("hex"),
-    "97403f210ef41ebbfdba9a8b03007592e614f2175c5dbd980f3d9503b55b895a")
+    "d89355308c319b1c51e9c235e407d799af86b22df3e5383fda840869eaa2ff9b")
   assert.deepEqual(parse(command).map((statement) => statement.type), ["do"])
 })
 
@@ -53,6 +53,8 @@ test("generated command has only the bounded dead-man operation surface", () => 
   assert.match(command, /exact_identity_mask/)
   assert.match(command, /active_before_mask/)
   assert.match(command, /inactive_after_mask/)
+  assert.match(command,
+    /guard_start_at := coalesce\(guard_start_at, expiry_at - interval '30 seconds'\)/)
 })
 
 test("expiry path is scoped, ordered, and self-deactivates last", () => {
