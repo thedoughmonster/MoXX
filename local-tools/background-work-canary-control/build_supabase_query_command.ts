@@ -21,9 +21,8 @@ export function buildSupabaseQueryCommand(
     throw new Error("Supabase query file is not a recognized sealed artifact")
   }
   return {
-    executableName: "pnpm",
     arguments: [
-      "exec", "supabase", "db", "query", "--linked", "--file", sealedFile,
+      "db", "query", "--linked", "--file", sealedFile,
       "--workdir", repositoryRoot, "--output-format", "json",
     ],
   }

@@ -13,6 +13,7 @@ import type {
   BoundedChildStatus,
 } from "./process_types.ts"
 import { resolveSafeExecutable } from "./resolve_safe_executable.ts"
+import { HELD_EXECUTABLES } from "./sealed_held_executable.ts"
 
 let childInFlight = false
 
@@ -35,8 +36,18 @@ export async function runBoundedChild(
   }
   childInFlight = true
   let executable: string
+  let stdio: ["ignore", "pipe", "pipe"] | ["ignore", "pipe", "pipe", number]
   try {
-    executable = await resolveSafeExecutable(request.executable)
+    if (request.heldExecutable === undefined) {
+      if (request.executable === "/proc/self/fd/3") throw new Error()
+      executable = await resolveSafeExecutable(request.executable)
+      stdio = ["ignore", "pipe", "pipe"]
+    } else {
+      if (request.executable !== "/proc/self/fd/3") throw new Error()
+      const held = HELD_EXECUTABLES.inspect(request.heldExecutable)
+      executable = request.executable
+      stdio = ["ignore", "pipe", "pipe", held.fd]
+    }
   } catch (error) {
     childInFlight = false
     throw error
@@ -53,7 +64,7 @@ export async function runBoundedChild(
       detached: true,
       env: buildSafeChildEnvironment(request.environment),
       shell: false,
-      stdio: ["ignore", "pipe", "pipe"],
+      stdio,
       windowsHide: true,
     })
   } catch {

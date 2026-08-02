@@ -4,6 +4,7 @@ import { performance } from "node:perf_hooks"
 import { acquireCanaryControlLock } from "./acquire_canary_control_lock.ts"
 import { appendReceipt } from "./append_receipt.ts"
 import { collectRuntimeEvidence } from "./collect_runtime_evidence.ts"
+import { createHeldNativeProvider } from "./create_held_native_provider.ts"
 import { createUtcTimer } from "./create_utc_timer.ts"
 import { executeProviderQuery } from "./execute_provider_query.ts"
 import { initializeReceipt } from "./initialize_receipt.ts"
@@ -26,7 +27,7 @@ export function createCanaryProgramDependencies(): CanaryProgramDependencies {
   const clock = { nowUtcMs }
   const timer = createUtcTimer(nowUtcMs)
   const query: SamplingQueryExecutor = (request) => executeProviderQuery(request, {
-    runChild: runBoundedChild, environment: process.env, temporaryRoot: "/tmp",
+    temporaryRoot: "/tmp",
   })
   const samplingDependencies = {
     randomBytes, query, initializeReceipt, appendReceipt,
@@ -43,6 +44,7 @@ export function createCanaryProgramDependencies(): CanaryProgramDependencies {
         environment: process.env, nodeVersion: process.versions.node,
         runChild: runBoundedChild, resolveExecutables: resolveRuntimeExecutables,
         collectEvidence: collectRuntimeEvidence, acquireLock: acquireCanaryControlLock,
+        createProvider: createHeldNativeProvider,
       },
     ),
     prepareReceiptRoot,

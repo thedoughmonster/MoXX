@@ -83,6 +83,7 @@ test("invocation safety fails closed and strips ambient authority", () => {
     SUPABASE_DB_PASSWORD: "redacted-test-value",
     PGPASSWORD: "redacted-test-value",
     SUPABASE_URL: "https://provider.invalid",
+    SUPABASE_CLI_BINARY_OVERRIDE: "/untrusted/supabase",
     DATABASE_URL: "postgresql://database.invalid/db",
     API_SECRET: "redacted-test-value",
     RANDOM_TOKEN: "redacted-test-value",

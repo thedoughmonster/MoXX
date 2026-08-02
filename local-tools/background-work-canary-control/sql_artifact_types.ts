@@ -7,6 +7,5 @@ export type VerifiedSqlArtifact = {
 }
 
 export type QueryCommand = {
-  executableName: "pnpm"
   arguments: readonly string[]
 }

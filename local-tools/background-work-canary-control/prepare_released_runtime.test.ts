@@ -1,5 +1,6 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
+import { createFakeHeldProvider } from "./create_fake_held_provider.test_fixture.ts"
 import { prepareReleasedRuntime } from "./prepare_released_runtime.ts"
 
 const repository = {
@@ -10,6 +11,7 @@ const repository = {
   headSha: "9e9425ac63cdfaf2fad0fb8a12b975642221aac9",
   projectRef: "xtbraqnlskmqxinjxxdn" as const,
 }
+const provider = createFakeHeldProvider()
 
 test("released runtime wiring holds one accepted lifecycle lock", async () => {
   let released = false
@@ -28,10 +30,12 @@ test("released runtime wiring holds one accepted lifecycle lock", async () => {
       status: () => released ? "released" as const : "held" as const,
       release: async () => { released = true },
     }),
-    collectEvidence: async () => repository,
+    collectEvidence: async () => ({ repository, provider }),
+    createProvider: async () => provider,
   })
   assert.equal(released, false)
   assert.equal(runtime.repository.headSha, repository.headSha)
+  assert.equal(runtime.provider, provider)
   await runtime.lock.release()
   assert.equal(released, true)
 })
@@ -53,6 +57,7 @@ test("released runtime wiring releases lock on evidence or executable drift", as
         status: () => released ? "released" as const : "held" as const,
         release: async () => { released = true } }),
       collectEvidence: async () => { throw new Error("preflight failed") },
+      createProvider: async () => createFakeHeldProvider(),
     }))
     assert.equal(released, true)
   }

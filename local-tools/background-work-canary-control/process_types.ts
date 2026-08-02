@@ -10,6 +10,7 @@ export type BoundedChildRequest = {
   executable: string
   arguments: readonly string[]
   environment?: NodeJS.ProcessEnv
+  heldExecutable?: SealedHeldExecutable
   signal?: AbortSignal
   timeoutMs?: number
 }
@@ -43,3 +44,4 @@ export type CanaryLockProcessOptions = {
   holderScript?: string
   releaseTimeoutMs?: number
 }
+import type { SealedHeldExecutable } from "./sealed_held_executable.ts"

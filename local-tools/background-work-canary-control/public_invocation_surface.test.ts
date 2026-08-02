@@ -9,6 +9,7 @@ test("public runtime surface accepts only exact development scope", () => {
   for (const option of [
     "--mode", "--sql", "--timing", "--threshold", "--path", "--credential",
     "--run-id", "--target", "--environment", "--database-url",
+    "--supabase-executable", "--provider-path",
   ]) assert.throws(() => parsePublicInvocation([
     "--env", "dev", "--project-ref", "xtbraqnlskmqxinjxxdn", option, "value",
   ]))

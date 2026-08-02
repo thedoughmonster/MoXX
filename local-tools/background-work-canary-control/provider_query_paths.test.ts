@@ -3,6 +3,7 @@ import { mkdtemp, readdir, rm, symlink } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { test } from "node:test"
+import { createFakeHeldProvider } from "./create_fake_held_provider.test_fixture.ts"
 import { createInternalProviderSql } from "./create_internal_provider_sql.ts"
 import { executeProviderQuery } from "./execute_provider_query.ts"
 import { generateCleanupSql } from "./generate_cleanup_sql.ts"
@@ -17,24 +18,23 @@ test("provider adapter rejects symlinked repository and temporary roots", async 
     VALID_RECOVERY_CONTROL_INPUT,
   ))
   let called = false
+  const provider = createFakeHeldProvider({ runQuery: async () => {
+    called = true
+    throw new Error("must not spawn")
+  } })
   const dependencies = {
     temporaryRoot,
-    environment: {},
-    runChild: async () => {
-      called = true
-      throw new Error("must not spawn")
-    },
   }
   try {
     await symlink(repository, repositoryLink, "dir")
     await symlink(temporaryRoot, temporaryLink, "dir")
     const linkedRepository = await executeProviderQuery({
-      repositoryRoot: repositoryLink, pnpmExecutable: process.execPath, sql,
+      repositoryRoot: repositoryLink, provider, sql,
       parser: () => "never",
     }, dependencies)
     assert.deepEqual(linkedRepository, { status: "failure", reason: "adapter_failure" })
     const linkedTemporary = await executeProviderQuery({
-      repositoryRoot: repository, pnpmExecutable: process.execPath, sql,
+      repositoryRoot: repository, provider, sql,
       parser: () => "never",
     }, { ...dependencies, temporaryRoot: temporaryLink })
     assert.deepEqual(linkedTemporary, { status: "failure", reason: "adapter_failure" })

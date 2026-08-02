@@ -14,7 +14,7 @@ export async function runFinalInactiveReadback(
 ): Promise<FinalReadbackResult> {
   const queryBase = {
     repositoryRoot: handoff.repositoryRoot,
-    pnpmExecutable: handoff.runtime.executables.pnpmExecutable,
+    provider: handoff.runtime.provider,
   }
   const fast = await dependencies.query({
     ...queryBase,

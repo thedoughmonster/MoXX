@@ -25,6 +25,7 @@ export type SamplingHarnessTelemetry = {
   combinedCalls: number
   appendCalls: number
   releases: number
+  providerCloses: number
   providerKinds: InternalProviderSqlKind[]
   observedBoundaries: number[]
 }

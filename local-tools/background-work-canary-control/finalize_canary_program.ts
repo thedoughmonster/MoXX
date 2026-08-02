@@ -11,6 +11,17 @@ export async function finalizeCanaryProgram(
   dependencies: CanaryProgramDependencies,
 ): Promise<CanaryProgramResult> {
   const lock = terminal.runtime.lock
+  try {
+    await terminal.runtime.provider.close()
+    if (terminal.runtime.provider.status() !== "closed") throw new Error()
+  } catch {
+    if (terminal.artifactInput.status === "pre_guard_failure") {
+      try { await lock.release() } catch { /* process exit also releases */ }
+      return buildProgramFailure("pre_guard")
+    }
+    lock.retainUntilExit?.()
+    return buildProgramFailure("manual")
+  }
   let published
   try {
     published = await dependencies.writeFinalArtifact(terminal.artifactInput, {

@@ -28,7 +28,7 @@ export async function runGuardBootstrap(
   try {
     result = await dependencies.query({
       repositoryRoot: state.repositoryRoot,
-      pnpmExecutable: state.runtime.executables.pnpmExecutable,
+      provider: state.runtime.provider,
       signal: state.signal,
       sql,
       parser: (stdout) => parseGuardBootstrapOutput(stdout, {

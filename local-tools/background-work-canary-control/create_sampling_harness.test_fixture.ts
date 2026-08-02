@@ -4,6 +4,7 @@ import { join } from "node:path"
 import { appendReceipt } from "./append_receipt.ts"
 import { buildTestProviderOutput } from "./build_test_provider_output.test_fixture.ts"
 import { createFakeCanaryLock } from "./create_fake_canary_lock.test_fixture.ts"
+import { createFakeHeldProvider } from "./create_fake_held_provider.test_fixture.ts"
 import { initializeReceipt } from "./initialize_receipt.ts"
 import type { SamplingPhaseDependencies } from "./sampling_phase_dependencies.ts"
 import type { SchedulerStopReason } from "./schedule_types.ts"
@@ -17,10 +18,13 @@ export async function createSamplingHarness(
   const controller = new AbortController()
   const telemetry: SamplingHarnessTelemetry = {
     nowUtcMs: Date.UTC(2026, 7, 2, 12, 0, 1), randomCalls: 0,
-    combinedCalls: 0, appendCalls: 0, releases: 0,
+    combinedCalls: 0, appendCalls: 0, releases: 0, providerCloses: 0,
     providerKinds: [], observedBoundaries: [],
   }
   const fakeLock = createFakeCanaryLock(() => { telemetry.releases += 1 })
+  const heldProvider = createFakeHeldProvider({
+    onClose: () => { telemetry.providerCloses += 1 },
+  })
   const loseLock = fakeLock.lose
   const dependencies: SamplingPhaseDependencies = {
     randomBytes: (size) => {
@@ -51,6 +55,7 @@ export async function createSamplingHarness(
     clock: { nowUtcMs: () => telemetry.nowUtcMs },
     timer: { setAt: () => { throw new Error("fake schedule owns time") } },
     query: async (request) => {
+      if (request.provider !== heldProvider) throw new Error("Provider identity drifted")
       telemetry.providerKinds.push(request.sql.kind)
       if ((options.lockLossAt === "preflight_resource" &&
         request.sql.kind === "resource_sample") ||
@@ -126,6 +131,7 @@ export async function createSamplingHarness(
           gitExecutable: "/trusted/git", pnpmExecutable: "/trusted/pnpm",
           flockExecutable: "/trusted/flock",
         },
+        provider: heldProvider,
         lock: fakeLock.lock,
       },
     },

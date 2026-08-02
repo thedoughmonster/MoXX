@@ -16,7 +16,7 @@ export async function runFreshCleanup(
     const input = buildRecoveryControlInput(handoff.runtime, guardJobId)
     return await dependencies.query({
       repositoryRoot: handoff.repositoryRoot,
-      pnpmExecutable: handoff.runtime.executables.pnpmExecutable,
+      provider: handoff.runtime.provider,
       sql: createInternalProviderSql("cleanup", generateCleanupSql(input)),
       parser: (stdout) => parseCleanupOutput(stdout, input),
     })

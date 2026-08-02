@@ -16,7 +16,7 @@ export async function runFreshRollback(
     const input = buildRecoveryControlInput(state.runtime, state.guard.guardJobId)
     return await dependencies.query({
       repositoryRoot: state.repositoryRoot,
-      pnpmExecutable: state.runtime.executables.pnpmExecutable,
+      provider: state.runtime.provider,
       sql: createInternalProviderSql("rollback", generateRollbackSql(input)),
       parser: (stdout) => parseRollbackOutput(stdout, input),
     })

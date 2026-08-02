@@ -20,6 +20,12 @@ credentials, SQL, provider payloads, command output, URLs, tokens, or stacks.
   `xtbraqnlskmqxinjxxdn`.
 - Use Node `24.14.0`, pnpm `11.7.0`, and the repository-pinned Supabase CLI
   `2.109.1` from the installed workspace.
+- Released-candidate preflight requires a real repository `node_modules`, then
+  verifies the exact lock-bound Linux x64 native CLI for version `2.109.1`.
+  The native bytes are hashed into an owner-only snapshot, opened, unlinked,
+  and executed only through its held descriptor. Provider queries never execute
+  `pnpm`, a JavaScript shim, a shebang, `PATH`, or a mutable binary pathname;
+  `pnpm` remains only a version preflight.
 - Authenticate the pinned Supabase CLI through its approved local credential
   store. Do not pass a credential, database URL, SQL path, mode, threshold,
   timing, run identifier, or target on the command line.

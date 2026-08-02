@@ -17,7 +17,7 @@ export async function runDeadmanReconciliation(
   try {
     return await dependencies.query({
       repositoryRoot: handoff.repositoryRoot,
-      pnpmExecutable: handoff.runtime.executables.pnpmExecutable,
+      provider: handoff.runtime.provider,
       sql: createInternalProviderSql(
         "deadman_reconciliation", generateDeadmanReconciliationSql(),
       ),

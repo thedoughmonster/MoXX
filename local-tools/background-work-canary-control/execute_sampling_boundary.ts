@@ -40,7 +40,7 @@ export async function executeSamplingBoundary(
   )
   const result = await dependencies.query({
     repositoryRoot: state.repositoryRoot,
-    pnpmExecutable: state.runtime.executables.pnpmExecutable,
+    provider: state.runtime.provider,
     signal,
     sql: createInternalProviderSql(
       boundary.resource ? "guard_heartbeat_resource" : "guard_heartbeat_fast",
