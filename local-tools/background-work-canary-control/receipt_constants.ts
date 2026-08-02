@@ -25,7 +25,8 @@ export const RECEIPT_NUMBER_KEYS: readonly ReceiptMetricKey[] = [
   "active_before_mask", "active_cron_executions", "count", "cron_history_bytes", "database_bytes",
   "deadlocks", "delivery_ready", "duration_ms", "guard_failures", "job_id",
   "exact_identity_mask", "inactive_after_mask", "missed_samples",
-  "numbackends", "oldest_age_seconds", "overlap_count", "queue_length",
+  "numbackends", "observed_outer_unexpected_keys", "observed_row_count",
+  "observed_sample_unexpected_keys", "oldest_age_seconds", "overlap_count", "queue_length",
   "queue_ready", "routing_ready", "target_run_count", "target_run_failures",
   "terminal_failure_count", "terminal_guard_run_id", "terminal_run_count",
   "toast_ready", "waiting_locks", "wal_bytes", "wal_directory_bytes",
@@ -38,6 +39,8 @@ export const RECEIPT_BOOLEAN_KEYS: readonly ReceiptMetricKey[] = [
 export const RECEIPT_STRING_KEYS: readonly ReceiptMetricKey[] = [
   "command_md5", "error_class", "expiry_utc", "generation_sha256",
   "guard_run_status", "job_name", "original_command_md5",
-  "original_command_sha256", "project_ref", "sample_kind", "schedule", "status",
+  "original_command_sha256", "observed_outer_keys", "observed_sample_keys",
+  "observed_top_level_type", "observed_value_types", "parse_subreason",
+  "project_ref", "sample_kind", "schedule", "status",
   "terminal_command_md5", "terminal_command_sha256", "terminal_guard_start_utc",
 ]

@@ -13,9 +13,9 @@ import {
 test("bootstrap transaction is byte deterministic and structurally parseable", () => {
   const sql = generateGuardBootstrapSql(VALID_GUARD_BOOTSTRAP_INPUT)
   assert.equal(sql, generateGuardBootstrapSql(structuredClone(VALID_GUARD_BOOTSTRAP_INPUT)))
-  assert.equal(Buffer.byteLength(sql), 11_478)
+  assert.equal(Buffer.byteLength(sql), 11_512)
   assert.equal(createHash("sha256").update(sql).digest("hex"),
-    "2655f5a5ca57b12190c308a4e976a6a25532fed56122cfbd50ecb1b359272152")
+    "f7d39c5f0efb23c8303215250a1cc02801da27ef820210d5b2db45de96aa2746")
   const masked = sql.replace(
     `${DEADMAN_TEMPLATE_TAG}${VALID_GUARD_BOOTSTRAP_INPUT.deadmanCommand}${DEADMAN_TEMPLATE_TAG}`,
     "'validated-deadman-template'",
@@ -33,6 +33,8 @@ test("bootstrap uses one database clock and exact 30-second materialization", ()
   assert.match(outer, /select clock_timestamp\(\) into database_now;/)
   assert.match(outer, /expiry_at := database_now \+ interval '30 seconds';/)
   assert.match(outer, /to_char\(expiry_at at time zone 'UTC'/)
+  assert.match(outer, /substring\(j\.command from 'expiry_at constant timestamptz/)
+  assert.doesNotMatch(outer, /substring\(j\.command from 'timestamptz/)
   assert.equal((VALID_GUARD_BOOTSTRAP_INPUT.deadmanCommand.match(
     new RegExp(DEADMAN_EXPIRY_PLACEHOLDER, "g"),
   ) ?? []).length, 1)

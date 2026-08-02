@@ -17,7 +17,9 @@ export async function coordinateSamplingFailure(
     ? error : new SamplingPhaseError("sampling", "unexpected_failure")
   state.failureStage = failure.stage
   state.failureReason = failure.reason
-  await appendSamplingFailureReceipt(state, dependencies, failure.reason, Boolean(state.guard))
+  await appendSamplingFailureReceipt(
+    state, dependencies, failure.reason, Boolean(state.guard), failure.schemaDiagnostic,
+  )
   if (state.guardMayExist && !state.guard) {
     return buildAmbiguousBootstrapContext(state, failure.reason)
   }

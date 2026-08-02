@@ -8,9 +8,9 @@ import { createFakeHeldProvider } from "./create_fake_held_provider.test_fixture
 import { initializeReceipt } from "./initialize_receipt.ts"
 import type { SamplingPhaseDependencies } from "./sampling_phase_dependencies.ts"
 import type { SchedulerStopReason } from "./schedule_types.ts"
-import type { SamplingHarness, SamplingHarnessOptions,
-  SamplingHarnessTelemetry } from "./sampling_test_types.test_fixture.ts"
+import type { SamplingHarness, SamplingHarnessOptions, SamplingHarnessTelemetry } from "./sampling_test_types.test_fixture.ts"
 import { verifyReceiptFile } from "./verify_receipt_file.ts"
+import { ProviderSchemaError } from "./provider_schema_error.ts"
 export async function createSamplingHarness(
   options: SamplingHarnessOptions = {},
 ): Promise<SamplingHarness> {
@@ -22,9 +22,7 @@ export async function createSamplingHarness(
     providerKinds: [], observedBoundaries: [],
   }
   const fakeLock = createFakeCanaryLock(() => { telemetry.releases += 1 })
-  const heldProvider = createFakeHeldProvider({
-    onClose: () => { telemetry.providerCloses += 1 },
-  })
+  const heldProvider = createFakeHeldProvider({ onClose: () => { telemetry.providerCloses += 1 } })
   const loseLock = fakeLock.lose
   const dependencies: SamplingPhaseDependencies = {
     randomBytes: (size) => {
@@ -73,8 +71,10 @@ export async function createSamplingHarness(
         return { status: "success", value: request.parser(buildTestProviderOutput(
           request.sql.kind, request.sql.sql, telemetry, options,
         )) }
-      } catch {
-        return { status: "failure", reason: "schema_failure" }
+      } catch (error) {
+        return error instanceof ProviderSchemaError ? { status: "failure",
+          reason: "schema_failure", schemaDiagnostic: error.diagnostic }
+          : { status: "failure", reason: "schema_failure" }
       }
     },
     schedule: async (boundaries, scheduler) => {

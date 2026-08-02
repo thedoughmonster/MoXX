@@ -10,6 +10,8 @@ import { generateRollbackSql } from "./generate_rollback_sql.ts"
 import { CHILD_OUTPUT_LIMIT_BYTES } from "./process_constants.ts"
 import { VALID_RECOVERY_CONTROL_INPUT } from "./recovery_control.test_fixture.ts"
 import type { BoundedChildResult } from "./process_types.ts"
+import { ProviderSchemaError } from "./provider_schema_error.ts"
+import { EMPTY_PROVIDER_OBSERVED_SHAPE } from "./provider_parse_diagnostic.ts"
 function childResult(status: BoundedChildResult["outcome"]["status"],
   stdout = "[]\n", stderr = ""): BoundedChildResult {
   const out = new TextEncoder().encode(stdout)
@@ -75,6 +77,14 @@ test("provider adapter maps all child and schema failures and always cleans temp
       parser: () => { throw new Error("raw-schema-output") },
     }, { temporaryRoot })
     assert.deepEqual(schema, { status: "failure", reason: "schema_failure" })
+    const typed = await executeProviderQuery({
+      repositoryRoot: root, provider, sql,
+      parser: () => { throw new ProviderSchemaError(
+        "expiry", EMPTY_PROVIDER_OBSERVED_SHAPE,
+      ) },
+    }, { temporaryRoot })
+    assert.deepEqual(typed, { status: "failure", reason: "schema_failure",
+      schemaDiagnostic: { subreason: "expiry", ...EMPTY_PROVIDER_OBSERVED_SHAPE } })
     assert.deepEqual(await readdir(temporaryRoot), [])
   } finally {
     await rm(root, { recursive: true, force: true })

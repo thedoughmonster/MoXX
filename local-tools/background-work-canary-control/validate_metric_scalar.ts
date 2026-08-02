@@ -5,6 +5,7 @@ import {
   RECEIPT_STRING_KEYS,
 } from "./receipt_constants.ts"
 import type { ReceiptMetricKey, ReceiptScalar } from "./receipt_types.ts"
+import { PROVIDER_PARSE_SUBREASONS } from "./provider_parse_diagnostic.ts"
 
 const jobNames = new Set([
   "momi-event-routing-wakeup-v1",
@@ -63,5 +64,21 @@ export function validateMetricScalar(key: ReceiptMetricKey, value: unknown): voi
   if (key === "status" && !statuses.has(value)) throw new Error("Receipt status is invalid")
   if (key === "error_class" && !/^[a-z][a-z0-9_]{0,63}$/.test(value)) {
     throw new Error("Receipt error_class is invalid")
+  }
+  if (key === "parse_subreason" &&
+    !PROVIDER_PARSE_SUBREASONS.includes(value as never)) {
+    throw new Error("Receipt parse_subreason is invalid")
+  }
+  if (key === "observed_top_level_type" &&
+    !["array", "boolean", "null", "number", "object", "string", "undefined"].includes(value)) {
+    throw new Error("Receipt observed_top_level_type is invalid")
+  }
+  if (["observed_outer_keys", "observed_sample_keys"].includes(key) &&
+    (value.length > 512 || !/^(none|[A-Za-z][A-Za-z0-9_]*(,[A-Za-z][A-Za-z0-9_]*)*)$/.test(value))) {
+    throw new Error(`Receipt ${key} is invalid`)
+  }
+  if (key === "observed_value_types" &&
+    (value.length > 1024 || !/^(none|[A-Za-z][A-Za-z0-9_]*:(array|boolean|null|number|object|string|undefined)(,[A-Za-z][A-Za-z0-9_]*:(array|boolean|null|number|object|string|undefined))*)$/.test(value))) {
+    throw new Error("Receipt observed_value_types is invalid")
   }
 }

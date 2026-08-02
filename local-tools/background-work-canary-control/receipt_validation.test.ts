@@ -38,6 +38,22 @@ test("receipt schema rejects unsafe identities, keys, and values", () => {
     ...base,
     metrics: { error_class: "https://provider.invalid" },
   }), /error_class/)
+  assert.doesNotThrow(validateReceiptInput.bind(null, {
+    ...base,
+    metrics: { ...base.metrics, parse_subreason: "expiry",
+      observed_top_level_type: "array", observed_row_count: 1,
+      observed_outer_keys: "marker,sample,schema_version",
+      observed_outer_unexpected_keys: 0,
+      observed_sample_keys: "expiryUtc,guardJobId",
+      observed_sample_unexpected_keys: 0,
+      observed_value_types: "expiryUtc:string,guardJobId:number" },
+  }))
+  assert.throws(validateReceiptInput.bind(null, {
+    ...base, metrics: { ...base.metrics, parse_subreason: "raw_provider_error" },
+  }), /parse_subreason/)
+  assert.throws(validateReceiptInput.bind(null, {
+    ...base, metrics: { ...base.metrics, observed_sample_keys: "token=https" },
+  }), /observed_sample_keys/)
   assert.throws(validateReceiptInput.bind(null, {
     ...base,
     metrics: { duration_ms: Number.NaN },
