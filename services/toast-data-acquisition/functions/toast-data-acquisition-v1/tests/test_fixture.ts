@@ -35,7 +35,7 @@ export function makeFixture(): {
       client_secret_secret_name: "TOAST_CLIENT_SECRET",
       user_access_type: "TOAST_MACHINE_CLIENT",
       request_timeout_ms: 5000,
-      first_business_date: "2024-01-01",
+      first_business_date: "2024-06-21",
       operation_parameters: [
         {
           parameter_key: "startDate",

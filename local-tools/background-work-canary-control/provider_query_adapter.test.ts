@@ -66,7 +66,9 @@ test("provider adapter maps all child and schema failures and always cleans temp
         repositoryRoot: root, provider, sql,
         parser: () => "never",
       }, { temporaryRoot })
-      assert.deepEqual(result, { status: "failure", reason: status })
+      assert.deepEqual(result, status === "exit_failure"
+        ? { status: "failure", reason: status, childExitCode: 7 }
+        : { status: "failure", reason: status })
       assert.equal(JSON.stringify(result).includes("private-credential-value"), false)
       assert.equal(JSON.stringify(result).includes(sql.sql), false)
       assert.deepEqual(await readdir(temporaryRoot), [])
@@ -86,6 +88,27 @@ test("provider adapter maps all child and schema failures and always cleans temp
     assert.deepEqual(typed, { status: "failure", reason: "schema_failure",
       schemaDiagnostic: { subreason: "expiry", ...EMPTY_PROVIDER_OBSERVED_SHAPE } })
     assert.deepEqual(await readdir(temporaryRoot), [])
+  } finally {
+    await rm(root, { recursive: true, force: true })
+    await rm(temporaryRoot, { recursive: true, force: true })
+  }
+})
+
+test("provider adapter exposes only closed exit diagnostics", async () => {
+  const root = await mkdtemp(join(tmpdir(), "momi-provider-code-root-"))
+  const temporaryRoot = await mkdtemp(join(tmpdir(), "momi-provider-code-temp-"))
+  const sql = createInternalProviderSql("rollback", generateRollbackSql(
+    VALID_RECOVERY_CONTROL_INPUT,
+  ))
+  try {
+    const provider = createFakeHeldProvider({ runQuery: async () => childResult(
+      "exit_failure", "", "ERROR:  momi_guard_heartbeat_current_command\nsecret=value\n",
+    ) })
+    const result = await executeProviderQuery({ repositoryRoot: root, provider, sql,
+      parser: () => "never" }, { temporaryRoot })
+    assert.deepEqual(result, { status: "failure", reason: "exit_failure",
+      childExitCode: 7, providerCode: "momi_guard_heartbeat_current_command" })
+    assert.doesNotMatch(JSON.stringify(result), /secret|ERROR/)
   } finally {
     await rm(root, { recursive: true, force: true })
     await rm(temporaryRoot, { recursive: true, force: true })

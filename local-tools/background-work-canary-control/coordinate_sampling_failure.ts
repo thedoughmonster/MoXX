@@ -19,6 +19,7 @@ export async function coordinateSamplingFailure(
   state.failureReason = failure.reason
   await appendSamplingFailureReceipt(
     state, dependencies, failure.reason, Boolean(state.guard), failure.schemaDiagnostic,
+    failure.childExitCode, failure.providerCode,
   )
   if (state.guardMayExist && !state.guard) {
     return buildAmbiguousBootstrapContext(state, failure.reason)
@@ -54,6 +55,7 @@ export async function coordinateSamplingFailure(
   if (rollback.status === "failure") {
     await appendSamplingFailureReceipt(
       state, dependencies, "provider_deadman_fallback_pending", true,
+      rollback.schemaDiagnostic, rollback.childExitCode, rollback.providerCode,
     )
     return {
       ...buildGuardedSamplingContext(state),

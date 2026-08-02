@@ -94,3 +94,23 @@ test("cancellation after guard verification stops before a heartbeat and rolls b
     await harness.cleanup()
   }
 })
+
+test("provider exits persist only bounded diagnostics", async () => {
+  const harness = await createSamplingHarness({ providerFailure: {
+    kind: "guard_heartbeat_resource", combinedIndex: 0,
+    reason: "exit_failure", childExitCode: 1,
+    providerCode: "momi_guard_heartbeat_current_command",
+  } })
+  try {
+    const result = await orchestrateGuardedSampling(harness.input, harness.dependencies)
+    assert.equal(result.status, "sampling_failed_rollback_completed")
+    if (result.status !== "sampling_failed_rollback_completed") return
+    assert.equal(result.reason, "exit_failure")
+    const receipt = await readFile(result.receipt.path, "utf8")
+    assert.match(receipt, /"child_exit_code":1/)
+    assert.match(receipt, /"provider_code":"momi_guard_heartbeat_current_command"/)
+    assert.doesNotMatch(receipt, /raw_sql|stderr|secret/)
+  } finally {
+    await harness.cleanup()
+  }
+})

@@ -94,14 +94,14 @@ test("bounds first-business-date reconciliation into resumable slices", () => {
     resource_type: "shift",
     pagination_kind: "none",
     page_size: null,
-    first_business_date: "2024-01-01",
+    first_business_date: "2024-06-21",
     operation_parameters: operation.operation_parameters.slice(0, 2),
-  }, "2024-03-01T00:00:00.000Z");
+  }, "2024-08-20T00:00:00.000Z");
   assert.deepEqual(result.parameters, {
-    startDate: "2024-01-01T00:00:00.000Z",
-    endDate: "2024-01-29T00:00:00.000Z",
+    startDate: "2024-06-21T00:00:00.000Z",
+    endDate: "2024-07-19T00:00:00.000Z",
   });
   assert.deepEqual(result.next_cursor, {
-    window_start: "2024-01-29T00:00:00.000Z",
+    window_start: "2024-07-19T00:00:00.000Z",
   });
 });

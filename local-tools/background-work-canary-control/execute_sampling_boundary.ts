@@ -63,7 +63,10 @@ export async function executeSamplingBoundary(
   })
   if (result.status === "failure") {
     assertSamplingLockHeld(state, "sampling")
-    throw new SamplingPhaseError("sampling", result.reason)
+    throw new SamplingPhaseError(
+      "sampling", result.reason, result.schemaDiagnostic,
+      result.childExitCode, result.providerCode,
+    )
   }
   assertSamplingLockHeld(state, "sampling")
   state.currentGenerationSha256 = nextGenerationSha256

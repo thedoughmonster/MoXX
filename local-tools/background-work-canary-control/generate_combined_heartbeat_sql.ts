@@ -26,7 +26,7 @@ export function generateCombinedHeartbeatSql(value: unknown): string {
   const resourceJoin = includeResource ? "\ncross join resource_envelope r" : ""
   return transition.slice(0, boundary) + [
     "with heartbeat_clock as (",
-    "  select substring(j.command from 'timestamptz ''([^'']+)''')::timestamptz",
+    "  select substring(j.command from 'expiry_at constant timestamptz := timestamptz ''([^'']+)''')::timestamptz",
     "    - interval '30 seconds' as observed_at",
     `  from cron.job j where j.jobid = ${input.guardJobId}`,
     "),",
@@ -37,7 +37,7 @@ export function generateCombinedHeartbeatSql(value: unknown): string {
     `    'runId', '${input.runId}',`,
     `    'previousGenerationSha256', '${input.currentGenerationSha256}',`,
     `    'nextGenerationSha256', '${input.nextGenerationSha256}',`,
-    "    'expiryUtc', substring(j.command from 'timestamptz ''([^'']+)'''),",
+    "    'expiryUtc', substring(j.command from 'expiry_at constant timestamptz := timestamptz ''([^'']+)'''),",
     "    'commandSha256', encode(extensions.digest(",
     "      convert_to(j.command, 'UTF8'), 'sha256'), 'hex'),",
     "    'commandMd5', md5(j.command),",

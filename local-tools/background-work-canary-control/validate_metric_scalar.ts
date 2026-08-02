@@ -6,6 +6,7 @@ import {
 } from "./receipt_constants.ts"
 import type { ReceiptMetricKey, ReceiptScalar } from "./receipt_types.ts"
 import { PROVIDER_PARSE_SUBREASONS } from "./provider_parse_diagnostic.ts"
+import { PROVIDER_STDERR_CODES } from "./provider_stderr_codes.ts"
 
 const jobNames = new Set([
   "momi-event-routing-wakeup-v1",
@@ -25,6 +26,9 @@ export function validateMetricScalar(key: ReceiptMetricKey, value: unknown): voi
   if (RECEIPT_NUMBER_KEYS.includes(key)) {
     if (!Number.isSafeInteger(value) || (value as number) < 0) {
       throw new Error(`Receipt metric ${key} must be a non-negative safe integer`)
+    }
+    if (key === "child_exit_code" && ((value as number) < 1 || (value as number) > 255)) {
+      throw new Error("Receipt child_exit_code is invalid")
     }
     return
   }
@@ -68,6 +72,9 @@ export function validateMetricScalar(key: ReceiptMetricKey, value: unknown): voi
   if (key === "parse_subreason" &&
     !PROVIDER_PARSE_SUBREASONS.includes(value as never)) {
     throw new Error("Receipt parse_subreason is invalid")
+  }
+  if (key === "provider_code" && !PROVIDER_STDERR_CODES.includes(value as never)) {
+    throw new Error("Receipt provider_code is invalid")
   }
   if (key === "observed_top_level_type" &&
     !["array", "boolean", "null", "number", "object", "string", "undefined"].includes(value)) {

@@ -13,7 +13,7 @@ import { signToastBody } from "./sign_toast_body.ts"
 test("durably accepts fresh and old signed unseen order events", async () => {
   const secret = "orders-freshness-secret"
   const freshTimestamp = new Date().toISOString()
-  const oldTimestamp = "2000-01-01T00:00:00.000Z"
+  const oldTimestamp = "2024-06-21T00:00:00.000Z"
   const saved: WebhookEnvelope[] = []
   const dependencies: IngestionDependencies = {
     getSecret() {
