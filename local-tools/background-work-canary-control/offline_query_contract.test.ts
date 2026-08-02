@@ -59,16 +59,17 @@ test("accepts only the exact released development repository evidence", () => {
   assert.throws(() => assertRepositoryPreflight(fixture, evidence))
 })
 
-test("builds the constant pinned Supabase query argv", () => {
+test("builds the constant pinned Supabase query argv", async () => {
   const file = join(sourceRoot, SQL_ARTIFACT_DIRECTORY, FAST_SQL_FILENAME)
   assert.deepEqual(buildSupabaseQueryCommand(sourceRoot, file), {
-    executableName: "pnpm",
     arguments: [
-      "exec", "supabase", "db", "query", "--linked", "--file", file,
+      "db", "query", "--linked", "--file", file,
       "--workdir", sourceRoot, "--output-format", "json",
     ],
   })
-  assert.throws(() => buildSupabaseQueryCommand(sourceRoot, join(sourceRoot, "other.sql")))
+  assert.throws(() => buildSupabaseQueryCommand(
+    sourceRoot, join(sourceRoot, "other.sql"),
+  ))
 })
 
 test("verifies both sealed SQL artifacts and rejects changed bytes", () => {

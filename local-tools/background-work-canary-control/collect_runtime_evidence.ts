@@ -8,19 +8,21 @@ import {
   REQUIRED_PNPM_VERSION,
   REQUIRED_RELEASE_BRANCH,
 } from "./repository_preflight_constants.ts"
-import type { RepositoryPreflight } from "./repository_preflight_types.ts"
 import type {
   BoundedChildRunner,
-  RuntimeExecutables,
+  HeldProviderFactory,
+  PreflightExecutables,
+  ReleasedCandidatePreflight,
 } from "./runtime_adapter_types.ts"
 
 export async function collectRuntimeEvidence(
   repositoryRoot: string,
-  executables: RuntimeExecutables,
+  executables: PreflightExecutables,
   runChild: BoundedChildRunner,
-  trustedNodeVersion: string = process.versions.node,
-  sourceEnvironment: NodeJS.ProcessEnv = process.env,
-): Promise<RepositoryPreflight> {
+  trustedNodeVersion: string,
+  sourceEnvironment: NodeJS.ProcessEnv,
+  createProvider: HeldProviderFactory,
+): Promise<ReleasedCandidatePreflight> {
   if (!isAbsolute(repositoryRoot) || resolve(repositoryRoot) !== repositoryRoot ||
     realpathSync(repositoryRoot) !== repositoryRoot) {
     throw new Error("Released repository root is invalid")
@@ -60,7 +62,7 @@ export async function collectRuntimeEvidence(
     ![DEV_PROJECT_REF, `${DEV_PROJECT_REF}\n`].includes(linkedOutput)) {
     throw new Error("Released linked project evidence is invalid")
   }
-  return assertRepositoryPreflight(repositoryRoot, {
+  const repository = assertRepositoryPreflight(repositoryRoot, {
     nodeVersion: trustedNodeVersion,
     pnpmVersion: pnpmOutput.slice(0, -1),
     branch: branchOutput.slice(0, -1),
@@ -69,4 +71,6 @@ export async function collectRuntimeEvidence(
     porcelainStatus,
     projectRef: DEV_PROJECT_REF,
   })
+  const provider = await createProvider(repositoryRoot, sourceEnvironment, runChild)
+  return { repository, provider }
 }

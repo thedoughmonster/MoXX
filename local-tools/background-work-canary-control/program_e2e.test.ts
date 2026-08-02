@@ -26,6 +26,7 @@ test("argv reaches every fixed offline phase and maps exact terminal exits", asy
       assert.equal(result.exitCode, exitCode, mode)
       assert.equal(result.envelope?.status, status, mode)
       assert.equal(harness.source.telemetry.releases, exitCode === 40 ? 0 : 1, mode)
+      assert.equal(harness.source.telemetry.providerCloses, 1, mode)
       assert.equal(harness.activeSignalListeners(), 0, mode)
     } finally {
       await harness.source.cleanup()

@@ -3,11 +3,11 @@ import { lstat } from "node:fs/promises"
 import { buildSafeChildEnvironment } from "./build_safe_child_environment.ts"
 import { resolveFlockExecutable } from "./resolve_flock_executable.ts"
 import { resolveSafeExecutable } from "./resolve_safe_executable.ts"
-import type { RuntimeExecutables } from "./runtime_adapter_types.ts"
+import type { PreflightExecutables } from "./runtime_adapter_types.ts"
 
 export async function resolveRuntimeExecutables(
   source: NodeJS.ProcessEnv = process.env,
-): Promise<RuntimeExecutables> {
+): Promise<PreflightExecutables> {
   const environment = buildSafeChildEnvironment(source)
   const directories = environment.PATH?.split(delimiter) ?? []
   if (directories.length === 0 || directories.some((path) => !path || !isAbsolute(path))) {

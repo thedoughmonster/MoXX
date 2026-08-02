@@ -6,16 +6,40 @@ export type BoundedChildRunner = (
   request: BoundedChildRequest,
 ) => Promise<BoundedChildResult>
 
-export type RuntimeExecutables = {
+export type HeldProviderStatus = "active" | "closed" | "held" | "lost"
+
+export type HeldProvider = Readonly<{
+  runQuery: (request: {
+    repositoryRoot: string
+    sqlPath: string
+    signal?: AbortSignal
+  }) => Promise<BoundedChildResult>
+  status: () => HeldProviderStatus
+  close: () => Promise<void>
+}>
+
+export type HeldProviderFactory = (
+  repositoryRoot: string,
+  environment: NodeJS.ProcessEnv,
+  runner: BoundedChildRunner,
+) => Promise<HeldProvider>
+
+export type PreflightExecutables = {
   gitExecutable: string
   pnpmExecutable: string
   flockExecutable: string
 }
 
+export type ReleasedCandidatePreflight = {
+  repository: RepositoryPreflight
+  provider: HeldProvider
+}
+
 export type ReleasedRuntime = {
   options: CliOptions
   repository: RepositoryPreflight
-  executables: RuntimeExecutables
+  executables: PreflightExecutables
+  provider: HeldProvider
   lock: CanaryControlLock
 }
 
@@ -23,14 +47,16 @@ export type RuntimePreparationDependencies = {
   environment: NodeJS.ProcessEnv
   nodeVersion: string
   runChild: BoundedChildRunner
-  resolveExecutables: (environment: NodeJS.ProcessEnv) => Promise<RuntimeExecutables>
+  resolveExecutables: (environment: NodeJS.ProcessEnv) => Promise<PreflightExecutables>
   collectEvidence: (
     root: string,
-    executables: RuntimeExecutables,
+    executables: PreflightExecutables,
     runner: BoundedChildRunner,
     nodeVersion: string,
     environment: NodeJS.ProcessEnv,
-  ) => Promise<RepositoryPreflight>
+    createProvider: HeldProviderFactory,
+  ) => Promise<ReleasedCandidatePreflight>
+  createProvider: HeldProviderFactory
   acquireLock: (environment: NodeJS.ProcessEnv) => Promise<CanaryControlLock>
 }
 
@@ -65,14 +91,12 @@ export type ProviderQueryResult<T> =
 
 export type ProviderQueryRequest<T> = {
   repositoryRoot: string
-  pnpmExecutable: string
+  provider: HeldProvider
   sql: InternalProviderSql
   parser: (stdout: Uint8Array) => T
   signal?: AbortSignal
 }
 
 export type ProviderQueryDependencies = {
-  runChild: BoundedChildRunner
-  environment: NodeJS.ProcessEnv
   temporaryRoot: string
 }

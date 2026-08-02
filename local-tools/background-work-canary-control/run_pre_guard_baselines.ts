@@ -18,7 +18,7 @@ export async function runPreGuardBaselines(
   assertSamplingLockHeld(state, "preflight_resource")
   const common = {
     repositoryRoot: state.repositoryRoot,
-    pnpmExecutable: state.runtime.executables.pnpmExecutable,
+    provider: state.runtime.provider,
     signal: state.signal,
   }
   const resource = await dependencies.query({

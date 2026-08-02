@@ -64,6 +64,9 @@ export async function createDeadmanHarness(
       return await verifyReceiptFile(path)
     },
     query: async (request) => {
+      if (request.provider !== handoff.runtime.provider) {
+        throw new Error("Provider identity drifted")
+      }
       telemetry.providerKinds.push(request.sql.kind)
       if ((options.holderLossAt === "reconciliation" &&
         request.sql.kind === "deadman_reconciliation") ||

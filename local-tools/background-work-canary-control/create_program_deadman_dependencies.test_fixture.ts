@@ -32,6 +32,9 @@ export function createProgramDeadmanDependencies(
     appendReceipt,
     verifyReceipt: verifyReceiptFile,
     query: async (request) => {
+      if (request.provider !== handoff.runtime.provider) {
+        throw new Error("Provider identity drifted")
+      }
       providerKinds.push(request.sql.kind)
       if (request.sql.kind === "deadman_reconciliation" &&
         options.reconciliationFailure) {

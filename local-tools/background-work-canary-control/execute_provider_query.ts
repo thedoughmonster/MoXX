@@ -1,9 +1,7 @@
 import { chmod, lstat, mkdtemp, open, realpath, rm } from "node:fs/promises"
 import { isAbsolute, join, resolve } from "node:path"
-import { buildSafeChildEnvironment } from "./build_safe_child_environment.ts"
 import { CHILD_OUTPUT_LIMIT_BYTES } from "./process_constants.ts"
 import { APPROVED_PROVIDER_SQL } from "./provider_sql_registry.ts"
-import { resolveSafeExecutable } from "./resolve_safe_executable.ts"
 import type {
   ProviderQueryDependencies,
   ProviderQueryRequest,
@@ -34,7 +32,6 @@ export async function executeProviderQuery<T>(
     ])
     if (!repository.isDirectory() || repository.isSymbolicLink() ||
       !temporaryRoot.isDirectory() || temporaryRoot.isSymbolicLink()) throw new Error()
-    const pnpmExecutable = await resolveSafeExecutable(request.pnpmExecutable)
     temporaryDirectory = await mkdtemp(join(dependencies.temporaryRoot, "momi-canary-query-"))
     await chmod(temporaryDirectory, 0o700)
     const directory = await lstat(temporaryDirectory)
@@ -53,13 +50,9 @@ export async function executeProviderQuery<T>(
     const sqlFile = await lstat(sqlPath)
     if (!sqlFile.isFile() || sqlFile.isSymbolicLink() || sqlFile.nlink !== 1 ||
       (sqlFile.mode & 0o777) !== 0o600 || await realpath(sqlPath) !== sqlPath) throw new Error()
-    const child = await dependencies.runChild({
-      executable: pnpmExecutable,
-      arguments: [
-        "exec", "supabase", "db", "query", "--linked", "--file", sqlPath,
-        "--workdir", request.repositoryRoot, "--output-format", "json",
-      ],
-      environment: buildSafeChildEnvironment(dependencies.environment),
+    const child = await request.provider.runQuery({
+      repositoryRoot: request.repositoryRoot,
+      sqlPath,
       signal: request.signal,
     })
     if (child.outcome.status !== "success" || child.outcome.exitCode !== 0 ||
