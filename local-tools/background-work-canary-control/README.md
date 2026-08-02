@@ -71,6 +71,13 @@ failure: before guard commitment it is pre-guard failure; after commitment it
 must enter rollback or dead-man recovery. A replacement process is still fenced
 by the named database guard.
 
+The linked database role has `SELECT` but not `UPDATE` on `cron.job`, so these
+transactions deliberately use no tuple-locking clause on Cron metadata reads.
+Cooperative serialization remains the named guard lease, transaction-scoped
+advisory lock, single writer, and exact post-mutation readback; Cron changes use
+only the supported `cron.schedule`, `cron.alter_job`, and `cron.unschedule`
+functions.
+
 ## Post-run checks
 
 For exit `0`, verify the printed `final.json` SHA-256, confirm its four fixed

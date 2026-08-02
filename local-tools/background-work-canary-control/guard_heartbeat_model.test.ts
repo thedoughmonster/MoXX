@@ -23,8 +23,8 @@ test("heartbeat model rotates one validated generation and commits", () => {
   assert.deepEqual(modelGuardHeartbeat(base), {
     outcome: "success",
     actions: [
-      "begin", "try_advisory_lock", "lock_guard", "validate_current_guard",
-      "lock_targets", "validate_targets", "capture_db_clock", "materialize_next",
+      "begin", "try_advisory_lock", "read_guard", "validate_current_guard",
+      "read_targets", "validate_targets", "capture_db_clock", "materialize_next",
       "alter_guard", "validate_readback", "emit_sanitized_receipt", "commit",
     ],
   })

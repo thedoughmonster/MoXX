@@ -21,7 +21,7 @@ test("bootstrap model succeeds at exact concurrency boundaries", () => {
   assert.deepEqual(modelGuardBootstrap(base), {
     outcome: "success",
     actions: [
-      "begin", "try_advisory_lock", "lock_targets", "validate_targets",
+      "begin", "try_advisory_lock", "read_targets", "validate_targets",
       "validate_concurrency", "capture_db_clock", "materialize_expiry",
       "schedule_guard", "validate_readback", "emit_sanitized_receipt", "commit",
     ],

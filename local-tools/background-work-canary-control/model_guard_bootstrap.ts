@@ -12,7 +12,7 @@ export function modelGuardBootstrap(input: GuardBootstrapModelInput): GuardBoots
   if (!input.lockAcquired) {
     return { outcome: "lock_unavailable", actions: [...actions, "rollback"] }
   }
-  actions.push("lock_targets", "validate_targets")
+  actions.push("read_targets", "validate_targets")
   if (!input.targetIdentityMatches) {
     return { outcome: "target_identity_drift", actions: [...actions, "rollback"] }
   }

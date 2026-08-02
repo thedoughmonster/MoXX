@@ -13,9 +13,9 @@ import {
 test("bootstrap transaction is byte deterministic and structurally parseable", () => {
   const sql = generateGuardBootstrapSql(VALID_GUARD_BOOTSTRAP_INPUT)
   assert.equal(sql, generateGuardBootstrapSql(structuredClone(VALID_GUARD_BOOTSTRAP_INPUT)))
-  assert.equal(Buffer.byteLength(sql), 9_399)
+  assert.equal(Buffer.byteLength(sql), 9_379)
   assert.equal(createHash("sha256").update(sql).digest("hex"),
-    "66f93a3ae8109f839229762b3bdad0f694d133cde495117cbf9f2a1ff79d0c3a")
+    "4815240b7bf85455425784dc9d8f8d7c2fa42fde083c9d80e6ff90d741e25fa2")
   const masked = sql.replace(
     `${DEADMAN_TEMPLATE_TAG}${VALID_GUARD_BOOTSTRAP_INPUT.deadmanCommand}${DEADMAN_TEMPLATE_TAG}`,
     "'validated-deadman-template'",
