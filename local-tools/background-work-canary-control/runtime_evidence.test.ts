@@ -4,7 +4,6 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { test } from "node:test"
 import { collectRuntimeEvidence } from "./collect_runtime_evidence.ts"
-import { createFakeHeldProvider } from "./create_fake_held_provider.test_fixture.ts"
 import { createRepositoryFixture } from "./repository_fixture.test_fixture.ts"
 import type { BoundedChildStatus } from "./process_types.ts"
 import type { BoundedChildRunner } from "./runtime_adapter_types.ts"
@@ -54,17 +53,10 @@ test("collector obtains exact evidence with fixed argv and sanitized environment
   try {
     createRepositoryFixture(root)
     const { runner, calls } = fakeEvidenceRunner(root)
-    const provider = createFakeHeldProvider()
-    let providerEnvironment: NodeJS.ProcessEnv | undefined
     const result = await collectRuntimeEvidence(root, executables, runner, "24.14.0", {
       PATH: "/trusted", SUPABASE_ACCESS_TOKEN: "private-token",
-    }, async (_root, environment) => {
-      providerEnvironment = environment
-      return provider
     })
-    assert.equal(result.repository.headSha, HEAD)
-    assert.equal(result.provider, provider)
-    assert.equal(providerEnvironment?.SUPABASE_ACCESS_TOKEN, "private-token")
+    assert.equal(result.headSha, HEAD)
     assert.deepEqual(calls.map((call) => call.slice(0, 2)), [
       ["/trusted/pnpm", "--version"], ["/trusted/git", "-C"],
       ["/trusted/git", "-C"], ["/trusted/git", "-C"], ["/trusted/git", "-C"],
@@ -89,7 +81,7 @@ test("collector rejects dirty, diverged, detached, malformed, and wrong-link evi
       createRepositoryFixture(root)
       const { runner } = fakeEvidenceRunner(root, overrides)
       await assert.rejects(collectRuntimeEvidence(root, executables, runner, "24.14.0",
-        {}, async () => createFakeHeldProvider()))
+        {}))
     } finally {
       await rm(root, { recursive: true, force: true })
     }
@@ -100,11 +92,11 @@ test("collector rejects dirty, diverged, detached, malformed, and wrong-link evi
     await writeFile(join(root, "supabase/.temp/project-ref"), "viodfldzuoypnpqaagag\n")
     await assert.rejects(collectRuntimeEvidence(
       root, executables, fakeEvidenceRunner(root).runner, "24.14.0",
-      {}, async () => createFakeHeldProvider(),
+      {},
     ))
     await assert.rejects(collectRuntimeEvidence(
       root, executables, fakeEvidenceRunner(root).runner, "23.0.0",
-      {}, async () => createFakeHeldProvider(),
+      {},
     ))
   } finally {
     await rm(root, { recursive: true, force: true })
@@ -122,7 +114,7 @@ test("collector rejects symlinked repository control files before acceptance", a
     await symlink(target, join(root, "package.json"))
     await assert.rejects(collectRuntimeEvidence(
       root, executables, fakeEvidenceRunner(root).runner, "24.14.0",
-      {}, async () => createFakeHeldProvider(),
+      {},
     ))
   } finally {
     await rm(root, { recursive: true, force: true })

@@ -8,12 +8,8 @@ import {
   REQUIRED_PNPM_VERSION,
   REQUIRED_RELEASE_BRANCH,
 } from "./repository_preflight_constants.ts"
-import type {
-  BoundedChildRunner,
-  HeldProviderFactory,
-  PreflightExecutables,
-  ReleasedCandidatePreflight,
-} from "./runtime_adapter_types.ts"
+import type { RepositoryPreflight } from "./repository_preflight_types.ts"
+import type { BoundedChildRunner, PreflightExecutables } from "./runtime_adapter_types.ts"
 
 export async function collectRuntimeEvidence(
   repositoryRoot: string,
@@ -21,8 +17,8 @@ export async function collectRuntimeEvidence(
   runChild: BoundedChildRunner,
   trustedNodeVersion: string,
   sourceEnvironment: NodeJS.ProcessEnv,
-  createProvider: HeldProviderFactory,
-): Promise<ReleasedCandidatePreflight> {
+  requireLinkedProject = true,
+): Promise<RepositoryPreflight> {
   if (!isAbsolute(repositoryRoot) || resolve(repositoryRoot) !== repositoryRoot ||
     realpathSync(repositoryRoot) !== repositoryRoot) {
     throw new Error("Released repository root is invalid")
@@ -53,8 +49,9 @@ export async function collectRuntimeEvidence(
     ["-C", repositoryRoot, "rev-parse", "refs/remotes/origin/dev"])
   const porcelainStatus = await run(executables.gitExecutable,
     ["-C", repositoryRoot, "status", "--porcelain=v1", "--untracked-files=all"])
-  const linkedRefPath = join(repositoryRoot, "supabase/.temp/project-ref")
-  const linkedOutput = readBoundedRegularFile(linkedRefPath, 128)
+  const linkedOutput = requireLinkedProject
+    ? readBoundedRegularFile(join(repositoryRoot, "supabase/.temp/project-ref"), 128)
+    : DEV_PROJECT_REF
   if (pnpmOutput !== `${REQUIRED_PNPM_VERSION}\n` ||
     branchOutput !== `${REQUIRED_RELEASE_BRANCH}\n` ||
     !/^[0-9a-f]{40}\n$/.test(headOutput) ||
@@ -62,7 +59,7 @@ export async function collectRuntimeEvidence(
     ![DEV_PROJECT_REF, `${DEV_PROJECT_REF}\n`].includes(linkedOutput)) {
     throw new Error("Released linked project evidence is invalid")
   }
-  const repository = assertRepositoryPreflight(repositoryRoot, {
+  return assertRepositoryPreflight(repositoryRoot, {
     nodeVersion: trustedNodeVersion,
     pnpmVersion: pnpmOutput.slice(0, -1),
     branch: branchOutput.slice(0, -1),
@@ -70,7 +67,5 @@ export async function collectRuntimeEvidence(
     expectedHeadSha: expectedHeadOutput.slice(0, -1),
     porcelainStatus,
     projectRef: DEV_PROJECT_REF,
-  })
-  const provider = await createProvider(repositoryRoot, sourceEnvironment, runChild)
-  return { repository, provider }
+  }, requireLinkedProject)
 }
