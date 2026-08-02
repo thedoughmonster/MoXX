@@ -1,0 +1,101 @@
+export type ReceiptEventType =
+  | "cleanup_completed"
+  | "deadman_reconciled"
+  | "failure"
+  | "fast_sample"
+  | "guard_heartbeat"
+  | "resource_sample"
+  | "rollback_completed"
+  | "rollback_started"
+  | "run_completed"
+  | "run_started"
+  | "stop_requested"
+  | "work_baseline"
+
+export type ReceiptMetricKey =
+  | "active"
+  | "active_cron_executions"
+  | "active_before_mask"
+  | "command_md5"
+  | "count"
+  | "cron_history_bytes"
+  | "database_bytes"
+  | "delivery_ready"
+  | "deadlocks"
+  | "duration_ms"
+  | "error_class"
+  | "generation_sha256"
+  | "exact_identity_mask"
+  | "guard_active"
+  | "guard_failures"
+  | "guard_run_status"
+  | "job_id"
+  | "job_name"
+  | "missed_samples"
+  | "inactive_after_mask"
+  | "numbackends"
+  | "oldest_age_seconds"
+  | "overlap_count"
+  | "project_ref"
+  | "queue_length"
+  | "queue_ready"
+  | "rollback_invoked"
+  | "sample_kind"
+  | "schedule"
+  | "terminal_command_md5"
+  | "terminal_command_sha256"
+  | "terminal_failure_count"
+  | "terminal_guard_run_id"
+  | "terminal_guard_start_utc"
+  | "terminal_run_count"
+  | "original_command_md5"
+  | "original_command_sha256"
+  | "expiry_utc"
+  | "status"
+  | "routing_ready"
+  | "target_run_count"
+  | "target_run_failures"
+  | "toast_ready"
+  | "waiting_locks"
+  | "wal_bytes"
+  | "wal_directory_bytes"
+
+export type ReceiptMetricGroup = "guard" | "queues" | "resources" | "target" | "timing"
+export type ReceiptScalar = boolean | number | string | null
+export type ReceiptMetricObject = Partial<Record<ReceiptMetricKey, ReceiptScalar>>
+export type ReceiptMetrics = Partial<Record<ReceiptMetricKey, ReceiptScalar>> &
+  Partial<Record<ReceiptMetricGroup, ReceiptMetricObject>>
+
+export type ReceiptInput = {
+  event_type: ReceiptEventType
+  timestamp_utc: string
+  metrics: ReceiptMetrics
+}
+
+export type ReceiptRecord = ReceiptInput & {
+  sequence: number
+  previous_hash: string
+  current_hash: string
+}
+
+export type ReceiptVerification = {
+  count: number
+  lastHash: string
+  nextSequence: number
+  size: number
+}
+
+export type ReceiptFileIdentity = {
+  dev: number
+  ino: number
+  size: number
+}
+
+export type ReceiptWriterState = ReceiptVerification & ReceiptFileIdentity & {
+  path: string
+  directory: string
+  poisoned: boolean
+  writing: boolean
+}
+
+export type ReceiptLineWriter = (path: string, line: string) => Promise<void>

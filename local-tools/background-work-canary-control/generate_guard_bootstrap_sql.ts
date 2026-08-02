@@ -1,0 +1,107 @@
+import { DEADMAN_EXPIRY_PLACEHOLDER } from "./deadman_command_constants.ts"
+import {
+  DEADMAN_TEMPLATE_TAG,
+  GUARD_BOOTSTRAP_DO_TAG,
+  GUARD_BOOTSTRAP_LOCK_TIMEOUT,
+  GUARD_BOOTSTRAP_MARKER,
+  GUARD_BOOTSTRAP_STATEMENT_TIMEOUT,
+} from "./guard_bootstrap_constants.ts"
+import { SQL_SCHEMA_VERSION } from "./sql_artifact_constants.ts"
+import {
+  MAX_ACTIVE_CRON_EXECUTIONS,
+  MAX_PREACTIVATION_OTHER_CRON,
+} from "./sample_constants.ts"
+import { validateGuardBootstrapInput } from "./validate_guard_bootstrap_input.ts"
+
+export function generateGuardBootstrapSql(value: unknown): string {
+  const input = validateGuardBootstrapInput(value)
+  if (input.deadmanCommand.includes(GUARD_BOOTSTRAP_DO_TAG) ||
+    input.deadmanCommand.includes(DEADMAN_TEMPLATE_TAG)) {
+    throw new Error("Guard bootstrap SQL delimiter collision")
+  }
+  const marker = `momi:deadman:generation:${input.runId}:${input.generationSha256}`
+  const targetCases = input.targetJobs.map((job) => [
+    `    when ${job.jobId} then j.jobname = '${job.jobName}' and`,
+    `      j.schedule = '${job.schedule}' and md5(j.command) = '${job.commandMd5}'`,
+  ].join("\n")).join("\n")
+  return [
+    "begin;",
+    `set local statement_timeout = '${GUARD_BOOTSTRAP_STATEMENT_TIMEOUT}';`,
+    `set local lock_timeout = '${GUARD_BOOTSTRAP_LOCK_TIMEOUT}';`,
+    `do ${GUARD_BOOTSTRAP_DO_TAG}`,
+    "declare",
+    "  lock_acquired boolean; identities_match boolean; targets_active boolean;",
+    "  target_executions bigint; guard_count bigint; active_cron bigint; other_cron bigint;",
+    "  database_now timestamptz; expiry_at timestamptz; expiry_utc text;",
+    `  deadman_template constant text := ${DEADMAN_TEMPLATE_TAG}${input.deadmanCommand}${DEADMAN_TEMPLATE_TAG};`,
+    "  materialized_command text; scheduled_job_id bigint; readback_job_id bigint;",
+    "  readback_command text;",
+    "  readback_name text; readback_schedule text; readback_active boolean;",
+    "begin",
+    `  select pg_try_advisory_xact_lock(hashtextextended('${input.advisoryLockKey}', 0))`,
+    "    into lock_acquired;",
+    "  if not lock_acquired then raise exception 'momi_guard_bootstrap_lock_unavailable'; end if;",
+    "  perform 1 from cron.job where jobid in (2, 3, 4, 11) for share;",
+    "  select count(*) = 4 and bool_and(case j.jobid",
+    targetCases,
+    "    else false end), coalesce(bool_or(j.active), false)",
+    "  into identities_match, targets_active",
+    "  from cron.job j where j.jobid in (2, 3, 4, 11);",
+    "  if not coalesce(identities_match, false) then",
+    "    raise exception 'momi_guard_bootstrap_target_identity'; end if;",
+    "  if targets_active then raise exception 'momi_guard_bootstrap_target_active'; end if;",
+    "  select count(*) into guard_count from cron.job",
+    `    where jobname = '${input.guardName}';`,
+    "  if guard_count <> 0 then raise exception 'momi_guard_bootstrap_guard_present'; end if;",
+    "  select count(*) into target_executions from cron.job_run_details",
+    "    where status = 'running' and jobid in (2, 3, 4, 11);",
+    "  if target_executions <> 0 then raise exception 'momi_guard_bootstrap_target_running'; end if;",
+    "  select count(*) into active_cron from pg_stat_activity",
+    "    where application_name ilike 'pg_cron%' and state = 'active';",
+    `  if active_cron > ${MAX_ACTIVE_CRON_EXECUTIONS} then`,
+    "    raise exception 'momi_guard_bootstrap_active_cron'; end if;",
+    "  select count(*) into other_cron from cron.job_run_details",
+    "    where status = 'running' and jobid not in (2, 3, 4, 11);",
+    `  if other_cron > ${MAX_PREACTIVATION_OTHER_CRON} then`,
+    "    raise exception 'momi_guard_bootstrap_other_cron'; end if;",
+    `  if length(deadman_template) - length(replace(deadman_template, '${DEADMAN_EXPIRY_PLACEHOLDER}', ''))`,
+    `      <> length('${DEADMAN_EXPIRY_PLACEHOLDER}') then`,
+    "    raise exception 'momi_guard_bootstrap_placeholder'; end if;",
+    "  select clock_timestamp() into database_now;",
+    "  expiry_at := database_now + interval '30 seconds';",
+    `  expiry_utc := to_char(expiry_at at time zone 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"');`,
+    `  materialized_command := replace(deadman_template, '${DEADMAN_EXPIRY_PLACEHOLDER}', expiry_utc);`,
+    `  if position('${DEADMAN_EXPIRY_PLACEHOLDER}' in materialized_command) <> 0 then`,
+    "    raise exception 'momi_guard_bootstrap_materialization'; end if;",
+    `  scheduled_job_id := cron.schedule('${input.guardName}', '${input.guardSchedule}', materialized_command);`,
+    "  if scheduled_job_id is null or scheduled_job_id < 1 then",
+    "    raise exception 'momi_guard_bootstrap_schedule'; end if;",
+    "  select j.jobid, j.jobname, j.schedule, j.active, j.command",
+    "  into strict readback_job_id, readback_name, readback_schedule,",
+    "    readback_active, readback_command",
+    `  from cron.job j where j.jobname = '${input.guardName}' for share;`,
+    `  if readback_job_id <> scheduled_job_id or readback_name <> '${input.guardName}'`,
+    `      or readback_schedule <> '${input.guardSchedule}'`,
+    "      or not readback_active or readback_command <> materialized_command",
+    `      or position('${marker}' in readback_command) = 0`,
+    "      or position(expiry_utc in readback_command) = 0 then",
+    "    raise exception 'momi_guard_bootstrap_readback'; end if;",
+    "end",
+    `${GUARD_BOOTSTRAP_DO_TAG};`,
+    "select",
+    `  '${GUARD_BOOTSTRAP_MARKER}'::text as marker,`,
+    `  ${SQL_SCHEMA_VERSION}::integer as schema_version,`,
+    "  jsonb_build_object(",
+    "    'guardJobId', j.jobid, 'guardName', j.jobname, 'guardSchedule', j.schedule,",
+    `    'guardActive', j.active, 'runId', '${input.runId}',`,
+    `    'generationSha256', '${input.generationSha256}',`,
+    "    'expiryUtc', substring(j.command from 'timestamptz ''([^'']+)'''),",
+    "    'commandSha256', encode(extensions.digest(",
+    "      convert_to(j.command, 'UTF8'), 'sha256'), 'hex'),",
+    "    'commandMd5', md5(j.command)",
+    "  ) as sample",
+    `from cron.job j where j.jobname = '${input.guardName}';`,
+    "commit;",
+    "",
+  ].join("\n")
+}
