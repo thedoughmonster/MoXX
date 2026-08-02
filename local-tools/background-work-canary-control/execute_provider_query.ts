@@ -8,6 +8,7 @@ import type {
   ProviderQueryResult,
 } from "./runtime_adapter_types.ts"
 import { sha256Text } from "./sha256_text.ts"
+import { ProviderSchemaError } from "./provider_schema_error.ts"
 
 export async function executeProviderQuery<T>(
   request: ProviderQueryRequest<T>,
@@ -64,8 +65,11 @@ export async function executeProviderQuery<T>(
     } else {
       try {
         result = { status: "success", value: request.parser(child.stdout) }
-      } catch {
-        result = { status: "failure", reason: "schema_failure" }
+      } catch (error) {
+        result = error instanceof ProviderSchemaError
+          ? { status: "failure", reason: "schema_failure",
+              schemaDiagnostic: error.diagnostic }
+          : { status: "failure", reason: "schema_failure" }
       }
     }
   } catch {

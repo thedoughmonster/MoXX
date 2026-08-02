@@ -127,7 +127,7 @@ export function generateGuardBootstrapSql(value: unknown): string {
     "    'guardJobId', j.jobid, 'guardName', j.jobname, 'guardSchedule', j.schedule,",
     `    'guardActive', j.active, 'runId', '${input.runId}',`,
     `    'generationSha256', '${input.generationSha256}',`,
-    "    'expiryUtc', substring(j.command from 'timestamptz ''([^'']+)'''),",
+    "    'expiryUtc', substring(j.command from 'expiry_at constant timestamptz := timestamptz ''([^'']+)'''),",
     "    'commandSha256', encode(extensions.digest(",
     "      convert_to(j.command, 'UTF8'), 'sha256'), 'hex'),",
     "    'commandMd5', md5(j.command)",

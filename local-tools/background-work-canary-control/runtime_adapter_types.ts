@@ -1,6 +1,7 @@
 import type { BoundedChildRequest, BoundedChildResult, CanaryControlLock } from "./process_types.ts"
 import type { RepositoryPreflight } from "./repository_preflight_types.ts"
 import type { CliOptions } from "./types.ts"
+import type { ProviderParseDiagnostic } from "./provider_parse_diagnostic.ts"
 
 export type BoundedChildRunner = (
   request: BoundedChildRequest,
@@ -87,7 +88,8 @@ export type ProviderQueryFailureReason =
 
 export type ProviderQueryResult<T> =
   | { status: "success"; value: T }
-  | { status: "failure"; reason: ProviderQueryFailureReason }
+  | { status: "failure"; reason: ProviderQueryFailureReason;
+      schemaDiagnostic?: ProviderParseDiagnostic }
 
 export type ProviderQueryRequest<T> = {
   repositoryRoot: string

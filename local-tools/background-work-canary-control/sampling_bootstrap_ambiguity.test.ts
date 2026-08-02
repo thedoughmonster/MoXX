@@ -1,5 +1,6 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
+import { readFile } from "node:fs/promises"
 import { createSamplingHarness } from "./create_sampling_harness.test_fixture.ts"
 import { orchestrateGuardedSampling } from "./orchestrate_guarded_sampling.ts"
 
@@ -36,6 +37,18 @@ test("every ambiguous bootstrap outcome preserves proof, dead-man, and lock", as
     if (result.status === "bootstrap_ambiguous_deadman_fallback_pending") {
       assert.equal(result.reason, "schema_failure")
       assert.equal(result.receipt.poisoned, false)
+      const records = (await readFile(result.receipt.path, "utf8")).trim().split("\n")
+        .map((line) => JSON.parse(line) as Record<string, unknown>)
+      const failure = records.find((record) => record.event_type === "failure") as {
+        metrics: Record<string, unknown>
+      }
+      assert.equal(failure.metrics.parse_subreason, "identity")
+      assert.equal(failure.metrics.observed_top_level_type, "array")
+      assert.equal(failure.metrics.observed_row_count, 1)
+      assert.equal(failure.metrics.observed_outer_unexpected_keys, 0)
+      assert.equal(failure.metrics.observed_sample_unexpected_keys, 0)
+      assert.match(failure.metrics.observed_value_types as string, /guardJobId:number/)
+      assert.equal(JSON.stringify(failure).includes("raw"), false)
     }
     assert.equal(drift.telemetry.providerKinds.includes("rollback"), false)
     assert.equal(drift.telemetry.releases, 0)
