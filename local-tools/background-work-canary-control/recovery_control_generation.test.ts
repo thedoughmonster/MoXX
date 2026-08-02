@@ -13,12 +13,12 @@ import { VALID_RECOVERY_CONTROL_INPUT } from "./recovery_control.test_fixture.ts
 test("rollback and cleanup transactions are deterministic and parseable", () => {
   const rollback = generateRollbackSql(VALID_RECOVERY_CONTROL_INPUT)
   const cleanup = generateCleanupSql(VALID_RECOVERY_CONTROL_INPUT)
-  assert.equal(Buffer.byteLength(rollback), 4_304)
+  assert.equal(Buffer.byteLength(rollback), 4_282)
   assert.equal(createHash("sha256").update(rollback).digest("hex"),
-    "8a41ca5b2c1ea0cc9de52b1dc07a9672c2bfb804c9784cefc9049e38cc6dec4a")
-  assert.equal(Buffer.byteLength(cleanup), 3_623)
+    "39ec96f37ccefc34a4bbe3f0de3531c959c8bbdf4de9209fa6ecbbc47a01f381")
+  assert.equal(Buffer.byteLength(cleanup), 3_602)
   assert.equal(createHash("sha256").update(cleanup).digest("hex"),
-    "be5e7ccaf1f8466d8d4453af6acd6007c73a04ecb2ec698f1df7ef4e6810a8cf")
+    "1dbad1b7541797484333be85f57a5e7af130f82008f898fd4931b38f16af410e")
   for (const [sql, tag] of [[rollback, ROLLBACK_DO_TAG], [cleanup, CLEANUP_DO_TAG]]) {
     assert.deepEqual(parse(sql.replaceAll(tag, () => "$$")).map((item) => item.type),
       ["begin", "set", "set", "do", "with", "commit"])
