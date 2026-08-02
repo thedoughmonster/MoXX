@@ -1,5 +1,11 @@
 import type { BoundedChildRequest, BoundedChildResult, CanaryControlLock } from "./process_types.ts"
 import type { RepositoryPreflight } from "./repository_preflight_types.ts"
+import type {
+  FlockCapabilityEvidence,
+  LinkageEvidence,
+  SetupBinding,
+  SetupReceipt,
+} from "./setup_preflight_types.ts"
 import type { CliOptions } from "./types.ts"
 import type { ProviderParseDiagnostic } from "./provider_parse_diagnostic.ts"
 import type { ProviderStderrCode } from "./provider_stderr_codes.ts"
@@ -32,11 +38,6 @@ export type PreflightExecutables = {
   flockExecutable: string
 }
 
-export type ReleasedCandidatePreflight = {
-  repository: RepositoryPreflight
-  provider: HeldProvider
-}
-
 export type ReleasedRuntime = {
   options: CliOptions
   repository: RepositoryPreflight
@@ -56,10 +57,15 @@ export type RuntimePreparationDependencies = {
     runner: BoundedChildRunner,
     nodeVersion: string,
     environment: NodeJS.ProcessEnv,
-    createProvider: HeldProviderFactory,
-  ) => Promise<ReleasedCandidatePreflight>
+    requireLinkedProject?: boolean,
+  ) => Promise<RepositoryPreflight>
   createProvider: HeldProviderFactory
   acquireLock: (environment: NodeJS.ProcessEnv) => Promise<CanaryControlLock>
+  testFlock: (path: string) => Promise<FlockCapabilityEvidence>
+  validateLinkage: (root: string) => Promise<LinkageEvidence>
+  prepareReceiptRoot: () => Promise<string>
+  claimReceipt: (root: string, binding: SetupBinding, nowMs: number) => Promise<SetupReceipt>
+  nowMs: () => number
 }
 
 export type InternalProviderSqlKind =

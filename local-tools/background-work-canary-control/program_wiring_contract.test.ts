@@ -9,11 +9,14 @@ import { runCanaryControlProgram } from "./run_canary_control_program.ts"
 
 const script = "local:background-work-canary-control"
 const command = "node local-tools/background-work-canary-control/main.ts"
+const setupScript = "local:background-work-canary-setup"
+const setupCommand = "node local-tools/background-work-canary-control/setup_main.ts"
 const execFileAsync = promisify(execFile)
 
-test("package exposes exactly one manual invocation and automation stays unaware", async () => {
+test("package exposes setup and validation only as manual invocations", async () => {
   const pkg = JSON.parse(await readFile("package.json", "utf8"))
   assert.equal(pkg.scripts[script], command)
+  assert.equal(pkg.scripts[setupScript], setupCommand)
   assert.equal(Object.values(pkg.scripts).filter((value) => value === command).length, 1)
   const candidates = glob([
     ".github/**/*", "services/**/*", "supabase/**/*", "workspace.json",
@@ -23,6 +26,8 @@ test("package exposes exactly one manual invocation and automation stays unaware
       const source = await readFile(path, "utf8")
       assert.equal(source.includes(script), false, path)
       assert.equal(source.includes(command), false, path)
+      assert.equal(source.includes(setupScript), false, path)
+      assert.equal(source.includes(setupCommand), false, path)
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "EISDIR") throw error
     }

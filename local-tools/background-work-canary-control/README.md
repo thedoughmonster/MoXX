@@ -26,21 +26,37 @@ credentials, SQL, provider payloads, command output, URLs, tokens, or stacks.
   and executed only through its held descriptor. Provider queries never execute
   `pnpm`, a JavaScript shim, a shebang, `PATH`, or a mutable binary pathname;
   `pnpm` remains only a version preflight.
-- Authenticate the pinned Supabase CLI through its approved local credential
-  store. Do not pass a credential, database URL, SQL path, mode, threshold,
-  timing, run identifier, or target on the command line.
+- Authenticate through the approved local CLI store; never pass a credential,
+  database URL, SQL path, mode, threshold, timing, run identifier, or target.
 - Confirm no other operator or process is running this canary control.
 
 ## Invocation
 
-From the released repository root, run exactly:
+Setup and validation are separate process sessions. From clean released `dev`, run:
+
+```text
+pnpm local:background-work-canary-setup -- --env dev --project-ref xtbraqnlskmqxinjxxdn
+```
+
+Setup verifies the release and query identities, proves exact `/usr/bin/flock`
+acquisition/conflict/release/reacquisition, runs the pinned CLI's governed `link`,
+and validates ignored linkage to the exact development project and an IPv4 pooler.
+It never runs SQL, creates a guard, changes jobs, or invokes validation.
+
+After setup returns `setup_ready`, start a new process session and run exactly:
 
 ```text
 pnpm local:background-work-canary-control -- --env dev --project-ref xtbraqnlskmqxinjxxdn
 ```
 
-No other public options are accepted. Presence of this source on `prod` does
-not authorize a production invocation.
+Validation independently repeats the release, linkage, DNS, query, and flock checks.
+It consumes the owner-only receipt once and rejects expiry, replay, change, or a
+different binding before provider preparation. No other option or production use is accepted.
+
+Owner-only setup receipts live under `~/.local/state/momi/background-work-canary/setup/`.
+They retain only sanitized hashes, versions, stages, booleans, timing, release SHA,
+safe exit/SQLSTATE fields, and receipt identity—never CLI output, network identity,
+credentials, SQL, provider data, or stacks. A blocked setup stops after one attempt.
 
 ## Receipts and exits
 

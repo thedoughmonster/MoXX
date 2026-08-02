@@ -18,6 +18,7 @@ import { validateStrictRecord } from "./validate_strict_record.ts"
 export function assertRepositoryPreflight(
   repositoryRoot: string,
   evidenceValue: unknown,
+  requireLinkedProject = true,
 ): RepositoryPreflight {
   if (!isAbsolute(repositoryRoot) || resolve(repositoryRoot) !== repositoryRoot) {
     throw new Error("Repository root must be an absolute canonical path")
@@ -80,9 +81,11 @@ export function assertRepositoryPreflight(
     !lock.includes("@supabase/cli-linux-x64@2.109.1")) {
     throw new Error("Supabase lockfile pin does not match policy")
   }
-  const linkedRef = read("supabase/.temp/project-ref")
-  if (linkedRef !== DEV_PROJECT_REF && linkedRef !== `${DEV_PROJECT_REF}\n`) {
-    throw new Error("Linked Supabase project does not match development")
+  if (requireLinkedProject) {
+    const linkedRef = read("supabase/.temp/project-ref")
+    if (linkedRef !== DEV_PROJECT_REF && linkedRef !== `${DEV_PROJECT_REF}\n`) {
+      throw new Error("Linked Supabase project does not match development")
+    }
   }
   return {
     nodeVersion: REQUIRED_NODE_VERSION,

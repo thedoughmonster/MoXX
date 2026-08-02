@@ -2,6 +2,7 @@ import { closeSync, fstatSync, lstatSync, realpathSync, rmdirSync } from "node:f
 import { dirname, isAbsolute, resolve } from "node:path"
 import type { HeldNativeSnapshot } from "./native_cli_installation_types.ts"
 import type { BoundedChildResult } from "./process_types.ts"
+import { DEV_PROJECT_REF } from "./constants.ts"
 import { REQUIRED_SUPABASE_VERSION } from "./repository_preflight_constants.ts"
 import { HELD_EXECUTABLES } from "./sealed_held_executable.ts"
 import type { SealedHeldExecutable } from "./sealed_held_executable.ts"
@@ -60,7 +61,10 @@ export class HeldNativeProviderOwner {
       "--workdir", this.#repositoryRoot, "--output-format", "json",
     ], request.signal)
   }
-
+  async linkProject(): Promise<BoundedChildResult> {
+    return await this.#execute(["link", "--project-ref", DEV_PROJECT_REF,
+      "--workdir", this.#repositoryRoot, "--yes"])
+  }
   async close(): Promise<void> {
     if (this.#state === "closed") return
     if (this.#state === "active") throw new Error("Provider is still active")
@@ -86,7 +90,6 @@ export class HeldNativeProviderOwner {
     }
     this.#state = "closed"
   }
-
   async #execute(arguments_: readonly string[], signal?: AbortSignal) {
     if (this.#state !== "held") throw new Error("Held native provider is unavailable")
     this.#assertLive()
