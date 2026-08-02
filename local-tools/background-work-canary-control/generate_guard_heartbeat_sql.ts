@@ -1,15 +1,8 @@
 import { DEADMAN_EXPIRY_PLACEHOLDER } from "./deadman_command_constants.ts"
 import { generateDeadmanCommand } from "./generate_deadman_command.ts"
-import {
-  CURRENT_DEADMAN_TEMPLATE_TAG,
-  GUARD_HEARTBEAT_DO_TAG,
-  GUARD_HEARTBEAT_MARKER,
-  NEXT_DEADMAN_TEMPLATE_TAG,
-} from "./guard_heartbeat_constants.ts"
-import {
-  GUARD_BOOTSTRAP_LOCK_TIMEOUT,
-  GUARD_BOOTSTRAP_STATEMENT_TIMEOUT,
-} from "./guard_bootstrap_constants.ts"
+import { GUARD_BOOTSTRAP_LOCK_TIMEOUT, GUARD_BOOTSTRAP_STATEMENT_TIMEOUT } from "./guard_bootstrap_constants.ts"
+import { CURRENT_DEADMAN_TEMPLATE_TAG, GUARD_HEARTBEAT_DO_TAG, GUARD_HEARTBEAT_MARKER, NEXT_DEADMAN_TEMPLATE_TAG } from "./guard_heartbeat_constants.ts"
+import { CRON_RUN_EVIDENCE_WINDOW_ROWS } from "./sample_constants.ts"
 import { SQL_SCHEMA_VERSION } from "./sql_artifact_constants.ts"
 import { validateGuardHeartbeatInput } from "./validate_guard_heartbeat_input.ts"
 
@@ -17,9 +10,9 @@ export function generateGuardHeartbeatSql(value: unknown): string {
   const input = validateGuardHeartbeatInput(value)
   const currentTemplate = generateDeadmanCommand({
     runId: input.runId, generationSha256: input.currentGenerationSha256,
-    startCronRunId: input.startCronRunId,
-    guardName: input.guardName, guardSchedule: input.guardSchedule,
-    targetJobs: input.targetJobs, advisoryLockKey: input.advisoryLockKey,
+    startCronRunId: input.startCronRunId, guardName: input.guardName,
+    guardSchedule: input.guardSchedule, targetJobs: input.targetJobs,
+    advisoryLockKey: input.advisoryLockKey,
     expiryPlaceholder: DEADMAN_EXPIRY_PLACEHOLDER,
   })
   const tags = [GUARD_HEARTBEAT_DO_TAG, CURRENT_DEADMAN_TEMPLATE_TAG, NEXT_DEADMAN_TEMPLATE_TAG]
@@ -41,7 +34,8 @@ export function generateGuardHeartbeatSql(value: unknown): string {
     "  lock_acquired boolean; guard_count bigint; current_command text;",
     "  current_name text; current_schedule text; current_active boolean;",
     "  current_expiry_utc text; current_expiry_at timestamptz;",
-    "  identities_match boolean; targets_active boolean; target_executions bigint;",
+    "  identities_match boolean; targets_active boolean; latest_run_id bigint;",
+    "  final_run_id bigint; target_executions bigint;",
     "  database_now timestamptz; next_expiry_at timestamptz; next_expiry_utc text;",
     `  current_template constant text := ${CURRENT_DEADMAN_TEMPLATE_TAG}${currentTemplate}${CURRENT_DEADMAN_TEMPLATE_TAG};`,
     `  next_template constant text := ${NEXT_DEADMAN_TEMPLATE_TAG}${input.nextDeadmanCommand}${NEXT_DEADMAN_TEMPLATE_TAG};`,
@@ -80,8 +74,14 @@ export function generateGuardHeartbeatSql(value: unknown): string {
     "  if not coalesce(identities_match, false) then",
     "    raise exception 'momi_guard_heartbeat_target_identity'; end if;",
     "  if targets_active then raise exception 'momi_guard_heartbeat_target_active'; end if;",
+    "  select coalesce(max(runid), 0)::bigint into latest_run_id",
+    "    from cron.job_run_details;",
+    `  if latest_run_id < ${input.startCronRunId}`,
+    `      or latest_run_id - ${input.startCronRunId} > ${CRON_RUN_EVIDENCE_WINDOW_ROWS} then`,
+    "    raise exception 'momi_guard_heartbeat_history_gap'; end if;",
     "  select count(*) into target_executions from cron.job_run_details",
-    "  where status = 'running' and jobid in (2, 3, 4, 11);",
+    `  where runid > ${input.startCronRunId} and runid <= latest_run_id`,
+    "    and jobid in (2, 3, 4, 11);",
     "  if target_executions <> 0 then raise exception 'momi_guard_heartbeat_target_running'; end if;",
     `  if length(next_template) - length(replace(next_template, '${DEADMAN_EXPIRY_PLACEHOLDER}', ''))`,
     `      <> length('${DEADMAN_EXPIRY_PLACEHOLDER}') then`,
@@ -94,6 +94,23 @@ export function generateGuardHeartbeatSql(value: unknown): string {
     `  if position('${DEADMAN_EXPIRY_PLACEHOLDER}' in materialized_next) <> 0 then`,
     "    raise exception 'momi_guard_heartbeat_materialization'; end if;",
     `  perform cron.alter_job(job_id := ${input.guardJobId}, command := materialized_next);`,
+    "  select coalesce(max(runid), 0)::bigint into final_run_id",
+    "    from cron.job_run_details;",
+    `  if final_run_id < latest_run_id or final_run_id - ${input.startCronRunId}`,
+    `      > ${CRON_RUN_EVIDENCE_WINDOW_ROWS} then`,
+    "    raise exception 'momi_guard_heartbeat_history_gap'; end if;",
+    "  select count(*) into target_executions from cron.job_run_details",
+    `  where runid > ${input.startCronRunId} and runid <= final_run_id`,
+    "    and jobid in (2, 3, 4, 11);",
+    "  if target_executions <> 0 then raise exception 'momi_guard_heartbeat_target_running'; end if;",
+    "  select count(*) = 4 and bool_and(case j.jobid",
+    targetCases,
+    "    else false end), coalesce(bool_or(j.active), false)",
+    "  into identities_match, targets_active from cron.job j",
+    "  where j.jobid in (2, 3, 4, 11);",
+    "  if not coalesce(identities_match, false) then",
+    "    raise exception 'momi_guard_heartbeat_target_identity'; end if;",
+    "  if targets_active then raise exception 'momi_guard_heartbeat_target_active'; end if;",
     "  select j.jobname, j.schedule, j.active, j.command",
     "  into strict readback_name, readback_schedule, readback_active, readback_command",
     `  from cron.job j where j.jobid = ${input.guardJobId};`,

@@ -21,12 +21,12 @@ test("fast-only and resource heartbeat variants are byte deterministic", () => {
   const resource = generateCombinedHeartbeatSql({
     ...VALID_GUARD_HEARTBEAT_INPUT, includeResource: true,
   })
-  assert.equal(Buffer.byteLength(fast), 22_165)
+  assert.equal(Buffer.byteLength(fast), 23_948)
   assert.equal(createHash("sha256").update(fast).digest("hex"),
-    "2f17adb9a10a929360adf3533e98b0da58610314bc132f4b5800c3b82549fa11")
-  assert.equal(Buffer.byteLength(resource), 24_830)
+    "45516960288d812ede28789e8d49fc21dcd8c2044e173f7c887a2b59817168da")
+  assert.equal(Buffer.byteLength(resource), 26_613)
   assert.equal(createHash("sha256").update(resource).digest("hex"),
-    "f5f2f8431984bd4594dce2d822dff2917d398890dc032463cdca194b76551614")
+    "0a99338003fcf5e1467f5c4818279451cbb9daf79c887898c780c152f4b7f728")
   assert.equal(fast, generateCombinedHeartbeatSql({
     ...structuredClone(VALID_GUARD_HEARTBEAT_INPUT), includeResource: false,
   }))

@@ -84,6 +84,13 @@ advisory lock, single writer, and exact post-mutation readback; Cron changes use
 only the supported `cron.schedule`, `cron.alter_job`, and `cron.unschedule`
 functions.
 
+Bootstrap and heartbeat control transactions never scan all retained Cron
+history. They anchor run evidence to the immediately verified pre-guard run ID,
+use a captured upper bound for every `runid` primary-key range, and fail closed
+if more than 16,384 run IDs would need inspection. A second bounded current
+readback after the guard mutation rejects concurrent target starts before the
+exact guard readback and commit.
+
 ## Post-run checks
 
 For exit `0`, verify the printed `final.json` SHA-256, confirm its four fixed
