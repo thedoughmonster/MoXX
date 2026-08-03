@@ -70,6 +70,8 @@ export type ReceiptMetricKey =
   | "routing_ready"
   | "registry_count"
   | "registry_sha256"
+  | "routing_catalog_count"
+  | "routing_catalog_sha256"
   | "target_run_count"
   | "target_run_failures"
   | "toast_ready"

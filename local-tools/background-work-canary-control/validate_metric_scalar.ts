@@ -47,8 +47,8 @@ export function validateMetricScalar(key: ReceiptMetricKey, value: unknown): voi
   if (key === "command_md5" && !/^[a-f0-9]{32}$/.test(value)) {
     throw new Error("Receipt command_md5 is invalid")
   }
-  if (["generation_sha256", "registry_sha256", "schedule_due_sha256",
-    "toast_sha256"].includes(key) &&
+  if (["generation_sha256", "registry_sha256", "routing_catalog_sha256",
+    "schedule_due_sha256", "toast_sha256"].includes(key) &&
     !/^[a-f0-9]{64}$/.test(value)) {
     throw new Error(`Receipt ${key} is invalid`)
   }

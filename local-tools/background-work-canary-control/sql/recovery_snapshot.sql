@@ -6,7 +6,7 @@ active_registry as (
   select s.schedule_key, s.operation_key, s.source_key, s.restaurant_guid,
     s.mode, s.schedule_kind, s.timezone, s.interval_seconds, s.local_run_time,
     s.day_of_month, s.window_key, s.parameter_defaults, s.window_lookback_seconds,
-    s.next_due_at,
+    s.next_due_at, o.pagination_kind, o.requires_window,
     o.is_enabled as operation_enabled, x.is_enabled as source_enabled,
     r.is_enabled as restaurant_enabled
   from toast_acquisition.schedules s
@@ -25,7 +25,8 @@ registry_summary as (
         mode, schedule_kind, timezone, coalesce(interval_seconds::text, ''),
         coalesce(local_run_time::text, ''), coalesce(day_of_month::text, ''),
         coalesce(window_key, ''), parameter_defaults::text,
-        coalesce(window_lookback_seconds::text, ''), operation_enabled::text,
+        coalesce(window_lookback_seconds::text, ''), pagination_kind,
+        requires_window::text, operation_enabled::text,
         source_enabled::text, restaurant_enabled::text), E'\n'
       order by schedule_key), ''), 'UTF8'), 'sha256'), 'hex') as fingerprint,
     encode(extensions.digest(convert_to(coalesce(string_agg(
@@ -34,8 +35,122 @@ registry_summary as (
       'UTF8'), 'sha256'), 'hex') as due_fingerprint
   from active_registry
 ),
+routing_catalog as (
+  select subscription_key, consumer_service, event_pattern, queue_name,
+    dead_letter_queue_name, active, minimum_recorded_at
+  from momi_events.subscriptions
+),
+routing_catalog_summary as (
+  select count(*)::bigint as rows,
+    encode(extensions.digest(convert_to(coalesce(string_agg(
+      concat_ws('|', subscription_key, consumer_service, event_pattern,
+        queue_name, dead_letter_queue_name, active::text,
+        to_char(minimum_recorded_at at time zone 'UTC',
+          'YYYY-MM-DD"T"HH24:MI:SS.US"Z"')), E'\n'
+      order by subscription_key), ''), 'UTF8'), 'sha256'), 'hex') as fingerprint
+  from routing_catalog
+),
 toast_open as (
   select j.* from toast_acquisition.jobs j where j.status <> 'succeeded'
+),
+toast_lineage as (
+  select j.*, schedule.matches as schedule_matches,
+    fanout.matches as fanout_matches,
+    schedule.occurrence_is_future or fanout.occurrence_is_future as lineage_is_future,
+    schedule.matches = 1 and schedule.legal_cursor
+      and j.page_count > 0 and j.page_count < j.page_budget
+      and j.cursor <> '{}'::jsonb as legal_continuation,
+    (case when schedule.matches = 1 and j.page_count = 0
+        and j.cursor = '{}'::jsonb then 1 else 0 end
+      + case when schedule.matches = 1 and schedule.legal_cursor
+        and j.page_count > 0 and j.page_count < j.page_budget
+        and j.cursor <> '{}'::jsonb then 1 else 0 end
+      + case when fanout.matches = 1 and j.page_count = 0
+        and j.cursor = '{}'::jsonb then 1 else 0 end) as accepted_lineage_count
+  from toast_open j cross join sample_clock c
+  cross join lateral (
+    select count(*)::bigint as matches,
+      coalesce(bool_and((a.pagination_kind in ('page', 'cursor')
+          or a.requires_window)
+        and jsonb_object_length(j.cursor) > 0
+        and not exists (select 1 from jsonb_object_keys(j.cursor) key
+          where key not in ('page', 'pageToken', 'window_start', 'businessDate'))
+        and not (j.cursor ? 'page' and j.cursor ? 'pageToken')
+        and not (j.cursor ? 'window_start' and j.cursor ? 'businessDate')
+        and (not (j.cursor ? 'page') or (a.pagination_kind = 'page'
+          and jsonb_typeof(j.cursor -> 'page') = 'number'
+          and j.cursor ->> 'page' ~ '^[1-9][0-9]*$'))
+        and (not (j.cursor ? 'pageToken') or (a.pagination_kind = 'cursor'
+          and jsonb_typeof(j.cursor -> 'pageToken') = 'string'
+          and btrim(j.cursor ->> 'pageToken') = j.cursor ->> 'pageToken'
+          and length(j.cursor ->> 'pageToken') between 1 and 16384))
+        and (not (j.cursor ? 'businessDate') or (a.requires_window
+          and jsonb_typeof(j.cursor -> 'businessDate') = 'string'
+          and j.cursor ->> 'businessDate' ~ '^[0-9]{8}$'
+          and pg_input_is_valid(concat(substring(j.cursor ->> 'businessDate', 1, 4),
+            '-', substring(j.cursor ->> 'businessDate', 5, 2), '-',
+            substring(j.cursor ->> 'businessDate', 7, 2)), 'date')))
+        and (not (j.cursor ? 'window_start') or (a.requires_window
+          and jsonb_typeof(j.cursor -> 'window_start') = 'string'
+          and j.cursor ->> 'window_start' ~
+            '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[.][0-9]{3}Z$'
+          and pg_input_is_valid(j.cursor ->> 'window_start', 'timestamptz')))
+      ), false) as legal_cursor,
+      coalesce(bool_or(substring(j.idempotency_key from length(a.schedule_key) + 2)
+        > to_char(c.observed_at at time zone 'UTC', 'YYYYMMDDHH24MISS')), false)
+        as occurrence_is_future
+    from active_registry a
+    where j.idempotency_key like a.schedule_key || ':%'
+      and length(j.idempotency_key) = length(a.schedule_key) + 15
+      and substring(j.idempotency_key from length(a.schedule_key) + 2)
+        ~ '^[0-9]{14}$'
+      and (a.operation_key, a.source_key, a.restaurant_guid, a.mode) =
+        (j.operation_key, j.source_key, j.restaurant_guid, j.mode)
+      and a.operation_enabled is true and a.source_enabled is true
+      and a.restaurant_enabled is true
+  ) schedule
+  cross join lateral (
+    select count(*)::bigint as matches,
+      coalesce(bool_or(substring(parent.idempotency_key
+        from length(a.schedule_key) + 2)
+        > to_char(c.observed_at at time zone 'UTC', 'YYYYMMDDHH24MISS')), false)
+        as occurrence_is_future
+    from toast_acquisition.jobs parent
+    join active_registry a on parent.idempotency_key like a.schedule_key || ':%'
+      and length(parent.idempotency_key) = length(a.schedule_key) + 15
+      and substring(parent.idempotency_key from length(a.schedule_key) + 2)
+        ~ '^[0-9]{14}$'
+      and (a.operation_key, a.source_key, a.restaurant_guid, a.mode) =
+        (parent.operation_key, parent.source_key, parent.restaurant_guid, parent.mode)
+      and a.operation_enabled is true and a.source_enabled is true
+      and a.restaurant_enabled is true
+    join toast_acquisition.operations detail
+      on detail.operation_key = j.operation_key
+    join toast_acquisition.operation_parameters parameter
+      on parameter.operation_key = detail.operation_key
+      and parameter.parameter_key = 'guid'
+    where j.operation_key = 'toast.payments.get.v1' and j.mode = 'repair'
+      and j.reason = 'Payment detail discovered from archived payment list'
+      and j.window_start is null and j.window_end is null
+      and j.idempotency_key ~ ('^toast[.]payment[.]detail:[1-9][0-9]{0,18}:'
+        || '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
+      and split_part(j.idempotency_key, ':', 3) = parent.job_id::text
+      and split_part(j.idempotency_key, ':', 4) = lower(j.parameters ->> 'guid')
+      and j.parameters = jsonb_build_object('guid', j.parameters ->> 'guid')
+      and j.parameters ->> 'guid' ~ parameter.validation_pattern
+      and parent.operation_key = 'toast.payments.list.v1'
+      and (parent.source_key, parent.restaurant_guid, parent.correlation_id) =
+        (j.source_key, j.restaurant_guid, j.correlation_id)
+      and parent.status in ('pending', 'running', 'succeeded')
+      and parent.created_at <= c.observed_at
+      and detail.source_operation_id = 'paymentsGuidGet'
+      and detail.response_kind = 'document' and detail.pagination_kind = 'none'
+      and detail.exact_resource_only and detail.is_enabled
+      and parameter.parameter_location = 'path' and parameter.data_type = 'string'
+      and parameter.required and parameter.validation_pattern is not null
+      and (select count(*) from toast_acquisition.operation_parameters extra
+        where extra.operation_key = detail.operation_key) = 1
+  ) fanout
 ),
 toast_classification as (
   select count(*)::bigint as open_rows,
@@ -44,31 +159,52 @@ toast_classification as (
     count(*) filter (where j.status = 'retry_wait')::bigint as retry_rows,
     count(*) filter (where j.status = 'dead_letter')::bigint as dead_rows,
     count(*) filter (where j.next_attempt_at > c.observed_at
-      or j.created_at > c.observed_at)::bigint as future_rows,
+      or j.created_at > c.observed_at or j.lineage_is_future)::bigint as future_rows,
     count(*) filter (where j.attempt_count <> 0)::bigint as attempted_rows,
     count(*) filter (where j.status <> 'pending')::bigint as unexpected_rows,
-    count(*) filter (where j.page_count <> 0 or j.cursor <> '{}'::jsonb
-      or j.lease_expires_at is not null or j.completed_at is not null
-      or j.last_error is not null)::bigint as partial_rows,
-    count(*) filter (where (select count(*) from active_registry a
-      where j.idempotency_key like a.schedule_key || ':%'
-        and length(j.idempotency_key) = length(a.schedule_key) + 15
-        and substring(j.idempotency_key from length(a.schedule_key) + 2) ~ '^[0-9]{14}$'
-        and (a.operation_key, a.source_key, a.restaurant_guid, a.mode) =
-          (j.operation_key, j.source_key, j.restaurant_guid, j.mode)
-        and a.operation_enabled is true and a.source_enabled is true
-        and a.restaurant_enabled is true) <> 1
-    )::bigint as unmatched_rows,
+    count(*) filter (where j.lease_expires_at is not null
+      or j.completed_at is not null or j.last_error is not null
+      or ((j.page_count <> 0 or j.cursor <> '{}'::jsonb)
+        and not j.legal_continuation))::bigint as partial_rows,
+    count(*) filter (where j.accepted_lineage_count <> 1)::bigint as unmatched_rows,
     encode(extensions.digest(convert_to(coalesce(string_agg(
       concat_ws('|', j.job_id::text, j.idempotency_key, j.operation_key,
         j.source_key, j.restaurant_guid, j.mode, j.status, j.attempt_count::text),
       E'\n' order by j.job_id), ''), 'UTF8'), 'sha256'), 'hex') as fingerprint
-  from toast_open j cross join sample_clock c
+  from toast_lineage j cross join sample_clock c
 ),
 routing_open as (
-  select w.*, e.source_system, e.event_name, e.recorded_at
+  select w.*, e.source_system, e.source_resource_type, e.event_name,
+    e.idempotency_key, e.schema_version, e.entity_type, e.entity_id, e.recorded_at
   from momi_events.routing_work w join momi_events.events e using (event_id)
   where w.status <> 'succeeded'
+),
+routing_lineage as (
+  select w.*, matches.patterns as matching_subscription_patterns,
+    matches.active_eligible as active_eligible_subscriptions,
+    (case when w.source_system = 'toast' and w.event_name like 'source.toast.%'
+        and matches.active_eligible = 1 then 1 else 0 end
+      + case when w.event_name = 'warehouse.order.reconciled'
+        and w.source_system = 'toast' and w.source_resource_type = 'order'
+        and w.schema_version = 2 and w.entity_type = 'order'
+        and w.entity_id is not null
+        and w.idempotency_key ~ ('^warehouse:order:[0-9a-f]{8}-[0-9a-f]{4}-'
+          || '[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
+        and matches.patterns = 0 then 1 else 0 end
+      + case when w.event_name = 'warehouse.stock.observed'
+        and w.source_system = 'toast' and w.source_resource_type = 'stock_state'
+        and w.schema_version = 1 and w.entity_type = 'menu_item'
+        and w.entity_id is not null
+        and w.idempotency_key ~ ('^warehouse:stock:[0-9a-f]{8}-[0-9a-f]{4}-'
+          || '[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$')
+        and matches.patterns = 0 then 1 else 0 end) as accepted_lineage_count
+  from routing_open w
+  cross join lateral (
+    select count(*)::bigint as patterns,
+      count(*) filter (where s.active
+        and w.recorded_at >= s.minimum_recorded_at)::bigint as active_eligible
+    from routing_catalog s where w.event_name like s.event_pattern
+  ) matches
 ),
 routing_classification as (
   select count(*)::bigint as open_rows,
@@ -80,9 +216,8 @@ routing_classification as (
       or w.attempt_count <> 0 or w.next_attempt_at > c.observed_at
       or w.recorded_at > c.observed_at
       or w.lease_expires_at is not null or w.completed_at is not null
-      or w.last_error is not null or w.source_system <> 'toast'
-      or w.event_name not like 'source.toast.%')::bigint as invalid_rows
-  from routing_open w cross join sample_clock c
+      or w.last_error is not null or w.accepted_lineage_count <> 1)::bigint as invalid_rows
+  from routing_lineage w cross join sample_clock c
 ),
 delivery_open as (
   select d.*, e.source_system, e.recorded_at, s.active as subscription_active
@@ -141,6 +276,7 @@ select jsonb_build_object(
   'registryCount', g.rows, 'registryContractViolations', g.contract_violations,
   'registrySha256', g.fingerprint,
   'scheduleDueSha256', g.due_fingerprint,
+  'routingCatalogCount', k.rows, 'routingCatalogSha256', k.fingerprint,
   'dueScheduleCount', (select count(*) from toast_acquisition.schedules
     where active and next_due_at <= c.observed_at),
   'toastOpen', t.open_rows, 'toastReady', t.ready, 'toastRunning', t.running,
@@ -200,7 +336,8 @@ select jsonb_build_object(
   'maxConnections', current_setting('max_connections')::integer,
   'reservedConnections', current_setting('superuser_reserved_connections')::integer
 ) as sample
-from sample_clock c cross join registry_summary g cross join toast_classification t
+from sample_clock c cross join registry_summary g cross join routing_catalog_summary k
+cross join toast_classification t
 cross join routing_classification r cross join delivery_classification d
 cross join queue_totals q cross join job_state j cross join database_statistics s
 cross join worker_violations w;

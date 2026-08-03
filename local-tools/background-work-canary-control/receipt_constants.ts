@@ -30,7 +30,8 @@ export const RECEIPT_NUMBER_KEYS: readonly ReceiptMetricKey[] = [
   "exact_identity_mask", "inactive_after_mask", "missed_samples",
   "numbackends", "observed_outer_unexpected_keys", "observed_row_count",
   "observed_sample_unexpected_keys", "oldest_age_seconds", "overlap_count", "queue_length",
-  "queue_ready", "registry_count", "routing_ready", "target_run_count", "target_run_failures",
+  "queue_ready", "registry_count", "routing_catalog_count", "routing_ready",
+  "target_run_count", "target_run_failures",
   "terminal_failure_count", "terminal_guard_run_id", "terminal_run_count",
   "toast_ready", "waiting_locks", "wal_bytes", "wal_directory_bytes", "zero_samples",
 ]
@@ -45,6 +46,6 @@ export const RECEIPT_STRING_KEYS: readonly ReceiptMetricKey[] = [
   "original_command_sha256", "observed_outer_keys", "observed_sample_keys",
   "observed_top_level_type", "observed_value_types", "parse_subreason",
   "project_ref", "provider_code", "sample_kind", "schedule", "status",
-  "registry_sha256", "schedule_due_sha256", "toast_sha256",
+  "registry_sha256", "routing_catalog_sha256", "schedule_due_sha256", "toast_sha256",
   "terminal_command_md5", "terminal_command_sha256", "terminal_guard_start_utc",
 ]

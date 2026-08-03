@@ -20,6 +20,7 @@ test("recovery observation accepts exact progress and recognizes zero work", () 
 test("recovery observation stops on every fail-closed evidence class", () => {
   const cases = [
     { registrySha256: "c".repeat(64) }, { registryContractViolations: 1 },
+    { routingCatalogSha256: "e".repeat(64) }, { routingCatalogCount: 3 },
     { toastUnmatched: 1 }, { windowToastViolations: 1 }, { routingRetry: 1 },
     { deliveryDead: 1 }, { queueDead: 1 }, { targetRunFailures: 1 },
     { invalidTargetReturns: 1 }, { forbiddenTargetFourRuns: 1 },
