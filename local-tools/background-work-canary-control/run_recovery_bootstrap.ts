@@ -16,4 +16,5 @@ export async function runRecoveryBootstrap(state: RecoveryState, startCronRunId:
   { temporaryRoot: "/tmp" })
   if (result.status === "failure") throw new Error(`Recovery bootstrap ${result.reason}`)
   state.guard = result.value
+  state.guardStartCronRunId = startCronRunId
 }
