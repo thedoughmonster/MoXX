@@ -12,12 +12,14 @@ import { EXPECTED_GUARD_NAME, EXPECTED_GUARD_SCHEDULE,
   EXPECTED_TARGET_JOBS } from "./sample_constants.ts"
 import { sha256Text } from "./sha256_text.ts"
 import { validateDeadmanReconciliationContext } from "./validate_deadman_reconciliation_context.ts"
+import { validateDeadmanActiveMasks } from "./validate_deadman_active_masks.ts"
 import { validateNonnegativeInteger } from "./validate_nonnegative_integer.ts"
 import { validateReconciliationFast } from "./validate_reconciliation_fast.ts"
 import { validateStrictRecord } from "./validate_strict_record.ts"
 export function parseDeadmanReconciliationOutput(
-  output: Uint8Array, contextValue: unknown,
+  output: Uint8Array, contextValue: unknown, expectedActiveBeforeMask: number | readonly number[] = 0,
 ): DeadmanReconciliationResult {
+  const expectedMasks = validateDeadmanActiveMasks(expectedActiveBeforeMask)
   const context = validateDeadmanReconciliationContext(contextValue)
   const row = validateStrictRecord(parseCliQueryEnvelope(
     output, DEADMAN_RECONCILIATION_MARKER), DEADMAN_RECONCILIATION_RESULT_KEYS,
@@ -112,11 +114,10 @@ export function parseDeadmanReconciliationOutput(
     row.terminalFailureCount === 0 && row.terminalExpectedStatus === DEADMAN_TERMINAL_STATUS &&
     row.terminalHistoryStatus === DEADMAN_TERMINAL_STATUS &&
     historyStartUtc === startUtc && startMs >= expiryMs && startMs <= expiryMs + 5_000
-  const masksSafe = row.exactIdentityMask === 15 && row.activeBeforeMask === 0 &&
+  const masksSafe = row.exactIdentityMask === 15 &&
+    expectedMasks.includes(row.activeBeforeMask as number) &&
     row.inactiveAfterMask === 15
-  const fast = validateReconciliationFast(
-    row.fast, context, true, row.guardJobId as number,
-  )
+  const fast = validateReconciliationFast(row.fast, context, true, row.guardJobId as number)
   const outcome = modelDeadmanReconciliation({
     mode: context.mode, guardIdentityCount: count, guardIdentityMatches: true,
     targetStateSafe: masksSafe, commandBindingValid: terminalBound,

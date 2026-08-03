@@ -12,7 +12,8 @@ export function createInternalProviderSql(
   if (![
     "cleanup", "deadman_reconciliation", "fast_sample", "guard_bootstrap",
     "guard_heartbeat_fast",
-    "guard_heartbeat_resource", "resource_sample", "rollback",
+    "guard_heartbeat_resource", "recovery_activation", "recovery_final",
+    "recovery_observation", "recovery_preflight", "resource_sample", "rollback",
   ].includes(kind) || typeof sql !== "string" || sql.length < 2 ||
     Buffer.byteLength(sql, "utf8") > 128 * 1024 || !sql.endsWith("\n") ||
     sql.includes("\0")) {

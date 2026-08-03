@@ -17,8 +17,10 @@ const jobNames = new Set([
 ])
 const statuses = new Set([
   "active", "bootstrap_ambiguity_reconciled", "completed", "failed",
-  "failure_recovered_by_deadman", "inactive", "inactive_dry_run_verified",
-  "manual_reconciliation_required", "passed", "pending", "started", "stopped",
+  "classified", "failure_recovered_by_deadman", "guard_absent", "inactive",
+  "inactive_dry_run_verified", "manual_reconciliation_required", "passed", "pending",
+  "reconciled", "rollback_and_cleanup_read_back", "started", "stopped",
+  "stopped_recovered",
 ])
 
 export function validateMetricScalar(key: ReceiptMetricKey, value: unknown): void {
@@ -45,8 +47,10 @@ export function validateMetricScalar(key: ReceiptMetricKey, value: unknown): voi
   if (key === "command_md5" && !/^[a-f0-9]{32}$/.test(value)) {
     throw new Error("Receipt command_md5 is invalid")
   }
-  if (key === "generation_sha256" && !/^[a-f0-9]{64}$/.test(value)) {
-    throw new Error("Receipt generation_sha256 is invalid")
+  if (["generation_sha256", "registry_sha256", "schedule_due_sha256",
+    "toast_sha256"].includes(key) &&
+    !/^[a-f0-9]{64}$/.test(value)) {
+    throw new Error(`Receipt ${key} is invalid`)
   }
   if (["original_command_sha256", "terminal_command_sha256"].includes(key) &&
     !/^[a-f0-9]{64}$/.test(value)) throw new Error(`Receipt ${key} is invalid`)
@@ -59,7 +63,7 @@ export function validateMetricScalar(key: ReceiptMetricKey, value: unknown): voi
     throw new Error("Receipt guard_run_status is invalid")
   }
   if (key === "job_name" && !jobNames.has(value)) throw new Error("Receipt job_name is invalid")
-  if (key === "sample_kind" && !["fast", "resource"].includes(value)) {
+  if (key === "sample_kind" && !["fast", "fast_and_resource", "resource"].includes(value)) {
     throw new Error("Receipt sample_kind is invalid")
   }
   if (key === "schedule" && !["1 second", "3 seconds", "5 seconds"].includes(value)) {
