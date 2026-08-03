@@ -8,10 +8,12 @@ import type { RecoveryObservation, RecoveryState } from "./recovery_types.ts"
 export async function runRecoveryObservation(
   state: RecoveryState, nextGenerationSha256: string, includeResource: boolean,
 ): Promise<RecoveryObservation> {
-  if (!state.guard || !state.activation) throw new Error("Recovery activation is absent")
+  if (!state.guard || !state.activation || state.guardStartCronRunId === undefined) {
+    throw new Error("Recovery activation is absent")
+  }
   const input = buildCombinedHeartbeatInput(state.runtime, state.runId,
     state.guard.guardJobId, state.generationSha256, nextGenerationSha256,
-    state.activation.frozen.maxCronRunId, false)
+    state.guardStartCronRunId, false)
   const { includeResource: _includeResource, ...heartbeat } = input
   state.attemptedGenerationSha256 = nextGenerationSha256
   const result = await executeProviderQuery({ repositoryRoot: state.repositoryRoot,

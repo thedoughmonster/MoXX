@@ -46,6 +46,7 @@ export type RecoveryState = {
   runtime: ReleasedRuntime; repositoryRoot: string; receiptRoot: string
   signal: AbortSignal; receipt: ReceiptWriterState; runId: string
   generationSha256: string; guard?: GuardBootstrapResult
+  guardStartCronRunId?: number
   attemptedGenerationSha256?: string
   preflight?: RecoverySnapshot; activation?: RecoveryActivation
   finalGenerationSha256?: string
