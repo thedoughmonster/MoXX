@@ -35,6 +35,7 @@ test("dynamic preflight authenticates schedule contracts without a fixed backlog
   assert.match(sql, /registryContractViolations/)
   assert.match(sql, /left join toast_acquisition\.operations/)
   assert.match(sql, /registrySha256/)
+  assert.match(sql, /routingCatalogSha256/)
   assert.doesNotMatch(sql, /2026-08-03 00:00|62|74|117/)
 })
 

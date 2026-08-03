@@ -27,6 +27,8 @@ export async function writeRecoveryArtifact(
     schedule_registry: { count: baseline.registryCount, sha256: baseline.registrySha256,
       due_sha256: baseline.scheduleDueSha256,
       contract_violations: baseline.registryContractViolations },
+    routing_catalog: { count: baseline.routingCatalogCount,
+      sha256: baseline.routingCatalogSha256 },
     preactivation_work: { toast_count: baseline.toastOpen,
       toast_sha256: baseline.toastSha256, routing_count: baseline.routingOpen,
       delivery_count: baseline.deliveryOpen, queue_count: baseline.queueReady,

@@ -11,6 +11,10 @@ export function evaluateRecoveryObservation(
   if (sample.registrySha256 !== baseline.registrySha256 ||
     sample.registryCount !== baseline.registryCount ||
     sample.registryContractViolations !== 0) reasons.push("registry_drift")
+  if (sample.routingCatalogSha256 !== baseline.routingCatalogSha256 ||
+    sample.routingCatalogCount !== baseline.routingCatalogCount) {
+    reasons.push("routing_catalog_drift")
+  }
   if (sample.targetJobs.find((job) => job.jobId === 4)?.active !== false ||
     sample.targetJobs.filter((job) => job.jobId !== 4).some((job) => !job.active)) {
     reasons.push("target_state_drift")

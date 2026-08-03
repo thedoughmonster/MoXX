@@ -8,6 +8,7 @@ test("recovery receipt events remain hash chained and sanitized", () => {
   const first = buildReceiptRecord({ event_type: "activation_completed",
     timestamp_utc: "2026-08-03T10:20:00.000Z", metrics: {
       status: "active", registry_count: 49, registry_sha256: "a".repeat(64),
+      routing_catalog_count: 2, routing_catalog_sha256: "c".repeat(64),
       toast_sha256: "b".repeat(64) } }, 1, RECEIPT_GENESIS)
   const second = buildReceiptRecord({ event_type: "canary_observation",
     timestamp_utc: "2026-08-03T10:20:15.000Z", metrics: {

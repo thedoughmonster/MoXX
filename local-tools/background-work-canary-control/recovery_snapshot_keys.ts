@@ -2,7 +2,7 @@ export const RECOVERY_SNAPSHOT_KEYS = [
   "observedAtUtcMs", "maxCronRunId", "targetJobs", "guardIdentityCount",
   "activeCronExecutions", "waitingLocks", "registryCount",
   "registryContractViolations", "registrySha256",
-  "scheduleDueSha256",
+  "scheduleDueSha256", "routingCatalogCount", "routingCatalogSha256",
   "dueScheduleCount", "toastOpen", "toastReady", "toastRunning", "toastRetry",
   "toastDead", "toastFuture", "toastAttempted", "toastUnexpected", "toastPartial",
   "toastUnmatched", "toastSha256", "routingOpen", "routingReady", "routingRunning",

@@ -8,14 +8,17 @@ export function parseRecoverySnapshot(value: unknown): RecoverySnapshot {
   const row = validateStrictRecord(value, RECOVERY_SNAPSHOT_KEYS, "Recovery snapshot")
   for (const key of RECOVERY_SNAPSHOT_KEYS) {
     if (key !== "targetJobs" && key !== "registrySha256" &&
-      key !== "scheduleDueSha256" && key !== "toastSha256") {
+      key !== "scheduleDueSha256" && key !== "routingCatalogSha256" &&
+      key !== "toastSha256") {
       validateNonnegativeInteger(row[key], `Recovery snapshot ${key}`)
     }
   }
   if (typeof row.registrySha256 !== "string" ||
     typeof row.scheduleDueSha256 !== "string" || typeof row.toastSha256 !== "string" ||
+    typeof row.routingCatalogSha256 !== "string" ||
     !/^[a-f0-9]{64}$/.test(row.registrySha256) ||
     !/^[a-f0-9]{64}$/.test(row.scheduleDueSha256) ||
+    !/^[a-f0-9]{64}$/.test(row.routingCatalogSha256) ||
     !/^[a-f0-9]{64}$/.test(row.toastSha256)) {
     throw new Error("Recovery snapshot fingerprint is invalid")
   }

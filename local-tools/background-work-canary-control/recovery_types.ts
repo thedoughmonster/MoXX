@@ -8,7 +8,7 @@ export type RecoverySnapshot = {
   guardIdentityCount: number; activeCronExecutions: number; waitingLocks: number
   registryCount: number; registryContractViolations: number
   registrySha256: string; scheduleDueSha256: string
-  dueScheduleCount: number
+  routingCatalogCount: number; routingCatalogSha256: string; dueScheduleCount: number
   toastOpen: number; toastReady: number; toastRunning: number; toastRetry: number
   toastDead: number; toastFuture: number; toastAttempted: number
   toastUnexpected: number; toastPartial: number; toastUnmatched: number
