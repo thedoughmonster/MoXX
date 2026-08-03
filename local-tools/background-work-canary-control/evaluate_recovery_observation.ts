@@ -53,7 +53,10 @@ export function evaluateRecoveryObservation(
   }
   if (sample.windowToastViolations) reasons.push("window_work_invalid")
   if (sample.cohortDead || sample.cohortRetry || sample.cohortInvalid ||
-    sample.cohortAmbiguous) reasons.push("cohort_work_invalid")
+    sample.cohortAmbiguous || sample.cohortMissingPriorMemberCount ||
+    sample.cohortMissingPriorLineageEdgeCount || sample.cohortChangedParentCount) {
+    reasons.push("cohort_work_invalid")
+  }
   if (sample.expiredLeases || sample.longLeases || sample.workerCapViolations ||
     sample.waitingLocks) {
     reasons.push("control_or_lease_violation")

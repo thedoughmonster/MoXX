@@ -1,4 +1,6 @@
 import { RECOVERY_SNAPSHOT_KEYS } from "./recovery_snapshot_keys.ts"
+import { parseRecoveryLineageProof } from "./parse_recovery_lineage_proof.ts"
+import { parseRecoveryMembershipProof } from "./parse_recovery_membership_proof.ts"
 import { parseRecoveryDueOccurrences } from "./parse_recovery_due_occurrences.ts"
 import type { RecoverySnapshot } from "./recovery_types.ts"
 import { validateNonnegativeInteger } from "./validate_nonnegative_integer.ts"
@@ -8,7 +10,9 @@ import { validateTargetJobs } from "./validate_target_jobs.ts"
 export function parseRecoverySnapshot(value: unknown): RecoverySnapshot {
   const row = validateStrictRecord(value, RECOVERY_SNAPSHOT_KEYS, "Recovery snapshot")
   for (const key of RECOVERY_SNAPSHOT_KEYS) {
-    if (key !== "targetJobs" && key !== "dueOccurrences" && !key.endsWith("Sha256")) {
+    if (key !== "targetJobs" && key !== "dueOccurrences" &&
+      key !== "cohortMembershipProof" && key !== "cohortLineageProof" &&
+      !key.endsWith("Sha256")) {
       validateNonnegativeInteger(row[key], `Recovery snapshot ${key}`)
     }
   }
@@ -18,5 +22,7 @@ export function parseRecoverySnapshot(value: unknown): RecoverySnapshot {
     }
   }
   return { ...row, dueOccurrences: parseRecoveryDueOccurrences(row.dueOccurrences),
+    cohortMembershipProof: parseRecoveryMembershipProof(row.cohortMembershipProof),
+    cohortLineageProof: parseRecoveryLineageProof(row.cohortLineageProof),
     targetJobs: validateTargetJobs(row.targetJobs) } as RecoverySnapshot
 }

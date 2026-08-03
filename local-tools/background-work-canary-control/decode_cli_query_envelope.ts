@@ -6,9 +6,10 @@ export function decodeCliQueryEnvelope(
   output: Uint8Array,
   expectedMarker: string,
   expectedSampleKeys: readonly string[] = [],
+  maxBytes = 64 * 1024,
 ): { sample: unknown, observed: ReturnType<typeof buildProviderObservedShape> } {
   const empty = buildProviderObservedShape(undefined, expectedSampleKeys)
-  if (!(output instanceof Uint8Array) || output.byteLength < 3 || output.byteLength > 64 * 1024) {
+  if (!(output instanceof Uint8Array) || output.byteLength < 3 || output.byteLength > maxBytes) {
     throw new ProviderSchemaError("framing", empty)
   }
   let text: string

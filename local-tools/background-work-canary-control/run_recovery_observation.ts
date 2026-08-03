@@ -3,6 +3,7 @@ import { createInternalProviderSql } from "./create_internal_provider_sql.ts"
 import { executeProviderQuery } from "./execute_provider_query.ts"
 import { generateRecoveryObservationSql } from "./generate_recovery_observation_sql.ts"
 import { parseRecoveryObservationOutput } from "./parse_recovery_observation_output.ts"
+import { RECOVERY_SNAPSHOT_OUTPUT_LIMIT_BYTES } from "./recovery_constants.ts"
 import type { RecoveryObservation, RecoveryState } from "./recovery_types.ts"
 
 export async function runRecoveryObservation(
@@ -19,7 +20,9 @@ export async function runRecoveryObservation(
   const result = await executeProviderQuery({ repositoryRoot: state.repositoryRoot,
     provider: state.runtime.provider, signal: state.signal,
     sql: createInternalProviderSql("recovery_observation",
-      generateRecoveryObservationSql(heartbeat, state.activation, includeResource)),
+      generateRecoveryObservationSql(heartbeat, state.activation, includeResource,
+        state.lastCohortProof)),
+    outputLimitBytes: RECOVERY_SNAPSHOT_OUTPUT_LIMIT_BYTES,
     parser: (output) => parseRecoveryObservationOutput(output,
       state.generationSha256, nextGenerationSha256, state.guard!.guardJobId) },
   { temporaryRoot: "/tmp" })

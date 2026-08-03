@@ -32,6 +32,11 @@ test("snapshot freezes every accepted durable root and deterministic descendant 
     /where status in \('queued', 'running', 'delivered'\)/,
     /from pgmq\.q_warehouse_projection_toast_v1 q/,
     /from pgmq\.q_order_alerting_v1 q/,
+    /prior_membership_proof_rows as/,
+    /not exists \(select 1 from cohort_membership_proof_rows current/,
+    /prior_lineage_proof_rows as/,
+    /current\.parent_sha256 <> prior\.parent_sha256/,
+    /'cohortChangedParentCount', lineage_delta\.changed_parent_rows/,
   ]) assert.match(sql, contract)
   assert.doesNotMatch(sql,
     /\b(insert|update|delete|alter|drop|create|truncate|lock|call)\b|jsonb_object_length/i)
@@ -81,6 +86,12 @@ test("durable membership and lineage may grow but never shrink or rewrite", () =
     cohortMembershipCount: 5, cohortMembershipSha256: "c".repeat(64),
     cohortLineageEdgeCount: 4, cohortLineageEdgeSha256: "d".repeat(64),
   }), state), false)
+  assert.equal(hasRecoveryMembershipDrift(createRecoverySnapshotFixture({
+    cohortMembershipCount: 8, cohortMembershipSha256: "c".repeat(64),
+    cohortLineageEdgeCount: 7, cohortLineageEdgeSha256: "d".repeat(64),
+    cohortMissingPriorMemberCount: 1, cohortMissingPriorLineageEdgeCount: 1,
+    cohortChangedParentCount: 1,
+  }), state), true)
   for (const change of [{ cohortMembershipCount: 3 },
     { cohortMembershipCount: 4, cohortMembershipSha256: "e".repeat(64) },
     { cohortLineageEdgeCount: 2 },
@@ -102,6 +113,11 @@ test("boundary parser rejects malformed, duplicate, and reordered occurrences", 
     [{ scheduleKey: "a", dueAtUtcMs: -1 }],
     [{ scheduleKey: "a", dueAtUtcMs: 1, extra: true }],
   ]) assert.throws(() => parseRecoverySnapshot({ ...snapshot, dueOccurrences }))
+  assert.throws(() => parseRecoverySnapshot({ ...snapshot,
+    cohortMembershipProof: ["b".repeat(64), "a".repeat(64)] }))
+  assert.throws(() => parseRecoverySnapshot({ ...snapshot,
+    cohortLineageProof: [{ childSha256: "a".repeat(64),
+      parentSha256: "b".repeat(64), edgeSha256: "not-a-hash" }] }))
 })
 
 test("preflight requires complete global-to-cohort root coverage", () => {

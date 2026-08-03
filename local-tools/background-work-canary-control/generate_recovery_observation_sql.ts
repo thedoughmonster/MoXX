@@ -4,11 +4,12 @@ import { GUARD_HEARTBEAT_MARKER } from "./guard_heartbeat_constants.ts"
 import { generateRecoveryBoundaryConfigSql } from "./generate_recovery_boundary_config_sql.ts"
 import { loadRecoverySnapshotSql } from "./load_recovery_snapshot_sql.ts"
 import { RECOVERY_OBSERVATION_MARKER } from "./recovery_constants.ts"
-import type { RecoveryActivation } from "./recovery_types.ts"
+import type { RecoveryActivation, RecoverySnapshot } from "./recovery_types.ts"
 import { SQL_SCHEMA_VERSION } from "./sql_artifact_constants.ts"
 
 export function generateRecoveryObservationSql(
   input: GuardHeartbeatInput, activation: RecoveryActivation, includeResource: boolean,
+  priorProof: RecoverySnapshot = activation.frozen,
 ): string {
   if (typeof includeResource !== "boolean") throw new Error("Recovery resource flag is invalid")
   const inactiveCheck = "  if targets_active then raise exception 'momi_guard_heartbeat_target_active'; end if;"
@@ -51,7 +52,7 @@ export function generateRecoveryObservationSql(
   const started = new Date(activation.startedAtUtcMs).toISOString()
   const startRunId = activation.frozen.maxCronRunId
   return transition.slice(0, boundary) + [
-    generateRecoveryBoundaryConfigSql(activation.frozen),
+    generateRecoveryBoundaryConfigSql(priorProof),
     "with recovery_snapshot as (", snapshot, "),",
     "run_evidence as (select",
     `  count(*) filter (where jobid in (2,3,4,11))::bigint target_runs,`,

@@ -26,6 +26,7 @@ export async function monitorRecoveryCanary(
   state.lastMembershipSha256 = state.activation.frozen.cohortMembershipSha256
   state.lastLineageEdgeCount = state.activation.frozen.cohortLineageEdgeCount
   state.lastLineageEdgeSha256 = state.activation.frozen.cohortLineageEdgeSha256
+  state.lastCohortProof = state.activation.frozen
   state.lastProgress = state.activation.frozen.cohortTerminalCount
   state.lastProgressAtUtcMs = started
   for (let index = 1; index < HARD_LIMIT_MS / FAST_INTERVAL_MS; index += 1) {
@@ -52,10 +53,6 @@ export async function monitorRecoveryCanary(
     if (hasRecoveryMembershipDrift(sample, state)) {
       evaluation.stopReasons.push("cohort_membership_drift")
     }
-    state.lastMembershipCount = sample.cohortMembershipCount
-    state.lastMembershipSha256 = sample.cohortMembershipSha256
-    state.lastLineageEdgeCount = sample.cohortLineageEdgeCount
-    state.lastLineageEdgeSha256 = sample.cohortLineageEdgeSha256
     state.zeroSamples = evaluation.zeroWork ? state.zeroSamples + 1 : 0
     const outstandingWork = sample.cohortJobOpen + sample.cohortAttemptOpen +
       sample.cohortRoutingOpen + sample.cohortDeliveryOpen +
@@ -77,6 +74,16 @@ export async function monitorRecoveryCanary(
         cohort_boundary_sha256: sample.cohortBoundarySha256,
         cohort_membership_count: sample.cohortMembershipCount,
         cohort_membership_sha256: sample.cohortMembershipSha256,
+        prior_cohort_membership_count: sample.priorCohortMembershipCount,
+        prior_cohort_membership_sha256: sample.priorCohortMembershipSha256,
+        cohort_membership_addition_count: sample.cohortMembershipAdditionCount,
+        cohort_membership_addition_sha256: sample.cohortMembershipAdditionSha256,
+        cohort_removed_member_count: sample.cohortMissingPriorMemberCount,
+        cohort_removed_member_sha256: sample.cohortMissingPriorMemberSha256,
+        cohort_missing_lineage_edge_count: sample.cohortMissingPriorLineageEdgeCount,
+        cohort_missing_lineage_edge_sha256: sample.cohortMissingPriorLineageEdgeSha256,
+        cohort_changed_parent_count: sample.cohortChangedParentCount,
+        cohort_changed_parent_sha256: sample.cohortChangedParentSha256,
         cohort_lineage_edge_count: sample.cohortLineageEdgeCount,
         cohort_lineage_edge_sha256: sample.cohortLineageEdgeSha256,
         queues: { toast_ready: sample.toastReady, routing_ready: sample.routingReady,
@@ -92,6 +99,11 @@ export async function monitorRecoveryCanary(
       state.stopReason = evaluation.stopReasons[0]
       return { passed: false, reason: state.stopReason }
     }
+    state.lastMembershipCount = sample.cohortMembershipCount
+    state.lastMembershipSha256 = sample.cohortMembershipSha256
+    state.lastLineageEdgeCount = sample.cohortLineageEdgeCount
+    state.lastLineageEdgeSha256 = sample.cohortLineageEdgeSha256
+    state.lastCohortProof = sample
     const workRemains = !evaluation.zeroWork
     if (workRemains &&
       sample.observedAtUtcMs - state.lastProgressAtUtcMs >= PROGRESS_LIMIT_MS) {

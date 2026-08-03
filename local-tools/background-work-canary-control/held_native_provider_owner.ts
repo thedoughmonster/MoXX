@@ -47,7 +47,7 @@ export class HeldNativeProviderOwner {
   }
 
   async runQuery(request: { repositoryRoot: string, sqlPath: string,
-    signal?: AbortSignal }): Promise<BoundedChildResult> {
+    signal?: AbortSignal, outputLimitBytes?: number }): Promise<BoundedChildResult> {
     if (request.repositoryRoot !== this.#repositoryRoot ||
       !isAbsolute(request.sqlPath) || resolve(request.sqlPath) !== request.sqlPath ||
       realpathSync(request.sqlPath) !== request.sqlPath) throw new Error("Provider query scope invalid")
@@ -59,7 +59,7 @@ export class HeldNativeProviderOwner {
     return await this.#execute([
       "db", "query", "--linked", "--file", request.sqlPath,
       "--workdir", this.#repositoryRoot, "--output-format", "json",
-    ], request.signal)
+    ], request.signal, request.outputLimitBytes)
   }
   async linkProject(): Promise<BoundedChildResult> {
     return await this.#execute(["link", "--project-ref", DEV_PROJECT_REF,
@@ -90,7 +90,8 @@ export class HeldNativeProviderOwner {
     }
     this.#state = "closed"
   }
-  async #execute(arguments_: readonly string[], signal?: AbortSignal) {
+  async #execute(arguments_: readonly string[], signal?: AbortSignal,
+    outputLimitBytes?: number) {
     if (this.#state !== "held") throw new Error("Held native provider is unavailable")
     this.#assertLive()
     this.#state = "active"
@@ -98,7 +99,7 @@ export class HeldNativeProviderOwner {
       const result = await this.#runChild({
         executable: "/proc/self/fd/3",
         heldExecutable: this.#sealedExecutable,
-        arguments: arguments_, environment: this.#environment, signal,
+        arguments: arguments_, environment: this.#environment, signal, outputLimitBytes,
       })
       this.#assertLive()
       this.#state = "held"

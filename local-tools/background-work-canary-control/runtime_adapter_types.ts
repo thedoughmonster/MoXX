@@ -21,6 +21,7 @@ export type HeldProvider = Readonly<{
     repositoryRoot: string
     sqlPath: string
     signal?: AbortSignal
+    outputLimitBytes?: number
   }) => Promise<BoundedChildResult>
   status: () => HeldProviderStatus
   close: () => Promise<void>
@@ -109,6 +110,7 @@ export type ProviderQueryRequest<T> = {
   sql: InternalProviderSql
   parser: (stdout: Uint8Array) => T
   signal?: AbortSignal
+  outputLimitBytes?: number
 }
 
 export type ProviderQueryDependencies = {

@@ -218,15 +218,11 @@ toast_classification as (
       E'\n' order by j.job_id), ''), 'UTF8'), 'sha256'), 'hex') as fingerprint
   from toast_lineage j cross join sample_clock c
 ),
-projector_events as (
+valid_projector_events as (
   select e.*
   from momi_events.events e
-  cross join lateral (
-    select count(*)::bigint as patterns
-    from routing_catalog s where e.event_name like s.event_pattern
-  ) matches
-  where matches.patterns = 0 and (
-    (e.event_name = 'warehouse.order.reconciled'
+  where (
+    (e.event_name in ('warehouse.order.observed', 'warehouse.order.reconciled')
       and e.source_system = 'toast' and e.source_resource_type = 'order'
       and e.schema_version = 2 and e.entity_type = 'order' and e.entity_id is not null
       and e.idempotency_key ~ ('^warehouse:order:[0-9a-f]{8}-[0-9a-f]{4}-'
@@ -237,6 +233,14 @@ projector_events as (
       and e.idempotency_key ~ ('^warehouse:stock:[0-9a-f]{8}-[0-9a-f]{4}-'
         || '[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'))
   )
+),
+projector_events as (
+  select e.* from valid_projector_events e
+  cross join lateral (
+    select count(*)::bigint as patterns
+    from routing_catalog s where e.event_name like s.event_pattern
+  ) matches
+  where e.event_name = 'warehouse.order.observed' or matches.patterns = 0
 ),
 source_observation_events as (
   select e.event_id, o.observation_id, e.correlation_id
@@ -272,7 +276,7 @@ source_webhook_events as (
   where e.source_system = 'toast' and e.event_name like 'source.toast.%'
 ),
 projector_parent_candidates as (
-  select distinct child.event_id as child_event_id, source.event_id as parent_event_id
+  select child.event_id as child_event_id, source.event_id as parent_event_id
   from projector_events child
   join momi_warehouse.version_observations v
     on child.source_reference ->> 'schema' = 'momi_warehouse'
@@ -284,8 +288,9 @@ projector_parent_candidates as (
     on v.source_observation_key ~ '^toast:resource-observation:[0-9]+(:[a-z0-9-]+)?$'
     and split_part(v.source_observation_key, ':', 3)::bigint = source.observation_id
     and child.correlation_id = source.correlation_id
-  union
-  select distinct child.event_id, source.event_id
+  where child.event_name <> 'warehouse.order.observed'
+  union all
+  select child.event_id, source.event_id
   from projector_events child
   join momi_warehouse.version_observations v
     on child.source_reference ->> 'schema' = 'momi_warehouse'
@@ -299,8 +304,9 @@ projector_parent_candidates as (
     and split_part(v.source_observation_key, ':', 3)::uuid = source.event_id
     and source.event_name like 'source.toast.%'
     and child.correlation_id = source.correlation_id
-  union
-  select distinct child.event_id, source.event_id
+  where child.event_name <> 'warehouse.order.observed'
+  union all
+  select child.event_id, source.event_id
   from projector_events child
   join momi_warehouse.stock_observations stock
     on child.source_reference ->> 'schema' = 'momi_warehouse'
@@ -314,8 +320,8 @@ projector_parent_candidates as (
     and stock.source_reference ->> 'id' ~ '^[0-9]+$'
     and (stock.source_reference ->> 'id')::bigint = source.observation_id
     and child.correlation_id = source.correlation_id
-  union
-  select distinct child.event_id, source.event_id
+  union all
+  select child.event_id, source.event_id
   from projector_events child
   join momi_warehouse.stock_observations stock
     on child.source_reference ->> 'schema' = 'momi_warehouse'
@@ -329,8 +335,8 @@ projector_parent_candidates as (
     and stock.source_reference ->> 'id' ~ '^[0-9]+$'
     and (stock.source_reference ->> 'id')::bigint = source.webhook_id
     and child.correlation_id = source.correlation_id
-  union
-  select distinct child.event_id, source.event_id
+  union all
+  select child.event_id, source.event_id
   from projector_events child
   join momi_warehouse.stock_observations stock
     on child.source_reference ->> 'schema' = 'momi_warehouse'
@@ -342,9 +348,49 @@ projector_parent_candidates as (
     on stock.source_reference ->> 'job_id' ~ '^[0-9]+$'
     and (stock.source_reference ->> 'job_id')::bigint = source.job_id
     and child.correlation_id = source.correlation_id
+  union all
+  select child.event_id, source.event_id
+  from projector_events child
+  join momi_warehouse.entity_versions version
+    on child.source_reference ->> 'schema' = 'momi_warehouse'
+    and child.source_reference ->> 'table' = 'entity_versions'
+    and child.source_reference ->> 'id' ~ '^[0-9a-f-]{36}$'
+    and (child.source_reference ->> 'id')::uuid = version.entity_version_id
+    and child.entity_id = version.entity_id
+    and child.source_id = version.source_id
+    and child.occurred_at = version.source_observed_at
+  join momi_warehouse.version_observations observation
+    on observation.entity_version_id = version.entity_version_id
+    and observation.correlation_id = child.correlation_id
+  join momi_events.events source
+    on observation.source_observation_key = 'toast:event:' || source.event_id::text
+    and observation.source_reference ->> 'source_observation_key'
+      = observation.source_observation_key
+    and source.event_name = 'source.toast.webhook.orders.observed'
+    and source.source_system = 'toast'
+    and source.source_resource_type = 'webhook.orders'
+    and source.schema_version = 1
+    and source.correlation_id = child.correlation_id
+    and source.source_reference ->> 'schema' = 'toast_raw'
+    and source.source_reference ->> 'table' = 'webhook_events'
+    and source.source_reference ->> 'id' ~ '^[0-9]+$'
+  join toast_raw.webhook_events webhook
+    on webhook.id = (source.source_reference ->> 'id')::bigint
+    and webhook.subscription_key = 'orders'
+    and webhook.event_guid = source.source_id
+    and webhook.correlation_id = source.correlation_id
+    and version.source_version_id = 'webhook:' || webhook.event_guid
+    and version.provenance ->> 'source_observation_key'
+      = observation.source_observation_key
+    and version.provenance ->> 'source_version_id' = version.source_version_id
+    and observation.source_reference ->> 'source_version_id'
+      = version.source_version_id
+  where child.event_name = 'warehouse.order.observed'
+    and version.source_system = 'toast'
+    and version.source_resource_type = 'order'
 ),
 projector_parent_summary as (
-  select child_event_id, count(distinct parent_event_id)::bigint as parent_count,
+  select child_event_id, count(*)::bigint as parent_count,
     min(parent_event_id::text)::uuid as parent_event_id
   from projector_parent_candidates group by child_event_id
 ),
@@ -361,7 +407,11 @@ routing_lineage as (
         and matches.active_eligible = 1 then 1 else 0 end
       + case when exists (select 1 from projector_events projector
           where projector.event_id = w.event_id)
-        and parents.parent_count = 1 then 1 else 0 end) as accepted_lineage_count
+        and parents.parent_count = 1
+        and ((w.event_name = 'warehouse.order.observed'
+            and matches.patterns = 1 and matches.active_eligible = 1)
+          or (w.event_name <> 'warehouse.order.observed' and matches.patterns = 0))
+        then 1 else 0 end) as accepted_lineage_count
   from routing_open w
   left join projector_parent_summary parents on parents.child_event_id = w.event_id
   cross join lateral (
@@ -391,7 +441,7 @@ delivery_open as (
   join momi_events.subscriptions s using (subscription_key)
 ),
 delivery_classification as (
-  select count(*) filter (where d.status <> 'dead_letter')::bigint as open_rows,
+  select count(*) filter (where d.status not in ('delivered', 'dead_letter'))::bigint as open_rows,
     count(*) filter (where d.status in ('pending', 'queued') and d.next_attempt_at <= c.observed_at)::bigint as ready,
     count(*) filter (where d.status = 'running')::bigint as running,
     count(*) filter (where d.status = 'retry_wait')::bigint as retry_rows,
@@ -533,8 +583,9 @@ cohort_routing as (
   join momi_events.routing_work r using (event_id)
 ),
 cohort_deliveries as (
-  select distinct e.root_key, d.* from cohort_events e
+  select distinct e.root_key, d.*, s.queue_name from cohort_events e
   join momi_events.deliveries d using (event_id)
+  join momi_events.subscriptions s using (subscription_key)
 ),
 cohort_reservations as (
   select distinct d.root_key, r.* from cohort_deliveries d
@@ -595,6 +646,20 @@ cohort_membership_rows as (
   union all select 'queue', event_id::text || ':' || subscription_key, root_key
     from cohort_deliveries where status in ('queued', 'running', 'delivered')
 ),
+cohort_membership_proof_rows as (
+  select encode(extensions.digest(convert_to(concat_ws('|', kind, identity, root_key),
+    'UTF8'), 'sha256'), 'hex') as member_sha256
+  from cohort_membership_rows
+),
+cohort_membership_proof_summary as (
+  select coalesce(jsonb_agg(member_sha256 order by member_sha256), '[]'::jsonb) as rows
+  from cohort_membership_proof_rows
+),
+prior_membership_proof_rows as (
+  select prior.member_sha256
+  from sample_clock c cross join lateral jsonb_array_elements_text(
+    coalesce(c.value -> 'priorMembershipProof', '[]'::jsonb)) prior(member_sha256)
+),
 cohort_membership_summary as (
   select count(*)::bigint as rows,
     encode(extensions.digest(convert_to(coalesce(string_agg(concat_ws('|', kind,
@@ -624,6 +689,72 @@ cohort_lineage_edges as (
   union select distinct ('delivery:' || event_id || ':' || subscription_key),
     ('queue:' || event_id || ':' || subscription_key) from cohort_deliveries
     where status in ('queued', 'running', 'delivered')
+),
+cohort_lineage_proof_rows as (
+  select encode(extensions.digest(convert_to(child, 'UTF8'), 'sha256'), 'hex')
+      as child_sha256,
+    encode(extensions.digest(convert_to(parent, 'UTF8'), 'sha256'), 'hex')
+      as parent_sha256,
+    encode(extensions.digest(convert_to(parent || '|' || child, 'UTF8'), 'sha256'), 'hex')
+      as edge_sha256
+  from cohort_lineage_edges
+),
+cohort_lineage_proof_summary as (
+  select coalesce(jsonb_agg(jsonb_build_object('childSha256', child_sha256,
+    'parentSha256', parent_sha256, 'edgeSha256', edge_sha256)
+    order by edge_sha256), '[]'::jsonb) as rows
+  from cohort_lineage_proof_rows
+),
+prior_lineage_proof_rows as (
+  select prior.value ->> 'childSha256' as child_sha256,
+    prior.value ->> 'parentSha256' as parent_sha256,
+    prior.value ->> 'edgeSha256' as edge_sha256
+  from sample_clock c cross join lateral jsonb_array_elements(
+    coalesce(c.value -> 'priorLineageProof', '[]'::jsonb)) prior(value)
+),
+membership_delta_summary as (
+  select
+    (select count(*) from prior_membership_proof_rows)::bigint as prior_rows,
+    encode(extensions.digest(convert_to(coalesce((select string_agg(member_sha256,
+      E'\n' order by member_sha256) from prior_membership_proof_rows), ''), 'UTF8'),
+      'sha256'), 'hex') as prior_fingerprint,
+    (select count(*) from cohort_membership_proof_rows current
+      where not exists (select 1 from prior_membership_proof_rows prior
+        where prior.member_sha256 = current.member_sha256))::bigint as addition_rows,
+    encode(extensions.digest(convert_to(coalesce((select string_agg(current.member_sha256,
+      E'\n' order by current.member_sha256) from cohort_membership_proof_rows current
+      where not exists (select 1 from prior_membership_proof_rows prior
+        where prior.member_sha256 = current.member_sha256)), ''), 'UTF8'), 'sha256'),
+      'hex') as addition_fingerprint,
+    (select count(*) from prior_membership_proof_rows prior
+      where not exists (select 1 from cohort_membership_proof_rows current
+        where current.member_sha256 = prior.member_sha256))::bigint as missing_rows,
+    encode(extensions.digest(convert_to(coalesce((select string_agg(prior.member_sha256,
+      E'\n' order by prior.member_sha256) from prior_membership_proof_rows prior
+      where not exists (select 1 from cohort_membership_proof_rows current
+        where current.member_sha256 = prior.member_sha256)), ''), 'UTF8'), 'sha256'),
+      'hex') as missing_fingerprint
+),
+lineage_delta_summary as (
+  select
+    (select count(*) from prior_lineage_proof_rows prior
+      where not exists (select 1 from cohort_lineage_proof_rows current
+        where current.edge_sha256 = prior.edge_sha256))::bigint as missing_rows,
+    encode(extensions.digest(convert_to(coalesce((select string_agg(prior.edge_sha256,
+      E'\n' order by prior.edge_sha256) from prior_lineage_proof_rows prior
+      where not exists (select 1 from cohort_lineage_proof_rows current
+        where current.edge_sha256 = prior.edge_sha256)), ''), 'UTF8'), 'sha256'),
+      'hex') as missing_fingerprint,
+    (select count(distinct prior.child_sha256) from prior_lineage_proof_rows prior
+      join cohort_lineage_proof_rows current using (child_sha256)
+      where current.parent_sha256 <> prior.parent_sha256)::bigint as changed_parent_rows,
+    encode(extensions.digest(convert_to(coalesce((select string_agg(distinct
+      concat_ws('|', prior.child_sha256, prior.parent_sha256, current.parent_sha256),
+      E'\n' order by concat_ws('|', prior.child_sha256, prior.parent_sha256,
+        current.parent_sha256)) from prior_lineage_proof_rows prior
+      join cohort_lineage_proof_rows current using (child_sha256)
+      where current.parent_sha256 <> prior.parent_sha256), ''), 'UTF8'), 'sha256'),
+      'hex') as changed_parent_fingerprint
 ),
 cohort_lineage_summary as (
   select count(*)::bigint as rows,
@@ -663,7 +794,8 @@ cohort_state as (
     (select count(distinct event_id) from cohort_routing
       where status <> 'succeeded')::bigint as routing_open,
     (select count(*) from cohort_deliveries)::bigint as delivery_count,
-    (select count(*) from cohort_deliveries where status <> 'delivered')::bigint as delivery_open,
+    (select count(*) from cohort_deliveries
+      where status not in ('delivered', 'dead_letter'))::bigint as delivery_open,
     (select count(*) from cohort_deliveries where queue_message_id is not null)::bigint as queue_open,
     (select count(*) from cohort_reservations)::bigint as reservation_open,
     ((select count(*) from cohort_jobs c join toast_acquisition.jobs j using (job_id)
@@ -689,7 +821,8 @@ cohort_state as (
     ((select count(distinct c.job_id) from cohort_jobs c join toast_acquisition.jobs j
         using (job_id) where j.status <> 'succeeded')
       + (select count(distinct event_id) from cohort_routing where status <> 'succeeded')
-      + (select count(*) from cohort_deliveries where status <> 'delivered'))::bigint
+      + (select count(*) from cohort_deliveries
+          where status not in ('delivered', 'dead_letter')))::bigint
       as emittable_parents,
     ((select count(distinct c.job_id) from cohort_jobs c join toast_acquisition.jobs j
         using (job_id) where j.status = 'succeeded')
@@ -751,7 +884,19 @@ select jsonb_build_object(
   'queueMappingCount', queue_boundary.rows,
   'queueMappingSha256', queue_boundary.fingerprint,
   'cohortMembershipCount', members.rows, 'cohortMembershipSha256', members.fingerprint,
+  'cohortMembershipProof', member_proof.rows,
   'cohortLineageEdgeCount', edges.rows, 'cohortLineageEdgeSha256', edges.fingerprint,
+  'cohortLineageProof', lineage_proof.rows,
+  'priorCohortMembershipCount', member_delta.prior_rows,
+  'priorCohortMembershipSha256', member_delta.prior_fingerprint,
+  'cohortMembershipAdditionCount', member_delta.addition_rows,
+  'cohortMembershipAdditionSha256', member_delta.addition_fingerprint,
+  'cohortMissingPriorMemberCount', member_delta.missing_rows,
+  'cohortMissingPriorMemberSha256', member_delta.missing_fingerprint,
+  'cohortMissingPriorLineageEdgeCount', lineage_delta.missing_rows,
+  'cohortMissingPriorLineageEdgeSha256', lineage_delta.missing_fingerprint,
+  'cohortChangedParentCount', lineage_delta.changed_parent_rows,
+  'cohortChangedParentSha256', lineage_delta.changed_parent_fingerprint,
   'cohortJobCount', cohort.job_count, 'cohortJobOpen', cohort.job_open,
   'cohortAttemptCount', cohort.attempt_count, 'cohortAttemptOpen', cohort.attempt_open,
   'cohortObservationCount', cohort.observation_count,
@@ -838,7 +983,10 @@ cross join cohort_root_summary roots cross join toast_root_summary toast_roots_s
 cross join routing_root_summary routing_roots_summary
 cross join delivery_root_summary delivery_roots_summary
 cross join queue_mapping_summary queue_boundary cross join cohort_membership_summary members
-cross join cohort_lineage_summary edges cross join cohort_ambiguity ambiguity
+cross join cohort_membership_proof_summary member_proof
+cross join cohort_lineage_summary edges cross join cohort_lineage_proof_summary lineage_proof
+cross join membership_delta_summary member_delta cross join lineage_delta_summary lineage_delta
+cross join cohort_ambiguity ambiguity
 cross join cohort_state cohort cross join registry_summary g
 cross join routing_catalog_summary k cross join toast_classification t
 cross join routing_classification r cross join delivery_classification d

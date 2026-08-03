@@ -8,6 +8,12 @@ export type RecoveryDueOccurrence = {
   dueAtUtcMs: number
 }
 
+export type RecoveryLineageProof = {
+  childSha256: string
+  parentSha256: string
+  edgeSha256: string
+}
+
 export type RecoverySnapshot = {
   observedAtUtcMs: number; cohortStartedAtUtcMs: number
   jobHighWater: number; observationHighWater: number
@@ -18,7 +24,15 @@ export type RecoverySnapshot = {
   deliveryRootCount: number; deliveryRootSha256: string
   queueMappingCount: number; queueMappingSha256: string
   cohortMembershipCount: number; cohortMembershipSha256: string
+  cohortMembershipProof: readonly string[]
   cohortLineageEdgeCount: number; cohortLineageEdgeSha256: string
+  cohortLineageProof: readonly RecoveryLineageProof[]
+  priorCohortMembershipCount: number; priorCohortMembershipSha256: string
+  cohortMembershipAdditionCount: number; cohortMembershipAdditionSha256: string
+  cohortMissingPriorMemberCount: number; cohortMissingPriorMemberSha256: string
+  cohortMissingPriorLineageEdgeCount: number
+  cohortMissingPriorLineageEdgeSha256: string
+  cohortChangedParentCount: number; cohortChangedParentSha256: string
   cohortJobCount: number; cohortJobOpen: number
   cohortAttemptCount: number; cohortAttemptOpen: number
   cohortObservationCount: number; cohortEventCount: number
@@ -80,6 +94,7 @@ export type RecoveryState = {
   lastProgress: number; lastOutstandingWork: number
   lastMembershipCount: number; lastMembershipSha256: string
   lastLineageEdgeCount: number; lastLineageEdgeSha256: string
+  lastCohortProof?: RecoverySnapshot
   lastProgressAtUtcMs: number; stopReason?: string
 }
 

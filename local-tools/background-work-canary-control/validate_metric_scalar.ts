@@ -7,6 +7,7 @@ import {
 import type { ReceiptMetricKey, ReceiptScalar } from "./receipt_types.ts"
 import { PROVIDER_PARSE_SUBREASONS } from "./provider_parse_diagnostic.ts"
 import { PROVIDER_STDERR_CODES } from "./provider_stderr_codes.ts"
+import { RECOVERY_PREFLIGHT_REASON_CATEGORIES } from "./recovery_preflight_failure_types.ts"
 
 const jobNames = new Set([
   "momi-event-routing-wakeup-v1",
@@ -47,9 +48,7 @@ export function validateMetricScalar(key: ReceiptMetricKey, value: unknown): voi
   if (key === "command_md5" && !/^[a-f0-9]{32}$/.test(value)) {
     throw new Error("Receipt command_md5 is invalid")
   }
-  if (["generation_sha256", "registry_sha256", "routing_catalog_sha256",
-    "schedule_due_sha256", "toast_sha256"].includes(key) &&
-    !/^[a-f0-9]{64}$/.test(value)) {
+  if (key.endsWith("_sha256") && !/^[a-f0-9]{64}$/.test(value)) {
     throw new Error(`Receipt ${key} is invalid`)
   }
   if (["original_command_sha256", "terminal_command_sha256"].includes(key) &&
@@ -72,6 +71,17 @@ export function validateMetricScalar(key: ReceiptMetricKey, value: unknown): voi
   if (key === "status" && !statuses.has(value)) throw new Error("Receipt status is invalid")
   if (key === "error_class" && !/^[a-z][a-z0-9_]{0,63}$/.test(value)) {
     throw new Error("Receipt error_class is invalid")
+  }
+  if (key === "failure_fingerprint" && !/^[a-f0-9]{64}$/.test(value)) {
+    throw new Error("Receipt failure_fingerprint is invalid")
+  }
+  if (key === "failure_reason" &&
+    !RECOVERY_PREFLIGHT_REASON_CATEGORIES.includes(value as never)) {
+    throw new Error("Receipt failure_reason is invalid")
+  }
+  if (key === "failure_stage" &&
+    !["provider_query", "parse_schema", "invariant_validation"].includes(value)) {
+    throw new Error("Receipt failure_stage is invalid")
   }
   if (key === "parse_subreason" &&
     !PROVIDER_PARSE_SUBREASONS.includes(value as never)) {

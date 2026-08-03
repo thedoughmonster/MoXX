@@ -25,7 +25,10 @@ export const RECEIPT_METRIC_GROUPS: readonly ReceiptMetricGroup[] = [
 export const RECEIPT_NUMBER_KEYS: readonly ReceiptMetricKey[] = [
   "active_after_mask", "active_before_mask", "active_cron_executions", "child_exit_code",
   "completed_count", "count",
-  "cohort_lineage_edge_count", "cohort_membership_count", "cohort_root_count",
+  "cohort_changed_parent_count", "cohort_lineage_edge_count",
+  "cohort_membership_addition_count", "cohort_membership_count",
+  "cohort_missing_lineage_edge_count", "cohort_removed_member_count",
+  "cohort_root_count", "prior_cohort_membership_count",
   "cron_history_bytes", "database_bytes",
   "deadlocks", "delivery_ready", "delivery_root_count", "duration_ms", "guard_failures", "job_id",
   "exact_identity_mask", "inactive_after_mask", "missed_samples",
@@ -40,17 +43,23 @@ export const RECEIPT_NUMBER_KEYS: readonly ReceiptMetricKey[] = [
 ]
 
 export const RECEIPT_BOOLEAN_KEYS: readonly ReceiptMetricKey[] = [
-  "active", "guard_active", "rollback_invoked",
+  "active", "guard_active", "invariant_cohort_rejected",
+  "invariant_control_rejected", "invariant_routes_rejected",
+  "invariant_safety_rejected", "invariant_work_rejected", "rollback_invoked",
 ]
 
 export const RECEIPT_STRING_KEYS: readonly ReceiptMetricKey[] = [
-  "command_md5", "error_class", "expiry_utc", "generation_sha256",
+  "command_md5", "error_class", "expiry_utc", "failure_fingerprint",
+  "failure_reason", "failure_stage", "generation_sha256",
   "guard_run_status", "job_name", "original_command_md5",
   "original_command_sha256", "observed_outer_keys", "observed_sample_keys",
   "observed_top_level_type", "observed_value_types", "parse_subreason",
   "project_ref", "provider_code", "sample_kind", "schedule", "status",
   "cohort_boundary_sha256", "cohort_lineage_edge_sha256",
-  "cohort_membership_sha256", "cohort_root_sha256", "delivery_root_sha256",
+  "cohort_changed_parent_sha256", "cohort_membership_addition_sha256",
+  "cohort_membership_sha256", "cohort_missing_lineage_edge_sha256",
+  "cohort_removed_member_sha256", "cohort_root_sha256",
+  "prior_cohort_membership_sha256", "delivery_root_sha256",
   "queue_mapping_sha256", "registry_sha256", "routing_catalog_sha256",
   "routing_root_sha256", "schedule_due_sha256", "toast_root_sha256", "toast_sha256",
   "terminal_command_md5", "terminal_command_sha256", "terminal_guard_start_utc",
