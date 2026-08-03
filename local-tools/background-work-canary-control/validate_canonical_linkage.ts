@@ -6,7 +6,6 @@ import { DEV_PROJECT_REF } from "./constants.ts"
 import { readBoundedLinkMetadata } from "./read_bounded_link_metadata.ts"
 import { resolveIpv4Addresses } from "./resolve_ipv4_addresses.ts"
 import {
-  LINKED_PROJECT_FILE,
   LINKED_REF_FILE,
   POOLER_URL_FILE,
 } from "./setup_preflight_constants.ts"
@@ -19,26 +18,14 @@ export async function validateCanonicalLinkage(
   resolveIpv4: (hostname: string) => Promise<string[]> = resolveIpv4Addresses,
 ): Promise<LinkageEvidence> {
   let linkedRef: string
-  let linkedProjectText: string
   let poolerText: string
   try {
     linkedRef = readBoundedLinkMetadata(join(repositoryRoot, LINKED_REF_FILE), 128).trim()
-    linkedProjectText = readBoundedLinkMetadata(
-      join(repositoryRoot, LINKED_PROJECT_FILE), 8 * 1024,
-    )
     poolerText = readBoundedLinkMetadata(join(repositoryRoot, POOLER_URL_FILE), 4 * 1024)
   } catch {
     throw new SetupPreflightError("LinkageMetadataUnsafe", "linkage")
   }
   if (linkedRef !== DEV_PROJECT_REF) {
-    throw new SetupPreflightError("LinkageProjectMismatch", "linkage")
-  }
-  let linkedProject: unknown
-  try { linkedProject = JSON.parse(linkedProjectText) } catch {
-    throw new SetupPreflightError("LinkageMetadataUnsafe", "linkage")
-  }
-  if (!linkedProject || typeof linkedProject !== "object" || Array.isArray(linkedProject) ||
-    (linkedProject as Record<string, unknown>).ref !== DEV_PROJECT_REF) {
     throw new SetupPreflightError("LinkageProjectMismatch", "linkage")
   }
   if (poolerText !== poolerText.trim()) {
@@ -48,10 +35,13 @@ export async function validateCanonicalLinkage(
   try { pooler = new URL(poolerText) } catch {
     throw new SetupPreflightError("LinkageUrlInvalid", "linkage")
   }
+  if (pooler.username !== `postgres.${DEV_PROJECT_REF}`) {
+    throw new SetupPreflightError("LinkageProjectMismatch", "linkage")
+  }
   const hostname = pooler.hostname.toLowerCase()
   if (!poolerText.startsWith(`postgresql://postgres.${DEV_PROJECT_REF}@`) ||
     pooler.protocol !== "postgresql:" ||
-    pooler.username !== `postgres.${DEV_PROJECT_REF}` || pooler.password !== "" ||
+    pooler.password !== "" ||
     !/^[a-z0-9-]+(?:\.[a-z0-9-]+)*\.pooler\.supabase\.com$/.test(hostname) ||
     hostname === `db.${DEV_PROJECT_REF}.supabase.co` || pooler.port !== "5432" ||
     pooler.pathname !== "/postgres" || pooler.search !== "" || pooler.hash !== "") {

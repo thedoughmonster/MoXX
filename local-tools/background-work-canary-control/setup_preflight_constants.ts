@@ -6,7 +6,6 @@ export const FLOCK_SELF_TEST_HOLDER_SCRIPT = [
   "});",
   "process.stdout.write('LOCKED\\n');",
 ].join("")
-export const LINKED_PROJECT_FILE = "supabase/.temp/linked-project.json" as const
 export const LINKED_REF_FILE = "supabase/.temp/project-ref" as const
 export const POOLER_URL_FILE = "supabase/.temp/pooler-url" as const
 export const SETUP_RECEIPT_CURRENT = "setup-current.json" as const

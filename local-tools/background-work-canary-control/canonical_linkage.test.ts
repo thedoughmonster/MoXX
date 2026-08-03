@@ -16,12 +16,11 @@ async function createLinkageFixture(): Promise<string> {
   const directory = join(root, "supabase/.temp")
   await mkdir(directory, { recursive: true, mode: 0o700 })
   await writeFile(join(directory, "project-ref"), `${DEV_PROJECT_REF}\n`)
-  await writeFile(join(directory, "linked-project.json"), JSON.stringify({ ref: DEV_PROJECT_REF }))
   await writeFile(join(directory, "pooler-url"), pooler)
   return root
 }
 
-test("accepts only canonical pooler metadata with IPv4 resolution", async () => {
+test("accepts supported project-ref and pooler metadata without telemetry cache", async () => {
   const root = await createLinkageFixture()
   try {
     const evidence = await validateCanonicalLinkage(root, async () => ["192.0.2.10"])
@@ -30,21 +29,26 @@ test("accepts only canonical pooler metadata with IPv4 resolution", async () => 
   } finally { await rm(root, { recursive: true, force: true }) }
 })
 
-test("rejects missing, wrong-project, malformed, credential, direct, and foreign links", async () => {
+test("rejects missing, mismatched, malformed, credential, direct, and foreign links", async () => {
   const cases = [
-    ["missing", null],
+    ["missing-pooler", null],
+    ["missing-ref", null],
     ["wrong-project", pooler],
+    ["mismatched-username", `postgresql://postgres.viodfldzuoypnpqaagag@${hostname}:5432/postgres`],
     ["malformed", "not-a-url"],
     ["credential", `postgresql://postgres.${DEV_PROJECT_REF}:secret@${hostname}:5432/postgres`],
     ["empty-password", `postgresql://postgres.${DEV_PROJECT_REF}:@${hostname}:5432/postgres`],
     ["direct", `postgresql://postgres.${DEV_PROJECT_REF}@db.${DEV_PROJECT_REF}.supabase.co:5432/postgres`],
     ["foreign", `postgresql://postgres.${DEV_PROJECT_REF}@database.example.com:5432/postgres`],
+    ["query", `${pooler}?sslmode=require`],
+    ["fragment", `${pooler}#unsafe`],
   ] as const
   for (const [name, value] of cases) {
     const root = await createLinkageFixture()
     try {
       const directory = join(root, "supabase/.temp")
-      if (name === "missing") await unlink(join(directory, "pooler-url"))
+      if (name === "missing-pooler") await unlink(join(directory, "pooler-url"))
+      else if (name === "missing-ref") await unlink(join(directory, "project-ref"))
       else if (name === "wrong-project") {
         await writeFile(join(directory, "project-ref"), "viodfldzuoypnpqaagag")
       } else await writeFile(join(directory, "pooler-url"), value!)
@@ -54,12 +58,16 @@ test("rejects missing, wrong-project, malformed, credential, direct, and foreign
   }
 })
 
-test("rejects symlinked, hard-linked, and non-IPv4 metadata", async () => {
-  for (const kind of ["symlink", "hardlink", "dns"] as const) {
+test("rejects symlinked, hard-linked, oversized, and non-IPv4 metadata", async () => {
+  for (const kind of ["symlink", "hardlink", "oversized-ref", "oversized-url", "dns"] as const) {
     const root = await createLinkageFixture()
     try {
       const path = join(root, "supabase/.temp/pooler-url")
-      if (kind !== "dns") {
+      if (kind === "oversized-ref") {
+        await writeFile(join(root, "supabase/.temp/project-ref"), "x".repeat(129))
+      } else if (kind === "oversized-url") {
+        await writeFile(path, "x".repeat(4097))
+      } else if (kind !== "dns") {
         const external = join(root, "external")
         await writeFile(external, pooler)
         await unlink(path)
