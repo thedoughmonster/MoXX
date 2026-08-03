@@ -2,6 +2,7 @@ import { createInternalProviderSql } from "./create_internal_provider_sql.ts"
 import { executeProviderQuery } from "./execute_provider_query.ts"
 import { generateRecoveryActivationSql } from "./generate_recovery_activation_sql.ts"
 import { parseRecoveryActivationOutput } from "./parse_recovery_activation_output.ts"
+import { RECOVERY_SNAPSHOT_OUTPUT_LIMIT_BYTES } from "./recovery_constants.ts"
 import type { RecoveryActivation, RecoveryState } from "./recovery_types.ts"
 
 export async function runRecoveryActivation(state: RecoveryState): Promise<RecoveryActivation> {
@@ -10,6 +11,7 @@ export async function runRecoveryActivation(state: RecoveryState): Promise<Recov
     provider: state.runtime.provider, signal: state.signal,
     sql: createInternalProviderSql("recovery_activation",
       generateRecoveryActivationSql(state.guard)),
+    outputLimitBytes: RECOVERY_SNAPSHOT_OUTPUT_LIMIT_BYTES,
     parser: (output) => parseRecoveryActivationOutput(output, state.guard!) },
   { temporaryRoot: "/tmp" })
   if (result.status === "failure") throw new Error(`Recovery activation ${result.reason}`)

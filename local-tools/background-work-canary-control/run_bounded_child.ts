@@ -4,6 +4,7 @@ import { buildSafeChildEnvironment } from "./build_safe_child_environment.ts"
 import { cancelProcessGroup } from "./cancel_process_group.ts"
 import {
   CHILD_HARD_TIMEOUT_MS,
+  CHILD_MAX_OUTPUT_LIMIT_BYTES,
   CHILD_OUTPUT_LIMIT_BYTES,
   CHILD_TERMINATION_GRACE_MS,
 } from "./process_constants.ts"
@@ -21,8 +22,13 @@ export async function runBoundedChild(
   request: BoundedChildRequest,
 ): Promise<BoundedChildResult> {
   const timeoutMs = request.timeoutMs ?? CHILD_HARD_TIMEOUT_MS
+  const outputLimitBytes = request.outputLimitBytes ?? CHILD_OUTPUT_LIMIT_BYTES
   if (!Number.isSafeInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 10_000) {
     throw new Error("Bounded child timeout is invalid")
+  }
+  if (!Number.isSafeInteger(outputLimitBytes) || outputLimitBytes < 1 ||
+    outputLimitBytes > CHILD_MAX_OUTPUT_LIMIT_BYTES) {
+    throw new Error("Bounded child output limit is invalid")
   }
   if (!Array.isArray(request.arguments) || request.arguments.length > 256 ||
     request.arguments.some((argument) =>
@@ -92,7 +98,7 @@ export async function runBoundedChild(
       if (stream === "stdout") stdoutBytes += chunk.length
       else stderrBytes += chunk.length
       const prior = stream === "stdout" ? stdoutBytes - chunk.length : stderrBytes - chunk.length
-      const remaining = Math.max(0, CHILD_OUTPUT_LIMIT_BYTES - prior)
+      const remaining = Math.max(0, outputLimitBytes - prior)
       if (remaining > 0) target.push(chunk.subarray(0, remaining))
       if (chunk.length > remaining && !limitedStream) {
         limitedStream = stream

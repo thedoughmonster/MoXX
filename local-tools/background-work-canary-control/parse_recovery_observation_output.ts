@@ -1,5 +1,6 @@
 import { parseCliQueryEnvelope } from "./parse_cli_query_envelope.ts"
-import { RECOVERY_OBSERVATION_MARKER } from "./recovery_constants.ts"
+import { RECOVERY_OBSERVATION_MARKER,
+  RECOVERY_SNAPSHOT_OUTPUT_LIMIT_BYTES } from "./recovery_constants.ts"
 import { RECOVERY_OBSERVATION_EXTRA_KEYS,
   RECOVERY_SNAPSHOT_KEYS } from "./recovery_snapshot_keys.ts"
 import { parseRecoverySnapshot } from "./parse_recovery_snapshot.ts"
@@ -12,7 +13,8 @@ export function parseRecoveryObservationOutput(
   nextGenerationSha256: string, guardJobId: number,
 ): RecoveryObservation {
   const top = validateStrictRecord(parseCliQueryEnvelope(output,
-    RECOVERY_OBSERVATION_MARKER), ["previousGenerationSha256",
+    RECOVERY_OBSERVATION_MARKER, RECOVERY_SNAPSHOT_OUTPUT_LIMIT_BYTES),
+    ["previousGenerationSha256",
     "nextGenerationSha256", "guardJobId", "observation"], "Recovery observation")
   if (top.previousGenerationSha256 !== previousGenerationSha256 ||
     top.nextGenerationSha256 !== nextGenerationSha256 || top.guardJobId !== guardJobId) {

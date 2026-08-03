@@ -56,10 +56,12 @@ export async function executeProviderQuery<T>(
       repositoryRoot: request.repositoryRoot,
       sqlPath,
       signal: request.signal,
+      outputLimitBytes: request.outputLimitBytes,
     })
+    const outputLimitBytes = request.outputLimitBytes ?? CHILD_OUTPUT_LIMIT_BYTES
     if (child.outcome.status !== "success" || child.outcome.exitCode !== 0 ||
-      child.stdout.byteLength > CHILD_OUTPUT_LIMIT_BYTES) {
-      const reason = child.stdout.byteLength > CHILD_OUTPUT_LIMIT_BYTES
+      child.stdout.byteLength > outputLimitBytes) {
+      const reason = child.stdout.byteLength > outputLimitBytes
         ? "output_limit" : child.outcome.status === "success"
           ? "exit_failure" : child.outcome.status
       const childExitCode = reason === "exit_failure" &&

@@ -1,5 +1,6 @@
 export const CHILD_HARD_TIMEOUT_MS = 10_000
 export const CHILD_OUTPUT_LIMIT_BYTES = 64 * 1024
+export const CHILD_MAX_OUTPUT_LIMIT_BYTES = 2 * 1024 * 1024
 export const CHILD_TERMINATION_GRACE_MS = 250
 
 export const CANARY_LOCK_FILENAME = "momi-330-canary-control.lock"

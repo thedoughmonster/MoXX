@@ -22,6 +22,8 @@ export function generateRecoveryActivationSql(guard: GuardBootstrapResult): stri
     "deliveryRetry", "deliveryDead", "deliveryInvalid", "queueDead", "openAttempts",
     "projectionReservations", "expiredLeases", "longLeases", "workerCapViolations",
     "waitingLocks", "cohortDead", "cohortRetry", "cohortInvalid", "cohortAmbiguous",
+    "cohortMissingPriorMemberCount", "cohortMissingPriorLineageEdgeCount",
+    "cohortChangedParentCount",
   ].map((key) => `(frozen_sample->>'${key}')::bigint <> 0`).join(" or ")
   return [
     "begin;", "set local statement_timeout = '12s';", "set local lock_timeout = '2s';",

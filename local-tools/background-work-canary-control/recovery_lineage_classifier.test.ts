@@ -71,19 +71,48 @@ test("cursor key enumeration is guarded for every JSONB shape", () => {
   assert.equal(Object.keys({ pageToken: "next" }).length > 0, true)
 })
 
-test("routing lineage accepts only authenticated Toast or the two zero-target projectors", () => {
+test("routing lineage separates valid projectors from zero-target projectors", () => {
   const sql = loadRecoverySnapshotSql()
   assert.match(sql, /w\.source_system = 'toast' and w\.event_name like 'source\.toast\.%'\s+and matches\.active_eligible = 1/)
-  assert.match(sql, /e\.event_name = 'warehouse\.order\.reconciled'\s+and e\.source_system = 'toast' and e\.source_resource_type = 'order'\s+and e\.schema_version = 2 and e\.entity_type = 'order'/)
+  assert.match(sql, /e\.event_name in \('warehouse\.order\.observed', 'warehouse\.order\.reconciled'\)\s+and e\.source_system = 'toast' and e\.source_resource_type = 'order'\s+and e\.schema_version = 2 and e\.entity_type = 'order'/)
   assert.match(sql, /e\.idempotency_key ~ \('\^warehouse:order:/)
   assert.match(sql, /e\.event_name = 'warehouse\.stock\.observed'\s+and e\.source_system = 'toast' and e\.source_resource_type = 'stock_state'\s+and e\.schema_version = 1 and e\.entity_type = 'menu_item'/)
   assert.match(sql, /e\.idempotency_key ~ \('\^warehouse:stock:/)
-  assert.match(sql, /where matches\.patterns = 0/)
-  assert.match(sql, /parents\.parent_count = 1 then 1 else 0 end/)
+  assert.match(sql,
+    /where e\.event_name = 'warehouse\.order\.observed' or matches\.patterns = 0/)
+  assert.match(sql, /parents\.parent_count = 1[\s\S]*then 1 else 0 end/)
+  assert.match(sql, /w\.event_name = 'warehouse\.order\.observed'\s+and matches\.patterns = 1 and matches\.active_eligible = 1/)
   assert.match(sql, /projector_parent_candidates/)
   assert.match(sql, /child\.correlation_id = source\.correlation_id/)
   assert.match(sql, /w\.accepted_lineage_count <> 1/)
   assert.doesNotMatch(sql, /w\.event_name like 'warehouse\.%'/)
+})
+
+test("lawful order observations require one deterministic webhook ancestry", () => {
+  const sql = loadRecoverySnapshotSql()
+  for (const contract of [
+    /child\.event_name <> 'warehouse\.order\.observed'/,
+    /join momi_warehouse\.entity_versions version/,
+    /join momi_warehouse\.version_observations observation/,
+    /observation\.source_observation_key = 'toast:event:' \|\| source\.event_id::text/,
+    /source\.event_name = 'source\.toast\.webhook\.orders\.observed'/,
+    /source\.source_reference ->> 'table' = 'webhook_events'/,
+    /join toast_raw\.webhook_events webhook/,
+    /webhook\.subscription_key = 'orders'/,
+    /version\.source_version_id = 'webhook:' \|\| webhook\.event_guid/,
+    /version\.provenance ->> 'source_observation_key'\s+= observation\.source_observation_key/,
+    /observation\.source_reference ->> 'source_version_id'\s+= version\.source_version_id/,
+  ]) assert.match(sql, contract)
+})
+
+test("missing, duplicate, ambiguous, and multi-root projector ancestry fails closed", () => {
+  const sql = loadRecoverySnapshotSql()
+  assert.match(sql, /projector_parent_candidates as \([\s\S]*union all/)
+  assert.match(sql, /select child_event_id, count\(\*\)::bigint as parent_count/)
+  assert.doesNotMatch(sql,
+    /select child_event_id, count\(distinct parent_event_id\)::bigint as parent_count/)
+  assert.match(sql, /parents\.parent_count = 1[\s\S]*then 1 else 0 end/)
+  assert.match(sql, /w\.accepted_lineage_count <> 1/)
 })
 
 test("the frozen subscription catalog is fingerprinted without row details", () => {

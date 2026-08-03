@@ -5,7 +5,10 @@ export function hasRecoveryMembershipDrift(
   state: Pick<RecoveryState, "lastMembershipCount" | "lastMembershipSha256" |
     "lastLineageEdgeCount" | "lastLineageEdgeSha256">,
 ): boolean {
-  return sample.cohortMembershipCount < state.lastMembershipCount ||
+  return sample.cohortMissingPriorMemberCount !== 0 ||
+    sample.cohortMissingPriorLineageEdgeCount !== 0 ||
+    sample.cohortChangedParentCount !== 0 ||
+    sample.cohortMembershipCount < state.lastMembershipCount ||
     (sample.cohortMembershipCount === state.lastMembershipCount &&
       sample.cohortMembershipSha256 !== state.lastMembershipSha256) ||
     sample.cohortLineageEdgeCount < state.lastLineageEdgeCount ||

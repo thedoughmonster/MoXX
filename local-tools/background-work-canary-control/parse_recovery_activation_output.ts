@@ -1,6 +1,7 @@
 import type { GuardBootstrapResult } from "./guard_bootstrap_types.ts"
 import { parseCliQueryEnvelope } from "./parse_cli_query_envelope.ts"
-import { RECOVERY_ACTIVATION_MARKER } from "./recovery_constants.ts"
+import { RECOVERY_ACTIVATION_MARKER,
+  RECOVERY_SNAPSHOT_OUTPUT_LIMIT_BYTES } from "./recovery_constants.ts"
 import { parseRecoverySnapshot } from "./parse_recovery_snapshot.ts"
 import type { RecoveryActivation } from "./recovery_types.ts"
 import { validateNonnegativeInteger } from "./validate_nonnegative_integer.ts"
@@ -12,7 +13,8 @@ export function parseRecoveryActivationOutput(
   output: Uint8Array, guard: GuardBootstrapResult,
 ): RecoveryActivation {
   const row = validateStrictRecord(parseCliQueryEnvelope(output,
-    RECOVERY_ACTIVATION_MARKER), ["startedAtUtcMs", "frozen", "targetJobs",
+    RECOVERY_ACTIVATION_MARKER, RECOVERY_SNAPSHOT_OUTPUT_LIMIT_BYTES),
+    ["startedAtUtcMs", "frozen", "targetJobs",
     "guardJobId", "generationSha256", "guardCommandSha256"], "Recovery activation")
   const startedAtUtcMs = validateNonnegativeInteger(row.startedAtUtcMs,
     "Recovery activation timestamp")

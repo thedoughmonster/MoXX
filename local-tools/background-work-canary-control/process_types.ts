@@ -13,6 +13,7 @@ export type BoundedChildRequest = {
   heldExecutable?: SealedHeldExecutable
   signal?: AbortSignal
   timeoutMs?: number
+  outputLimitBytes?: number
 }
 
 export type BoundedChildOutcome = {

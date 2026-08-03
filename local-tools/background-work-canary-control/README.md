@@ -9,9 +9,8 @@ work against a frozen active schedule registry, installs the same database
 dead-man guard, activates the exact downstream-to-upstream target set, monitors
 the bounded recovery window, and always returns the targets to inactive state.
 
-Neither command deletes cron history, runs against production, deploys code, or
-creates automation. The attended command is the only activation path. The tool emits no
-credentials, SQL, provider payloads, command output, URLs, tokens, or stacks.
+Neither command deletes cron history, runs against production, deploys code, or creates
+automation. The tool emits no credentials, SQL, provider payloads, output, URLs, or stacks.
 
 ## Prerequisites
 
@@ -63,14 +62,14 @@ records resource evidence every 60 seconds, and deactivates 3, then 2, then 11.
 Immediately before activation it freezes the schedule occurrences due at that
 instant, durable table high-water marks, pre-existing root identities, and
 catalog fingerprints. Completion is based only on those roots and their
-deterministically traced descendants. Independent work arriving after the
-boundary remains subject to every global safety check, but cannot join the
-cohort or extend its deadline.
+deterministically traced descendants. Order-observed descendants require exact
+version, observation, source-event, and webhook ancestry. Terminal deliveries
+remain available for lineage but are not open work. Independent work arriving
+after the boundary cannot join the frozen cohort or extend its deadline.
 
 Validation independently repeats the release, linkage, DNS, query, and flock checks.
 It consumes the owner-only receipt once and rejects expiry, replay, change, or a
 different binding before provider preparation. No other option or production use is accepted.
-
 Owner-only setup receipts live under `~/.local/state/momi/background-work-canary/setup/`.
 They retain only sanitized hashes, versions, stages, booleans, timing, release SHA,
 safe exit/SQLSTATE fields, and receipt identity—never CLI output, network identity,
@@ -83,9 +82,10 @@ Each run creates a mode-`0700` directory under the OS account home at
 append-only `receipt.ndjson` and, only after receipt verification, an exclusive
 mode-`0600` final JSON artifact. The single stdout envelope identifies the run, final
 artifact path, and SHA-256; provider output is never printed.
-The attended receipt records only cohort boundary, root, membership, lineage,
-and catalog hashes plus numeric lifecycle evidence; it never records durable
-row identities or physical queue message identifiers.
+The attended receipt records only aggregate cohort hashes, proof-delta counts,
+and lifecycle evidence; its internal proof arrays never enter receipts. A
+pre-guard provider, parse/schema, or invariant failure writes an owner-only
+artifact with only its closed-set category, stage, duration, and fingerprint.
 
 - Exit `0`, `inactive_dry_run_verified`: final targets are inactive, the guard
   is absent, all required checks passed, and `final.json` is verified.
