@@ -40,8 +40,8 @@ pnpm local:background-work-canary-setup -- --env dev --project-ref xtbraqnlskmqx
 
 Setup verifies the release and query identities, proves exact `/usr/bin/flock`
 acquisition/conflict/release/reacquisition, runs the pinned CLI's governed `link`,
-and validates ignored linkage to the exact development project and an IPv4 pooler.
-It never runs SQL, creates a guard, changes jobs, or invokes validation.
+and validates CLI-owned `project-ref` plus password-free `pooler-url` as agreeing IPv4 evidence.
+Optional `linked-project.json` telemetry is not authority; setup never runs SQL or changes jobs.
 
 After setup returns `setup_ready`, start a new process session and run exactly:
 

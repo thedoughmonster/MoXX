@@ -56,8 +56,11 @@ test("released runtime consumes exact setup evidence before provider preparation
   assert.equal(released, true)
 })
 
-test("linkage, flock, and receipt failures never reach provider preparation", async () => {
-  for (const failure of ["flock", "linkage", "receipt"] as const) {
+test("every linkage, flock, and receipt failure fences provider preparation", async () => {
+  for (const failure of [
+    "flock", "LinkageMetadataUnsafe", "LinkageProjectMismatch",
+    "LinkageUrlInvalid", "LinkageDnsFailed", "receipt",
+  ] as const) {
     let lockAcquired = false
     let released = false
     let providerCreated = false
@@ -80,8 +83,8 @@ test("linkage, flock, and receipt failures never reach provider preparation", as
       } },
       collectEvidence: async () => repository,
       validateLinkage: async () => {
-        if (failure === "linkage") {
-          throw new SetupPreflightError("LinkageUrlInvalid", "linkage")
+        if (failure !== "flock" && failure !== "receipt") {
+          throw new SetupPreflightError(failure, "linkage")
         }
         return { identitySha256: "b".repeat(64), ipv4Resolved: true as const }
       },
