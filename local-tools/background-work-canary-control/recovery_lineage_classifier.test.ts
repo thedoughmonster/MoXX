@@ -4,6 +4,14 @@ import { parse } from "pgsql-ast-parser"
 
 import { loadRecoverySnapshotSql } from "./load_recovery_snapshot_sql.ts"
 
+const guardedCursorKeys = new RegExp([
+  "case when jsonb_typeof\\(j\\.cursor\\) = 'object' then",
+  "exists \\(select 1 from jsonb_object_keys\\(j\\.cursor\\)\\)",
+  "and not exists \\(select 1 from jsonb_object_keys\\(j\\.cursor\\) key",
+  "where key not in \\('page', 'pageToken', 'window_start', 'businessDate'\\)\\)",
+  "else false end",
+].join("\\s+"))
+
 test("recovery snapshot accepts only the three exact Toast lineage classes", () => {
   const sql = loadRecoverySnapshotSql()
   assert.deepEqual(parse(sql).map((statement) => statement.type), ["with"])
@@ -26,7 +34,7 @@ test("Toast lineage rejects every continuation and fanout near miss", () => {
   for (const required of [
     /schedule\.matches = 1/,
     /a\.pagination_kind in \('page', 'cursor'\)\s+or a\.requires_window/,
-    /jsonb_object_length\(j\.cursor\) > 0/,
+    guardedCursorKeys,
     /key not in \('page', 'pageToken', 'window_start', 'businessDate'\)/,
     /a\.pagination_kind = 'page'/,
     /jsonb_typeof\(j\.cursor -> 'page'\) = 'number'/,
@@ -49,6 +57,18 @@ test("Toast lineage rejects every continuation and fanout near miss", () => {
   ]) assert.match(sql, required)
   assert.match(sql, /\(\(j\.page_count <> 0 or j\.cursor <> '\{\}'::jsonb\)\s+and not j\.legal_continuation\)/)
   assert.doesNotMatch(sql, /j\.mode = 'repair' then 1/)
+  assert.doesNotMatch(sql, /jsonb_object_length/)
+})
+
+test("cursor key enumeration is guarded for every JSONB shape", () => {
+  const sql = loadRecoverySnapshotSql()
+  assert.match(sql, guardedCursorKeys)
+  assert.equal((sql.match(/jsonb_object_keys\(j\.cursor\)/g) ?? []).length, 2)
+  for (const rejected of [null, {}, [], "cursor", 1, true]) {
+    assert.equal(rejected !== null && !Array.isArray(rejected) &&
+      typeof rejected === "object" && Object.keys(rejected).length > 0, false)
+  }
+  assert.equal(Object.keys({ pageToken: "next" }).length > 0, true)
 })
 
 test("routing lineage accepts only authenticated Toast or the two zero-target projectors", () => {

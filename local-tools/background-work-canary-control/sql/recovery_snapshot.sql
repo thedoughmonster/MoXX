@@ -72,9 +72,11 @@ toast_lineage as (
     select count(*)::bigint as matches,
       coalesce(bool_and((a.pagination_kind in ('page', 'cursor')
           or a.requires_window)
-        and jsonb_object_length(j.cursor) > 0
-        and not exists (select 1 from jsonb_object_keys(j.cursor) key
-          where key not in ('page', 'pageToken', 'window_start', 'businessDate'))
+        and case when jsonb_typeof(j.cursor) = 'object' then
+          exists (select 1 from jsonb_object_keys(j.cursor))
+          and not exists (select 1 from jsonb_object_keys(j.cursor) key
+            where key not in ('page', 'pageToken', 'window_start', 'businessDate'))
+        else false end
         and not (j.cursor ? 'page' and j.cursor ? 'pageToken')
         and not (j.cursor ? 'window_start' and j.cursor ? 'businessDate')
         and (not (j.cursor ? 'page') or (a.pagination_kind = 'page'
