@@ -2,15 +2,15 @@
 
 ## Purpose
 
-This manual-only local tool performs the approved development dry-run for the
-paused background-work schedules. It verifies the released `dev` checkout,
-holds one lifecycle lock, installs a database dead-man guard, samples the fixed
-inactive targets for five minutes, deliberately stops guard heartbeats, waits
-for database-clock recovery, removes the exact guard, and verifies the final
-inactive state.
+This manual-only local tool has two explicit development commands. The released
+inactive command performs the approved five-minute dry-run without activating a
+target. The attended recovery command dynamically authenticates due durable
+work against a frozen active schedule registry, installs the same database
+dead-man guard, activates the exact downstream-to-upstream target set, monitors
+the bounded recovery window, and always returns the targets to inactive state.
 
-It does not activate issue #330, resume target schedules, delete cron history,
-run against production, deploy code, or create automation. The tool emits no
+Neither command deletes cron history, runs against production, deploys code, or
+creates automation. The attended command is the only activation path. The tool emits no
 credentials, SQL, provider payloads, command output, URLs, tokens, or stacks.
 
 ## Prerequisites
@@ -49,6 +49,18 @@ After setup returns `setup_ready`, start a new process session and run exactly:
 pnpm local:background-work-canary-control -- --env dev --project-ref xtbraqnlskmqxinjxxdn
 ```
 
+For the single attended recovery authorized by issue #330, use the same setup
+command and then, from a new process at the exact released SHA, run exactly:
+
+```text
+pnpm local:background-work-recovery-canary -- --env dev --project-ref xtbraqnlskmqxinjxxdn
+```
+
+The recovery command exposes no target, timing, threshold, SQL, credential,
+URL, run-ID, activation-order, or rollback-order override. It activates target
+11, then 2, then 3 while target 4 remains inactive. It samples every 15 seconds,
+records resource evidence every 60 seconds, and deactivates 3, then 2, then 11.
+
 Validation independently repeats the release, linkage, DNS, query, and flock checks.
 It consumes the owner-only receipt once and rejects expiry, replay, change, or a
 different binding before provider preparation. No other option or production use is accepted.
@@ -62,8 +74,8 @@ credentials, SQL, provider data, or stacks. A blocked setup stops after one atte
 
 Each run creates a mode-`0700` directory under the OS account home at
 `~/.local/state/momi/background-work-canary/`. The directory contains the
-append-only `receipt.ndjson` and, only after receipt verification, exclusive
-mode-`0600` `final.json`. The single stdout envelope identifies the run, final
+append-only `receipt.ndjson` and, only after receipt verification, an exclusive
+mode-`0600` final JSON artifact. The single stdout envelope identifies the run, final
 artifact path, and SHA-256; provider output is never printed.
 
 - Exit `0`, `inactive_dry_run_verified`: final targets are inactive, the guard
@@ -84,9 +96,8 @@ continue. A second signal cannot bypass that safety path.
 The exact guard generation and database-clock expiry are the database lifecycle
 lease. Every database mutation takes the same transaction-scoped advisory lock;
 the tool intentionally holds no persistent session advisory lock. Issue #330
-activation remains prohibited until its activation mutation is inside the exact
-current guard-generation and unexpired database-lease fence in this same
-orchestration. This tool contains no activation path.
+activation is performed only inside the exact current guard-generation and
+unexpired database-lease fence in the attended orchestration.
 
 The OS `flock` is independently monitored. Unexpected holder death is a typed
 failure: before guard commitment it is pre-guard failure; after commitment it
@@ -109,10 +120,10 @@ exact guard readback and commit.
 
 ## Post-run checks
 
-For exit `0`, verify the printed `final.json` SHA-256, confirm its four fixed
-target-inactive fields are true, confirm `guard.absent` is true, and preserve
-both receipt files. Do not infer issue #330 activation readiness from this dry
-run alone.
+For exit `0`, verify the printed final-artifact SHA-256, confirm all four fixed
+targets are inactive, the guard is absent, and waiting control locks are zero.
+Preserve both receipt files. The inactive dry-run is not activation evidence;
+only the attended recovery artifact can satisfy issue #330's live criterion.
 
 Stop for manual reconciliation after identity drift, a missed dead-man deadline,
 unknown guard state, cleanup refusal, failed final fast/resource evidence,

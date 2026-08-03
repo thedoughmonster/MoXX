@@ -75,6 +75,10 @@ export type InternalProviderSqlKind =
   | "guard_bootstrap"
   | "guard_heartbeat_fast"
   | "guard_heartbeat_resource"
+  | "recovery_activation"
+  | "recovery_final"
+  | "recovery_observation"
+  | "recovery_preflight"
   | "resource_sample"
   | "rollback"
 

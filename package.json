@@ -28,6 +28,7 @@
     "local:legacy-recipe-import": "node local-tools/legacy-recipe-import/main.ts",
     "local:background-work-canary-setup": "node local-tools/background-work-canary-control/setup_main.ts",
     "local:background-work-canary-control": "node local-tools/background-work-canary-control/main.ts",
+    "local:background-work-recovery-canary": "node local-tools/background-work-canary-control/recovery_main.ts",
     "local:preorder-config": "node local-tools/preorder-config/main.ts",
     "test:legacy-recipe-postgres": "node tests/run_legacy_recipe_postgres_integration.ts",
     "migration:check": "node scripts/check_migrations.ts",

@@ -38,7 +38,8 @@ export function buildDeadmanReconciliationOutput(
   const runId = fault === "identity_drift"
     ? "run-ffffffffffffffffffffffff" : handoff.runId
   const exactIdentityMask = fault === "reassigned_id" ? 14 : 15
-  const activeBeforeMask = fault === "active_before" ? 1 : 0
+  const activeBeforeMask = fault === "active_before" ? 1
+    : fault === "recovery_active_before" ? 11 : 0
   const terminalInput = {
     runId, generationSha256, expiryUtc, guardRunId: exactRunId,
     guardStartUtc: historyStartUtc, exactIdentityMask, activeBeforeMask,

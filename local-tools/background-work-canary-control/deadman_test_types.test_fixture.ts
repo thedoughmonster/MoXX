@@ -14,6 +14,7 @@ export type DeadmanReconciliationFault =
   | "identity_drift"
   | "late_history"
   | "reassigned_id"
+  | "recovery_active_before"
   | "terminal_command_drift"
   | "target_drift"
 
