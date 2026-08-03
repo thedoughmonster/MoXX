@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto"
 import { appendReceipt } from "./append_receipt.ts"
 import { createRecoveryGeneration } from "./create_recovery_generation.ts"
 import { evaluateRecoveryObservation } from "./evaluate_recovery_observation.ts"
+import { hasRecoveryMembershipDrift } from "./has_recovery_membership_drift.ts"
 import { DRAIN_LIMIT_MS, FAST_INTERVAL_MS, HARD_LIMIT_MS,
   PROGRESS_LIMIT_MS, RESOURCE_INTERVAL_MS } from "./recovery_constants.ts"
 import type { RecoveryState } from "./recovery_types.ts"
@@ -14,9 +15,18 @@ export async function monitorRecoveryCanary(
 ): Promise<{ passed: boolean; reason: string | null }> {
   if (!state.activation) throw new Error("Recovery activation is absent")
   const started = state.activation.startedAtUtcMs
-  state.lastOutstandingWork = state.activation.frozen.toastOpen +
-    state.activation.frozen.routingOpen + state.activation.frozen.deliveryOpen +
-    state.activation.frozen.queueReady + state.activation.frozen.dueScheduleCount
+  state.lastOutstandingWork = state.activation.frozen.cohortJobOpen +
+    state.activation.frozen.cohortAttemptOpen +
+    state.activation.frozen.cohortRoutingOpen +
+    state.activation.frozen.cohortDeliveryOpen +
+    state.activation.frozen.cohortQueueOpen +
+    state.activation.frozen.cohortReservationOpen +
+    state.activation.frozen.dueScheduleCount
+  state.lastMembershipCount = state.activation.frozen.cohortMembershipCount
+  state.lastMembershipSha256 = state.activation.frozen.cohortMembershipSha256
+  state.lastLineageEdgeCount = state.activation.frozen.cohortLineageEdgeCount
+  state.lastLineageEdgeSha256 = state.activation.frozen.cohortLineageEdgeSha256
+  state.lastProgress = state.activation.frozen.cohortTerminalCount
   state.lastProgressAtUtcMs = started
   for (let index = 1; index < HARD_LIMIT_MS / FAST_INTERVAL_MS; index += 1) {
     const boundary = started + index * FAST_INTERVAL_MS
@@ -39,9 +49,18 @@ export async function monitorRecoveryCanary(
     state.fastSamples += 1
     if (resourceBoundary) state.resourceSamples += 1
     const evaluation = evaluateRecoveryObservation(sample, state.activation)
+    if (hasRecoveryMembershipDrift(sample, state)) {
+      evaluation.stopReasons.push("cohort_membership_drift")
+    }
+    state.lastMembershipCount = sample.cohortMembershipCount
+    state.lastMembershipSha256 = sample.cohortMembershipSha256
+    state.lastLineageEdgeCount = sample.cohortLineageEdgeCount
+    state.lastLineageEdgeSha256 = sample.cohortLineageEdgeSha256
     state.zeroSamples = evaluation.zeroWork ? state.zeroSamples + 1 : 0
-    const outstandingWork = sample.toastOpen + sample.routingOpen +
-      sample.deliveryOpen + sample.queueReady + sample.dueAtStartRemaining
+    const outstandingWork = sample.cohortJobOpen + sample.cohortAttemptOpen +
+      sample.cohortRoutingOpen + sample.cohortDeliveryOpen +
+      sample.cohortQueueOpen + sample.cohortReservationOpen +
+      sample.dueAtStartRemaining
     if (evaluation.progress > state.lastProgress ||
       outstandingWork < state.lastOutstandingWork ||
       (state.lastOutstandingWork === 0 && outstandingWork > 0)) {
@@ -54,7 +73,12 @@ export async function monitorRecoveryCanary(
         sample_kind: resourceBoundary ? "fast_and_resource" : "fast",
         status: evaluation.stopReasons.length === 0 ? "passed" : "stopped",
         generation_sha256: state.generationSha256,
-        completed_count: sample.completedSinceStart, zero_samples: state.zeroSamples,
+        completed_count: sample.cohortTerminalCount, zero_samples: state.zeroSamples,
+        cohort_boundary_sha256: sample.cohortBoundarySha256,
+        cohort_membership_count: sample.cohortMembershipCount,
+        cohort_membership_sha256: sample.cohortMembershipSha256,
+        cohort_lineage_edge_count: sample.cohortLineageEdgeCount,
+        cohort_lineage_edge_sha256: sample.cohortLineageEdgeSha256,
         queues: { toast_ready: sample.toastReady, routing_ready: sample.routingReady,
           delivery_ready: sample.deliveryReady, queue_ready: sample.queueReady },
         ...(resourceBoundary ? { resources: { database_bytes: sample.databaseBytes,

@@ -21,7 +21,7 @@ export function generateRecoveryActivationSql(guard: GuardBootstrapResult): stri
     "routingRetry", "routingDead", "routingInvalid", "deliveryRunning",
     "deliveryRetry", "deliveryDead", "deliveryInvalid", "queueDead", "openAttempts",
     "projectionReservations", "expiredLeases", "longLeases", "workerCapViolations",
-    "waitingLocks",
+    "waitingLocks", "cohortDead", "cohortRetry", "cohortInvalid", "cohortAmbiguous",
   ].map((key) => `(frozen_sample->>'${key}')::bigint <> 0`).join(" or ")
   return [
     "begin;", "set local statement_timeout = '12s';", "set local lock_timeout = '2s';",
@@ -44,6 +44,13 @@ export function generateRecoveryActivationSql(guard: GuardBootstrapResult): stri
     "    raise exception 'momi_recovery_activation_target_state'; end if;",
     "  select sample into strict frozen_sample from (", snapshot, "  ) recovery_snapshot;",
     "  started_at := to_timestamp((frozen_sample->>'observedAtUtcMs')::bigint / 1000.0);",
+    "  if (frozen_sample->>'cohortStartedAtUtcMs')::bigint",
+    "      <> (frozen_sample->>'observedAtUtcMs')::bigint",
+    "      or (frozen_sample->>'cohortJobOpen')::bigint <> (frozen_sample->>'toastOpen')::bigint",
+    "      or (frozen_sample->>'cohortRoutingOpen')::bigint <> (frozen_sample->>'routingOpen')::bigint",
+    "      or (frozen_sample->>'cohortDeliveryOpen')::bigint <> (frozen_sample->>'deliveryOpen')::bigint",
+    "      or (frozen_sample->>'cohortQueueOpen')::bigint <> (frozen_sample->>'queueReady')::bigint then",
+    "    raise exception 'momi_recovery_activation_cohort'; end if;",
     "  if (frozen_sample->>'toastOpen')::bigint <> (frozen_sample->>'toastReady')::bigint",
     "      or (frozen_sample->>'routingOpen')::bigint <> (frozen_sample->>'routingReady')::bigint",
     "      or (frozen_sample->>'deliveryOpen')::bigint <> (frozen_sample->>'deliveryReady')::bigint",

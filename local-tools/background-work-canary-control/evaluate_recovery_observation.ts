@@ -8,6 +8,22 @@ export function evaluateRecoveryObservation(
 ): { stopReasons: string[]; zeroWork: boolean; progress: number } {
   const baseline = activation.frozen
   const reasons: string[] = []
+  if (sample.cohortStartedAtUtcMs !== baseline.cohortStartedAtUtcMs ||
+    sample.jobHighWater !== baseline.jobHighWater ||
+    sample.observationHighWater !== baseline.observationHighWater ||
+    sample.cohortBoundarySha256 !== baseline.cohortBoundarySha256 ||
+    sample.cohortRootCount !== baseline.cohortRootCount ||
+    sample.cohortRootSha256 !== baseline.cohortRootSha256 ||
+    sample.toastRootCount !== baseline.toastRootCount ||
+    sample.toastRootSha256 !== baseline.toastRootSha256 ||
+    sample.routingRootCount !== baseline.routingRootCount ||
+    sample.routingRootSha256 !== baseline.routingRootSha256 ||
+    sample.deliveryRootCount !== baseline.deliveryRootCount ||
+    sample.deliveryRootSha256 !== baseline.deliveryRootSha256 ||
+    sample.queueMappingCount !== baseline.queueMappingCount ||
+    sample.queueMappingSha256 !== baseline.queueMappingSha256) {
+    reasons.push("cohort_boundary_drift")
+  }
   if (sample.registrySha256 !== baseline.registrySha256 ||
     sample.registryCount !== baseline.registryCount ||
     sample.registryContractViolations !== 0) reasons.push("registry_drift")
@@ -36,8 +52,10 @@ export function evaluateRecoveryObservation(
     reasons.push("execution_evidence_invalid")
   }
   if (sample.windowToastViolations) reasons.push("window_work_invalid")
-  if (sample.openAttempts || sample.projectionReservations || sample.expiredLeases ||
-    sample.longLeases || sample.workerCapViolations || sample.waitingLocks) {
+  if (sample.cohortDead || sample.cohortRetry || sample.cohortInvalid ||
+    sample.cohortAmbiguous) reasons.push("cohort_work_invalid")
+  if (sample.expiredLeases || sample.longLeases || sample.workerCapViolations ||
+    sample.waitingLocks) {
     reasons.push("control_or_lease_violation")
   }
   if (sample.activeToastRouteCount !== 1 || sample.activeRoutingRouteCount !== 1 ||
@@ -53,8 +71,9 @@ export function evaluateRecoveryObservation(
     sample.cronHistoryBytes - baseline.cronHistoryBytes > MAX_CRON_HISTORY_GROWTH_BYTES ||
     sample.deadlocks !== baseline.deadlocks || sample.maxCronRunId < baseline.maxCronRunId ||
     sample.maxCronRunId - baseline.maxCronRunId > 16_384) reasons.push("resource_threshold")
-  const zeroWork = sample.toastOpen === 0 && sample.routingOpen === 0 &&
-    sample.deliveryOpen === 0 && sample.queueReady === 0 && sample.openAttempts === 0 &&
-    sample.projectionReservations === 0 && sample.dueAtStartRemaining === 0
-  return { stopReasons: reasons, zeroWork, progress: sample.completedSinceStart }
+  const zeroWork = sample.cohortJobOpen === 0 && sample.cohortAttemptOpen === 0 &&
+    sample.cohortRoutingOpen === 0 && sample.cohortDeliveryOpen === 0 &&
+    sample.cohortQueueOpen === 0 && sample.cohortReservationOpen === 0 &&
+    sample.cohortEmittableParents === 0 && sample.dueAtStartRemaining === 0
+  return { stopReasons: reasons, zeroWork, progress: sample.cohortTerminalCount }
 }

@@ -14,5 +14,8 @@ export async function initializeRecoveryState(
     receipt: await initializeReceipt(receiptRoot, identity.runId),
     runId: identity.runId, generationSha256: identity.generationSha256,
     fastSamples: 0, resourceSamples: 0, zeroSamples: 0,
-    lastProgress: 0, lastOutstandingWork: 0, lastProgressAtUtcMs: 0 }
+    lastProgress: 0, lastOutstandingWork: 0,
+    lastMembershipCount: 0, lastMembershipSha256: "",
+    lastLineageEdgeCount: 0, lastLineageEdgeSha256: "",
+    lastProgressAtUtcMs: 0 }
 }

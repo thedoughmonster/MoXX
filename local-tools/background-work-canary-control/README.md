@@ -60,6 +60,12 @@ The recovery command exposes no target, timing, threshold, SQL, credential,
 URL, run-ID, activation-order, or rollback-order override. It activates target
 11, then 2, then 3 while target 4 remains inactive. It samples every 15 seconds,
 records resource evidence every 60 seconds, and deactivates 3, then 2, then 11.
+Immediately before activation it freezes the schedule occurrences due at that
+instant, durable table high-water marks, pre-existing root identities, and
+catalog fingerprints. Completion is based only on those roots and their
+deterministically traced descendants. Independent work arriving after the
+boundary remains subject to every global safety check, but cannot join the
+cohort or extend its deadline.
 
 Validation independently repeats the release, linkage, DNS, query, and flock checks.
 It consumes the owner-only receipt once and rejects expiry, replay, change, or a
@@ -77,6 +83,9 @@ Each run creates a mode-`0700` directory under the OS account home at
 append-only `receipt.ndjson` and, only after receipt verification, an exclusive
 mode-`0600` final JSON artifact. The single stdout envelope identifies the run, final
 artifact path, and SHA-256; provider output is never printed.
+The attended receipt records only cohort boundary, root, membership, lineage,
+and catalog hashes plus numeric lifecycle evidence; it never records durable
+row identities or physical queue message identifiers.
 
 - Exit `0`, `inactive_dry_run_verified`: final targets are inactive, the guard
   is absent, all required checks passed, and `final.json` is verified.

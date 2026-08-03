@@ -3,8 +3,32 @@ import type { ReceiptWriterState } from "./receipt_types.ts"
 import type { ReleasedRuntime } from "./runtime_adapter_types.ts"
 import type { TargetJobState } from "./sample_types.ts"
 
+export type RecoveryDueOccurrence = {
+  scheduleKey: string
+  dueAtUtcMs: number
+}
+
 export type RecoverySnapshot = {
-  observedAtUtcMs: number; maxCronRunId: number; targetJobs: readonly TargetJobState[]
+  observedAtUtcMs: number; cohortStartedAtUtcMs: number
+  jobHighWater: number; observationHighWater: number
+  dueOccurrences: readonly RecoveryDueOccurrence[]; cohortBoundarySha256: string
+  cohortRootCount: number; cohortRootSha256: string
+  toastRootCount: number; toastRootSha256: string
+  routingRootCount: number; routingRootSha256: string
+  deliveryRootCount: number; deliveryRootSha256: string
+  queueMappingCount: number; queueMappingSha256: string
+  cohortMembershipCount: number; cohortMembershipSha256: string
+  cohortLineageEdgeCount: number; cohortLineageEdgeSha256: string
+  cohortJobCount: number; cohortJobOpen: number
+  cohortAttemptCount: number; cohortAttemptOpen: number
+  cohortObservationCount: number; cohortEventCount: number
+  cohortRoutingCount: number; cohortRoutingOpen: number
+  cohortDeliveryCount: number; cohortDeliveryOpen: number
+  cohortQueueOpen: number; cohortReservationOpen: number
+  cohortDead: number; cohortRetry: number; cohortInvalid: number
+  cohortAmbiguous: number; cohortEmittableParents: number
+  cohortTerminalCount: number
+  maxCronRunId: number; targetJobs: readonly TargetJobState[]
   guardIdentityCount: number; activeCronExecutions: number; waitingLocks: number
   registryCount: number; registryContractViolations: number
   registrySha256: string; scheduleDueSha256: string
@@ -54,6 +78,8 @@ export type RecoveryState = {
   recoveryPath?: "explicit_rollback" | "rollback_readback_cleanup" | "deadman"
   fastSamples: number; resourceSamples: number; zeroSamples: number
   lastProgress: number; lastOutstandingWork: number
+  lastMembershipCount: number; lastMembershipSha256: string
+  lastLineageEdgeCount: number; lastLineageEdgeSha256: string
   lastProgressAtUtcMs: number; stopReason?: string
 }
 

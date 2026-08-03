@@ -5,9 +5,11 @@ import { parseRecoveryFinalOutput } from "./parse_recovery_final_output.ts"
 import type { RecoverySnapshot, RecoveryState } from "./recovery_types.ts"
 
 export async function runRecoveryFinal(state: RecoveryState): Promise<RecoverySnapshot> {
+  const baseline = state.activation?.frozen ?? state.preflight
+  if (!baseline) throw new Error("Recovery final baseline is absent")
   const result = await executeProviderQuery({ repositoryRoot: state.repositoryRoot,
     provider: state.runtime.provider,
-    sql: createInternalProviderSql("recovery_final", generateRecoveryFinalSql()),
+    sql: createInternalProviderSql("recovery_final", generateRecoveryFinalSql(baseline)),
     parser: parseRecoveryFinalOutput }, { temporaryRoot: "/tmp" })
   if (result.status === "failure") throw new Error(`Recovery final readback ${result.reason}`)
   return result.value

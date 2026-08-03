@@ -11,7 +11,11 @@ const activation = { startedAtUtcMs: 1_785_752_000_000,
 test("recovery observation accepts exact progress and recognizes zero work", () => {
   assert.deepEqual(evaluateRecoveryObservation(createRecoverySnapshotFixture(), activation),
     { stopReasons: [], zeroWork: false, progress: 1 })
-  const zero = createRecoverySnapshotFixture({ toastOpen: 0, toastReady: 0,
+  const zero = createRecoverySnapshotFixture({ cohortJobOpen: 0,
+    cohortEmittableParents: 0, cohortTerminalCount: 2,
+    toastOpen: 50, toastReady: 50, routingOpen: 60, routingReady: 60,
+    deliveryOpen: 70, deliveryReady: 70, queueReady: 80,
+    openAttempts: 9, projectionReservations: 4,
     completedSinceStart: 2, targetRunCount: 2 })
   assert.deepEqual(evaluateRecoveryObservation(zero, activation),
     { stopReasons: [], zeroWork: true, progress: 2 })
@@ -24,11 +28,12 @@ test("recovery observation stops on every fail-closed evidence class", () => {
     { toastUnmatched: 1 }, { windowToastViolations: 1 }, { routingRetry: 1 },
     { deliveryDead: 1 }, { queueDead: 1 }, { targetRunFailures: 1 },
     { invalidTargetReturns: 1 }, { forbiddenTargetFourRuns: 1 },
-    { openAttempts: 1 }, { projectionReservations: 1 }, { longLeases: 1 },
+    { cohortInvalid: 1 }, { cohortAmbiguous: 1 }, { cohortDead: 1 },
+    { longLeases: 1 },
     { workerCapViolations: 1 }, { activeProjectionEdgeRouteCount: 1 },
     { waitingLocks: 1 }, { databaseBackends: 50 }, { deadlocks: 1 },
     { databaseBytes: 8_200_000_000 }, { dueAtStartRemaining: 1,
-      toastOpen: 0, toastReady: 0, completedSinceStart: 2 },
+      cohortJobOpen: 0, cohortEmittableParents: 0, cohortTerminalCount: 2 },
   ]
   for (const changed of cases) {
     const evaluated = evaluateRecoveryObservation(createRecoverySnapshotFixture(changed), activation)

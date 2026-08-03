@@ -16,6 +16,16 @@ export function validateRecoveryPreflight(
   const invalidControl = sample.targetJobs.some((job) => job.active) ||
     sample.guardIdentityCount !== expectedGuardIdentityCount || sample.waitingLocks !== 0 ||
     sample.activeCronExecutions > MAX_ACTIVE_CRON_EXECUTIONS
+  const invalidCohort = sample.cohortStartedAtUtcMs !== sample.observedAtUtcMs ||
+    sample.cohortDead !== 0 || sample.cohortRetry !== 0 ||
+    sample.cohortInvalid !== 0 || sample.cohortAmbiguous !== 0 ||
+    sample.cohortJobOpen !== sample.toastOpen ||
+    sample.cohortRoutingOpen !== sample.routingOpen ||
+    sample.cohortDeliveryOpen !== sample.deliveryOpen ||
+    sample.cohortQueueOpen !== sample.queueReady ||
+    sample.cohortAttemptOpen !== sample.openAttempts ||
+    sample.cohortReservationOpen !== sample.projectionReservations ||
+    sample.cohortMembershipCount < sample.cohortRootCount
   const invalidRoutes = sample.activeToastRouteCount !== 1 ||
     sample.activeRoutingRouteCount !== 1 || sample.activeProjectionEdgeRouteCount !== 0 ||
     sample.databaseProjectionModeCount !== 1 ||
@@ -28,7 +38,7 @@ export function validateRecoveryPreflight(
     sample.walDirectoryBytes >= MAX_WAL_DIRECTORY_BYTES_EXCLUSIVE ||
     sample.databaseBackends >= MAX_DATABASE_BACKENDS_EXCLUSIVE ||
     sample.maxConnections - sample.reservedConnections - sample.databaseBackends < 8
-  if (invalidWork || invalidControl || invalidRoutes || invalidSafety) {
+  if (invalidWork || invalidControl || invalidCohort || invalidRoutes || invalidSafety) {
     throw new Error("Recovery preflight rejected current provider state")
   }
   return sample

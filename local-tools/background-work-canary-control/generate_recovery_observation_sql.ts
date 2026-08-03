@@ -1,6 +1,7 @@
 import type { GuardHeartbeatInput } from "./guard_heartbeat_types.ts"
 import { generateGuardHeartbeatSql } from "./generate_guard_heartbeat_sql.ts"
 import { GUARD_HEARTBEAT_MARKER } from "./guard_heartbeat_constants.ts"
+import { generateRecoveryBoundaryConfigSql } from "./generate_recovery_boundary_config_sql.ts"
 import { loadRecoverySnapshotSql } from "./load_recovery_snapshot_sql.ts"
 import { RECOVERY_OBSERVATION_MARKER } from "./recovery_constants.ts"
 import type { RecoveryActivation } from "./recovery_types.ts"
@@ -50,6 +51,7 @@ export function generateRecoveryObservationSql(
   const started = new Date(activation.startedAtUtcMs).toISOString()
   const startRunId = activation.frozen.maxCronRunId
   return transition.slice(0, boundary) + [
+    generateRecoveryBoundaryConfigSql(activation.frozen),
     "with recovery_snapshot as (", snapshot, "),",
     "run_evidence as (select",
     `  count(*) filter (where jobid in (2,3,4,11))::bigint target_runs,`,
