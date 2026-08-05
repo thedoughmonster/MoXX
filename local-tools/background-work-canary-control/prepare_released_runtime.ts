@@ -38,7 +38,9 @@ export async function prepareReleasedRuntime(
       repositoryRoot, repository, linkage, flockCapability,
     )
     const receiptRoot = await dependencies.prepareReceiptRoot()
-    await dependencies.claimReceipt(receiptRoot, binding, dependencies.nowMs())
+    const setupReceipt = await dependencies.claimReceipt(
+      receiptRoot, binding, dependencies.nowMs(),
+    )
     providerWorkBegan = true
     try {
       provider = await dependencies.createProvider(
@@ -54,6 +56,7 @@ export async function prepareReleasedRuntime(
       executables: preflightExecutables,
       provider,
       lock,
+      setupReceipt,
     }
   } catch (error) {
     let cleanupFailed = false

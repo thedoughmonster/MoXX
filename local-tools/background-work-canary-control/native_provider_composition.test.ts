@@ -61,8 +61,12 @@ test("real resolver and owner compose through every production provider stage", 
     assert.doesNotMatch(source, /providerCommand|pnpm|heldExecutable/)
   }
   const composition = await readFile(join(
-    import.meta.dirname, "create_canary_program_dependencies.ts",
+    import.meta.dirname, "prepare_canary_runtime.ts",
   ), "utf8")
   assert.match(composition, /createProvider: createHeldNativeProvider/)
   assert.match(composition, /runChild: runBoundedChild/)
+  const program = await readFile(join(
+    import.meta.dirname, "create_canary_program_dependencies.ts",
+  ), "utf8")
+  assert.match(program, /prepareRuntime: prepareCanaryRuntime/)
 })
