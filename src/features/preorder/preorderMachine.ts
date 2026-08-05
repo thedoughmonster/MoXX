@@ -1,7 +1,9 @@
 import { setup } from 'xstate';
 
 type Events =
+  | { type: 'DETAILS' }
   | { type: 'REVIEW' }
+  | { type: 'EDIT_DETAILS' }
   | { type: 'KEEP_SHOPPING' };
 
 export const preorderMachine = setup({
@@ -14,11 +16,18 @@ export const preorderMachine = setup({
   states: {
     selecting: {
       on: {
-        REVIEW: 'reviewing'
+        DETAILS: 'details'
+      }
+    },
+    details: {
+      on: {
+        REVIEW: 'reviewing',
+        KEEP_SHOPPING: 'selecting'
       }
     },
     reviewing: {
       on: {
+        EDIT_DETAILS: 'details',
         KEEP_SHOPPING: 'selecting'
       }
     }

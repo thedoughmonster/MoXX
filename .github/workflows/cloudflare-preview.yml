@@ -34,7 +34,9 @@ jobs:
       VITE_APP_STAGE: preview
       VITE_PREORDER_API_ORIGIN: https://xtbraqnlskmqxinjxxdn.supabase.co
       VITE_PREORDER_API_VERSION: v1
-      VITE_PREORDER_DATA_MODE: fixture
+      VITE_PREORDER_DATA_MODE: live
+      VITE_SQUARE_SANDBOX_APPLICATION_ID: sandbox-sq0idb-5fqqJ2x3hNzSvwaLcIOq9A
+      VITE_SQUARE_SANDBOX_LOCATION_ID: LN73GYJ0P4PY1
       VITE_RELEASE_ID: ${{ github.sha }}
     steps:
       - name: Checkout exact release

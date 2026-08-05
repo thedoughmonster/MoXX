@@ -6,30 +6,39 @@ const envelope: PreorderBootstrapEnvelope = {
   meta: {
     contract_key: 'momi.preorder.bootstrap.read.v1',
     request_id: '10000000-0000-4000-8000-000000000001',
-    generated_at: '2026-07-29T12:00:00Z'
+    generated_at: '2026-08-05T12:00:00Z'
   },
   data: {
     surface_id: '10000000-0000-4000-8000-000000000002',
     surface_key: 'preorder',
-    location_id: '10000000-0000-4000-8000-000000000003',
+    location_id: '9154e81d-52a1-46ea-a213-e572343a601b',
     location_name: 'Dough Monster',
-    timezone: 'America/Los_Angeles',
+    timezone: 'America/New_York',
+    versions: {
+      surface_version: 3,
+      catalog_version: 3,
+      policy_version: 3,
+      mapping_version: 3
+    },
     fulfillment_windows: [{
       window_id: '10000000-0000-4000-8000-000000000004',
-      date: '2026-08-01',
-      starts_at: '2026-08-01T09:00:00-07:00',
-      ends_at: '2026-08-01T10:00:00-07:00',
-      order_cutoff_at: '2026-07-31T12:00:00-07:00',
+      date: '2026-08-08',
+      starts_at: '2026-08-08T08:00:00-04:00',
+      ends_at: '2026-08-08T14:00:00-04:00',
+      order_cutoff_at: '2026-08-07T17:00:00-04:00',
       availability: 'available'
     }],
     catalog: [{
       item_id: '10000000-0000-4000-8000-000000000005',
-      item_version: 1,
+      item_version: 3,
+      category: 'classic',
       name: 'Test Doughnut',
       description: 'Synthetic adapter fixture.',
-      base_price: { currency: 'USD', amount_minor: 450 },
+      base_price: { currency: 'USD', amount_minor: 150 },
+      shop_price: { currency: 'USD', amount_minor: 250 },
+      price_floor: { currency: 'USD', amount_minor: 150 },
       media: [],
-      allergen_status: 'contains_declared',
+      allergen_status: 'verified',
       allergens: ['milk', 'wheat'],
       seasonal_eligibility: 'eligible',
       available: true,
@@ -37,23 +46,43 @@ const envelope: PreorderBootstrapEnvelope = {
       option_groups: [],
       disclosures: []
     }],
-    fresh_at: '2026-07-29T12:00:00Z',
-    expires_at: '2026-07-29T12:05:00Z'
+    cancellation_policy: {
+      summary: 'Contact the shop by 5 PM the prior day.',
+      customer_cancellation_allowed: false,
+      customer_modification_allowed: false
+    },
+    fresh_at: '2026-08-05T12:00:00Z',
+    expires_at: '2026-08-05T12:05:00Z'
   }
 };
 
 describe('preorder bootstrap adapter', () => {
-  test('maps accepted live fields into the selection model', () => {
+  test('maps accepted v3 fields into the live selection model', () => {
     const result = adaptBootstrap(envelope);
+
     expect(result.source).toBe('live');
+    expect(result.surfaceId).toBe(envelope.data.surface_id);
+    expect(result.locationId).toBe(envelope.data.location_id);
+    expect(result.versions).toEqual(envelope.data.versions);
     expect(result.fulfillmentWindows[0]?.availability).toBe('available');
+    expect(result.products[0]?.itemVersion).toBe(3);
     expect(result.products[0]?.allergens).toEqual(['milk', 'wheat']);
+    expect(result.products[0]?.allergenStatus).toBe('verified');
     expect(result.allergenOptions.map((item) => item.label)).toEqual(['Milk', 'Wheat']);
+    expect(result.cancellationPolicy).toEqual({
+      summary: 'Contact the shop by 5 PM the prior day.',
+      customerCancellationAllowed: false,
+      customerModificationAllowed: false
+    });
   });
 
-  test('fails closed when declared allergen details are absent', () => {
-    const withoutDetails = structuredClone(envelope);
-    delete withoutDetails.data.catalog[0]!.allergens;
-    expect(adaptBootstrap(withoutDetails).products[0]?.allergenStatus).toBe('unverified');
+  test('keeps general ordering available when allergen data is unverified', () => {
+    const unverified = structuredClone(envelope);
+    unverified.data.catalog[0]!.allergen_status = 'unverified';
+    unverified.data.catalog[0]!.allergens = [];
+
+    const product = adaptBootstrap(unverified).products[0];
+    expect(product?.allergenStatus).toBe('unverified');
+    expect(product?.maximumQuantity).toBe(8);
   });
 });

@@ -7,6 +7,12 @@ export {
 export { loadSquareSandboxSdk } from './loadSandboxSdk';
 export { mountEmbeddedSquareCard } from './mountEmbeddedCard';
 export { readSquareSandboxConfig } from './readSandboxConfig';
+export { SquarePaymentPanel } from './SquarePaymentPanel';
+export {
+  SquareWebPaymentsBoundary
+} from './SquareWebPaymentsBoundary';
+export { useSquareSandboxConfig } from './squareWebPaymentsContext';
+export { squareSandboxCspContent } from './squareSandboxCsp';
 export type {
   EmbeddedSquareCard,
   SourceTokenHandoff,
@@ -20,3 +26,4 @@ export type {
   SquareSdkLoadResult,
   SquareTokenHandoffResult
 } from './types';
+export type { SquarePaymentActivation } from './SquarePaymentPanel';

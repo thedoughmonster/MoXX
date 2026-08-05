@@ -15,6 +15,210 @@
   --shadow: 0 18px 48px rgba(71, 49, 33, 0.1);
 }
 
+.draft-restored {
+  padding: 10px 20px;
+  border-bottom: 1px solid #d8b469;
+  background: #fff4d8;
+  color: #5b4217;
+  text-align: center;
+  font-size: 0.84rem;
+  font-weight: 750;
+}
+
+.flow-page {
+  min-height: 100vh;
+  padding: clamp(28px, 6vw, 72px) 20px;
+  display: grid;
+  place-items: start center;
+  background: var(--cream);
+}
+
+.flow-card {
+  width: min(760px, 100%);
+  padding: clamp(28px, 6vw, 64px);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.flow-card h1 {
+  margin: 10px 0 16px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2.35rem, 7vw, 4.5rem);
+  line-height: 1;
+  letter-spacing: -0.05em;
+}
+
+.flow-intro {
+  max-width: 620px;
+  color: var(--ink-soft);
+  line-height: 1.6;
+}
+
+.draft-status,
+.quote-warning {
+  margin: 26px 0;
+  padding: 16px 18px;
+  border: 1px solid #d8b469;
+  border-radius: 14px;
+  background: #fff4d8;
+  color: #5b4217;
+  display: grid;
+  gap: 5px;
+}
+
+.details-form {
+  margin-top: 28px;
+  display: grid;
+  gap: 20px;
+}
+
+.details-form label {
+  display: grid;
+  gap: 8px;
+  font-weight: 750;
+}
+
+.details-form input,
+.details-form textarea {
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 14px;
+  border: 1px solid #b9aa98;
+  border-radius: 12px;
+  background: var(--white);
+  color: var(--ink);
+}
+
+.details-form textarea {
+  resize: vertical;
+}
+
+.details-form input:focus,
+.details-form textarea:focus {
+  outline: 3px solid rgba(141, 41, 79, 0.22);
+  border-color: var(--berry);
+}
+
+.details-form [aria-invalid="true"] {
+  border-color: #a51d2d;
+}
+
+.field-error {
+  color: #8d1728;
+  font-size: 0.86rem;
+}
+
+.optional-label {
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.draft-retention {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.flow-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.flow-actions .primary-button,
+.flow-actions .secondary-button {
+  min-height: 52px;
+  padding: 0 20px;
+}
+
+.review-section,
+.policy-placeholder {
+  padding: 24px 0;
+  border-top: 1px solid var(--line);
+}
+
+.review-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.review-heading h2,
+.totals-section h2,
+.policy-placeholder h2,
+.payment-review > h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.45rem;
+}
+
+.review-lines {
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 14px;
+}
+
+.review-lines li,
+.totals-section dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.review-lines span,
+.review-card address {
+  display: grid;
+  gap: 4px;
+}
+
+.review-lines small,
+.review-card address,
+.policy-placeholder p,
+.payment-review > p {
+  color: var(--ink-soft);
+  font-style: normal;
+  line-height: 1.5;
+}
+
+.totals-section dl {
+  margin: 18px 0 0;
+  display: grid;
+  gap: 12px;
+}
+
+.totals-section dl > div:last-child {
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-weight: 800;
+}
+
+.totals-section dd {
+  margin: 0;
+  text-align: right;
+}
+
+@media (max-width: 560px) {
+  .flow-actions > *,
+  .flow-actions .primary-button,
+  .flow-actions .secondary-button {
+    width: 100%;
+  }
+
+  .review-lines li,
+  .totals-section dl > div {
+    align-items: start;
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -1189,3 +1393,32 @@ footer a {
     transition-duration: 0.01ms !important;
   }
 }
+
+.payment-review {
+  display: grid;
+  gap: 18px;
+}
+
+.payment-review > p {
+  margin: 0;
+}
+
+.payment-outcome {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  line-height: 1.5;
+}
+
+.payment-outcome.is-success {
+  background: #e6f1e5;
+  color: #294d2d;
+}
+
+.payment-outcome.is-warning {
+  background: #fff0d4;
+  color: #67420c;
+}
+
+.payment-outcome.is-error {
+  background: #fbe7e7;
