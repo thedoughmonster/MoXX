@@ -53,7 +53,10 @@ export function reduceMetrics(
       const device = point.labels.device ?? "";
       if (!/^(?:loop|ram|fd|sr)/u.test(device)) ioFallback += point.value;
       if (wholeDisk.test(device)) ioWhole += point.value;
-    } else if (point.name === "pg_stat_database_numbackends") {
+    } else if (
+      point.name === "pg_stat_database_num_backends" ||
+      point.name === "pg_stat_database_numbackends"
+    ) {
       if (!point.labels.datname || point.labels.datname === "postgres") {
         connections += point.value;
         connectionFound = true;

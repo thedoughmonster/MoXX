@@ -14,7 +14,7 @@ const fixture = [
   'node_disk_io_time_seconds_total{device="nvme0n1"} 12',
   'node_filesystem_size_bytes{device="/dev/nvme0n1",mountpoint="/"} 1000',
   'node_filesystem_avail_bytes{device="/dev/nvme0n1",mountpoint="/"} 300',
-  'pg_stat_database_numbackends{datname="postgres"} 6',
+  'pg_stat_database_num_backends{datname="postgres"} 6',
   "supabase_provider_pressure 0",
 ].join("\n");
 
@@ -44,6 +44,16 @@ test("fails closed when the configured provider warning metric is absent", () =>
   );
   assert.equal(sample.sourceComplete, false);
   assert.equal(sample.providerWarning, null);
+});
+
+test("accepts the legacy connection metric spelling", () => {
+  const sample = reduceMetrics(
+    fixture.replace("num_backends", "numbackends"),
+    "2026-08-05T00:00:00.000Z",
+    ["supabase_provider_pressure"],
+  );
+  assert.equal(sample.sourceComplete, true);
+  assert.equal(sample.providerConnections, 6);
 });
 
 test("authenticates the Metrics API as service_role", () => {
