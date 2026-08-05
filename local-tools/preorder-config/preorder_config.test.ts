@@ -20,7 +20,7 @@ test("active configuration enforces lower preorder pricing", async () => {
   items[0].preorder_price_minor = 160;
   await assert.rejects(
     validateConfig(unsafe as JsonValue),
-    /safe allergen or price evidence/,
+    /price does not match its class/,
   );
 });
 
@@ -44,9 +44,11 @@ test("drafts fail closed without invented facts", async () => {
   surface.enabled = false;
   const item = (draft.catalog as Array<Record<string, unknown>>)[0];
   item.available = false;
+  item.preorder_enabled = false;
   item.allergen_status = "unverified";
-  item.preorder_price_minor = null;
   item.price_floor_minor = null;
+  const classes = draft.price_classes as Array<Record<string, unknown>>;
+  classes[0].price_floor_minor = null;
   await assert.doesNotReject(validateConfig(draft as JsonValue));
 });
 
@@ -60,7 +62,15 @@ test("checked-in Toast draft preserves evidence but publishes nothing", async ()
   assert.ok(
     config.catalog.every((item) => item.allergen_status === "unverified"),
   );
-  assert.ok(config.catalog.every((item) => item.preorder_price_minor === null));
+  assert.deepEqual(
+    Object.fromEntries((config.price_classes ?? []).map((priceClass) => [
+      priceClass.price_class_key, priceClass.preorder_price_minor,
+    ])),
+    { classic: 150, iced: 160, honey_bun: 160, iced_sprinkles: 170,
+      filled_shell: 180, big_apple_ugly: 350 },
+  );
+  assert.ok(config.catalog.every((item) => item.preorder_enabled === false));
+  assert.ok(config.catalog.every((item) => item.eligibility_mode === "always"));
   assert.ok(config.catalog.every((item) => item.price_floor_minor === null));
 });
 
