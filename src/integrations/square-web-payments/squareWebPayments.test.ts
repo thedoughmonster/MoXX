@@ -6,6 +6,8 @@ import { loadSquareSandboxSdk } from './loadSandboxSdk';
 import mountEmbeddedCardSource from './mountEmbeddedCard.ts?raw';
 import { mountEmbeddedSquareCard } from './mountEmbeddedCard';
 import readSandboxConfigSource from './readSandboxConfig.ts?raw';
+import squarePaymentPanelSource from './SquarePaymentPanel.tsx?raw';
+import squareWebPaymentsBoundarySource from './SquareWebPaymentsBoundary.tsx?raw';
 import { readSquareSandboxConfig } from './readSandboxConfig';
 import type {
   SquareCard,
@@ -195,7 +197,9 @@ describe('embedded Square card token handoff', () => {
       browserScriptHostSource,
       loadSandboxSdkSource,
       mountEmbeddedCardSource,
-      readSandboxConfigSource
+      readSandboxConfigSource,
+      squarePaymentPanelSource,
+      squareWebPaymentsBoundarySource
     ].join('\n');
     expect(source).not.toMatch(
       /localStorage|sessionStorage|console\.|fetch\(|sendBeacon|Sentry|window\.open/

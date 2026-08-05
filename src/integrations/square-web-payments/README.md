@@ -20,13 +20,23 @@ provider errors, or returns a token in its result.
 6. If handoff is indeterminate, use Logic-owned status/reconciliation. The
    adapter deliberately blocks another tokenization from that card instance.
 
+`SquareWebPaymentsBoundary` validates the two public Sandbox identifiers once
+at the app root. `SquarePaymentPanel` remains inactive until its caller supplies
+an owner-authoritative payment-attempt key, amount, currency, and handoff
+callback. A changed attempt key remounts the one-use card session rather than
+reusing a consumed or indeterminate tokenization session.
+Inactive or missing configuration never loads Square's SDK or renders a submit
+action.
+
 ## Downstream activation dependency
 
-The preorder UI owner must wire the adapter to an authoritative order/payment
-attempt, provide the two public `VITE_SQUARE_SANDBOX_*` identifiers, and add the
-current Square Sandbox CSP allowlist at the hosting boundary before rendering
-the card element. Payment execution remains disabled until the backend's active
-preorder configuration and durable payment-attempt gates are satisfied.
+The app root now provides the validated public configuration, and the governed
+development preview has a host-scoped Square Sandbox CSP contract in
+`public/_headers`. The preorder UI owner must place `SquarePaymentPanel` only
+after an authoritative order/payment attempt exists and hand its token directly
+to the accepted Logic initiation route. Payment execution remains disabled until
+the backend's active preorder configuration and durable payment-attempt gates
+are satisfied.
 
 The SDK URL and browser flow follow Square's Web Payments SDK documentation:
 
