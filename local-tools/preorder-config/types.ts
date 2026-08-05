@@ -7,13 +7,26 @@ export type CatalogItem = {
   shop_price_minor: number;
   preorder_price_minor: number | null;
   price_floor_minor: number | null;
+  pricing_strategy?: "direct_class" | "highest_active_doughnut_class";
+  price_class_key?: string | null;
+  preorder_enabled?: boolean;
+  eligibility_mode?: "always" | "starts_on" | "ends_on" | "date_range";
+  eligible_from_date?: string | null;
+  eligible_through_date?: string | null;
   allergen_status: string;
   available: boolean;
   maximum_quantity: number;
 };
 
+export type PriceClass = {
+  price_class_key: string;
+  preorder_price_minor: number;
+  price_floor_minor: number | null;
+  doughnut_price_class: boolean;
+};
+
 export type PreorderConfiguration = {
-  schema_version: number;
+  schema_version: 1 | 2;
   publication_ref: string;
   publication_mode: "draft" | "active";
   surface: { surface_key: string; enabled: boolean };
@@ -30,6 +43,7 @@ export type PreorderConfiguration = {
     daily_limit: number | null;
     limited_threshold: number | null;
   };
+  price_classes?: PriceClass[];
   catalog: CatalogItem[];
   [key: string]: JsonValue;
 };
