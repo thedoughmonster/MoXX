@@ -9,8 +9,9 @@ careful filing step or refuses to touch anything.
 ## Trigger And Input
 
 `POST` accepts only one database-issued `tick_id` and `capability_token`. `GET`
-returns a redacted configuration check. The pg_cron dispatcher sends the token
-only while an operator-selected phase is active.
+returns a redacted configuration check. A side-effect-free `OPTIONS` request
+proves deployment liveness without weakening readiness. The pg_cron dispatcher
+sends the token only while an operator-selected phase is active.
 
 The runtime requires `SUPABASE_DB_URL`, `SUPABASE_URL`, a dedicated
 `MOMI_CRON_HISTORY_METRICS_SECRET_KEY`, and the exact comma-separated

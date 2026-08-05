@@ -5,6 +5,12 @@ import { processTick } from "./process_tick.ts";
 import { functionKey } from "./types.ts";
 
 export async function handleRequest(request: Request): Promise<Response> {
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: { Allow: "GET, POST, OPTIONS" },
+    });
+  }
   if (request.method === "GET") {
     const configured = isConfigured();
     return Response.json({
@@ -19,7 +25,7 @@ export async function handleRequest(request: Request): Promise<Response> {
   if (request.method !== "POST") {
     return new Response("method not allowed", {
       status: 405,
-      headers: { Allow: "GET, POST" },
+      headers: { Allow: "GET, POST, OPTIONS" },
     });
   }
   const body: unknown = await request.json().catch(() => null);
