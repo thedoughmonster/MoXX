@@ -13,11 +13,14 @@ import { validateRecoveryPreflight } from "./validate_recovery_preflight.ts"
 export async function runRecoveryPreflight(state: RecoveryState): Promise<RecoverySnapshot> {
   const startedAt = Date.now()
   const sql = createInternalProviderSql("recovery_preflight", generateRecoveryPreflightSql())
+  state.preflightQuerySha256 = sql.sha256
   const result = await executeProviderQuery({ repositoryRoot: state.repositoryRoot,
     provider: state.runtime.provider, signal: state.signal, sql,
     outputLimitBytes: RECOVERY_SNAPSHOT_OUTPUT_LIMIT_BYTES,
     parser: parseRecoveryPreflightOutput }, { temporaryRoot: "/tmp" })
-  const durationMs = Math.max(0, Date.now() - startedAt)
+  const endedAt = Date.now()
+  const durationMs = Math.max(0, endedAt - startedAt)
+  state.preflightTiming = { startedAtUtcMs: startedAt, endedAtUtcMs: endedAt, durationMs }
   if (result.status === "failure") {
     const categories: Record<typeof result.reason, RecoveryPreflightReasonCategory> = {
       adapter_failure: "adapter", cancelled: "cancelled", exit_failure: "exit",

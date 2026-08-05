@@ -86,6 +86,9 @@ export type RecoveryState = {
   generationSha256: string; guard?: GuardBootstrapResult
   guardStartCronRunId?: number
   attemptedGenerationSha256?: string
+  preflightQuerySha256?: string
+  preflightTiming?: { startedAtUtcMs: number; endedAtUtcMs: number; durationMs: number }
+  classificationReleaseTreeSha?: string
   preflight?: RecoverySnapshot; activation?: RecoveryActivation
   finalGenerationSha256?: string
   deadmanReconciled?: boolean

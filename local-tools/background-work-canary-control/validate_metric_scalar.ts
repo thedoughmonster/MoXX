@@ -17,7 +17,8 @@ const jobNames = new Set([
   "momi-warehouse-projection-wakeup-v1",
 ])
 const statuses = new Set([
-  "active", "bootstrap_ambiguity_reconciled", "completed", "failed",
+  "accepted_classification", "active", "bootstrap_ambiguity_reconciled",
+  "classification_started", "completed", "failed",
   "classified", "failure_recovered_by_deadman", "guard_absent", "inactive",
   "inactive_dry_run_verified", "manual_reconciliation_required", "passed", "pending",
   "reconciled", "rollback_and_cleanup_read_back", "started", "stopped",

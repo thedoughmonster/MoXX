@@ -45,6 +45,7 @@ export type ReleasedRuntime = {
   executables: PreflightExecutables
   provider: HeldProvider
   lock: CanaryControlLock
+  setupReceipt: SetupReceipt
 }
 
 export type RuntimePreparationDependencies = {

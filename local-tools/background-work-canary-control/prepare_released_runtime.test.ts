@@ -41,7 +41,7 @@ test("released runtime consumes exact setup evidence before provider preparation
       claimed = true
       assert.equal(providerCreated, false)
       assert.equal(binding.releaseSha, repository.headSha)
-      return {} as never
+      return { receiptSha256: "c".repeat(64) } as never
     },
     nowMs: () => 1_000,
     createProvider: async () => { providerCreated = true; return provider },
@@ -52,6 +52,7 @@ test("released runtime consumes exact setup evidence before provider preparation
   assert.equal(claimed, true)
   assert.equal(providerCreated, true)
   assert.equal(runtime.provider, provider)
+  assert.equal(runtime.setupReceipt.receiptSha256, "c".repeat(64))
   await runtime.lock.release()
   assert.equal(released, true)
 })

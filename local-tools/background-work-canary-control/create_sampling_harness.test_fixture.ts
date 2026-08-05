@@ -132,7 +132,7 @@ export async function createSamplingHarness(
           flockExecutable: "/trusted/flock",
         },
         provider: heldProvider,
-        lock: fakeLock.lock,
+        lock: fakeLock.lock, setupReceipt: { receiptSha256: "a".repeat(64) } as never,
       },
     },
     cleanup: async () => rm(receiptRoot, { recursive: true, force: true }),
