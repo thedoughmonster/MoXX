@@ -7,7 +7,6 @@ const acceptedMount = /^(?:\/|\/data|\/var\/lib\/postgresql(?:\/data)?)$/u;
 export function reduceMetrics(
   text: string,
   observedAt: string,
-  warningNames: string[],
 ): ProviderMetricSample {
   let cpuTotal = 0;
   let cpuIdle = 0;
@@ -19,8 +18,6 @@ export function reduceMetrics(
   let ioFallback = 0;
   let connections = 0;
   let connectionFound = false;
-  let warningFound = 0;
-  let providerWarning = false;
   const filesystems = new Map<string, { size?: number; available?: number }>();
   for (const line of text.split("\n")) {
     if (!line || line.startsWith("#")) continue;
@@ -73,11 +70,6 @@ export function reduceMetrics(
       else current.available = point.value;
       filesystems.set(key, current);
     }
-    const warningIndex = warningNames.indexOf(point.name);
-    if (warningIndex >= 0) {
-      warningFound |= 1 << Math.min(warningIndex, 30);
-      if (point.value > 0) providerWarning = true;
-    }
   }
   let diskPct = Number.NaN;
   for (const filesystem of filesystems.values()) {
@@ -87,14 +79,10 @@ export function reduceMetrics(
       (1 - filesystem.available / filesystem.size) * 100,
     );
   }
-  const warningMask = warningNames.length > 0 && warningNames.length <= 30
-    ? (1 << warningNames.length) - 1
-    : -1;
-  const warningComplete = warningMask >= 0 && warningFound === warningMask;
   const complete = cpuTotal > 0 && cpuIdle >= 0 && memoryTotal > 0 &&
     memoryAvailable >= 0 && swapTotal >= 0 && swapFree >= 0 &&
     (ioWhole > 0 || ioFallback > 0) && Number.isFinite(diskPct) &&
-    connectionFound && connections >= 0 && warningComplete;
+    connectionFound && connections >= 0;
   return {
     sourceObservedAt: observedAt,
     cpuTotalSeconds: cpuTotal > 0 ? cpuTotal : null,
@@ -108,7 +96,8 @@ export function reduceMetrics(
     ioBusySeconds: ioWhole > 0 ? ioWhole : ioFallback > 0 ? ioFallback : null,
     allocatedDiskPct: Number.isFinite(diskPct) ? diskPct : null,
     providerConnections: connectionFound ? connections : null,
-    providerWarning: warningComplete ? providerWarning : null,
+    // PostgreSQL derives the warning after counter deltas are available.
+    providerWarning: false,
     sourceComplete: complete,
   };
 }

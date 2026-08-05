@@ -13,9 +13,11 @@ returns a redacted configuration check. A side-effect-free `OPTIONS` request
 proves deployment liveness without weakening readiness. The pg_cron dispatcher
 sends the token only while an operator-selected phase is active.
 
-The runtime requires `SUPABASE_DB_URL`, `SUPABASE_URL`, a dedicated
-`MOMI_CRON_HISTORY_METRICS_SECRET_KEY`, and the exact comma-separated
-`MOMI_CRON_HISTORY_PROVIDER_WARNING_METRICS` names proven in that environment.
+The runtime requires `SUPABASE_DB_URL`, `SUPABASE_URL`, and a dedicated
+`MOMI_CRON_HISTORY_METRICS_SECRET_KEY`. PostgreSQL derives provider pressure
+from the accepted CPU, RAM/swap, I/O, and allocated-disk thresholds after
+counter deltas are available; no guessed or separately named warning series is
+accepted.
 
 ## Output
 

@@ -39,7 +39,10 @@ Prometheus series, and submits no raw exposition text. This is the accepted
 exception to normal source/destination network rules: it calls only the
 same-origin Supabase metrics endpoint and owned database routines. The database
 adapter sends only an expiring tick identity and capability token. Missing
-metrics, secrets, mappings, or health evidence fails closed.
+metrics, secrets, or health evidence fails closed. PostgreSQL derives provider
+pressure from the accepted CPU, RAM/swap, I/O, and allocated-disk thresholds
+after counter deltas are available; a separate named provider-warning metric is
+neither required nor guessed.
 
 The cleanup routine uses one transaction, an exact advisory lock, a bounded
 forward primary-key cursor, and a captured high-water mark. It writes and
