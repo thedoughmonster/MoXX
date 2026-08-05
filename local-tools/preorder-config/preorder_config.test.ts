@@ -24,17 +24,26 @@ test("active configuration enforces lower preorder pricing", async () => {
   );
 });
 
-test("one safe item cannot mask another unsafe available item", async () => {
+test("one safe item cannot mask another item without quantity evidence", async () => {
   const mixed = structuredClone(base) as Record<string, unknown>;
   const safe = (mixed.catalog as Array<Record<string, unknown>>)[0];
   const unsafe = structuredClone(safe);
   unsafe.item_id = "20000000-0000-4000-8000-000000000001";
-  unsafe.allergen_status = "unverified";
+  unsafe.maximum_quantity = 0;
   (mixed.catalog as Array<Record<string, unknown>>).push(unsafe);
   await assert.rejects(
     validateConfig(mixed as JsonValue),
-    /safe allergen or price evidence/,
+    /safe price or quantity evidence/,
   );
+});
+
+test("active configuration permits explicit unverified status and shop equality", async () => {
+  const launch = structuredClone(base) as Record<string, unknown>;
+  const item = (launch.catalog as Array<Record<string, unknown>>)[0];
+  item.shop_price_minor = item.preorder_price_minor;
+  item.allergens = [];
+  item.allergen_status = "unverified";
+  await assert.doesNotReject(validateConfig(launch as JsonValue));
 });
 
 test("drafts fail closed without invented facts", async () => {
@@ -87,6 +96,10 @@ test("CLI defaults to dry-run and requires exact target identity", () => {
     "operator",
   ]);
   assert.equal(options.execute, false);
+  assert.throws(() => parseCli([
+    "--env", "dev", "--project-ref", "xtbraqnlskmqxinjxxdn",
+    "--config", "launch.json", "--actor", "operator", "--execute",
+  ]), /--execute requires --release-receipt/);
   assert.throws(() => parseCli(["--env", "dev"]), /Required option missing/);
   assert.throws(() =>
     parseCli([

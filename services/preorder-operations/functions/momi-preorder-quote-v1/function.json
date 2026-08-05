@@ -2,7 +2,7 @@
   "$schema": "../../../../schemas/function-manifest-v1.schema.json",
   "function_key": "momi.preorder.quote.create.v1",
   "contract_version": 1,
-  "purpose": "Create an idempotent authoritative preorder quote from current window, catalog, pricing, capacity, and allergen evidence.",
+  "purpose": "Create an idempotent authoritative preorder quote from current window, catalog, pricing, capacity, and requested allergen avoidance.",
   "owner_service": "preorder-operations",
   "function_type": "action",
   "capability": "decide",

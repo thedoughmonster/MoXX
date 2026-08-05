@@ -26,3 +26,18 @@ test("migration keeps lifecycle idempotent, private, and recoverable", async () 
   assert.doesNotMatch(sql, /request_snapshot jsonb not null/);
   assert.doesNotMatch(sql, /grant .* to (public|anon|authenticated)/i);
 });
+
+test("launch lifecycle revalidates avoidance without blocking general carts", async () => {
+  const sql = await readFile(new URL(
+    "../../../../../supabase/migrations/20260805135432_add_preorder_launch_policy_v3.sql",
+    import.meta.url,
+  ), "utf8");
+  assert.equal(
+    sql.match(/jsonb_array_length\(v_quote\.request_snapshot->'avoided_allergens'\) > 0/g)?.length,
+    2,
+  );
+  assert.equal(
+    sql.match(/item\.allergen_status in \('unverified', 'cross_contact_possible'\)/g)?.length,
+    2,
+  );
+});

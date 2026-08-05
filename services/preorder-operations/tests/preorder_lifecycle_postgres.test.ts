@@ -4,6 +4,7 @@ import { assertAdmission } from "./preorder_postgres/assert_admission.ts";
 import { assertCurrentAuthority } from "./preorder_postgres/assert_authority.ts";
 import { assertContracts } from "./preorder_postgres/assert_contracts.ts";
 import { assertHolds } from "./preorder_postgres/assert_holds.ts";
+import { assertLaunchPolicy } from "./preorder_postgres/assert_launch_policy.ts";
 import { assertOrders } from "./preorder_postgres/assert_orders.ts";
 import { assertPricingEligibility } from "./preorder_postgres/assert_pricing_eligibility.ts";
 import { assertRecovery } from "./preorder_postgres/assert_recovery.ts";
@@ -22,6 +23,7 @@ test("executes preorder state, recovery, security, and contract behavior on Post
   const windowId = await lifecycleFixture.seed(database.sql);
   await assertAdmission(database.sql);
   await assertPricingEligibility(database.sql, windowId);
+  await assertLaunchPolicy(database.sql);
   const hold = await assertHolds(database.sql, windowId);
   await assertCurrentAuthority(database.sql, windowId);
   const order = await assertOrders(database.sql, windowId);

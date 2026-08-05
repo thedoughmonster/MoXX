@@ -28,6 +28,14 @@ export async function assertCurrentAuthority(
     set allergen_status = 'cross_contact_possible'
     where surface_id = ${surfaceId}::uuid and catalog_version = 1
       and item_id = ${itemId}::uuid`;
+  const allergenHold = await lifecycleFixture.hold(sql, allergenQuote.authority, {
+    command_id: crypto.randomUUID(), action: "create",
+    quote_id: allergenQuote.quoteId, expected_quote_version: 1,
+  });
+  assert.equal(
+    (allergenHold.error as Record<string, unknown>)?.code,
+    "allergen_unverified",
+  );
   const allergenOrder = await lifecycleFixture.order(sql, allergenQuote.authority, {
     command_id: crypto.randomUUID(), quote_id: allergenQuote.quoteId,
     expected_quote_version: 1,
