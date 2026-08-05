@@ -1,4 +1,5 @@
 import type { MetricDocument } from "./types.ts";
+import { metricsAuthorization } from "./metrics-authorization.ts";
 
 const maximumMetricsBytes = 2_000_000;
 
@@ -13,7 +14,7 @@ export async function fetchMetrics(): Promise<MetricDocument> {
   const response = await fetch(url, {
     headers: {
       Accept: "text/plain",
-      Authorization: `Basic ${btoa(`username:${secret}`)}`,
+      Authorization: metricsAuthorization(secret),
     },
     signal: AbortSignal.timeout(2000),
   });

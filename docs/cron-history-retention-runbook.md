@@ -11,8 +11,8 @@ For each environment, create a dedicated Supabase Secret API key for metrics
 automation. Store it only as the Edge Function secret
 `MOMI_CRON_HISTORY_METRICS_SECRET_KEY`; never print, commit, or send it. Scrape
 `https://<project-ref>.supabase.co/customer/v1/privileged/metrics` once per
-minute with HTTP Basic authentication, following the
-[Supabase Metrics API guide](https://supabase.com/docs/guides/telemetry/metrics/grafana-self-hosted).
+minute with HTTP Basic authentication as `service_role`, following the
+[Supabase Metrics API guide](https://supabase.com/docs/guides/monitoring-and-debugging/metrics/vendor-agnostic).
 
 Inspect one redacted metric-name inventory. Set
 `MOMI_CRON_HISTORY_PROVIDER_WARNING_METRICS` to the exact comma-separated
