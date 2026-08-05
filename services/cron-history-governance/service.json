@@ -1,0 +1,78 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "cron-history-governance",
+  "purpose": "Govern bounded retention and sanitized diagnostic coverage for pg_cron execution history.",
+  "kind": "core_capability",
+  "service_type": "dataset_owner",
+  "lifecycle_status": "active",
+  "functions": ["momi-cron-history-governor-v1"],
+  "contracts": { "provides": [], "consumes": [] },
+  "database": {
+    "read": ["cron.job_run_details", "momi_cron_history", "pgmq"],
+    "write": ["cron.job_run_details", "momi_cron_history"]
+  },
+  "network": { "outbound_hosts": ["same-origin:supabase-metrics"] },
+  "secrets": [
+    "SUPABASE_DB_URL",
+    "MOMI_CRON_HISTORY_METRICS_SECRET_KEY"
+  ],
+  "configuration": [
+    "MOMI_CRON_HISTORY_PROVIDER_WARNING_METRICS",
+    "SUPABASE_URL"
+  ],
+  "deployment": {
+    "owns": [
+      { "kind": "cron_job", "key": "momi-cron-history-governor-v1" }
+    ],
+    "depends_on": [
+      { "kind": "postgres_extension", "key": "pg_cron" },
+      { "kind": "postgres_extension", "key": "pg_net" },
+      { "kind": "postgres_extension", "key": "pgmq" },
+      { "kind": "vault_secret", "key": "momi_project_url" },
+      { "kind": "vault_secret", "key": "momi_publishable_key" }
+    ]
+  },
+  "runtime_dependencies": [
+    "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
+    "npm:postgres@3.4.3"
+  ],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "momi.cron_history_governance",
+    "dataset_class": "operational",
+    "private_schema": "momi_cron_history",
+    "private_relations": [
+      "momi_cron_history.batch_candidates",
+      "momi_cron_history.batch_receipts",
+      "momi_cron_history.batch_summary_coverage",
+      "momi_cron_history.exception_declarations",
+      "momi_cron_history.exception_ledger",
+      "momi_cron_history.governor_ticks",
+      "momi_cron_history.health_samples",
+      "momi_cron_history.incident_holds",
+      "momi_cron_history.incomplete_gaps",
+      "momi_cron_history.job_terminal_state",
+      "momi_cron_history.minute_summaries",
+      "momi_cron_history.policy_control",
+      "momi_cron_history.scan_state"
+    ],
+    "private_routines": [
+      "momi_cron_history.claim_governor_tick_v1",
+      "momi_cron_history.classify_return_v1",
+      "momi_cron_history.configure_v1",
+      "momi_cron_history.dispatch_governor_tick_v1",
+      "momi_cron_history.health_gate_v1",
+      "momi_cron_history.pause_v1",
+      "momi_cron_history.read_tick_receipt_v1",
+      "momi_cron_history.record_provider_sample_v1",
+      "momi_cron_history.register_exception_v1",
+      "momi_cron_history.register_hold_v1",
+      "momi_cron_history.release_hold_v1",
+      "momi_cron_history.run_batch_v1"
+    ],
+    "public_reads": [],
+    "public_commands": [],
+    "emitted_events": []
+  }
+}
