@@ -6,7 +6,7 @@ export const draftPath = new URL(
 );
 
 export const base = {
-  schema_version: 1,
+  schema_version: 2,
   publication_ref: "70000000-0000-4000-8000-000000000001",
   publication_mode: "active",
   source_evidence: {
@@ -49,6 +49,14 @@ export const base = {
   },
   capacity_policy: { daily_limit: 120, limited_threshold: 24 },
   feature_flags: { checkout: false },
+  price_classes: [{
+    price_class_key: "classic",
+    label: "Classic",
+    currency: "USD",
+    preorder_price_minor: 150,
+    price_floor_minor: 120,
+    doughnut_price_class: true,
+  }],
   catalog: [{
     item_id: "d11f082b-e0ef-4d6e-9537-45111be658b9",
     item_version: 1,
@@ -56,9 +64,15 @@ export const base = {
     name: "Vanilla Joe",
     description: "Espresso creme.",
     currency: "USD",
-    shop_price_minor: 160,
+    shop_price_minor: 250,
+    pricing_strategy: "direct_class",
+    price_class_key: "classic",
     preorder_price_minor: 150,
     price_floor_minor: 120,
+    preorder_enabled: true,
+    eligibility_mode: "always",
+    eligible_from_date: null,
+    eligible_through_date: null,
     media: [],
     allergens: ["milk"],
     allergen_status: "verified",
