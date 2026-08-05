@@ -15,14 +15,12 @@ const fixture = [
   'node_filesystem_size_bytes{device="/dev/nvme0n1",mountpoint="/"} 1000',
   'node_filesystem_avail_bytes{device="/dev/nvme0n1",mountpoint="/"} 300',
   'pg_stat_database_num_backends{datname="postgres"} 6',
-  "supabase_provider_pressure 0",
 ].join("\n");
 
 test("reduces only allowlisted metrics into a complete sanitized sample", () => {
   const sample = reduceMetrics(
     fixture,
     "2026-08-05T00:00:00.000Z",
-    ["supabase_provider_pressure"],
   );
   assert.equal(sample.sourceComplete, true);
   assert.equal(sample.cpuTotalSeconds, 100);
@@ -36,21 +34,19 @@ test("reduces only allowlisted metrics into a complete sanitized sample", () => 
   assert.doesNotMatch(JSON.stringify(sample), /node_|pg_stat|fixture/u);
 });
 
-test("fails closed when the configured provider warning metric is absent", () => {
+test("fails closed when an accepted resource metric is absent", () => {
   const sample = reduceMetrics(
-    fixture,
+    fixture.replace("node_memory_MemAvailable_bytes", "unrecognized_metric"),
     "2026-08-05T00:00:00.000Z",
-    ["different_pressure_metric"],
   );
   assert.equal(sample.sourceComplete, false);
-  assert.equal(sample.providerWarning, null);
+  assert.equal(sample.ramPct, null);
 });
 
 test("accepts the legacy connection metric spelling", () => {
   const sample = reduceMetrics(
     fixture.replace("num_backends", "numbackends"),
     "2026-08-05T00:00:00.000Z",
-    ["supabase_provider_pressure"],
   );
   assert.equal(sample.sourceComplete, true);
   assert.equal(sample.providerConnections, 6);

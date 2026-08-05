@@ -14,12 +14,13 @@ automation. Store it only as the Edge Function secret
 minute with HTTP Basic authentication as `service_role`, following the
 [Supabase Metrics API guide](https://supabase.com/docs/guides/monitoring-and-debugging/metrics/vendor-agnostic).
 
-Inspect one redacted metric-name inventory. Set
-`MOMI_CRON_HISTORY_PROVIDER_WARNING_METRICS` to the exact comma-separated
-provider warning series available in that environment. Do not activate if the
-mapping is empty or any named series is absent. The function also requires the
-governed `SUPABASE_DB_URL` and `SUPABASE_URL`; its health `GET` must return
-`configured` without exposing any value.
+Inspect one redacted metric-name inventory and prove every accepted CPU,
+RAM/swap, I/O, allocated-disk, and connection series in that environment.
+PostgreSQL derives provider pressure only from the accepted resource thresholds
+after counter deltas are available; no separate provider-warning metric is
+configured. Do not activate if any required resource series is absent. The
+function also requires the governed `SUPABASE_DB_URL` and `SUPABASE_URL`; its
+health `GET` must return `configured` without exposing any value.
 
 ## Preflight
 

@@ -18,7 +18,6 @@
     "MOMI_CRON_HISTORY_METRICS_SECRET_KEY"
   ],
   "configuration": [
-    "MOMI_CRON_HISTORY_PROVIDER_WARNING_METRICS",
     "SUPABASE_URL"
   ],
   "deployment": {
@@ -61,6 +60,7 @@
       "momi_cron_history.claim_governor_tick_v1",
       "momi_cron_history.classify_return_v1",
       "momi_cron_history.configure_v1",
+      "momi_cron_history.derive_provider_warning_v1",
       "momi_cron_history.dispatch_governor_tick_v1",
       "momi_cron_history.health_gate_v1",
       "momi_cron_history.pause_v1",
