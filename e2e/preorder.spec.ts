@@ -14,7 +14,7 @@ test('supports fulfillment, allergen, cart, and review interactions', async ({ p
 
   await page.locator('.allergen-chip').filter({ hasText: 'Milk' }).click();
   const strawberryCard = page.getByRole('article').filter({ hasText: 'Strawberry Cloud' });
-  await expect(strawberryCard.getByText('Contains Milk')).toBeVisible();
+  await expect(strawberryCard.getByText('Conflicts with Milk')).toBeVisible();
   await expect(strawberryCard.getByRole('button', { name: 'Add one Strawberry Cloud' }))
     .toBeDisabled();
 
@@ -34,6 +34,10 @@ test('supports fulfillment, allergen, cart, and review interactions', async ({ p
   await page.getByRole('button', { name: 'Review preorder →' }).click();
   await expect(page.getByRole('heading', { name: 'Review your preorder' })).toBeVisible();
   await expect(page.getByText('Fresh authoritative quote required')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Secure checkout' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Secure payment' })).toBeVisible();
+  await expect(page.getByText('Payment will appear after the preorder menu is published.')).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Submit payment' })).toHaveCount(0);
   await expect(page.getByText('Ordering remains disabled')).toBeVisible();
   await page.getByRole('button', { name: '← Edit details' }).click();
   await expect(page.getByLabel('Pickup name')).toHaveValue('Zac Monster');

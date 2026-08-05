@@ -8,6 +8,7 @@ import {
   Radio,
   RadioGroup
 } from 'react-aria-components';
+import { type Allergen } from '../../lib/contracts';
 import { PreorderApiError } from '../../lib/api';
 import { preorderDataMode } from '../../lib/config';
 import { CartSummary } from './CartSummary';
@@ -72,7 +73,7 @@ function LoadedPreorderExperience({
   const [selectedWindow, setSelectedWindow] = useState(
     initialDraft?.selectedWindow ?? 'saturday-august-1'
   );
-  const [selectedAllergens, setSelectedAllergens] = useState<string[]>(
+  const [selectedAllergens, setSelectedAllergens] = useState<Allergen[]>(
     initialDraft?.selectedAllergens ?? []
   );
   const [quantities, setQuantities] = useState<CartQuantities>(
@@ -144,9 +145,12 @@ function LoadedPreorderExperience({
     return (
       <ReviewPreorder
         customerDetails={customerDetails}
+        data={data}
         pickupLabel={pickupLabel}
         products={data.products}
         quantities={quantities}
+        selectedAllergens={selectedAllergens}
+        selectedWindow={effectiveSelectedWindow}
         onEditDetails={() => send({ type: 'EDIT_DETAILS' })}
         onKeepShopping={() => send({ type: 'KEEP_SHOPPING' })}
       />
@@ -284,7 +288,13 @@ function LoadedPreorderExperience({
               <CheckboxGroup
                 className="allergen-grid"
                 value={selectedAllergens}
-                onChange={setSelectedAllergens}
+                onChange={(values) =>
+                  setSelectedAllergens(
+                    data.allergenOptions
+                      .filter((option) => values.includes(option.id))
+                      .map((option) => option.id)
+                  )
+                }
                 aria-label="Allergens to avoid"
               >
                 {data.allergenOptions.map((option) => (
@@ -302,14 +312,13 @@ function LoadedPreorderExperience({
               </CheckboxGroup>
             ) : (
               <p className="cross-contact-note">
-                Exact allergen filtering is unavailable. Products without verified details
-                remain disabled.
+                Exact allergen filtering is unavailable for this menu.
               </p>
             )}
             <p className="cross-contact-note">
               <span aria-hidden="true">i</span>
-              All doughnuts are made in a shared kitchen. We’ll show verified
-              ingredients, but cross-contact is possible.
+              All doughnuts are made in a shared kitchen. Allergen information may
+              be unverified, and avoidance requests remain unavailable without evidence.
             </p>
           </section>
 
@@ -335,6 +344,7 @@ function LoadedPreorderExperience({
                     product={product}
                     quantity={quantities[product.id] ?? 0}
                     blockedBy={blockedBy}
+                    allergenAvoidanceRequested={selectedAllergens.length > 0}
                     onDecrease={() => changeQuantity(product.id, -1)}
                     onIncrease={() => changeQuantity(product.id, 1)}
                   />

@@ -1,8 +1,18 @@
 import { z } from 'zod';
+import { type Allergen } from '../../lib/contracts';
 import { type CartQuantities, type PreorderFixture } from './model';
 
 const DRAFT_KEY = 'moxi.preorder.draft.v1';
 const DRAFT_TTL_MS = 24 * 60 * 60 * 1000;
+const storedAllergen = z.enum([
+  'milk',
+  'egg',
+  'peanuts',
+  'tree_nuts',
+  'wheat',
+  'soy',
+  'sesame'
+]);
 
 export const customerDetailsSchema = z.object({
   fullName: z.string().trim().min(2, 'Enter the pickup name.').max(100),
@@ -26,7 +36,7 @@ const storedDraftSchema = z.object({
   savedAt: z.string().datetime({ offset: true }),
   expiresAt: z.string().datetime({ offset: true }),
   selectedWindow: z.string().max(120),
-  selectedAllergens: z.array(z.string().max(64)).max(32),
+  selectedAllergens: z.array(storedAllergen).max(7),
   quantities: z.record(z.string().max(120), z.number().int().min(0).max(100)),
   customerDetails: storedCustomerDetailsSchema
 });
@@ -68,7 +78,7 @@ export function revalidateRecoveredDraft(
   data: PreorderFixture
 ): {
   selectedWindow: string;
-  selectedAllergens: string[];
+  selectedAllergens: Allergen[];
   quantities: CartQuantities;
   adjusted: boolean;
 } {
@@ -84,7 +94,9 @@ export function revalidateRecoveredDraft(
   for (const product of data.products) {
     const requested = draft.quantities[product.id] ?? 0;
     const conflicts = product.allergens.some((id) => selectedAllergens.includes(id));
-    const maximum = product.allergenStatus === 'verified' && !conflicts
+    const lacksRequestedEvidence =
+      selectedAllergens.length > 0 && product.allergenStatus !== 'verified';
+    const maximum = !lacksRequestedEvidence && !conflicts
       ? product.maximumQuantity
       : 0;
     const accepted = Math.max(0, Math.min(requested, maximum));
@@ -105,7 +117,7 @@ export function revalidateRecoveredDraft(
 
 export function saveRecoverableDraft(input: {
   selectedWindow: string;
-  selectedAllergens: string[];
+  selectedAllergens: Allergen[];
   quantities: CartQuantities;
   customerDetails: CustomerDetails;
 }): void {

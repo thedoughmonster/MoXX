@@ -152,7 +152,8 @@
 
 .review-heading h2,
 .totals-section h2,
-.policy-placeholder h2 {
+.policy-placeholder h2,
+.payment-review > h2 {
   margin: 0;
   font-family: Georgia, "Times New Roman", serif;
   font-size: 1.45rem;
@@ -181,7 +182,8 @@
 
 .review-lines small,
 .review-card address,
-.policy-placeholder p {
+.policy-placeholder p,
+.payment-review > p {
   color: var(--ink-soft);
   font-style: normal;
   line-height: 1.5;
@@ -1391,3 +1393,32 @@ footer a {
     transition-duration: 0.01ms !important;
   }
 }
+
+.payment-review {
+  display: grid;
+  gap: 18px;
+}
+
+.payment-review > p {
+  margin: 0;
+}
+
+.payment-outcome {
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  line-height: 1.5;
+}
+
+.payment-outcome.is-success {
+  background: #e6f1e5;
+  color: #294d2d;
+}
+
+.payment-outcome.is-warning {
+  background: #fff0d4;
+  color: #67420c;
+}
+
+.payment-outcome.is-error {
+  background: #fbe7e7;

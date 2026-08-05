@@ -2,9 +2,17 @@ import { type PreorderFixture } from './model';
 
 export const preorderFixture: PreorderFixture = {
   source: 'fixture',
+  surfaceId: null,
+  locationId: null,
+  versions: null,
   surfaceName: 'Weekend preorder',
   locationName: 'Dough Monster · Long Beach',
   freshnessLabel: 'Menu updated just now',
+  cancellationPolicy: {
+    summary: 'Preview policy only. No order or payment can be created from fixture data.',
+    customerCancellationAllowed: false,
+    customerModificationAllowed: false
+  },
   fulfillmentWindows: [
     {
       id: 'saturday-august-1',
@@ -34,8 +42,8 @@ export const preorderFixture: PreorderFixture = {
   allergenOptions: [
     { id: 'milk', label: 'Milk' },
     { id: 'egg', label: 'Egg' },
-    { id: 'peanut', label: 'Peanuts' },
-    { id: 'tree-nut', label: 'Tree nuts' },
+    { id: 'peanuts', label: 'Peanuts' },
+    { id: 'tree_nuts', label: 'Tree nuts' },
     { id: 'wheat', label: 'Wheat' },
     { id: 'soy', label: 'Soy' },
     { id: 'sesame', label: 'Sesame' }
@@ -43,6 +51,7 @@ export const preorderFixture: PreorderFixture = {
   products: [
     {
       id: 'strawberry-cloud',
+      itemVersion: 1,
       name: 'Strawberry Cloud',
       description: 'Bright berry glaze, vanilla bean, and a soft sugar finish.',
       price: { currency: 'USD', amountMinor: 450 },
@@ -54,6 +63,7 @@ export const preorderFixture: PreorderFixture = {
     },
     {
       id: 'dark-chocolate-sea-salt',
+      itemVersion: 1,
       name: 'Dark Chocolate + Sea Salt',
       description: 'Deep cocoa glaze with flaky salt and a tender ring.',
       price: { currency: 'USD', amountMinor: 475 },
@@ -64,6 +74,7 @@ export const preorderFixture: PreorderFixture = {
     },
     {
       id: 'lemon-sunbeam',
+      itemVersion: 1,
       name: 'Lemon Sunbeam',
       description: 'Lemon curd, citrus sugar, and a little California sunshine.',
       price: { currency: 'USD', amountMinor: 500 },
@@ -75,13 +86,14 @@ export const preorderFixture: PreorderFixture = {
     },
     {
       id: 'vanilla-mystery',
+      itemVersion: 1,
       name: 'Vanilla Bean Twist',
       description: 'A delicate twist awaiting its final allergen verification.',
       price: { currency: 'USD', amountMinor: 425 },
       art: 'vanilla',
       allergens: [],
       allergenStatus: 'unverified',
-      maximumQuantity: 0
+      maximumQuantity: 8
     }
   ]
 };

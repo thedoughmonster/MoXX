@@ -1,3 +1,5 @@
+import { type Allergen, type VersionSet } from '../../lib/contracts';
+
 export type Money = {
   currency: string;
   amountMinor: number;
@@ -14,23 +16,32 @@ export type FulfillmentWindow = {
 
 export type Product = {
   id: string;
+  itemVersion: number;
   name: string;
   description: string;
   price: Money;
   art: 'berry' | 'chocolate' | 'citrus' | 'vanilla';
   badge?: string;
-  allergens: string[];
+  allergens: Allergen[];
   allergenStatus: 'verified' | 'unverified';
   maximumQuantity: number;
 };
 
 export type PreorderFixture = {
   source: 'fixture' | 'live';
+  surfaceId: string | null;
+  locationId: string | null;
+  versions: VersionSet | null;
   surfaceName: string;
   locationName: string;
   freshnessLabel: string;
+  cancellationPolicy: {
+    summary: string;
+    customerCancellationAllowed: boolean;
+    customerModificationAllowed: boolean;
+  };
   fulfillmentWindows: FulfillmentWindow[];
-  allergenOptions: Array<{ id: string; label: string }>;
+  allergenOptions: Array<{ id: Allergen; label: string }>;
   products: Product[];
 };
 

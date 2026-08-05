@@ -1,6 +1,8 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, test } from 'vitest';
 import publicEnvironmentExample from '../../../.env.example?raw';
+import previewWorkflow from '../../../.github/workflows/cloudflare-preview.yml?raw';
+import productionWorkflow from '../../../.github/workflows/cloudflare-production.yml?raw';
 import previewHeaders from '../../../public/_headers?raw';
 import appSource from '../../App.tsx?raw';
 import { SquarePaymentPanel } from './SquarePaymentPanel';
@@ -31,7 +33,7 @@ describe('Square payment UI activation boundary', () => {
       <SquareWebPaymentsBoundary environment={{}}>
         <SquarePaymentPanel activation={{
           status: 'ready',
-          attemptKey: 'attempt-public-reference',
+          initiationKey: 'initiation-public-reference',
           verificationDetails: {
             amount: '12.34',
             currencyCode: 'USD',
@@ -48,7 +50,7 @@ describe('Square payment UI activation boundary', () => {
     expect(markup).not.toContain('Submit payment');
   });
 
-  test('fails closed when the owner does not supply an attempt key', () => {
+  test('fails closed when the owner does not supply an initiation key', () => {
     const markup = renderToStaticMarkup(
       <SquareWebPaymentsBoundary environment={{
         VITE_SQUARE_SANDBOX_APPLICATION_ID: 'sandbox-sq0idb-public-example',
@@ -56,7 +58,7 @@ describe('Square payment UI activation boundary', () => {
       }}>
         <SquarePaymentPanel activation={{
           status: 'ready',
-          attemptKey: ' ',
+          initiationKey: ' ',
           verificationDetails: {
             amount: '12.34',
             currencyCode: 'USD',
@@ -97,7 +99,7 @@ describe('Square payment UI activation boundary', () => {
       }}>
         <SquarePaymentPanel activation={{
           status: 'ready',
-          attemptKey: 'attempt-public-reference',
+          initiationKey: 'initiation-public-reference',
           verificationDetails: {
             amount: '12.34',
             currencyCode: 'USD',
@@ -121,17 +123,35 @@ describe('Square payment UI activation boundary', () => {
     expect(appSource).not.toContain('loadSquareSandboxSdk');
   });
 
-  test('documents only public browser identifiers', () => {
-    expect(publicEnvironmentExample).toContain('VITE_SQUARE_SANDBOX_APPLICATION_ID=');
-    expect(publicEnvironmentExample).toContain('VITE_SQUARE_SANDBOX_LOCATION_ID=');
+  test('documents only exact public browser identifiers', () => {
+    expect(publicEnvironmentExample).toContain(
+      'VITE_SQUARE_SANDBOX_APPLICATION_ID=sandbox-sq0idb-5fqqJ2x3hNzSvwaLcIOq9A'
+    );
+    expect(publicEnvironmentExample).toContain(
+      'VITE_SQUARE_SANDBOX_LOCATION_ID=LN73GYJ0P4PY1'
+    );
     expect(publicEnvironmentExample).not.toMatch(/ACCESS_TOKEN|SIGNATURE_KEY|SECRET/);
+  });
+
+  test('binds live v3 reads and public Sandbox identifiers to preview only', () => {
+    expect(previewWorkflow).toContain('VITE_PREORDER_DATA_MODE: live');
+    expect(previewWorkflow).toContain(
+      'VITE_SQUARE_SANDBOX_APPLICATION_ID: sandbox-sq0idb-5fqqJ2x3hNzSvwaLcIOq9A'
+    );
+    expect(previewWorkflow).toContain(
+      'VITE_SQUARE_SANDBOX_LOCATION_ID: LN73GYJ0P4PY1'
+    );
+    expect(productionWorkflow).not.toContain('VITE_SQUARE_SANDBOX_');
   });
 });
 
 describe('Square Sandbox preview CSP', () => {
-  test('matches the reviewed provider allowlist without production Square hosts', () => {
+  test('matches the reviewed API/provider allowlist without production Square hosts', () => {
     expect(previewHeaders).toContain(
       `Content-Security-Policy: ${squareSandboxCspContent()}`
+    );
+    expect(previewHeaders).toContain(
+      "connect-src 'self' https://xtbraqnlskmqxinjxxdn.supabase.co"
     );
     expect(previewHeaders).not.toContain('https://web.squarecdn.com');
     expect(previewHeaders).not.toContain('https://pci-connect.squareup.com');

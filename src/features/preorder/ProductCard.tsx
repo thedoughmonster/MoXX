@@ -5,6 +5,7 @@ type ProductCardProps = {
   product: Product;
   quantity: number;
   blockedBy: string[];
+  allergenAvoidanceRequested: boolean;
   onDecrease: () => void;
   onIncrease: () => void;
 };
@@ -13,19 +14,23 @@ export function ProductCard({
   product,
   quantity,
   blockedBy,
+  allergenAvoidanceRequested,
   onDecrease,
   onIncrease
 }: ProductCardProps) {
   const unverified = product.allergenStatus === 'unverified';
   const soldOut = product.maximumQuantity === 0;
-  const unavailable = unverified || soldOut || blockedBy.length > 0;
-  const reason = unverified
-    ? 'Allergen details are still being verified'
+  const lacksRequestedEvidence = unverified && allergenAvoidanceRequested;
+  const unavailable = lacksRequestedEvidence || soldOut || blockedBy.length > 0;
+  const reason = lacksRequestedEvidence
+    ? 'Allergen avoidance is unavailable without verified evidence'
     : soldOut
       ? 'Not available for this pickup window'
-    : blockedBy.length > 0
-      ? 'Contains ' + blockedBy.join(', ')
-      : null;
+      : blockedBy.length > 0
+        ? 'Conflicts with ' + blockedBy.join(', ')
+        : unverified
+          ? 'Allergen information is unverified'
+          : null;
 
   return (
     <article className={'product-card' + (unavailable ? ' is-unavailable' : '')}>

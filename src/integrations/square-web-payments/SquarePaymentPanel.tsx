@@ -20,11 +20,11 @@ import type {
 export type SquarePaymentActivation =
   | Readonly<{
       status: 'inactive';
-      reason: 'configuration_unavailable' | 'payment_attempt_unavailable';
+      reason: 'configuration_unavailable' | 'order_unavailable';
     }>
   | Readonly<{
       status: 'ready';
-      attemptKey: string;
+      initiationKey: string;
       verificationDetails: SquareChargeVerificationDetails;
       handoff: SourceTokenHandoff;
     }>;
@@ -56,7 +56,7 @@ export function SquarePaymentPanel({
         <p role="status">
           {activation.reason === 'configuration_unavailable'
             ? 'Payment will appear after the preorder menu is published.'
-            : 'Payment will appear after your order is ready.'}
+            : 'Secure payment will appear after your order is created.'}
         </p>
       </section>
     );
@@ -71,7 +71,7 @@ export function SquarePaymentPanel({
     );
   }
 
-  if (activation.attemptKey.trim().length === 0) {
+  if (activation.initiationKey.trim().length === 0) {
     return (
       <section className="square-payment-panel" aria-labelledby="square-payment-heading">
         <h2 id="square-payment-heading">Secure payment</h2>
@@ -82,7 +82,7 @@ export function SquarePaymentPanel({
 
   return (
     <ActiveSquarePaymentPanel
-      key={activation.attemptKey}
+      key={activation.initiationKey}
       activation={activation}
       config={config.config}
       createHost={createHost}

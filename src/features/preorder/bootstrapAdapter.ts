@@ -14,14 +14,12 @@ function formatWindowTime(startsAt: string, endsAt: string, timezone: string): s
 
 export function adaptBootstrap(envelope: PreorderBootstrapEnvelope): PreorderFixture {
   const { data } = envelope;
-  const allergenIds = new Set<string>();
+  const allergenIds = new Set<Product['allergens'][number]>();
   const products = data.catalog.map((item, index): Product => {
-    const allergens = item.allergens ?? [];
-    allergens.forEach((allergen) => allergenIds.add(allergen));
-    const missingDeclaredAllergens = item.allergen_status !== 'verified'
-      && item.allergens === undefined;
+    item.allergens.forEach((allergen) => allergenIds.add(allergen));
     return {
       id: item.item_id,
+      itemVersion: item.item_version,
       name: item.name,
       description: item.description,
       price: {
@@ -30,16 +28,17 @@ export function adaptBootstrap(envelope: PreorderBootstrapEnvelope): PreorderFix
       },
       art: artStyles[index % artStyles.length] ?? 'vanilla',
       badge: item.seasonal_eligibility === 'eligible' ? undefined : 'Not in season',
-      allergens,
-      allergenStatus: item.allergen_status === 'unverified' || missingDeclaredAllergens
-        ? 'unverified'
-        : 'verified',
+      allergens: item.allergens,
+      allergenStatus: item.allergen_status === 'verified' ? 'verified' : 'unverified',
       maximumQuantity: item.available ? item.maximum_quantity : 0
     };
   });
 
   return {
     source: 'live',
+    surfaceId: data.surface_id,
+    locationId: data.location_id,
+    versions: data.versions,
     surfaceName: 'Weekend preorder',
     locationName: data.location_name,
     freshnessLabel: `Updated ${new Intl.DateTimeFormat('en-US', {
@@ -47,6 +46,13 @@ export function adaptBootstrap(envelope: PreorderBootstrapEnvelope): PreorderFix
       minute: '2-digit',
       timeZone: data.timezone
     }).format(new Date(data.fresh_at))}`,
+    cancellationPolicy: {
+      summary: data.cancellation_policy.summary,
+      customerCancellationAllowed:
+        data.cancellation_policy.customer_cancellation_allowed,
+      customerModificationAllowed:
+        data.cancellation_policy.customer_modification_allowed
+    },
     fulfillmentWindows: data.fulfillment_windows.map((window, index) => ({
       id: window.window_id,
       eyebrow: index === 0 ? 'Soonest' : 'Plan ahead',
@@ -64,7 +70,9 @@ export function adaptBootstrap(envelope: PreorderBootstrapEnvelope): PreorderFix
     })),
     allergenOptions: [...allergenIds].sort().map((id) => ({
       id,
-      label: id.split('-').map((part) => part[0]?.toUpperCase() + part.slice(1)).join(' ')
+      label: id.split('_').map((part) =>
+        part[0]?.toUpperCase() + part.slice(1)
+      ).join(' ')
     })),
     products
   };

@@ -22,9 +22,11 @@ provider errors, or returns a token in its result.
 
 `SquareWebPaymentsBoundary` validates the two public Sandbox identifiers once
 at the app root. `SquarePaymentPanel` remains inactive until its caller supplies
-an owner-authoritative payment-attempt key, amount, currency, and handoff
-callback. A changed attempt key remounts the one-use card session rather than
-reusing a consumed or indeterminate tokenization session.
+an owner-authoritative payment-initiation command key, amount, currency, and
+handoff callback. A changed initiation key remounts the one-use card session
+rather than reusing a consumed or indeterminate tokenization session. The
+backend creates the durable payment attempt atomically with that direct token
+handoff; the browser does not manufacture an attempt in advance.
 Inactive or missing configuration never loads Square's SDK or renders a submit
 action.
 
@@ -33,9 +35,10 @@ action.
 The app root now provides the validated public configuration, and the governed
 development preview has a host-scoped Square Sandbox CSP contract in
 `public/_headers`. The preorder UI owner must place `SquarePaymentPanel` only
-after an authoritative order/payment attempt exists and hand its token directly
-to the accepted Logic initiation route. Payment execution remains disabled until
-the backend's active preorder configuration and durable payment-attempt gates
+after an authoritative unpaid order exists and hand its token directly to the
+accepted Logic initiation route. The payment attempt is created within that
+one-use request. Payment execution remains disabled until the backend's active
+preorder configuration and durable order gates
 are satisfied.
 
 The SDK URL and browser flow follow Square's Web Payments SDK documentation:
