@@ -64,6 +64,14 @@ the same digest is idempotent. Rollback copies previously accepted business
 values under a fresh `publication_ref`, creating a new monotonic version while
 preserving both receipts.
 
+Configuration schema version two normalizes authoring policy into immutable,
+publication-bound price-class and item-policy relations. Each item declares a
+direct class or the uniquely highest doughnut class, an administrative
+`preorder_enabled` override, and one explicit eligibility mode with its exact
+date shape. The published catalog stores the resolved class and quote-time
+eligibility is evaluated against the requested pickup date. Version-one
+publication receipts remain replayable and rollback-compatible.
+
 ## Quote authority
 
 The quote route accepts no customer identity or payment data. The database
