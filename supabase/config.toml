@@ -108,13 +108,10 @@ verify_jwt = false
 
 [functions.momi-model-execution-gateway-v1]
 verify_jwt = false
-
 [functions.momi-model-execution-webhook-v1]
 verify_jwt = false
-
 [functions.momi-model-execution-completion-worker-v1]
 verify_jwt = false
-
 [functions.momi-preorder-bootstrap-v1]
 verify_jwt = false
 
@@ -137,4 +134,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.momi-preorder-square-webhook-v1]
+verify_jwt = false
+
+[functions.momi-cron-history-governor-v1]
 verify_jwt = false
