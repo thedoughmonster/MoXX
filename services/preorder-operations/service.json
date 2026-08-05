@@ -41,8 +41,7 @@
   "network": {
     "outbound_hosts": []
   },
-  "secrets": ["SUPABASE_DB_URL"],
-  "configuration": ["SQUARE_SANDBOX_LOCATION_ID"],
+  "secrets": ["SUPABASE_DB_URL"], "configuration": ["SQUARE_SANDBOX_LOCATION_ID"],
   "deployment": {
     "owns": [],
     "depends_on": []
@@ -63,6 +62,7 @@
       "momi_preorder.checkout_holds",
       "momi_preorder.commands",
       "momi_preorder.configuration_item_policies",
+      "momi_preorder.configuration_pickup_schedule_days",
       "momi_preorder.configuration_price_classes",
       "momi_preorder.configuration_publications",
       "momi_preorder.fulfillment_windows",

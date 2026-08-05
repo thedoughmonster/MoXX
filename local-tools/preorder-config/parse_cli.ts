@@ -7,7 +7,8 @@ const projectRefs = {
 
 export function parseCli(args: string[]): CliOptions {
   const values: Record<string, string> = {};
-  const valued = new Set(["--env", "--project-ref", "--config", "--actor"]);
+  const required = new Set(["--env", "--project-ref", "--config", "--actor"]);
+  const valued = new Set([...required, "--release-receipt"]);
   let execute = false;
   for (let index = 0; index < args.length; index += 1) {
     const token = args[index];
@@ -31,9 +32,9 @@ export function parseCli(args: string[]): CliOptions {
     values[token] = value;
     index += 1;
   }
-  for (const required of valued) {
-    if (!values[required]) {
-      throw new Error(`Required option missing: ${required}`);
+  for (const option of required) {
+    if (!values[option]) {
+      throw new Error(`Required option missing: ${option}`);
     }
   }
   const environment = values["--env"];
@@ -43,11 +44,15 @@ export function parseCli(args: string[]): CliOptions {
   if (values["--project-ref"] !== projectRefs[environment]) {
     throw new Error("--project-ref does not match the selected environment");
   }
+  if (execute && !values["--release-receipt"]) {
+    throw new Error("--execute requires --release-receipt");
+  }
   return {
     environment,
     projectRef: values["--project-ref"],
     configPath: values["--config"],
     actorRef: values["--actor"],
+    releaseReceiptPath: values["--release-receipt"],
     execute,
   };
 }

@@ -22,3 +22,13 @@ test("migration pins quote authority and business boundaries", async () => {
   assert.match(sql, /request_snapshot is distinct from p_request/);
   assert.doesNotMatch(sql, /grant .* to (public|anon|authenticated)/i);
 });
+
+test("launch policy admits general unverified carts but not avoidance", async () => {
+  const sql = await readFile(new URL(
+    "../../../../../supabase/migrations/20260805135432_add_preorder_launch_policy_v3.sql",
+    import.meta.url,
+  ), "utf8");
+  assert.match(sql, /jsonb_array_length\(p_request->'avoided_allergens'\) > 0/);
+  assert.match(sql, /v_item\.allergen_status in \(\s*'unverified', 'cross_contact_possible'\)/);
+  assert.match(sql, /v_final_unit > v_item\.shop_price_minor/);
+});

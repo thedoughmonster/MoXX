@@ -6,7 +6,7 @@ export const draftPath = new URL(
 );
 
 export const base = {
-  schema_version: 2,
+  schema_version: 3,
   publication_ref: "70000000-0000-4000-8000-000000000001",
   publication_mode: "active",
   source_evidence: {
@@ -31,21 +31,16 @@ export const base = {
   },
   pickup_policy: {
     horizon_days: 14,
-    daily_start_local: "08:00",
-    daily_end_local: "10:00",
-    cutoff_hours: 12,
+    schedule_mappings: [{ schedule_key: "weekday", iso_weekdays: [1, 2, 3, 4, 5],
+      starts_local: "07:00", ends_local: "14:00" },
+    { schedule_key: "weekend", iso_weekdays: [6, 7],
+      starts_local: "08:00", ends_local: "14:00" }],
+    ordering_cutoff: { mode: "previous_day_local_time", local_time: "17:00" },
     closures: [],
   },
   savings_policy: {
-    advance_tiers: [{ minimum_days: 2, multiplier_bps: 100 }, {
-      minimum_days: 5,
-      multiplier_bps: 200,
-    }, { minimum_days: 10, multiplier_bps: 300 }],
-    quantity_levels: [{
-      minimum_quantity: 6,
-      discount_bps: 100,
-      label: "Level 1",
-    }],
+    advance_tiers: [],
+    quantity_levels: [],
   },
   capacity_policy: { daily_limit: 120, limited_threshold: 24 },
   feature_flags: { checkout: false },
@@ -54,7 +49,7 @@ export const base = {
     label: "Classic",
     currency: "USD",
     preorder_price_minor: 150,
-    price_floor_minor: 120,
+    price_floor_minor: 150,
     doughnut_price_class: true,
   }],
   catalog: [{
@@ -68,14 +63,14 @@ export const base = {
     pricing_strategy: "direct_class",
     price_class_key: "classic",
     preorder_price_minor: 150,
-    price_floor_minor: 120,
+    price_floor_minor: 150,
     preorder_enabled: true,
     eligibility_mode: "always",
     eligible_from_date: null,
     eligible_through_date: null,
     media: [],
     allergens: ["milk"],
-    allergen_status: "verified",
+    allergen_status: "unverified",
     seasonal_eligibility: "eligible",
     available: true,
     maximum_quantity: 24,

@@ -1,0 +1,61 @@
+export const launchSurfaceId = "71000000-0000-4000-8000-000000000001";
+export const launchItemId = "71000000-0000-4000-8000-000000000002";
+export const launchBigAppleId = "71000000-0000-4000-8000-000000000003";
+
+export const launchConfig = {
+  schema_version: 3,
+  publication_ref: "71000000-0000-4000-8000-000000000004",
+  publication_mode: "active",
+  surface: {
+    surface_id: launchSurfaceId, surface_key: "launch-test",
+    location_id: "71000000-0000-4000-8000-000000000005",
+    location_name: "Dough Monster Test", timezone: "America/New_York",
+    enabled: true, freshness_seconds: 300,
+    cancellation_policy: { summary: "Contact the shop by 5 PM the prior day.",
+      customer_cancellation_allowed: false,
+      customer_modification_allowed: false },
+  },
+  pickup_policy: {
+    horizon_days: 14,
+    schedule_mappings: [
+      { schedule_key: "weekday", iso_weekdays: [1, 2, 3, 4, 5],
+        starts_local: "07:00", ends_local: "14:00" },
+      { schedule_key: "weekend", iso_weekdays: [6, 7],
+        starts_local: "08:00", ends_local: "14:00" },
+    ],
+    ordering_cutoff: { mode: "previous_day_local_time", local_time: "17:00" },
+    closures: [],
+  },
+  savings_policy: { advance_tiers: [], quantity_levels: [] },
+  capacity_policy: { daily_limit: 75, limited_threshold: 27 },
+  feature_flags: { checkout: true, customer_cancellation: false,
+    customer_modification: false },
+  price_classes: [
+    { price_class_key: "classic", label: "Classic", currency: "USD",
+      preorder_price_minor: 150, price_floor_minor: 150,
+      doughnut_price_class: true },
+    { price_class_key: "big_apple_ugly", label: "Big Apple Ugly",
+      currency: "USD", preorder_price_minor: 350, price_floor_minor: 350,
+      doughnut_price_class: false },
+  ],
+  catalog: [
+    { item_id: launchItemId, item_version: 1, category: "Classic",
+      name: "Unverified Classic", description: "", currency: "USD",
+      shop_price_minor: 250, preorder_price_minor: 150,
+      price_floor_minor: 150, pricing_strategy: "direct_class",
+      price_class_key: "classic", preorder_enabled: true,
+      eligibility_mode: "always", eligible_from_date: null,
+      eligible_through_date: null, media: [], allergens: [],
+      allergen_status: "unverified", seasonal_eligibility: "eligible",
+      available: true, maximum_quantity: 75, option_groups: [], disclosures: [] },
+    { item_id: launchBigAppleId, item_version: 1, category: "Pastries",
+      name: "Big Apple Ugly", description: "", currency: "USD",
+      shop_price_minor: 350, preorder_price_minor: 350,
+      price_floor_minor: 350, pricing_strategy: "direct_class",
+      price_class_key: "big_apple_ugly", preorder_enabled: true,
+      eligibility_mode: "always", eligible_from_date: null,
+      eligible_through_date: null, media: [], allergens: [],
+      allergen_status: "unverified", seasonal_eligibility: "eligible",
+      available: true, maximum_quantity: 75, option_groups: [], disclosures: [] },
+  ],
+};

@@ -68,8 +68,10 @@ and route versions.
 - One durable MoMi order intent exists before any paid provider mutation.
 - Provider timeout or missing response is pending or indeterminate, never
   success and never permission for a blind paid retry.
-- Quote expiry, policy drift, closure, capacity loss, and allergen uncertainty
-  fail closed with typed customer-safe outcomes.
+- Quote expiry, policy drift, closure, and capacity loss fail closed with typed
+  customer-safe outcomes. Allergen uncertainty fails closed when avoidance is
+  requested; a general order may retain explicitly unverified evidence without
+  making an allergen-safe or avoidance claim.
 - Refresh, back navigation, reconnect, callback replay, and webhook duplication
   cannot duplicate an order or charge.
 - Realtime is advisory. Durable read and reconciliation contracts remain the

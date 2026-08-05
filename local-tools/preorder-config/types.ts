@@ -26,11 +26,24 @@ export type PriceClass = {
 };
 
 export type PreorderConfiguration = {
-  schema_version: 1 | 2;
+  schema_version: 1 | 2 | 3;
   publication_ref: string;
-  publication_mode: "draft" | "active";
+  publication_mode: "draft" | "active" | "inactive";
   surface: { surface_key: string; enabled: boolean };
-  pickup_policy: { horizon_days: number; cutoff_hours: number | null };
+  pickup_policy: {
+    horizon_days: number;
+    cutoff_hours?: number | null;
+    schedule_mappings?: Array<{
+      schedule_key: string;
+      iso_weekdays: number[];
+      starts_local: string;
+      ends_local: string;
+    }>;
+    ordering_cutoff?: {
+      mode: "previous_day_local_time";
+      local_time: string;
+    };
+  };
   savings_policy: {
     advance_tiers: Array<
       { minimum_days: number; multiplier_bps: number | null }
@@ -53,5 +66,48 @@ export type CliOptions = {
   projectRef: string;
   configPath: string;
   actorRef: string;
+  releaseReceiptPath?: string;
   execute: boolean;
+};
+
+export type ReleaseIdentity = {
+  headSha: string;
+  headTree: string;
+  receiptPath: string;
+};
+
+export type PublicationReadback = {
+  publication_ref: string;
+  config_digest: string;
+  publication_mode: "draft" | "active" | "inactive";
+  resulting_version: number | null;
+  surface_enabled: boolean | null;
+  active_publication_matches: boolean;
+  price_class_count: number;
+  item_policy_count: number;
+  schedule_day_count: number;
+  catalog_item_count: number;
+  window_count: number;
+  contract_valid: boolean;
+};
+
+export type PublicationExecution = {
+  receipt: Record<string, unknown>;
+  readback: PublicationReadback;
+};
+
+export type OperatorReceipt = {
+  schema_version: 1;
+  run_id: string;
+  environment: "dev" | "prod";
+  project_ref: string;
+  publication_ref: string;
+  publication_mode: "draft" | "active" | "inactive";
+  config_sha256: string;
+  release_head_sha: string;
+  release_head_tree: string;
+  started_at: string;
+  completed_at?: string;
+  status: "started" | "succeeded" | "failed";
+  readback?: PublicationReadback;
 };

@@ -1,7 +1,7 @@
 import type { PreorderConfiguration } from "./types.ts";
 
 export function validatePricingPolicy(config: PreorderConfiguration): void {
-  if (config.schema_version !== 2) return;
+  if (config.schema_version < 2) return;
   const classes = config.price_classes ?? [];
   const keys = classes.map((priceClass) => priceClass.price_class_key);
   if (new Set(keys).size !== keys.length) {

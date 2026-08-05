@@ -61,7 +61,7 @@ export async function assertPricingEligibility(
     sql`select momi_preorder.publish_configuration_v1(
       ${sql.json(invalid)}::jsonb, ${"b".repeat(64)}, 'postgres-test'
     )`,
-    /invalid version two preorder authoring policy/,
+    /invalid versioned preorder authoring policy/,
   );
 
   const [window] = await sql<{ fulfillment_date: string }[]>`

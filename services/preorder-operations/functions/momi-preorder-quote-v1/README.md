@@ -3,8 +3,9 @@
 ## ELI5
 
 The browser asks, “What would this exact box cost for this pickup date?” This
-function asks the preorder owner, which checks the current menu, discounts,
-allergens, and remaining capacity before returning one short-lived receipt.
+function asks the preorder owner, which checks the current menu, configured
+pricing, requested allergen avoidance, and remaining capacity before returning
+one short-lived receipt.
 
 ## Trigger And Input
 
@@ -21,7 +22,7 @@ authority. Customer-safe 409/422/429 errors direct refresh or recovery.
 
 ## Side Effects
 
-The owner refreshes the fourteen-day window horizon and persists an accepted
+The owner refreshes the versioned fourteen-day window horizon and persists an accepted
 quote once per command ID. Quotes do not reserve capacity.
 
 ## Failure Handling
@@ -33,5 +34,7 @@ typed customer-safe response and is never inferred.
 
 `SUPABASE_DB_URL` is the only secret. Unit tests cover request parsing,
 idempotent envelopes, typed failures, preflight, and rate limiting. Migration
-tests pin private storage, version checks, savings boundaries, price floors,
-capacity, and allergen enforcement.
+tests pin private storage, version checks, configured adjustment boundaries,
+price floors, capacity, and fail-closed allergen-avoidance enforcement. General
+carts with an empty avoidance list may retain explicitly unverified data and
+make no safety claim.

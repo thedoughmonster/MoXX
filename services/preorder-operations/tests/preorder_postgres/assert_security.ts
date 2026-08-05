@@ -22,6 +22,7 @@ export async function assertSecurity(
     authenticated_table: boolean;
     anon_policy_table: boolean;
     service_policy_table: boolean;
+    service_schedule_table: boolean;
     policy_rls_count: number;
     rls_count: number;
     service_entry: boolean;
@@ -39,9 +40,13 @@ export async function assertSecurity(
       has_table_privilege('service_role',
         'momi_preorder.configuration_price_classes', 'select')
         as service_policy_table,
+      has_table_privilege('service_role',
+        'momi_preorder.configuration_pickup_schedule_days', 'select')
+        as service_schedule_table,
       (select count(*)::integer from pg_class c join pg_namespace n
         on n.oid = c.relnamespace where n.nspname = 'momi_preorder'
         and c.relname in ('configuration_item_policies',
+          'configuration_pickup_schedule_days',
           'configuration_price_classes') and c.relrowsecurity)
         as policy_rls_count,
       (select count(*)::integer from pg_class c join pg_namespace n
@@ -64,7 +69,8 @@ export async function assertSecurity(
     authenticated_table: false,
     anon_policy_table: false,
     service_policy_table: false,
-    policy_rls_count: 2,
+    service_schedule_table: false,
+    policy_rls_count: 3,
     rls_count: 4,
     service_entry: true,
     anon_entry: false,

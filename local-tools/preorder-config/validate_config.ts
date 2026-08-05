@@ -7,12 +7,14 @@ import { validatePricingPolicy } from "./validate_pricing_policy.ts";
 
 const schemaV1 = new URL("../../services/preorder-operations/config/preorder-configuration-v1.schema.json", import.meta.url);
 const schemaV2 = new URL("../../services/preorder-operations/config/preorder-configuration-v2.schema.json", import.meta.url);
+const schemaV3 = new URL("../../services/preorder-operations/config/preorder-configuration-v3.schema.json", import.meta.url);
 
 export async function validateConfig(
   value: JsonValue,
 ): Promise<PreorderConfiguration> {
   const version = (value as { schema_version?: unknown }).schema_version;
-  const schema = JSON.parse(await readFile(version === 2 ? schemaV2 : schemaV1, "utf8")) as object;
+  const schemaUrl = version === 3 ? schemaV3 : version === 2 ? schemaV2 : schemaV1;
+  const schema = JSON.parse(await readFile(schemaUrl, "utf8")) as object;
   const ajv = new Ajv2020({
     allErrors: true,
     strict: false,
@@ -35,9 +37,20 @@ export async function validateConfig(
     throw new Error("Catalog item IDs must be unique");
   }
   validatePricingPolicy(config);
-  if (config.publication_mode === "draft") {
+  if (config.schema_version === 3) {
+    const mappings = config.pickup_policy.schedule_mappings ?? [];
+    const weekdays = mappings.flatMap((mapping) => mapping.iso_weekdays);
+    if (
+      weekdays.length !== 7 || new Set(weekdays).size !== 7 ||
+      !weekdays.every((day) => day >= 1 && day <= 7) ||
+      mappings.some((mapping) => mapping.starts_local >= mapping.ends_local)
+    ) {
+      throw new Error("Pickup schedule must cover each ISO weekday exactly once");
+    }
+  }
+  if (config.publication_mode !== "active") {
     if (config.surface.enabled) {
-      throw new Error("Draft configuration cannot enable a surface");
+      throw new Error("Non-active configuration cannot enable a surface");
     }
     return config;
   }
@@ -45,7 +58,8 @@ export async function validateConfig(
     throw new Error("Active configuration must enable its surface");
   }
   if (
-    config.pickup_policy.cutoff_hours === null ||
+    (config.schema_version !== 3 &&
+      config.pickup_policy.cutoff_hours === null) ||
     config.capacity_policy.daily_limit === null ||
     config.capacity_policy.limited_threshold === null
   ) {
@@ -57,7 +71,12 @@ export async function validateConfig(
   ) {
     throw new Error("Limited threshold cannot exceed daily capacity");
   }
-  if (
+  if (config.schema_version === 3) {
+    if (
+      config.savings_policy.advance_tiers.length !== 0 ||
+      config.savings_policy.quantity_levels.length !== 0
+    ) throw new Error("Launch savings must remain disabled");
+  } else if (
     config.savings_policy.advance_tiers.map((tier) => tier.minimum_days).join(
         ",",
       ) !== "2,5,10" ||
@@ -69,9 +88,7 @@ export async function validateConfig(
       level.discount_bps === null
     )
   ) {
-    throw new Error(
-      "Active configuration requires 2/5/10-day and quantity savings",
-    );
+    throw new Error("Active legacy configuration requires savings tiers");
   }
   const advance = config.savings_policy.advance_tiers.map((tier) =>
     tier.multiplier_bps as number
@@ -99,16 +116,15 @@ export async function validateConfig(
   }
   for (const item of available) {
     if (
-      (config.schema_version === 2 && !item.preorder_enabled) ||
-      item.allergen_status === "unverified" ||
+      (config.schema_version >= 2 && !item.preorder_enabled) ||
       item.preorder_price_minor === null ||
       item.price_floor_minor === null ||
       item.price_floor_minor > item.preorder_price_minor ||
-      item.preorder_price_minor >= item.shop_price_minor ||
+      item.preorder_price_minor > item.shop_price_minor ||
       item.maximum_quantity < 1
     ) {
       throw new Error(
-        `Available item ${item.item_id} lacks safe allergen or price evidence`,
+        `Available item ${item.item_id} lacks safe price or quantity evidence`,
       );
     }
   }
