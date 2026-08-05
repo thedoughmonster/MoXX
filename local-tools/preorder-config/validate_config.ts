@@ -3,16 +3,16 @@ import { readFile } from "node:fs/promises";
 import Ajv2020 from "ajv/dist/2020.js";
 
 import type { JsonValue, PreorderConfiguration } from "./types.ts";
+import { validatePricingPolicy } from "./validate_pricing_policy.ts";
 
-const schemaUrl = new URL(
-  "../../services/preorder-operations/config/preorder-configuration-v1.schema.json",
-  import.meta.url,
-);
+const schemaV1 = new URL("../../services/preorder-operations/config/preorder-configuration-v1.schema.json", import.meta.url);
+const schemaV2 = new URL("../../services/preorder-operations/config/preorder-configuration-v2.schema.json", import.meta.url);
 
 export async function validateConfig(
   value: JsonValue,
 ): Promise<PreorderConfiguration> {
-  const schema = JSON.parse(await readFile(schemaUrl, "utf8")) as object;
+  const version = (value as { schema_version?: unknown }).schema_version;
+  const schema = JSON.parse(await readFile(version === 2 ? schemaV2 : schemaV1, "utf8")) as object;
   const ajv = new Ajv2020({
     allErrors: true,
     strict: false,
@@ -34,6 +34,7 @@ export async function validateConfig(
   if (new Set(ids).size !== ids.length) {
     throw new Error("Catalog item IDs must be unique");
   }
+  validatePricingPolicy(config);
   if (config.publication_mode === "draft") {
     if (config.surface.enabled) {
       throw new Error("Draft configuration cannot enable a surface");
@@ -98,6 +99,7 @@ export async function validateConfig(
   }
   for (const item of available) {
     if (
+      (config.schema_version === 2 && !item.preorder_enabled) ||
       item.allergen_status === "unverified" ||
       item.preorder_price_minor === null ||
       item.price_floor_minor === null ||
