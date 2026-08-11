@@ -6,7 +6,7 @@ cd "$project_dir"
 project_dir="$PWD"
 export GH_CONFIG_DIR="${GH_CONFIG_DIR:-${HOME}/.openhands/gh}"
 mkdir -p "$GH_CONFIG_DIR"
-export TMPDIR="${project_dir}/.momi/tmp"
+export TMPDIR="${MOMI_TMPDIR:-$(dirname "$project_dir")/.momi-openhands-tmp}"
 mkdir -p "$TMPDIR"
 chmod 700 "$TMPDIR"
 

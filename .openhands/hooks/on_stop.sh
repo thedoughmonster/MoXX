@@ -10,7 +10,7 @@ project_dir="${OPENHANDS_PROJECT_DIR:-$PWD}"
 cd "$project_dir" || deny "The OpenHands project directory is unavailable."
 project_dir="$PWD"
 export GH_CONFIG_DIR="${GH_CONFIG_DIR:-${HOME}/.openhands/gh}"
-export TMPDIR="${project_dir}/.momi/tmp"
+export TMPDIR="${MOMI_TMPDIR:-$(dirname "$project_dir")/.momi-openhands-tmp}"
 mkdir -p "$TMPDIR" || deny "The repository-local temporary directory is unavailable."
 chmod 700 "$TMPDIR" || deny "The repository-local temporary directory cannot be secured."
 
