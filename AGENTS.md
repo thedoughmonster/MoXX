@@ -118,17 +118,21 @@ they deploy from the same repository.
 ## Backend Release Rules
 - For hosted backend changes, release the exact PR validation receipt to
   development, then promote only that exact development receipt.
-## Issue Tracking and Planning
-- Use GitHub-backed issues and Zenhub's native webhook; GitHub owns the engineering record.
-- Zenhub owns hierarchy, pipeline, order, priority, estimate, sprint, dates, and roadmap.
+## OpenHands Execution and Planning
+- In OpenHands, use the `momi-execution` skill for an assigned Linear issue.
+- OpenHands is the execution harness; Linear owns planning and execution state.
+- GitHub owns branches, draft PRs, CI, review, and the linked open GitHub issue required by the delivery ledger.
+- The coding agent owns one bounded issue. Humans retain planning, architecture, review, merge, deployment, and production authority.
+- Stop after the draft PR is green and Linear reaches human review. Never merge,
+  deploy, or independently begin neighboring work.
 - Use `Initiative → Project → Epic → Feature/Task/Bug → Sub-task`.
 - Initiatives are business outcomes; MoMi, MoSi, MoXi, and shared are surfaces, not roots.
 - Opened is L1-L3 only; keep possible decomposition in `Future decomposition candidates`.
 - Create L4/L5 directly in Designing only while their immediate parent is in Designing.
 - L4/L5 may regress to Discovering with the unresolved question recorded, never to Opened.
 - Before Building, L4 is independently closable and L5 is the smallest useful slice.
-- Do not mirror Zenhub planning metadata into repository automation or manifests.
-- Correct planning drift before implementation; follow `docs/zenhub-planning.md`.
+- Do not mirror Linear planning metadata into repository automation or manifests.
+- Correct planning drift in Linear before implementation.
 ## Code Review Rules
 - Block unauthorized ownership, private-data, public-contract, or deployer changes.
 - Block material correctness, security, privacy, data-loss, or rollback defects.
