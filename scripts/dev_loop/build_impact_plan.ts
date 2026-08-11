@@ -42,7 +42,11 @@ export function buildImpactPlan(
     "runtime", "architecture", "manifest", "migration", "unknown",
   ]
   const full = fullClasses.some((kind) => classifications[kind].length > 0)
-  const tests = selectTestPaths(classifications)
+  const tests = selectTestPaths(
+    classifications,
+    affectedServices,
+    affectedFunctions,
+  )
   const focused = { id: "focused-tests", command: "node", args: ["--test", ...tests] }
   return {
     schema_version: 1,
