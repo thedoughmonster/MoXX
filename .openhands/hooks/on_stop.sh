@@ -8,7 +8,11 @@ deny() {
 
 project_dir="${OPENHANDS_PROJECT_DIR:-$PWD}"
 cd "$project_dir" || deny "The OpenHands project directory is unavailable."
+project_dir="$PWD"
 export GH_CONFIG_DIR="${GH_CONFIG_DIR:-${HOME}/.openhands/gh}"
+export TMPDIR="${project_dir}/.momi/tmp"
+mkdir -p "$TMPDIR" || deny "The repository-local temporary directory is unavailable."
+chmod 700 "$TMPDIR" || deny "The repository-local temporary directory cannot be secured."
 
 expected_node="$(tr -d '[:space:]' < .node-version)"
 actual_node="$(node -p 'process.versions.node' 2>/dev/null || true)"

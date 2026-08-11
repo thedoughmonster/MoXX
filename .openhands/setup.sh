@@ -3,8 +3,12 @@ set -Eeuo pipefail
 
 project_dir="${OPENHANDS_PROJECT_DIR:-$PWD}"
 cd "$project_dir"
+project_dir="$PWD"
 export GH_CONFIG_DIR="${GH_CONFIG_DIR:-${HOME}/.openhands/gh}"
 mkdir -p "$GH_CONFIG_DIR"
+export TMPDIR="${project_dir}/.momi/tmp"
+mkdir -p "$TMPDIR"
+chmod 700 "$TMPDIR"
 
 expected_node="$(tr -d '[:space:]' < .node-version)"
 expected_pnpm="$(node -e "const p=require('./package.json');process.stdout.write(p.packageManager.split('@').at(-1))" 2>/dev/null || printf '11.7.0')"
