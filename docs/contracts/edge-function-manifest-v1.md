@@ -15,7 +15,7 @@ These fields explain what the function is and who owns it:
 - `function_type`: registry-compatible implementation category.
 - `capability`: one of `ingest`, `hydrate`, `read`, `decide`, or `deliver`.
 - `boundary`: one of `toast_inbound`, `toast_outbound`, `trello_inbound`,
-  `trello_outbound`, `openai_inbound`, `momi_internal`, `momi_public`, or
+  `trello_outbound`, `linear_inbound`, `openai_inbound`, `momi_internal`, `momi_public`, or
   `slack_outbound`.
 
 Logical identity is authoritative. A function's directory or runtime does not

@@ -7,6 +7,7 @@ identify deployment location but do not define business purpose.
 
 | Capability | Function key | Purpose | Service | Kind | Boundary | Route |
 | --- | --- | --- | --- | --- | --- | --- |
+| ingest | `momi.agent_control.linear_webhook.v1` | Authenticate Linear issue webhooks and durably accept newly added execute-run actions. | `agent-control` | core_capability | linear_inbound | `/functions/v1/momi-agent-control-linear-webhook-v1` |
 | ingest | `momi.communications.capture_human_message.v1` | Capture one committed OpenWebUI human message into immutable evidence. | `communications-archive` | core_capability | momi_internal | `/functions/v1/momi-communications-capture-human-message-v1` |
 | ingest | `momi.communications.capture_openai_message.v1` | Capture one OpenAI or ChatGPT source message into the immutable communications archive. | `communications-archive` | core_capability | momi_internal | `/functions/v1/momi-communications-capture-openai-message-v1` |
 | ingest | `momi.model_execution.openai_webhook.v1` | Authenticate and deduplicate content-free OpenAI background completion events. | `model-execution-gateway` | source_adapter | openai_inbound | `/functions/v1/momi-model-execution-webhook-v1` |
@@ -40,6 +41,7 @@ identify deployment location but do not define business purpose.
 | decide | `momi.preorder.payment.reconcile.v1` | Reconcile one known Square payment into durable preorder truth. | `preorder-operations` | core_capability | momi_public | `/functions/v1/momi-preorder-payment-reconcile-v1` |
 | decide | `momi.preorder.quote.create.v1` | Create an idempotent authoritative preorder quote from current window, catalog, pricing, capacity, and requested allergen avoidance. | `preorder-operations` | core_capability | momi_public | `/functions/v1/momi-preorder-quote-v1` |
 | decide | `momi.preorder.square_webhook.process.v1` | Authenticate, archive, resolve, and project Square payment webhooks. | `preorder-operations` | core_capability | momi_public | `/functions/v1/momi-preorder-square-webhook-v1` |
+| deliver | `momi.agent_control.dispatch.v1` | Deliver one claimed Linear action to Codex and reconcile durable task state back to Linear. | `agent-control` | core_capability | momi_internal | `/functions/v1/momi-agent-control-dispatch-v1` |
 | deliver | `momi.events.route.v1` | Route one durable event reference to configured subscriber queues. | `momi-event-routing` | core_capability | momi_internal | `/functions/v1/momi-event-router-v1` |
 | deliver | `momi.model_execution.complete_background.v1` | Reconcile one terminal background model response and notify its owning caller. | `model-execution-gateway` | source_adapter | momi_internal | `/functions/v1/momi-model-execution-completion-worker-v1` |
 | deliver | `momi.slack.order_alert.deliver.v1` | Deliver one durable, prepared order alert to its configured Slack destination. | `slack-order-delivery` | destination_adapter | slack_outbound | `/functions/v1/slack-order-alert-delivery-v1` |
