@@ -6,6 +6,7 @@ import type { ReleaseReceipt } from "./types.ts"
 
 export function readReleaseReceipt(path: string): ReleaseReceipt {
   const receipt = JSON.parse(readFileSync(path, "utf8")) as ReleaseReceipt
+  receipt.retired_functions ??= []
   if (
     receipt.schema_version !== 1 || receipt.kind !== "release" ||
     receipt.environment !== "dev" ||
@@ -20,6 +21,10 @@ export function readReleaseReceipt(path: string): ReleaseReceipt {
     receipt.plan.impact_sha256 !== receipt.impact_sha256 ||
     receipt.plan.impact.release.services.join(",") !== receipt.services.join(",") ||
     receipt.plan.impact.release.functions.join(",") !== receipt.functions.join(",") ||
+    !Array.isArray(receipt.retired_functions) ||
+    receipt.retired_functions.some((slug) => !/^[a-z][a-z0-9-]+$/.test(slug)) ||
+    receipt.retired_functions.join(",") !==
+      [...new Set(receipt.retired_functions)].sort().join(",") ||
     receipt.validation.required_job !== "validate-final" ||
     receipt.validation.counts.failed !== 0 ||
     receipt.validation.identities.head_tree !== receipt.head_tree ||

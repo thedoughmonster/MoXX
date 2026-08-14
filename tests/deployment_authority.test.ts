@@ -56,10 +56,12 @@ test("keeps deployment apply in the two authorized workflows", async () => {
   assert.deepEqual(callers.sort(), ["deploy-dev.yml", "deploy-prod.yml"])
   const source = await readFile(".github/workflows/deploy-dev.yml", "utf8")
   assert.match(source, /base_sha:|services:|plan_sha256:|validated_tree:/)
+  assert.match(source, /release_identity:/)
   assert.match(source, /assert_bound_deployment_plan\.ts/)
   assert.ok(source.indexOf("assert_bound_deployment_plan.ts") <
     source.indexOf("SUPABASE_ACCESS_TOKEN"))
   assert.doesNotMatch(source, /--service all|pnpm run check/)
+  assert.match(source, /MOMI_RETIRE_FUNCTIONS/)
 })
 
 test("requires an exact SHA for solo production promotion", async () => {

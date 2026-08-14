@@ -11,7 +11,8 @@ export async function ensureDispatchedWorkflow(
   requiredJob: string,
   inputs: Record<string, string>,
 ): Promise<WorkflowRun> {
-  const identity = inputs.plan_sha256 ?? inputs.dev_receipt_sha256
+  const identity = inputs.release_identity ?? inputs.plan_sha256 ??
+    inputs.dev_receipt_sha256
   if (!/^[0-9a-f]{64}$/.test(identity ?? "")) {
     throw new Error("Workflow dispatch requires an exact receipt or plan digest")
   }

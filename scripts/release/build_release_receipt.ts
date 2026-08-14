@@ -11,6 +11,7 @@ export function buildReleaseReceipt(
   validationReceiptSha256: string,
   databaseApplied: boolean,
   deploymentRunId?: number,
+  retiredFunctions: string[] = [],
 ): ReleaseReceipt {
   return {
     schema_version: 1,
@@ -28,6 +29,7 @@ export function buildReleaseReceipt(
     database: databaseApplied ? "preview_apply_parity_complete" : "none",
     services: plan.impact.release.services,
     functions: plan.impact.release.functions,
+    retired_functions: retiredFunctions,
     ...(deploymentRunId ? { deployment_run_id: deploymentRunId } : {}),
   }
 }
