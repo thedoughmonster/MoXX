@@ -2,11 +2,11 @@
 
 - Status: accepted
 - Date: 2026-08-14
-- Owning issue: #504 / MOX-151
+- Owning issues: #504 / MOX-151; #517 / MOX-152
 
 ## Context
 
-Linear needs one one-shot `execute-run` action that creates a visible Codex task
+Linear needs one-shot action labels that create visible Codex tasks
 without making a webhook, database trigger, or Edge Function a long-running
 executor. Provider retries must not duplicate the task, and the private control
 ledger must not become a client-facing data contract.
@@ -18,8 +18,14 @@ dataset, and `agent-control-host` as the independently deployable destination
 adapter for the external Codex-host boundary. A Linear-specific ingress Edge
 Function verifies HMAC-SHA256 against
 the untouched request bytes, records the complete envelope, and normalizes only
-fields named by `updatedFrom`. A newly added `execute-run` creates canonical
-dispatch and run records in the same transaction.
+fields named by `updatedFrom`. Exactly one newly added declared action creates
+canonical dispatch and run records in the same transaction.
+
+The accepted catalog is `execute-run`, `validate-issue`, `investigate-issue`,
+`cleanup`, `decompose`, and `run-discovery`. Events that add more than one
+catalog action are ambiguous and do not create work. Each accepted action is
+stored on the dispatch, consumed after host acceptance, and reported in the
+marker-bound Linear comment. Provider retries converge on the delivery receipt.
 
 Project routing is configuration owned by `momi_agent_ops.project_mappings`.
 The first mapping is the Linear Backend Stabilization project to
@@ -36,10 +42,12 @@ App Server `thread/start` and `turn/start`, so an ambiguous retry cannot create
 a second task. It archives the thread after terminal `turn/completed` and sends
 an authenticated terminal callback for durable and Linear write-back.
 
-The initial Codex turn contains only stable issue and mapping identities plus a
-bounded instruction to fetch current Linear context, preflight, and execute the
-issue directly. Symphony is not in this boundary. MOX-152 action expansion and
-MOX-153 parent/cancellation behavior remain separate decisions.
+The initial Codex turn contains only the accepted action, stable issue and
+mapping identities, plus a bounded action-specific instruction. `execute-run`
+owns repository implementation; the other actions are limited to validation,
+investigation, metadata cleanup, decomposition, or discovery. Symphony is not
+in this boundary. MOX-153 parent/cancellation behavior remains a separate
+decision.
 
 ## Security and authority
 

@@ -7,7 +7,7 @@ identify deployment location but do not define business purpose.
 
 | Capability | Function key | Purpose | Service | Kind | Boundary | Route |
 | --- | --- | --- | --- | --- | --- | --- |
-| ingest | `momi.agent_control.linear_webhook.v1` | Authenticate Linear issue webhooks and durably accept newly added execute-run actions. | `agent-control` | core_capability | linear_inbound | `/functions/v1/momi-agent-control-linear-webhook-v1` |
+| ingest | `momi.agent_control.linear_webhook.v1` | Authenticate Linear issue webhooks and durably accept one newly added declared action. | `agent-control` | core_capability | linear_inbound | `/functions/v1/momi-agent-control-linear-webhook-v1` |
 | ingest | `momi.communications.capture_human_message.v1` | Capture one committed OpenWebUI human message into immutable evidence. | `communications-archive` | core_capability | momi_internal | `/functions/v1/momi-communications-capture-human-message-v1` |
 | ingest | `momi.communications.capture_openai_message.v1` | Capture one OpenAI or ChatGPT source message into the immutable communications archive. | `communications-archive` | core_capability | momi_internal | `/functions/v1/momi-communications-capture-openai-message-v1` |
 | ingest | `momi.model_execution.openai_webhook.v1` | Authenticate and deduplicate content-free OpenAI background completion events. | `model-execution-gateway` | source_adapter | openai_inbound | `/functions/v1/momi-model-execution-webhook-v1` |
