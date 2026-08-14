@@ -35,6 +35,8 @@ test("development uses one validation receipt and affected-only deployment", asy
   assert.match(source, /assertPlanMatchesValidation/)
   assert.match(source, /!databaseApplied && plan\.impact\.release\.functions\.length === 0/)
   assert.match(source, /release\.services\.join/)
+  assert.match(source, /retire_functions: retireFunctions\.join/)
+  assert.match(source, /release_identity: releaseIdentity/)
   assert.doesNotMatch(source, /applyMigrations/)
   assert.doesNotMatch(source, /scripts\/check|--service|waitForPullRequest/)
 })

@@ -14,6 +14,7 @@ import { probeFunctions } from "./deploy/probe_functions.ts"
 import { readAdvisors } from "./deploy/read_advisors.ts"
 import { reconcileInventory } from "./deploy/reconcile_inventory.ts"
 import { requireCredentials } from "./deploy/require_credentials.ts"
+import { retireFunctions } from "./deploy/retire_functions.ts"
 import { selectFunctions } from "./deploy/select_functions.ts"
 import { writeReleaseRecord } from "./deploy/write_release_record.ts"
 import { applyMigrations } from "./release/apply_migrations.ts"
@@ -27,12 +28,6 @@ const functions = plan.impact.release.functions.length === 0
   ? []
   : selectFunctions(architecture, options.services)
 const environment = architecture.workspace.environments[options.environment]
-const context = {
-  environment: options.environment,
-  project_ref: environment.project_ref,
-  service: options.services.join(","),
-  functions,
-}
 requireCredentials()
 assertGitState(environment.branch)
 if (options.environment === "dev" && plan.impact.release.database !== "none") {
@@ -40,12 +35,20 @@ if (options.environment === "dev" && plan.impact.release.database !== "none") {
 }
 linkProject(environment.project_ref)
 if (functions.length > 0) deployFunctions(environment.project_ref, functions)
-const hosted = listHostedFunctions(environment.project_ref)
+const beforeRetirement = listHostedFunctions(environment.project_ref)
+const retired = retireFunctions(architecture, options.environment,
+  environment.project_ref, options.retireFunctions, beforeRetirement)
+const hosted = retired.length === 0
+  ? beforeRetirement
+  : listHostedFunctions(environment.project_ref)
 const inventory = reconcileInventory(architecture, options.environment, hosted)
 assertInventory(inventory)
 const probes = await probeFunctions(environment.project_ref, functions)
 console.log(JSON.stringify({ probes }, null, 2))
 if (probes.some((probe) => !probe.ok)) throw new Error("A hosted probe failed")
 const advisors = await readAdvisors(environment.project_ref)
+const context = { environment: options.environment,
+  project_ref: environment.project_ref, service: options.services.join(","),
+  functions, retired_functions: retired }
 const record = await writeReleaseRecord(context, inventory, probes, advisors)
 console.log(`Release record: ${record}`)

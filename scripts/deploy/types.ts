@@ -5,6 +5,7 @@ export type EnvironmentKey = "dev" | "prod"
 export type DeploymentOptions = {
   environment: EnvironmentKey
   services: string[]
+  retireFunctions: string[]
 }
 
 export type HostedFunction = {
@@ -47,4 +48,5 @@ export type DeploymentContext = {
   project_ref: string
   service: string
   functions: LoadedFunction[]
+  retired_functions: string[]
 }

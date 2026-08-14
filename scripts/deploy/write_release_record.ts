@@ -24,6 +24,7 @@ export async function writeReleaseRecord(
     commit_sha: sha,
     created_at: new Date().toISOString(),
     functions,
+    retired_functions: context.retired_functions,
     inventory,
     probes,
     advisors: {

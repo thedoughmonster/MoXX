@@ -112,6 +112,11 @@ export type RetirementManifest = {
   replacement: string
   environments: Array<"dev" | "prod">
   remove_after: string
+  removal_evidence?: {
+    issue_url: string
+    verified_at: string
+    summary: string
+  }
 }
 
 export type Architecture = {

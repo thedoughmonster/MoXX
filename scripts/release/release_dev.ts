@@ -12,7 +12,10 @@ import { ensureDispatchedWorkflow } from "./ensure_dispatched_workflow.ts"
 import { readValidationReceipt } from "./read_validation_receipt.ts"
 import { writeReleaseReceipt } from "./write_release_receipt.ts"
 
-export async function releaseDev(validationPath: string): Promise<void> {
+export async function releaseDev(
+  validationPath: string,
+  retireFunctions: string[] = [],
+): Promise<void> {
   const head = assertReleaseHead("dev")
   const source = readFileSync(validationPath, "utf8")
   const validation = readValidationReceipt(validationPath)
@@ -27,14 +30,19 @@ export async function releaseDev(validationPath: string): Promise<void> {
   assertPlanMatchesValidation(plan, validation)
   const databaseApplied = plan.impact.release.database !== "none"
   const planDigest = hashText(canonicalJson(plan))
-  const run = !databaseApplied && plan.impact.release.functions.length === 0
+  const releaseIdentity = hashText(canonicalJson({ plan_sha256: planDigest,
+    retire_functions: retireFunctions }))
+  const run = !databaseApplied && plan.impact.release.functions.length === 0 &&
+      retireFunctions.length === 0
     ? undefined
     : await ensureDispatchedWorkflow("deploy-dev.yml", "dev", head, "deploy", {
       expected_sha: head,
       base_sha: plan.base.sha,
       services: plan.impact.release.services.join(","),
       plan_sha256: planDigest,
+      release_identity: releaseIdentity,
       validated_tree: plan.head.tree,
+      retire_functions: retireFunctions.join(","),
     })
   const receipt = buildReleaseReceipt(
     "dev",
@@ -42,7 +50,7 @@ export async function releaseDev(validationPath: string): Promise<void> {
     validation,
     hashText(source),
     databaseApplied,
-    run?.databaseId,
+    run?.databaseId, retireFunctions,
   )
   const path = writeReleaseReceipt(receipt)
   console.log(`Development release receipt: ${path}`)

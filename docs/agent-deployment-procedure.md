@@ -34,6 +34,9 @@ the protected development workflow and waits for its exact required job.
 - Migration plans make `deploy-dev.yml` use its authenticated pinned Supabase
   CLI to link the exact project, preview, apply, and prove history parity.
 - Function plans deploy only affected manifest-owned services after parity.
+- Caller-verified expired development functions may be removed only when their
+  manifest carries dated issue evidence and the exact validation receipt names
+  them through `--retire-functions`; the coordinator never prunes inventory.
 
 The coordinator polls the exact required job with a bound. A successful required
 job is authoritative even while aggregate run state is lagging.

@@ -43,5 +43,6 @@ export type ReleaseReceipt = {
   database: "none" | "preview_apply_parity_complete"
   services: string[]
   functions: string[]
+  retired_functions: string[]
   deployment_run_id?: number
 }
