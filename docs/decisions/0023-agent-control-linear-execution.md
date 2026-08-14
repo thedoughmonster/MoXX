@@ -28,9 +28,9 @@ The first mapping is the Linear Backend Stabilization project to
 After commit, a dedicated ADR-0004 trigger adapter sends only the dispatch ID
 and a per-work capability token to the exact dispatch Edge Function. The
 function atomically claims work, then calls the versioned
-`momi.agent_control.host_dispatch.v1` contract on one configured, authenticated
-Codex host adapter. This is the exact internal HTTP exception accepted by this
-ADR; it authorizes no general service-to-service calls. The adapter durably
+`momi.agent_control.host_dispatch.v1` contract on the mapped, authenticated
+private HTTPS Codex host adapter. This is the exact internal HTTP exception
+accepted by this ADR; it authorizes no general service-to-service calls. The adapter durably
 reserves the dispatch before issuing Codex
 App Server `thread/start` and `turn/start`, so an ambiguous retry cannot create
 a second task. It archives the thread after terminal `turn/completed` and sends
@@ -49,8 +49,10 @@ MOX-153 parent/cancellation behavior remain separate decisions.
   explicitly granted routines.
 - Linear and Codex-host secrets remain runtime secrets and never enter payload
   logs, prompts, database records, or trigger bodies.
-- The host URL is configured and HTTPS-only outside loopback tests. The service
-  declares `api.linear.app` and that configured boundary as outbound authority.
+- The non-secret host URL is HTTPS-only private project configuration, resolved
+  at claim time so endpoint rotation does not require an Edge Function secret
+  change. The bearer credential remains a runtime secret. The service declares
+  `api.linear.app` and that configured boundary as outbound authority.
 - Trigger networking is restricted to the exact dispatch route and the standard
   project URL/publishable-key Vault records accepted by ADR 0004.
 
