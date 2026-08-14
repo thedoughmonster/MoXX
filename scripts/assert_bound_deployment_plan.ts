@@ -20,6 +20,9 @@ if (plan.head.sha !== expectedSha || plan.head.tree !== expectedTree) {
 if (plan.impact.release.services.join(",") !== services.join(",")) {
   throw new Error("Affected deployment services differ")
 }
-if (plan.impact.release.functions.length === 0) {
-  throw new Error("Deployment plan contains no affected functions")
+if (
+  plan.impact.release.functions.length === 0 &&
+  plan.impact.release.database === "none"
+) {
+  throw new Error("Deployment plan contains no hosted changes")
 }

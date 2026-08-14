@@ -1,14 +1,15 @@
 ---
 name: momi-execution
-description: Run one assigned MoMi Linear issue through the OpenHands execution workflow: establish readiness and repository scope, implement on a feature branch, publish a draft GitHub PR, wait for authoritative CI, resolve feedback, and merge the validated PR to dev. Use when asked to work an assigned Linear issue, use the MoMi execution workflow, or perform MoMi coding work inside OpenHands.
+description: Run one assigned MoMi Linear issue through implementation, review, validated merge, development release, and controlled acceptance. Use when asked to work an assigned Linear issue, use the MoMi execution workflow, or perform MoMi coding work inside OpenHands.
 ---
 
 # MoMi Execution
 
 Treat OpenHands as the execution harness, Linear as planning and work state,
 GitHub as branch/PR/CI state, and this repository as technical truth. Own one
-bounded implementation issue through validated merge to `dev`. A human retains
-planning, material architecture decisions, deployment, and production authority.
+bounded implementation issue through review, validated merge, development
+release, and controlled acceptance. A human retains planning, material
+architecture decisions, and production authority.
 
 ## Establish the work
 
@@ -93,9 +94,11 @@ skill owns the outer Linear-to-merge lifecycle.
    blocking feedback remains, move Linear to Merging, mark the PR ready, and
    merge it to `dev`. Verify the recorded merge commit is present on
    `origin/dev` and update the owning issue/workpad with merge evidence.
-7. Stop. Do not mark implementation complete before the OpenHands Stop hook
-   allows it. Never deploy, mutate production, or independently select
-   neighboring work.
+7. For hosted development scope, download the exact validation receipt and run
+   `pnpm release:dev`; then verify one controlled acceptance event. Review may
+   be agent-performed, but required CI and unresolved-feedback gates still bind.
+8. Stop. Do not mark implementation complete before the OpenHands Stop hook
+   allows it. Never promote to production or independently select neighboring work.
 
 The Stop hook deterministically enforces the runtime, canonical changed check,
 clean branch, merged PR/head contract, resolved review threads, issue

@@ -1,7 +1,7 @@
 # Deployment
 
-GitHub Actions is the sole repository-code and Edge Function deployment
-authority. The local Node 24 coordinator is the sole normal migration authority.
+GitHub Actions is the sole hosted development and Edge Function deployment
+authority. The local Node 24 coordinator is the sole release orchestrator.
 Supabase Git deployment remains disabled. ADRs `0006` and `0008` govern this.
 
 ## Deterministic plan and validation
@@ -33,6 +33,8 @@ pnpm release:prod -- --dev-receipt <dev-release-receipt.json>
 Development accepts only the validated tree, diff, impact, and gate. A merge SHA
 may differ as benign technical drift only when those identities are equal.
 The coordinator verifies the receipt's exact GitHub run and required job.
+Development migrations run inside the protected deployment workflow before
+affected functions; the agent needs GitHub CLI access, not a local Supabase token.
 Production consumes the exact development receipt. The coordinator creates or
 reuses the sole exact `dev`-to-`prod` promotion PR and makes it ready before
 dispatching the receipt-bound fast-forward workflow.
@@ -58,17 +60,19 @@ artifact. It never uses Docker, `--prune`, or implicit function discovery.
 
 ## Migration boundary
 
-Only `scripts/release/apply_migrations.ts` calls `db push`. It links and checks
+Only `scripts/release/apply_migrations.ts` calls `db push`. Development invokes
+it inside `deploy-dev.yml`; production invokes it from the coordinator. It links
+and checks
 the exact project, reads hosted migration history, and compares every locally
 missing version with the migration set in the accepted validation plan. The
-default preview and apply omit `--include-all`. The coordinator derives
+default preview and apply omit `--include-all`. The release module derives
 `--include-all` only when every locally missing migration is authorized by that
 plan, at least one is ordered before the hosted tip, hosted history has no
 version unknown to local files, and local history has no unexplained missing
 version.
 
 The dry-run output must name every and only the authorized missing filename in
-local order. Only then does the coordinator apply with the same derived
+local order. Only then does the release module apply with the same derived
 arguments and verify final exact migration-history parity. Any inventory,
 preview, apply, or parity mismatch stops the release. There is no caller flag,
 environment bypass, or manual release override for this path.
@@ -83,8 +87,8 @@ line 1 with:
 -- service-owner: <service-key>
 ```
 
-The owner selects affected services after parity. GitHub workflows never apply
-migrations, and local code never deploys Edge Functions.
+The owner selects affected services after parity. Only `deploy-dev.yml` applies
+development migrations, and local code never deploys Edge Functions.
 
 ## Rollback
 

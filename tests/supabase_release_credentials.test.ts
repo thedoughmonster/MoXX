@@ -7,9 +7,15 @@ test("opens database access only through the migration apply path", async () => 
     new URL("../scripts/release/release_dev.ts", import.meta.url),
     "utf8",
   )
-  assert.match(dev, /if \(databaseApplied\)/)
-  assert.match(dev, /applyMigrations\("dev", validatedPlan\.impact\.migrations\)/)
-  assert.doesNotMatch(dev, /linkProject|runSupabase|SUPABASE/)
+  assert.doesNotMatch(dev, /applyMigrations|linkProject|runSupabase|SUPABASE/)
+  const deploy = await readFile(
+    new URL("../scripts/run_deploy_apply.ts", import.meta.url),
+    "utf8",
+  )
+  assert.match(deploy, /options\.environment === "dev"/)
+  assert.match(deploy, /applyMigrations\("dev", plan\.impact\.migrations\)/)
+  assert.ok(deploy.indexOf("assertGitHubDeploymentAuthority") <
+    deploy.indexOf("applyMigrations("))
   const linker = await readFile(
     new URL("../scripts/deploy/link_project.ts", import.meta.url),
     "utf8",

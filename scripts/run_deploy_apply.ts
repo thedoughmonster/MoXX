@@ -1,4 +1,7 @@
+import { readFileSync } from "node:fs"
+
 import { validateArchitecture } from "./architecture/validate_architecture.ts"
+import type { BoundPlan } from "./dev_loop/types.ts"
 import { assertGitHubDeploymentAuthority } from "./deploy/assert_github_deployment_authority.ts"
 import { assertGitState } from "./deploy/assert_git_state.ts"
 import { assertInventory } from "./deploy/assert_inventory.ts"
@@ -13,12 +16,16 @@ import { reconcileInventory } from "./deploy/reconcile_inventory.ts"
 import { requireCredentials } from "./deploy/require_credentials.ts"
 import { selectFunctions } from "./deploy/select_functions.ts"
 import { writeReleaseRecord } from "./deploy/write_release_record.ts"
+import { applyMigrations } from "./release/apply_migrations.ts"
 
 const options = parseDeploymentOptions()
 assertGitHubDeploymentAuthority(options.environment)
 assertPlanIdentity()
+const plan = JSON.parse(readFileSync(".momi/release-plan.json", "utf8")) as BoundPlan
 const architecture = await validateArchitecture()
-const functions = selectFunctions(architecture, options.services)
+const functions = plan.impact.release.functions.length === 0
+  ? []
+  : selectFunctions(architecture, options.services)
 const environment = architecture.workspace.environments[options.environment]
 const context = {
   environment: options.environment,
@@ -28,8 +35,11 @@ const context = {
 }
 requireCredentials()
 assertGitState(environment.branch)
+if (options.environment === "dev" && plan.impact.release.database !== "none") {
+  await applyMigrations("dev", plan.impact.migrations)
+}
 linkProject(environment.project_ref)
-deployFunctions(environment.project_ref, functions)
+if (functions.length > 0) deployFunctions(environment.project_ref, functions)
 const hosted = listHostedFunctions(environment.project_ref)
 const inventory = reconcileInventory(architecture, options.environment, hosted)
 assertInventory(inventory)
