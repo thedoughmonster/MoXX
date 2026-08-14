@@ -114,22 +114,16 @@ verify_jwt = false
 verify_jwt = false
 [functions.momi-preorder-bootstrap-v1]
 verify_jwt = false
-
 [functions.momi-preorder-quote-v1]
 verify_jwt = false
-
 [functions.momi-preorder-checkout-hold-v1]
 verify_jwt = false
-
 [functions.momi-preorder-order-intent-v1]
 verify_jwt = false
-
 [functions.momi-preorder-order-status-v1]
 verify_jwt = false
-
 [functions.momi-preorder-payment-initiate-v1]
 verify_jwt = false
-
 [functions.momi-preorder-payment-reconcile-v1]
 verify_jwt = false
 
@@ -137,4 +131,10 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.momi-cron-history-governor-v1]
+verify_jwt = false
+
+[functions.momi-agent-control-linear-webhook-v1]
+verify_jwt = false
+
+[functions.momi-agent-control-dispatch-v1]
 verify_jwt = false

@@ -37,7 +37,8 @@
     "warehouse_projection",
     "legacy_recipe_staging",
     "momi_archive",
-    "momi_communications"
+    "momi_communications",
+    "momi_agent_ops"
   ],
   "policies": {
     "max_handwritten_lines": 120,
