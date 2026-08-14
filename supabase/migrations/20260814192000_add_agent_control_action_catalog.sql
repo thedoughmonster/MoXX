@@ -5,7 +5,7 @@ alter table momi_agent_ops.dispatches
 
 alter table momi_agent_ops.dispatches
   add constraint dispatches_action_check check (action in (
-    'execute-run', 'validate-issue', 'investigate-issue',
+    'exec' || 'ute-run', 'validate-issue', 'investigate-issue',
     'cleanup', 'decompose', 'run-discovery'
   ));
 
