@@ -1,14 +1,14 @@
 ---
 name: momi-execution
-description: Run one assigned MoMi Linear issue through the OpenHands execution workflow: establish readiness and repository scope, implement on a feature branch, publish a draft GitHub PR, wait for authoritative CI, hand the issue to human review, and stop. Use when asked to work an assigned Linear issue, use the MoMi execution workflow, or perform MoMi coding work inside OpenHands.
+description: Run one assigned MoMi Linear issue through the OpenHands execution workflow: establish readiness and repository scope, implement on a feature branch, publish a draft GitHub PR, wait for authoritative CI, resolve feedback, and merge the validated PR to dev. Use when asked to work an assigned Linear issue, use the MoMi execution workflow, or perform MoMi coding work inside OpenHands.
 ---
 
 # MoMi Execution
 
 Treat OpenHands as the execution harness, Linear as planning and work state,
 GitHub as branch/PR/CI state, and this repository as technical truth. Own one
-bounded implementation issue. A human retains planning, architecture, review,
-merge, deployment, and production authority.
+bounded implementation issue through validated merge to `dev`. A human retains
+planning, material architecture decisions, deployment, and production authority.
 
 ## Establish the work
 
@@ -45,7 +45,7 @@ merge, deployment, and production authority.
 ## Implement the bounded change
 
 Use `develop-repository-change` for the inner code-and-test loop while this
-skill owns the outer Linear-to-review lifecycle.
+skill owns the outer Linear-to-merge lifecycle.
 
 - Reproduce or establish current behavior, then make the smallest coherent
   implementation for this issue.
@@ -60,19 +60,21 @@ skill owns the outer Linear-to-review lifecycle.
   contract, cross-service impact, material security/privacy/cost/exposure,
   destructive migration, production infrastructure, or scope expansion.
 - Keep Linear updates quiet. Record only a genuine block, implementation start,
-  draft PR publication, or review handoff.
+  draft PR publication, merge, or a genuine block.
 
-## Publish and hand off
+## Publish and merge
 
 1. Inspect `git status --short` and the full changed-path set against
    `origin/dev`; confirm every untracked path and actual impact belongs to the
    issue. Run `pnpm momi-impact plan --base origin/dev --head HEAD` when useful
    for the human-readable scope decision.
-2. Run `pnpm momi-check changed`. Fix relevant failures. Do not run the local
-   `--final` gate: the PR job named `validate-final` is the one authoritative
-   final gate and includes current generated-quality evidence.
-3. Review the final diff once, commit, push the feature branch, and open exactly
-   one draft PR to `dev`. Its body must contain exactly one of each:
+2. Perform one final principal-level diff review and commit it. Run
+   `pnpm momi-check changed` on that exact committed tree and fix relevant
+   failures. Do not run the local `--final` gate: the PR job named
+   `validate-final` is the one authoritative final gate and includes current
+   generated-quality evidence.
+3. Push the feature branch and open exactly one draft PR to `dev`. Its body must
+   contain exactly one of each:
 
    ```text
    Owning issue: #<open-github-issue-number>
@@ -84,15 +86,19 @@ skill owns the outer Linear-to-review lifecycle.
    Inspect an actual failure and repair it only when it belongs to this issue.
 5. Associate the PR with the Linear issue using the workspace's native
    Linear/GitHub linkage when available; otherwise add one concise PR link.
-   After local checks, draft publication, and required CI are green, move the
-   Linear issue to the workspace's In Review-equivalent state and record the
-   handoff.
-6. Stop. Do not mark implementation complete before the OpenHands Stop hook
-   allows it. Never make the PR ready, merge, deploy, mutate production, or
-   independently select neighboring work.
+   Sweep conversation comments, reviews, and unresolved review threads. Fix
+   blocking findings and wait for the updated required checks when the head
+   changes.
+6. When required checks are green, the head is current and mergeable, and no
+   blocking feedback remains, move Linear to Merging, mark the PR ready, and
+   merge it to `dev`. Verify the recorded merge commit is present on
+   `origin/dev` and update the owning issue/workpad with merge evidence.
+7. Stop. Do not mark implementation complete before the OpenHands Stop hook
+   allows it. Never deploy, mutate production, or independently select
+   neighboring work.
 
 The Stop hook deterministically enforces the runtime, canonical changed check,
-clean pushed branch, draft PR contract, and required CI. Linear readiness,
-issue-to-path intent, and the final In Review mutation remain agent-driven
-because command hooks cannot call session MCP tools; report any incomplete
-handoff instead of claiming success.
+clean branch, merged PR/head contract, resolved review threads, issue
+disposition, and required CI. Linear readiness, issue-to-path intent, and
+workflow mutations remain agent-driven because command hooks cannot call
+session MCP tools; report any incomplete merge instead of claiming success.

@@ -14,12 +14,12 @@ Work the assigned Linear issue using the MoMi execution workflow.
 - OpenHands loads repository context and `momi-execution`, prepares the runtime,
   exposes integrations, hosts the coding agent, and applies the Stop hook.
 - The coding agent implements one bounded issue, tests it, diagnoses failures,
-  and stays within repository ownership and scope.
-- GitHub owns branches, commits, draft PRs, authoritative CI, review history,
+  resolves review feedback, and owns its validated merge to `dev`.
+- GitHub owns branches, commits, PRs, authoritative CI, review history,
   and the linked open owning issue required by the delivery ledger.
 - Repository manifests, ADRs, `AGENTS.md`, impact tooling, validators, and CI are
   the technical authority.
-- Humans retain planning and architecture decisions, review, merge, deployment,
+- Humans retain planning and material architecture decisions, deployment,
   production mutation, and approval of material workflow changes.
 
 ## Start a task
@@ -45,23 +45,27 @@ stops for ownership ambiguity, unexpected cross-service/public-contract impact,
 scope expansion, or a material security, privacy, cost, exposure, destructive
 migration, production, or architecture decision.
 
-Before handoff it must:
+Before completion it must:
 
 1. compare actual changed and untracked paths with the issue and impact plan;
-2. run `pnpm momi-check changed`;
-3. commit and push a clean feature branch;
+2. perform one final principal-level diff review and commit it;
+3. run `pnpm momi-check changed` on that exact commit, then push the clean
+   feature branch;
 4. publish one draft PR to `dev` with exactly one `Owning issue: #<number>` and
    one `Disposition: partial|complete` line;
 5. wait for `validate-final` and issue-ledger validation to succeed;
-6. associate the PR with Linear and move the issue to In Review;
-7. stop for human review without making the PR ready, merging, or deploying.
+6. associate the PR with Linear and sweep all PR feedback;
+7. when no blocking feedback remains, move Linear to Merging, mark the PR ready,
+   merge it to `dev`, and verify the merge commit is present on `origin/dev`;
+8. record the merge evidence and stop without deploying or selecting more work.
 
 The PR `validate-final` job is the authoritative final gate; do not duplicate
 it locally. It selects the correct full or path-scoped checks and verifies
 current generated quality evidence. The OpenHands Stop hook blocks completion
 for the wrong Node version, failed canonical changed check, uncommitted or
-untracked files, an unpushed head, absent or non-draft PR, invalid metadata,
-closed owning issue, or failed/missing required CI.
+untracked files, a mismatched PR head, an unmerged PR, unresolved review
+threads, invalid metadata, inconsistent issue disposition, or failed/missing
+required CI.
 
 ## Authentication and capabilities
 
@@ -73,7 +77,7 @@ These capabilities are independent and must be reported separately:
 - OpenHands GitHub MCP authentication is optional when its capabilities are
   covered by shell Git and `gh`.
 - SSH Git supplies repository fetch and push in the OpenHands workspace.
-- GitHub CLI authentication supplies draft PR and CI operations.
+- GitHub CLI authentication supplies PR, review, merge, and CI operations.
 - An unauthenticated `gh` does not mean shell Git is unavailable.
 
 No credential belongs in this repository or in task output. Reauthenticate the
@@ -84,11 +88,10 @@ from another capability.
 
 - The shell Stop hook cannot inspect session MCP tools, compare free-form Linear
   acceptance text to paths, or mutate Linear. The skill performs those steps,
-  and the agent must report a missing In Review handoff instead of claiming
-  completion.
+  and the agent must report missing Merging or merge evidence instead of
+  claiming completion.
 - Concurrency one is operationally enforced by explicit assignment, Linear
-  status, the skill, and the instruction to stop at review; there is no
-  distributed lock.
+  status, and the skill; there is no distributed lock.
 - Linear remains beside OpenHands rather than embedded as a planning dashboard.
-- Starting a run and approving authentication are manual. Merge and deployment
-  are intentionally human-controlled.
+- Starting a run and approving authentication are manual. A validated merge is
+  agent-controlled; deployment remains intentionally human-controlled.

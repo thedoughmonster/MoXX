@@ -121,10 +121,11 @@ they deploy from the same repository.
 ## OpenHands Execution and Planning
 - In OpenHands, use the `momi-execution` skill for an assigned Linear issue.
 - OpenHands is the execution harness; Linear owns planning and execution state.
-- GitHub owns branches, draft PRs, CI, review, and the linked open GitHub issue required by the delivery ledger.
-- The coding agent owns one bounded issue. Humans retain planning, architecture, review, merge, deployment, and production authority.
-- Stop after the draft PR is green and Linear reaches human review. Never merge,
-  deploy, or independently begin neighboring work.
+- GitHub owns branches, PRs, CI, review history, and the linked open GitHub issue required by the delivery ledger.
+- The coding agent owns one bounded issue through validated merge to `dev`. Humans retain planning, material architecture decisions, deployment, and production authority.
+- After required checks pass, perform one final review and feedback sweep. When
+  no blocking feedback remains, move Linear to Merging, mark the PR ready, and
+  merge it. Never deploy or independently begin neighboring work.
 - Use `Initiative → Project → Epic → Feature/Task/Bug → Sub-task`.
 - Initiatives are business outcomes; MoMi, MoSi, MoXi, and shared are surfaces, not roots.
 - Opened is L1-L3 only; keep possible decomposition in `Future decomposition candidates`.
