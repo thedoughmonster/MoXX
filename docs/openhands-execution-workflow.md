@@ -19,8 +19,8 @@ Work the assigned Linear issue using the MoMi execution workflow.
   and the linked open owning issue required by the delivery ledger.
 - Repository manifests, ADRs, `AGENTS.md`, impact tooling, validators, and CI are
   the technical authority.
-- Humans retain planning and material architecture decisions, deployment,
-  production mutation, and approval of material workflow changes.
+- Humans retain planning, material architecture decisions, production mutation,
+  and approval of material workflow changes.
 
 ## Start a task
 
@@ -57,7 +57,8 @@ Before completion it must:
 6. associate the PR with Linear and sweep all PR feedback;
 7. when no blocking feedback remains, move Linear to Merging, mark the PR ready,
    merge it to `dev`, and verify the merge commit is present on `origin/dev`;
-8. record the merge evidence and stop without deploying or selecting more work.
+8. for hosted scope, release the exact validation receipt to development and
+   verify one controlled acceptance event before stopping.
 
 The PR `validate-final` job is the authoritative final gate; do not duplicate
 it locally. It selects the correct full or path-scoped checks and verifies
@@ -93,5 +94,5 @@ from another capability.
 - Concurrency one is operationally enforced by explicit assignment, Linear
   status, and the skill; there is no distributed lock.
 - Linear remains beside OpenHands rather than embedded as a planning dashboard.
-- Starting a run and approving authentication are manual. A validated merge is
-  agent-controlled; deployment remains intentionally human-controlled.
+- Starting a run, review, merge, and validated development release are
+  agent-controlled. Production promotion remains intentionally human-controlled.

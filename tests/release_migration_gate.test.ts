@@ -2,15 +2,20 @@ import assert from "node:assert/strict"
 import { readFile } from "node:fs/promises"
 import test from "node:test"
 
-test("repository-only releases cannot touch database or application deploy", async () => {
+test("repository-only releases dispatch no hosted deployment", async () => {
   const dev = await readFile("scripts/release/release_dev.ts", "utf8")
-  const database = dev.indexOf("if (databaseApplied)")
-  const zeroDeploy = dev.indexOf("release.functions.length === 0")
-  assert.ok(database > 0)
-  assert.ok(zeroDeploy > database)
   assert.match(dev, /databaseApplied = plan\.impact\.release\.database !== "none"/)
-  assert.match(dev, /validatedPlan\.impact\.migrations/)
+  assert.match(dev, /!databaseApplied && plan\.impact\.release\.functions\.length === 0/)
+  assert.doesNotMatch(dev, /applyMigrations/)
   assert.match(dev, /\\? undefined/)
+})
+
+test("development migration parity precedes function deployment", async () => {
+  const deploy = await readFile("scripts/run_deploy_apply.ts", "utf8")
+  const database = deploy.indexOf("applyMigrations(")
+  const functions = deploy.indexOf("deployFunctions(")
+  assert.ok(database > 0 && database < functions)
+  assert.match(deploy, /options\.environment === "dev"/)
 })
 
 test("migration transport remains hosted-read, preview, apply, parity", async () => {

@@ -14,7 +14,7 @@ test("exposes the validation and literal release commands", async () => {
   assert.equal(json.scripts["release:prod"], "node scripts/run_release.ts --env prod")
 })
 
-test("keeps migration apply in one model-opaque local coordinator module", async () => {
+test("keeps migration apply in one model-opaque release module", async () => {
   const entries = await readdir("scripts", { recursive: true, withFileTypes: true })
   const callers: string[] = []
   for (const entry of entries) {
@@ -33,10 +33,19 @@ test("development uses one validation receipt and affected-only deployment", asy
   assert.match(source, /readValidationReceipt/)
   assert.match(source, /assertValidationJob/)
   assert.match(source, /assertPlanMatchesValidation/)
-  assert.match(source, /release\.functions\.length === 0/)
+  assert.match(source, /!databaseApplied && plan\.impact\.release\.functions\.length === 0/)
   assert.match(source, /release\.services\.join/)
-  assert.match(source, /applyMigrations\("dev", validatedPlan\.impact\.migrations\)/)
+  assert.doesNotMatch(source, /applyMigrations/)
   assert.doesNotMatch(source, /scripts\/check|--service|waitForPullRequest/)
+})
+
+test("development applies migrations inside its protected deployment", async () => {
+  const source = await readFile("scripts/run_deploy_apply.ts", "utf8")
+  assert.match(source, /options\.environment === "dev"/)
+  assert.match(source, /applyMigrations\("dev", plan\.impact\.migrations\)/)
+  assert.match(source, /plan\.impact\.release\.functions\.length === 0/)
+  assert.match(source, /if \(functions\.length > 0\) deployFunctions/)
+  assert.ok(source.indexOf("applyMigrations(") < source.indexOf("deployFunctions("))
 })
 
 test("production consumes the exact dev receipt without revalidation", async () => {
@@ -72,7 +81,7 @@ test("workflow polling is bounded and never shells out to run watch", async () =
   assert.match(finder, /includes\(identity\)/)
 })
 
-test("database apply remains outside GitHub workflows", async () => {
+test("raw migration commands remain outside workflow definitions", async () => {
   const names = await readdir(".github/workflows")
   for (const name of names) {
     const source = await readFile(`.github/workflows/${name}`, "utf8")

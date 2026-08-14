@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       expected_sha:
-        description: Exact dev commit whose migrations are already applied
+        description: Exact validated dev commit to release
         required: true
         type: string
       base_sha:
@@ -71,7 +71,8 @@ jobs:
             --head "$MOMI_EXPECTED_SHA" \
             --tree "$MOMI_VALIDATED_TREE" \
             --services "${{ inputs.services }}"
-      - run: pnpm run deploy:apply -- --env dev --services "${{ inputs.services }}"
+      - name: Apply migrations, prove parity, and deploy affected functions
+        run: pnpm run deploy:apply -- --env dev --services "${{ inputs.services }}"
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
       - uses: actions/upload-artifact@v4

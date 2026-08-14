@@ -2,7 +2,7 @@ import assert from "node:assert/strict"
 import { readFile } from "node:fs/promises"
 import test from "node:test"
 
-test("requires an agent-owned validated merge while preserving deployment", async () => {
+test("requires agent-owned review, merge, and development release", async () => {
   const contract = await readFile(new URL("../AGENTS.md", import.meta.url), "utf8")
   const workflow = await readFile(
     new URL("../docs/openhands-execution-workflow.md", import.meta.url), "utf8")
@@ -12,7 +12,9 @@ test("requires an agent-owned validated merge while preserving deployment", asyn
     new URL("../.openhands/hooks/on_stop.sh", import.meta.url), "utf8")
   for (const source of [contract, workflow, skill]) {
     assert.match(source, /merge.*`dev`/s)
-    assert.match(source, /deploy(?:ment)?/)
+    assert.match(source, /review/s)
+    assert.match(source, /development release/s)
+    assert.match(source, /production/s)
   }
   assert.match(hook, /pr_state.*MERGED/s)
   assert.match(hook, /mergeCommit/)

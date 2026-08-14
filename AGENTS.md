@@ -53,12 +53,11 @@ they deploy from the same repository.
   authoritative validation gate for the committed tree.
 - Only `.github/workflows/deploy-dev.yml` and `deploy-prod.yml` may invoke the
   deployment apply command.
-- The Node 24 release coordinator is the sole normal database migration
-  authority. It must use the pinned Supabase CLI's exact-project `--linked`
-  transport and CLI-owned short-lived login role.
-- A development deployment may start only after its exact commit is validated
-  and its migrations have reached parity; migration-free features may inherit
-  parity only from the exact deployed `dev` baseline and an empty migration diff.
+- The Node 24 release coordinator is the sole normal release orchestrator.
+  Development migrations run inside `deploy-dev.yml` through its pinned
+  Supabase CLI, exact-project `--linked` transport, and short-lived login role.
+- A development release may start only after its exact commit is validated.
+  Functions require planned parity or exact-baseline parity with no migration diff.
 - Keep manual operator programs under `local-tools/` and obey its `AGENTS.md`.
 - Track local tooling on both branches, but never deploy, host, schedule, or
   import it into runtime code.
@@ -122,9 +121,10 @@ they deploy from the same repository.
 - In OpenHands, use the `momi-execution` skill for an assigned Linear issue.
 - OpenHands is the execution harness; Linear owns planning and execution state.
 - GitHub owns branches, PRs, CI, review history, and the linked open GitHub issue required by the delivery ledger.
-- The coding agent owns one bounded issue through validated merge to `dev`. Humans retain planning, material architecture decisions, deployment, and production authority.
-- After required checks pass, perform one final review and feedback sweep. With
-  no blocking feedback, move Linear to Merging, mark the PR ready, and merge it. Never deploy or independently begin neighboring work.
+- The coding agent owns one bounded issue through review, validated merge, development release, and controlled acceptance. Humans retain planning, material architecture decisions, and production authority.
+- After required checks pass, perform one final review and feedback sweep. With no
+  blocking feedback, merge to `dev`, release required hosted changes,
+  verify one controlled acceptance event, and never begin neighboring work.
 - Use `Initiative → Project → Epic → Feature/Task/Bug → Sub-task`.
 - Initiatives are business outcomes; MoMi, MoSi, MoXi, and shared are surfaces, not roots.
 - Opened is L1-L3 only; keep possible decomposition in `Future decomposition candidates`.

@@ -84,10 +84,10 @@ test("codifies the supported agent deployment path", async () => {
   assert.match(contract, /agent-deployment-procedure\.md/)
   assert.match(procedure, /pnpm release:dev/)
   assert.match(procedure, /Never merge or push `prod` directly/)
-  assert.match(procedure, /authenticated CLI profile/)
-  assert.match(procedure, /OAuth or a personal access token/)
+  assert.match(procedure, /protected development workflow/)
+  assert.match(procedure, /account token/)
   assert.match(procedure, /short-lived database login/)
-  assert.match(procedure, /do not substitute the account PAT as a database password/)
+  assert.match(procedure, /never substitutes it.*database password/s)
   assert.match(procedure, /Do not retry through a different deployment authority/)
 })
 
