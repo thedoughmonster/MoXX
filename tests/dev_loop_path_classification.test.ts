@@ -10,6 +10,13 @@ test("classifies repository agent skills as tooling impact", () => {
   )
 })
 
+test("classifies OpenHands harness files as tooling impact", () => {
+  assert.equal(
+    classifyPath(".openhands/hooks/on_stop.sh"),
+    "repository_tooling",
+  )
+})
+
 test("classifies local operator tools as repository tooling", () => {
   assert.equal(
     classifyPath("local-tools/preorder-config/main.ts"),
