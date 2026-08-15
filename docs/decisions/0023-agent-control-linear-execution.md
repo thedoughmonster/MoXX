@@ -56,7 +56,9 @@ retained interactive state; it does not archive the thread or send a terminal
 callback. The same visible task accepts later user turns. Explicit task archive
 or exact cancellation closes the retained session and resumes the existing
 terminal callback. All other catalog actions retain one-shot archival behavior,
-and host dispatch v1 remains accepted during development cutover.
+and host dispatch v1 remains accepted during development cutover. Race recovery
+reads a newly started thread without resuming it; only startup recovery resumes
+stored threads to restore event subscriptions after a host restart.
 
 For parent runs, the visible parent task reads and preflights the direct Linear
 child graph. It applies each eligible child's one-shot `execute-run` label; the
