@@ -2,7 +2,7 @@
 
 - Status: accepted
 - Date: 2026-08-14
-- Owning issues: #504 / MOX-151; #517 / MOX-152
+- Owning issues: #504 / MOX-151; #517 / MOX-152; #519 / MOX-153
 
 ## Context
 
@@ -21,7 +21,7 @@ the untouched request bytes, records the complete envelope, and normalizes only
 fields named by `updatedFrom`. Exactly one newly added declared action creates
 canonical dispatch and run records in the same transaction.
 
-The accepted catalog is `execute-run`, `validate-issue`, `investigate-issue`,
+The accepted catalog is `execute-run`, `cancel-run`, `validate-issue`, `investigate-issue`,
 `cleanup`, `decompose`, and `run-discovery`. Events that add more than one
 catalog action are ambiguous and do not create work. Each accepted action is
 stored on the dispatch, consumed after host acceptance, and reported in the
@@ -46,8 +46,20 @@ The initial Codex turn contains only the accepted action, stable issue and
 mapping identities, plus a bounded action-specific instruction. `execute-run`
 owns repository implementation; the other actions are limited to validation,
 investigation, metadata cleanup, decomposition, or discovery. Symphony is not
-in this boundary. MOX-153 parent/cancellation behavior remains a separate
-decision.
+in this boundary.
+
+For parent runs, the visible parent task reads and preflights the direct Linear
+child graph. It applies each eligible child's one-shot `execute-run` label; the
+ingress links that child dispatch to the active parent dispatch and enforces one
+child dispatch per parent/issue pair. Parent state is reconstructed from those
+durable dispatch edges and child run records after task archival. The parent
+task reports deterministic eligibility, aggregate progress, partial failure,
+retry, and intervention evidence in Linear. It does not invoke Symphony.
+
+`cancel-run` creates a separate durable command targeting the newest
+`execute-run` for the same issue. Pending work is withdrawn transactionally;
+an exact active host turn receives idempotent `turn/interrupt`; terminal replay
+is successful; missing and ambiguous targets produce explicit Linear evidence.
 
 ## Security and authority
 
