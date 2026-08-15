@@ -58,7 +58,9 @@ or exact cancellation closes the retained session and resumes the existing
 terminal callback. All other catalog actions retain one-shot archival behavior,
 and host dispatch v1 remains accepted during development cutover. Race recovery
 reads a newly started thread without resuming it; only startup recovery resumes
-stored threads to restore event subscriptions after a host restart.
+stored threads to restore event subscriptions after a host restart. The host uses
+the managed App Server daemon and unsubscribes after retaining an interactive
+turn, releasing the same visible task for later sidebar input.
 
 For parent runs, the visible parent task reads and preflights the direct Linear
 child graph. It applies each eligible child's one-shot `execute-run` label; the
