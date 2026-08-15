@@ -7,7 +7,14 @@ settings:
 importers:
 
   .:
+    dependencies:
+      ws:
+        specifier: 8.21.3
+        version: 8.21.3
     devDependencies:
+      '@types/ws':
+        specifier: 8.18.1
+        version: 8.18.1
       ajv:
         specifier: 8.20.0
         version: 8.20.0
@@ -123,6 +130,12 @@ packages:
     cpu: [x64]
     os: [win32]
 
+  '@types/node@26.2.0':
+    resolution: {integrity: sha512-5IviulTZeRNp2vAJ514cc/HUlY5nZ9fCbq9DMyC52BrhFZACo3nI0R7qBxhQmo/d27NFe96ur/b7Wwxklda+kg==}
+
+  '@types/ws@8.18.1':
+    resolution: {integrity: sha512-ThVF6DCVhA8kUGy+aazFQ4kXQ7E1Ty7A3ypFOe0IcJV8O/M511G99AW24irKrW56Wt44yG9+ij8FaqoBGkuBXg==}
+
   ajv@8.20.0:
     resolution: {integrity: sha512-Thbli+OlOj+iMPYFBVBfJ3OmCAnaSyNn4M1vz9T6Gka5Jt9ba/HIR56joy65tY6kx/FCF5VXNB819Y7/GUrBGA==}
 
@@ -190,6 +203,21 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
+  undici-types@8.3.0:
+    resolution: {integrity: sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==}
+
+  ws@8.21.3:
+    resolution: {integrity: sha512-201TZ/kPWxoPr/OKWjquZR1SWKXcvxdH+e1xrx89b3YbmzLMFCLfnaG1HFIgWzJOEWZ7MvpK++odZufgYR50Rw==}
+    engines: {node: '>=10.0.0'}
+    peerDependencies:
+      bufferutil: ^4.0.1
+      utf-8-validate: '>=5.0.2'
+    peerDependenciesMeta:
+      bufferutil:
+        optional: true
+      utf-8-validate:
+        optional: true
+
 snapshots:
 
   '@deno/darwin-arm64@2.9.2':
@@ -245,6 +273,14 @@ snapshots:
 
   '@supabase/cli-windows-x64@2.109.1':
     optional: true
+
+  '@types/node@26.2.0':
+    dependencies:
+      undici-types: 8.3.0
+
+  '@types/ws@8.18.1':
+    dependencies:
+      '@types/node': 26.2.0
 
   ajv@8.20.0:
     dependencies:
@@ -323,3 +359,7 @@ snapshots:
       '@supabase/cli-windows-x64': 2.109.1
 
   typescript@6.0.3: {}
+
+  undici-types@8.3.0: {}
+
+  ws@8.21.3: {}
