@@ -2,7 +2,8 @@
 
 - Status: accepted
 - Date: 2026-08-14
-- Owning issues: #504 / MOX-151; #517 / MOX-152; #519 / MOX-153
+- Owning issues: #504 / MOX-151; #517 / MOX-152; #519 / MOX-153;
+  #523 / MOX-159
 
 ## Context
 
@@ -48,6 +49,15 @@ owns repository implementation; the other actions are limited to validation,
 investigation, metadata cleanup, decomposition, or discovery. Symphony is not
 in this boundary.
 
+`run-discovery` is the catalog's interactive exception. Host dispatch v2 names
+its non-ephemeral thread before the first turn and omits structured terminal
+output. A normally completed discovery turn moves the durable host record to a
+retained interactive state; it does not archive the thread or send a terminal
+callback. The same visible task accepts later user turns. Explicit task archive
+or exact cancellation closes the retained session and resumes the existing
+terminal callback. All other catalog actions retain one-shot archival behavior,
+and host dispatch v1 remains accepted during development cutover.
+
 For parent runs, the visible parent task reads and preflights the direct Linear
 child graph. It applies each eligible child's one-shot `execute-run` label; the
 ingress links that child dispatch to the active parent dispatch and enforces one
@@ -84,5 +94,6 @@ repeated. Linear labels/comments are reconciled from durable state. A failed
 ingress transaction cannot enqueue network work.
 
 Rollback removes the functions and trigger only through the normal manifest
-retirement and additive-migration process. Existing ledger history is retained;
+retirement and additive-migration process. Existing ledger history and retained
+interactive task identities are preserved;
 no rollback repeats an ambiguous task creation.
