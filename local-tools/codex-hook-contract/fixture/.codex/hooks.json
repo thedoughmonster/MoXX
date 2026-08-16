@@ -1,0 +1,31 @@
+{
+  "description": "Disposable Codex edit-event contract fixture.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^(apply_patch|Edit|Write)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/fixture_hook.mjs\"",
+            "timeout": 5,
+            "statusMessage": "Checking protected fixture paths"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^(apply_patch|Edit|Write)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/.codex/hooks/fixture_hook.mjs\"",
+            "timeout": 5,
+            "statusMessage": "Inspecting the edited fixture"
+          }
+        ]
+      }
+    ]
+  }
+}
