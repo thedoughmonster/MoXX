@@ -23,7 +23,7 @@ fields named by `updatedFrom`. Exactly one newly added declared action creates
 canonical dispatch and run records in the same transaction.
 
 The accepted catalog is `execute-run`, `cancel-run`, `validate-issue`, `investigate-issue`,
-`cleanup`, `decompose`, and `run-discovery`. Events that add more than one
+`cleanup`, `decompose`, `run-discovery`, and `recover-discovery`. Events that add more than one
 catalog action are ambiguous and do not create work. Each accepted action is
 stored on the dispatch, consumed after host acceptance, and reported in the
 marker-bound Linear comment. Provider retries converge on the delivery receipt.
@@ -61,6 +61,15 @@ reads a newly started thread without resuming it; only startup recovery resumes
 stored threads to restore event subscriptions after a host restart. The host uses
 the managed App Server daemon's private Unix WebSocket and unsubscribes after
 retaining an interactive turn, releasing the same visible task for later input.
+
+`recover-discovery` is the bounded control path for a retained discovery whose
+archive needs to be retried. It resolves the exact retained dispatch regardless
+of Linear workflow state, reads the retained thread, interrupts and confirms
+the sole active turn when present, then archives the thread and releases durable
+ownership. Missing, ambiguous, or mapping-mismatched targets produce sanitized
+unready evidence. Archive failure retains ownership and retries the same
+recovery identity; it cannot start a task. Force release and generalized
+recovery controls are not part of this contract.
 
 For parent runs, the visible parent task reads and preflights the direct Linear
 child graph. It applies each eligible child's one-shot `execute-run` label; the
