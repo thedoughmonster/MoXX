@@ -16,7 +16,7 @@ test("registers a synchronous pre-write hook for proven edit tools", async () =>
   const registration = configuration.hooks.PreToolUse[0]
   assert.equal(registration.matcher, "^(apply_patch|Edit|Write)$")
   assert.match(registration.hooks[0].command, /run_codex_migration_guard\.ts/)
-  assert.equal(configuration.hooks.PostToolUse, undefined)
+  assert.equal(registration.hooks[0].async, undefined)
 })
 
 test("denies an apply-patch update before a protected migration changes", async (t) => {

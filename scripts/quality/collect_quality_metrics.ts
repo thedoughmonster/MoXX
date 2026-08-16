@@ -3,15 +3,8 @@ import { extname, join, relative, sep } from "node:path"
 import * as ts from "typescript"
 
 import { workspaceRoot } from "../architecture/paths.ts"
+import { isQualityMetricsInput } from "./is_quality_metrics_input.ts"
 import type { QualityMetrics } from "./types.ts"
-
-const extensions = new Set([".ts", ".md", ".json", ".sql", ".toml", ".yml", ".yaml"])
-const ignoredPrefixes = [
-  ".momi/",
-  "node_modules/",
-  "supabase/.branches/",
-  "supabase/.temp/",
-]
 
 export async function collectQualityMetrics(): Promise<QualityMetrics> {
   const metrics: QualityMetrics = {
@@ -24,14 +17,10 @@ export async function collectQualityMetrics(): Promise<QualityMetrics> {
   }
   const entries = await readdir(workspaceRoot, { recursive: true, withFileTypes: true })
   for (const entry of entries) {
-    if (!entry.isFile() || !extensions.has(extname(entry.name))) continue
+    if (!entry.isFile()) continue
     const path = join(entry.parentPath, entry.name)
     const relativePath = relative(workspaceRoot, path).replaceAll(sep, "/")
-    if (
-      ignoredPrefixes.some((prefix) => relativePath.startsWith(prefix)) ||
-      relativePath === "pnpm-lock.yaml" ||
-      relativePath === "docs/quality-metrics.json"
-    ) continue
+    if (!isQualityMetricsInput(relativePath)) continue
     const source = (await readFile(path, "utf8")).replaceAll("\r\n", "\n")
     metrics.handwritten_files += 1
     metrics.handwritten_lines += source === "" ? 0 :
