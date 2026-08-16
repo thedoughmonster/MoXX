@@ -2,6 +2,8 @@ import type { ImpactClass } from "./types.ts"
 
 export function selectTestPaths(
   classifications: Record<ImpactClass, string[]>,
+  affectedServices: string[],
+  affectedFunctions: string[],
 ): string[] {
   const selected = new Set([
     "tests/dev_loop_determinism.test.ts",
@@ -12,6 +14,12 @@ export function selectTestPaths(
     for (const path of paths) {
       if (path.startsWith("tests/") && path.endsWith(".test.ts")) selected.add(path)
     }
+  }
+  for (const service of affectedServices) {
+    selected.add(`services/${service}/**/*.test.ts`)
+  }
+  for (const slug of affectedFunctions) {
+    selected.add(`supabase/functions/${slug}/**/*.test.ts`)
   }
   if (
     classifications.issue_automation.length > 0 ||
