@@ -1,0 +1,52 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "project-baseline-governance",
+  "purpose": "Own immutable material decision history for Project Baseline governance.",
+  "kind": "core_capability",
+  "service_type": "dataset_owner",
+  "lifecycle_status": "active",
+  "functions": [],
+  "contracts": { "provides": [], "consumes": [] },
+  "database": { "read": ["momi_governance"], "write": ["momi_governance"] },
+  "network": { "outbound_hosts": [] },
+  "secrets": [],
+  "configuration": [],
+  "deployment": { "owns": [], "depends_on": [
+    { "kind": "postgres_extension", "key": "pgcrypto" }
+  ] },
+  "runtime_dependencies": [],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "momi.project_baseline_governance",
+    "dataset_class": "operational",
+    "private_schema": "momi_governance",
+    "private_relations": [
+      "momi_governance.bootstrap_reconciliations",
+      "momi_governance.decision_evidence",
+      "momi_governance.decision_events",
+      "momi_governance.decision_external_references",
+      "momi_governance.material_decisions"
+    ],
+    "private_routines": [
+      "momi_governance.append_decision_event_v1",
+      "momi_governance.canonical_timestamp_v1",
+      "momi_governance.canonicalize_bootstrap_entry_v1",
+      "momi_governance.canonicalize_evidence_v1",
+      "momi_governance.canonicalize_external_references_v1",
+      "momi_governance.canonicalize_provenance_preimage_v1",
+      "momi_governance.prepare_bootstrap_reconciliation_v1",
+      "momi_governance.prepare_decision_evidence_v1",
+      "momi_governance.prepare_decision_event_v1",
+      "momi_governance.prepare_decision_reference_v1",
+      "momi_governance.prepare_material_decision_v1",
+      "momi_governance.provenance_digest_v1",
+      "momi_governance.read_decision_history_v1",
+      "momi_governance.reconcile_bootstrap_v1",
+      "momi_governance.reject_ledger_mutation"
+    ],
+    "public_reads": [],
+    "public_commands": [],
+    "emitted_events": []
+  }
+}
