@@ -1,0 +1,98 @@
+[
+  {
+    "name": "traversal",
+    "path": "filesystem.read.0.path",
+    "value": "../AGENTS.md",
+    "code": "path_escape"
+  },
+  {
+    "name": "glob",
+    "path": "filesystem.read.0.path",
+    "value": "docs/contracts/*.md",
+    "code": "path_escape"
+  },
+  {
+    "name": "absolute path",
+    "path": "filesystem.read.0.path",
+    "value": "/etc/passwd",
+    "code": "path_escape"
+  },
+  {
+    "name": "private cross-owner provider object",
+    "path": "database.read.0.owner_service",
+    "value": "toast-data-acquisition",
+    "code": "provider_leakage"
+  },
+  {
+    "name": "debt-derived object",
+    "path": "database.read.0.qualified_object",
+    "value": "legacy.private_table",
+    "code": "debt_derived_authority"
+  },
+  {
+    "name": "schema kind with object name",
+    "path": "database.read.0.object_kind",
+    "value": "schema",
+    "code": "object_kind_mismatch"
+  },
+  {
+    "name": "wildcard host",
+    "path": "network.connect.0.host",
+    "value": "*.example.com",
+    "code": "wildcard_or_credentials"
+  },
+  {
+    "name": "host credentials",
+    "path": "network.connect.0.host",
+    "value": "user@example.com",
+    "code": "wildcard_or_credentials"
+  },
+  {
+    "name": "secret value",
+    "path": "secrets.reference.0",
+    "value": "actual-secret-value",
+    "code": "secret_value"
+  },
+  {
+    "name": "stale revision",
+    "path": "base_revision",
+    "value": "0000000000000000000000000000000000000000",
+    "code": "base_revision_drift"
+  },
+  {
+    "name": "source digest drift",
+    "path": "source_digest",
+    "value": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "code": "source_digest_drift"
+  },
+  {
+    "name": "unknown version",
+    "path": "schema_version",
+    "value": "execution-authority/v2",
+    "code": "unknown_version"
+  },
+  {
+    "name": "unaccepted external resource",
+    "path": "external.invoke.0.resource",
+    "value": "another/repository",
+    "code": "external_authority_missing"
+  },
+  {
+    "name": "64-character git revision",
+    "path": "base_revision",
+    "value": "0000000000000000000000000000000000000000000000000000000000000000",
+    "code": "schema_invalid"
+  },
+  {
+    "name": "40-character source digest",
+    "path": "source_digest",
+    "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "code": "schema_invalid"
+  },
+  {
+    "name": "40-character provenance digest",
+    "path": "provenance.issue_authorization.digest",
+    "value": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "code": "schema_invalid"
+  }
+]
