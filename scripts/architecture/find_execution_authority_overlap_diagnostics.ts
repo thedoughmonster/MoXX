@@ -2,6 +2,7 @@ import type {
   ExecutionAuthority,
   ExecutionAuthorityDiagnostic,
 } from "./execution_authority_types.ts"
+import { findContained } from "./find_execution_authority_containment.ts"
 
 const requiredEscalations = [
   "allow_deny_overlap", "ambiguous_authority", "base_revision_drift",
@@ -12,15 +13,6 @@ const requiredEscalations = [
 const protectedOperations = [
   "deployment", "destructive", "production", "restoration", "runtime",
 ]
-
-function findContained(
-  allowed: string[],
-  denied: string[],
-  separator: "/" | ".",
-): string[] {
-  return allowed.filter((target) => denied.some((prohibition) =>
-    target === prohibition || target.startsWith(`${prohibition}${separator}`)))
-}
 
 export function findExecutionAuthorityOverlapDiagnostics(
   grant: ExecutionAuthority,
