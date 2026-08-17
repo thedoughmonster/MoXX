@@ -40,7 +40,7 @@ migration body runs in both databases. This is not the hosted receipt.
    receipt; confirm the schema is absent from the Data API schema setting.
 2. Through the exact-dev Supabase SQL connector, submit
    `tests/project_baseline_decision_ledger_connector.pg.sql` unchanged. Its
-   SHA-256 is `3681518de29f3a91d8fc39689afc592e507961da3c2611762e527f018d980ec7`.
+   SHA-256 is `b1d005668e09b3c1ddbfcf36821b45cdd5b0c77daa0564e2b9bdebc5dd079d0d`.
 3. Preserve its successful `BEGIN`/`ROLLBACK` output as the real development transaction receipt. Static repository tests do not prove runtime behavior.
 4. Confirm forced RLS, no policies or API grants, and trusted-operator-only
    routine execution from that receipt before any persistent ledger row.

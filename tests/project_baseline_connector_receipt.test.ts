@@ -27,8 +27,9 @@ function buildConnectorReceipt(parts: string[]): string {
 test("pins the connector-ready rollback receipt to its four owned sources", () => {
   assert.equal(connector, buildConnectorReceipt([core, lifecycle, bootstrap, security]));
   assert.doesNotMatch(connector, /\\(?:set|ir)\b/u);
+  assert.doesNotMatch(connector, /\bcreate\s+(?:or\s+replace\s+)?function\b/iu);
   const digest = createHash("sha256").update(connector, "utf8").digest("hex");
-  assert.equal(digest, "3681518de29f3a91d8fc39689afc592e507961da3c2611762e527f018d980ec7");
+  assert.equal(digest, "b1d005668e09b3c1ddbfcf36821b45cdd5b0c77daa0564e2b9bdebc5dd079d0d");
   assert.match(runbook, new RegExp(digest, "u"));
 });
 
