@@ -60,7 +60,7 @@ test("schema-wide grants cannot contain exact debt targets", async () => {
     item.target === "momi_orders.debt_relation"))
 })
 
-test("repository scanner validates self-bound and external grants", async (t) => {
+test("repository scanner requires a separate exact trust context", async (t) => {
   const root = await mkdtemp(join(tmpdir(), "momi-authority-scan-"))
   t.after(async () => await rm(root, { recursive: true, force: true }))
   await mkdir(join(root, "execution-authorities"), { recursive: true })
@@ -70,9 +70,7 @@ test("repository scanner validates self-bound and external grants", async (t) =>
     "schemas/execution-authority-v1.schema.json",
     "schemas/service-access-debt-baseline-v1.schema.json",
     "docs/service-access-debt-baseline.json",
-  ]) {
-    await cp(path, join(root, path))
-  }
+  ]) await cp(path, join(root, path))
   const zero = await readJson<ExecutionAuthority>(
     join(fixtureRoot, "zero-authority.json"),
   )
@@ -81,17 +79,30 @@ test("repository scanner validates self-bound and external grants", async (t) =>
   external.work_item = "MOX-202"
   external.provenance.issue_authorization.source = "linear:MOX-202"
   external.external.invoke = structuredClone(positive.external.invoke)
-  await writeFile(
-    join(root, "execution-authorities", "zero.json"),
-    JSON.stringify(zero),
-  )
-  await writeFile(
-    join(root, "execution-authorities", "external.json"),
-    JSON.stringify(external),
-  )
+  await writeFile(join(root, "execution-authorities", "zero.json"),
+    JSON.stringify(zero))
+  await writeFile(join(root, "execution-authorities", "external.json"),
+    JSON.stringify(external))
   const services = await discoverServices("services")
+  const trust = {
+    grants: {
+      "MOX-201": {
+        baseRevision: zero.base_revision, sourceDigest: zero.source_digest,
+      },
+      "MOX-202": {
+        baseRevision: external.base_revision,
+        sourceDigest: external.source_digest,
+      },
+    },
+    externalAuthorities: [
+      "github.contents:read:thedoughmonster/momi-backend",
+    ],
+  }
   assert.deepEqual(
-    await findExecutionAuthorityViolations(services, root),
-    [],
+    await findExecutionAuthorityViolations(services, root, trust), [],
   )
+  const untrusted = await findExecutionAuthorityViolations(services, root)
+  assert(untrusted.some((item) => item.includes("base_revision_drift")))
+  assert(untrusted.some((item) => item.includes("source_digest_drift")))
+  assert(untrusted.some((item) => item.includes("external_authority_missing")))
 })

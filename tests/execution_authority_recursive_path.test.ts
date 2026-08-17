@@ -13,7 +13,7 @@ import {
   context, fixtureRoot, schema,
 } from "./execution_authority_test_support.ts"
 
-test("recursive directory grants reject descendant symlink escape", async (t) => {
+test("recursive grants inspect nested in-root symlink directories", async (t) => {
   const root = await mkdtemp(join(tmpdir(), "momi-authority-root-"))
   const outside = await mkdtemp(join(tmpdir(), "momi-authority-outside-"))
   t.after(async () => {
@@ -21,7 +21,9 @@ test("recursive directory grants reject descendant symlink escape", async (t) =>
     await rm(outside, { recursive: true, force: true })
   })
   await mkdir(join(root, "scope"))
-  await symlink(outside, join(root, "scope", "escape"))
+  await mkdir(join(root, "inside"))
+  await symlink(join(root, "inside"), join(root, "scope", "inside"))
+  await symlink(outside, join(root, "inside", "escape"))
   const grant = await readJson<ExecutionAuthority>(
     join(fixtureRoot, "zero-authority.json"),
   )

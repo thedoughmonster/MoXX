@@ -23,9 +23,15 @@ export function findExecutionAuthorityOverlapDiagnostics(
       message: `${code}: ${target}` })
   }
   const paths = [...grant.filesystem.read, ...grant.filesystem.write]
-    .map((item) => item.path)
+    .map((item) => ({
+      target: item.path,
+      recursive: item.kind === "directory" && item.recursive,
+    }))
   const database = [...grant.database.read, ...grant.database.write]
-    .map((item) => item.qualified_object)
+    .map((item) => ({
+      target: item.qualified_object,
+      recursive: item.object_kind === "schema",
+    }))
   const overlaps: Array<[string, string[]]> = [
     ["paths", findContained(paths, grant.forbidden.paths, "/")],
     ["database_objects", findContained(

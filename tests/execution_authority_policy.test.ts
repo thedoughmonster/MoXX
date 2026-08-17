@@ -73,7 +73,7 @@ test("requires category-relevant provenance and repository rules", async () => {
     (item) => item.code === "provenance_missing"))
 })
 
-test("deny containment covers paths and database schemas only", async () => {
+test("deny containment covers both parent-child directions", async () => {
   const blocked = await diagnosticsFor((grant) => {
     grant.forbidden.paths = [
       ".env", "docs/contracts", "supabase/migrations",
@@ -87,6 +87,21 @@ test("deny containment covers paths and database schemas only", async () => {
     item.target === "docs/contracts/execution-authority-v1.md"))
   assert(blocked.some((item) =>
     item.code === "allow_deny_overlap" &&
+    item.target === "momi_orders.order_headers"))
+  const children = await diagnosticsFor((grant) => {
+    grant.forbidden.paths.push(
+      "tests/fixtures/execution-authority/rejections.json",
+    )
+    grant.database.read[0] = {
+      owner_service: "preorder-operations",
+      object_kind: "schema",
+      qualified_object: "momi_orders",
+    }
+    grant.forbidden.database_objects.push("momi_orders.order_headers")
+  })
+  assert(children.some((item) =>
+    item.target === "tests/fixtures/execution-authority/rejections.json"))
+  assert(children.some((item) =>
     item.target === "momi_orders.order_headers"))
   const sibling = await diagnosticsFor((grant) => {
     grant.forbidden.paths = [

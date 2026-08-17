@@ -5,6 +5,7 @@ import { buildExecutionAuthorityDatabaseOwners } from
   "./build_execution_authority_database_owners.ts"
 import type {
   ExecutionAuthority,
+  ExecutionAuthorityTrustContext,
   LoadedExecutionAuthority,
 } from "./execution_authority_types.ts"
 import { findExecutionAuthorityIdentityViolations } from
@@ -19,6 +20,7 @@ import { workspaceRoot } from "./paths.ts"
 export async function findExecutionAuthorityViolations(
   services: LoadedService[],
   root = workspaceRoot,
+  trust?: ExecutionAuthorityTrustContext,
 ): Promise<string[]> {
   const directory = join(root, "execution-authorities")
   let entries
@@ -62,18 +64,15 @@ export async function findExecutionAuthorityViolations(
   violations.push(...findExecutionAuthorityIdentityViolations(grants))
   const debtTargets = await loadExecutionAuthorityDebtTargets(root)
   for (const { label, grant } of grants) {
+    const accepted = trust?.grants[grant.work_item]
     const diagnostics = await validateExecutionAuthority(grant, schema, {
       root,
       repository: "thedoughmonster/momi-backend",
-      baseRevision: grant.base_revision,
-      sourceDigest: grant.source_digest,
+      baseRevision: accepted?.baseRevision ?? "",
+      sourceDigest: accepted?.sourceDigest ?? "",
       services: indexed,
       databaseOwners,
-      externalAuthorities: grant.provenance.external_authorities.flatMap(
-        ({ source }) => source.startsWith("external-authority:")
-          ? [source.slice("external-authority:".length)]
-          : [],
-      ),
+      externalAuthorities: trust?.externalAuthorities ?? [],
       debtTargets,
     })
     violations.push(...diagnostics.map((item) =>

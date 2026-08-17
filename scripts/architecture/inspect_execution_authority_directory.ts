@@ -1,4 +1,4 @@
-import { readdir, realpath } from "node:fs/promises"
+import { readdir, realpath, stat } from "node:fs/promises"
 import { join, relative, sep } from "node:path"
 
 export async function inspectExecutionAuthorityDirectory(
@@ -6,8 +6,11 @@ export async function inspectExecutionAuthorityDirectory(
   directory: string,
 ): Promise<string | undefined> {
   const pending = [directory]
+  const visited = new Set<string>()
   while (pending.length > 0) {
-    const current = pending.pop()!
+    const current = await realpath(pending.pop()!)
+    if (visited.has(current)) continue
+    visited.add(current)
     for (const entry of await readdir(current, { withFileTypes: true })) {
       const path = join(current, entry.name)
       const targetReal = await realpath(path)
@@ -15,7 +18,10 @@ export async function inspectExecutionAuthorityDirectory(
       if (resolved === ".." || resolved.startsWith(`..${sep}`)) {
         return "symlink_escape"
       }
-      if (entry.isDirectory()) pending.push(path)
+      if (entry.isDirectory() ||
+        (entry.isSymbolicLink() && (await stat(targetReal)).isDirectory())) {
+        pending.push(targetReal)
+      }
     }
   }
   return undefined

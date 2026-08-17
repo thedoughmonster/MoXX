@@ -75,6 +75,11 @@ export type DatabaseOwnerIndex = {
   schemas: Record<string, string[]>
 }
 
+export type ExecutionAuthorityTrustContext = {
+  grants: Record<string, { baseRevision: string; sourceDigest: string }>
+  externalAuthorities: string[]
+}
+
 export type ExecutionAuthorityContext = {
   root: string
   repository: string
