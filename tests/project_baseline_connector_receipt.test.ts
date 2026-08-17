@@ -29,7 +29,7 @@ test("pins the connector-ready rollback receipt to its four owned sources", () =
   assert.doesNotMatch(connector, /\\(?:set|ir)\b/u);
   assert.doesNotMatch(connector, /\bcreate\s+(?:or\s+replace\s+)?function\b/iu);
   const digest = createHash("sha256").update(connector, "utf8").digest("hex");
-  assert.equal(digest, "b1d005668e09b3c1ddbfcf36821b45cdd5b0c77daa0564e2b9bdebc5dd079d0d");
+  assert.equal(digest, "eca490174d69cc9c124b114a3353ccd2cfb5208084667b670a9eb3fea7f74a82");
   assert.match(runbook, new RegExp(digest, "u"));
 });
 

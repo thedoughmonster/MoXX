@@ -7,6 +7,8 @@ declare
   v_replay record;
   v_accepted record;
   v_history jsonb;
+  v_invalid_case record;
+  v_valid_bootstrap jsonb;
 begin
   begin
     perform momi_governance.canonicalize_provenance_preimage_v1(null);
@@ -18,6 +20,85 @@ begin
     raise exception 'NULL bootstrap entry was accepted';
   exception when invalid_parameter_value then null;
   end;
+
+  for v_invalid_case in
+    select * from (values
+      ('missing schema_version',
+        '{"encoding":"utf-8","content":"x"}'::jsonb),
+      ('JSON null schema_version',
+        '{"schema_version":null,"encoding":"utf-8","content":"x"}'::jsonb),
+      ('string schema_version',
+        '{"schema_version":"1","encoding":"utf-8","content":"x"}'::jsonb),
+      ('wrong schema_version value',
+        '{"schema_version":2,"encoding":"utf-8","content":"x"}'::jsonb),
+      ('missing encoding',
+        '{"schema_version":1,"content":"x"}'::jsonb),
+      ('JSON null encoding',
+        '{"schema_version":1,"encoding":null,"content":"x"}'::jsonb),
+      ('wrong encoding type',
+        '{"schema_version":1,"encoding":8,"content":"x"}'::jsonb),
+      ('wrong encoding value',
+        '{"schema_version":1,"encoding":"utf-16","content":"x"}'::jsonb),
+      ('missing content',
+        '{"schema_version":1,"encoding":"utf-8"}'::jsonb),
+      ('non-string content',
+        '{"schema_version":1,"encoding":"utf-8","content":7}'::jsonb),
+      ('extra key',
+        '{"schema_version":1,"encoding":"utf-8","content":"x","extra":true}'::jsonb)
+    ) as invalid_cases(case_name, preimage)
+  loop
+    begin
+      perform momi_governance.canonicalize_provenance_preimage_v1(
+        v_invalid_case.preimage
+      );
+      raise exception 'Malformed provenance preimage (%) was accepted',
+        v_invalid_case.case_name;
+    exception when invalid_parameter_value then null;
+    end;
+  end loop;
+
+  v_valid_bootstrap := jsonb_build_object(
+    'schema_version', 1,
+    'temporary_id', 'PB-INVALID-1',
+    'category', 'governance',
+    'decision', 'Reject malformed bootstrap entries',
+    'rationale', 'Bootstrap discriminators must be exact JSON values',
+    'alternatives', '[]'::jsonb,
+    'consequences', '[]'::jsonb,
+    'decided_by', 'local-validator',
+    'decided_at', '2026-08-17T00:00:00Z',
+    'source_snapshot', 'disposable local PostgreSQL',
+    'supersedes_temporary_id', null,
+    'evidence', '[]'::jsonb,
+    'external_references', '[]'::jsonb
+  );
+  for v_invalid_case in
+    select * from (values
+      ('missing schema_version', v_valid_bootstrap - 'schema_version'),
+      ('JSON null schema_version', jsonb_set(
+        v_valid_bootstrap, '{schema_version}', 'null'::jsonb
+      )),
+      ('string schema_version', jsonb_set(
+        v_valid_bootstrap, '{schema_version}', '"1"'::jsonb
+      )),
+      ('wrong schema_version type', jsonb_set(
+        v_valid_bootstrap, '{schema_version}', '[]'::jsonb
+      )),
+      ('wrong schema_version value', jsonb_set(
+        v_valid_bootstrap, '{schema_version}', '2'::jsonb
+      )),
+      ('extra key', v_valid_bootstrap || '{"extra":true}'::jsonb)
+    ) as invalid_cases(case_name, entry)
+  loop
+    begin
+      perform momi_governance.canonicalize_bootstrap_entry_v1(
+        v_invalid_case.entry
+      );
+      raise exception 'Malformed bootstrap entry (%) was accepted',
+        v_invalid_case.case_name;
+    exception when invalid_parameter_value then null;
+    end;
+  end loop;
 
   select * into v_first from momi_governance.append_decision_event_v1(
     'receipt_fixture', 'PB-LOCAL-1',

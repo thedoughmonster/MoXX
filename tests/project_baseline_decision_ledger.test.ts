@@ -50,8 +50,10 @@ test("binds immutable evidence and external references to events", () => {
   assert.match(appendFunction, /'external_references', v_references/u);
   assert.match(sql, /canonicalize_provenance_preimage_v1/u);
   assert.match(provenanceFunction, /convert_to\(v_preimage->>'content', 'UTF8'\)/u);
-  assert.match(preimageFunction, /p_preimage is null/u);
-  assert.match(bootstrapEntryFunction, /p_entry is null/u);
+  assert.match(preimageFunction,
+    /jsonb_typeof\(p_preimage\) is distinct from 'object'[\s\S]+p_preimage->'schema_version' is distinct from '1'::jsonb[\s\S]+p_preimage->'encoding' is distinct from '"utf-8"'::jsonb[\s\S]+jsonb_typeof\(p_preimage->'content'\) is distinct from 'string'/u);
+  assert.match(bootstrapEntryFunction,
+    /p_entry->'schema_version' is distinct from '1'::jsonb/u);
   assert.match(appendFunction, /digest does not match its canonical preimage/gmu);
 });
 test("requires one event source identity and idempotency key", () => {

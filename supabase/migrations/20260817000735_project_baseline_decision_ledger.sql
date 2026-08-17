@@ -162,11 +162,12 @@ create function momi_governance.canonicalize_provenance_preimage_v1(
 ) returns jsonb language plpgsql immutable security invoker set search_path = '' as $$
 begin
   if p_preimage is null
-    or jsonb_typeof(p_preimage) <> 'object'
-    or p_preimage->>'schema_version' <> '1'
-    or p_preimage->>'encoding' <> 'utf-8'
-    or coalesce(jsonb_typeof(p_preimage->'content'), '') <> 'string'
-    or (p_preimage - 'schema_version' - 'encoding' - 'content') <> '{}'::jsonb
+    or jsonb_typeof(p_preimage) is distinct from 'object'
+    or p_preimage->'schema_version' is distinct from '1'::jsonb
+    or p_preimage->'encoding' is distinct from '"utf-8"'::jsonb
+    or jsonb_typeof(p_preimage->'content') is distinct from 'string'
+    or (p_preimage - 'schema_version' - 'encoding' - 'content')
+      is distinct from '{}'::jsonb
   then
     raise exception 'Provenance preimage must contain only schema_version 1, utf-8 encoding, and string content'
       using errcode = '22023';
@@ -887,15 +888,15 @@ declare
   v_references jsonb;
 begin
   if p_entry is null
-    or jsonb_typeof(p_entry) <> 'object'
-    or p_entry->>'schema_version' <> '1'
+    or jsonb_typeof(p_entry) is distinct from 'object'
+    or p_entry->'schema_version' is distinct from '1'::jsonb
     or (
       p_entry
       - 'schema_version' - 'temporary_id' - 'category' - 'decision'
       - 'rationale' - 'alternatives' - 'consequences' - 'decided_by'
       - 'decided_at' - 'source_snapshot' - 'supersedes_temporary_id'
       - 'evidence' - 'external_references' - 'temporary_digest'
-    ) <> '{}'::jsonb
+    ) is distinct from '{}'::jsonb
     or nullif(btrim(p_entry->>'temporary_id'), '') is null
     or p_entry->>'category' not in (
       'scope', 'architecture_contract', 'data_security_ops',

@@ -96,7 +96,7 @@ internal UUID, raw status ID, or private payload.
    governed pull-request and exact-receipt development release only.
 2. Submit the exact-dev connector rollback payload
    `tests/project_baseline_decision_ledger_connector.pg.sql` (SHA-256
-   `b1d005668e09b3c1ddbfcf36821b45cdd5b0c77daa0564e2b9bdebc5dd079d0d`).
+   `eca490174d69cc9c124b114a3353ccd2cfb5208084667b670a9eb3fea7f74a82`).
 3. Preserve its successful hosted `ROLLBACK` before persistent rows. Bind the
    release SHA/tree, project ref, migration and fixture hashes, and manifest digest.
 4. Submit `tests/project_baseline_bootstrap_apply_fixture.pg.sql` unchanged

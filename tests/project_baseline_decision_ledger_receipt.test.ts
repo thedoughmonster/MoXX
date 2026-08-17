@@ -39,6 +39,15 @@ test("runtime receipt proves canonical bootstrap failures", () => {
 test("runtime receipts reconstruct digests and prove target-lock freshness", () => {
   assert.match(entry, /NULL provenance preimage was accepted/u);
   assert.match(entry, /NULL bootstrap entry was accepted/u);
+  for (const invalidCase of [
+    "missing schema_version", "JSON null schema_version",
+    "string schema_version", "wrong schema_version type",
+    "wrong schema_version value", "missing encoding", "JSON null encoding",
+    "wrong encoding type", "wrong encoding value", "missing content",
+    "non-string content", "extra key",
+  ]) {
+    assert.match(entry, new RegExp(invalidCase, "u"));
+  }
   assert.match(entry, /changed expected digest was accepted/u);
   assert.match(entry, /provenance_digest_v1/u);
   assert.match(entry, /source_identity_preimage/u);
