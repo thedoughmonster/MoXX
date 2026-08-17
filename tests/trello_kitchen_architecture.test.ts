@@ -90,7 +90,7 @@ test("accepts explicit Trello inbound and outbound function boundaries", () => {
 
 test("keeps canonical task identity and activation gates explicit", async () => {
   const decision = await readFile(join(
-    workspaceRoot, "docs", "decisions", "0019-trello-kitchen-task-integration.md",
+    workspaceRoot, "docs", "decisions", "0025-trello-kitchen-task-integration.md",
   ), "utf8")
   const normalized = decision.replaceAll(/\s+/g, " ")
   assert.match(normalized, /MoMi UUIDs are canonical/)

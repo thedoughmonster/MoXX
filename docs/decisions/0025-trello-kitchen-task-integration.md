@@ -1,4 +1,4 @@
-# 0019: Trello Kitchen Task Integration
+# 0025: Trello Kitchen Task Integration
 
 - Status: accepted
 - Date: 2026-07-27
