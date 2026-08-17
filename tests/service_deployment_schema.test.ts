@@ -40,6 +40,26 @@ test("accepts a typed database-only service", () => {
   assert.doesNotThrow(() => validateJson(schema, manifest, "fixture"))
 })
 
+test("requires service_type at the manifest root", () => {
+  const untyped = { ...manifest } as Partial<typeof manifest>
+  delete untyped.service_type
+  assert.throws(
+    () => validateJson(schema, untyped, "fixture"),
+    /fixture: \/ must have required property 'service_type'/u,
+  )
+})
+
+test("rejects unsupported service types", () => {
+  assert.throws(
+    () => validateJson(
+      schema,
+      { ...manifest, service_type: "unsupported" },
+      "fixture",
+    ),
+    /fixture: \/service_type/u,
+  )
+})
+
 test("rejects malformed operational unit keys", () => {
   const deployment = {
     ...manifest.deployment,

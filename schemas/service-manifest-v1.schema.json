@@ -1,7 +1,7 @@
 { "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://momi.local/schemas/service-manifest-v1.schema.json", "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "service_key", "purpose", "kind",
+  "required": ["schema_version", "service_key", "purpose", "kind", "service_type",
     "lifecycle_status", "functions", "contracts", "database", "network",
     "secrets", "runtime_dependencies", "approved_packages"],
   "properties": {
