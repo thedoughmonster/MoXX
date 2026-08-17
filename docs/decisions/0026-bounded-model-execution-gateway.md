@@ -1,4 +1,4 @@
-# 0018: Bounded model execution gateway
+# 0026: Bounded model execution gateway
 
 - Status: accepted
 - Date: 2026-07-25
