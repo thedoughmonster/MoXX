@@ -36,6 +36,18 @@ export const context: ExecutionAuthorityContext = {
       consumes: [], network: [], secrets: [], packages: [],
     },
   },
+  databaseOwners: {
+    relations: {
+      "momi_orders.order_headers": ["preorder-operations"],
+      "momi_orders.order_items": ["preorder-operations"],
+      "toast_raw.orders": ["toast-data-acquisition"],
+    },
+    routines: {},
+    schemas: {
+      momi_orders: ["preorder-operations"],
+      toast_raw: ["toast-data-acquisition"],
+    },
+  },
   externalAuthorities: [
     "github.contents:read:thedoughmonster/momi-backend",
   ],

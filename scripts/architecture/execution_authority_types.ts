@@ -69,12 +69,19 @@ export type ManifestAuthority = {
   packages: string[]
 }
 
+export type DatabaseOwnerIndex = {
+  relations: Record<string, string[]>
+  routines: Record<string, string[]>
+  schemas: Record<string, string[]>
+}
+
 export type ExecutionAuthorityContext = {
   root: string
   repository: string
   baseRevision: string
   sourceDigest: string
   services: Record<string, ManifestAuthority>
+  databaseOwners: DatabaseOwnerIndex
   externalAuthorities: string[]
   debtTargets: string[]
 }

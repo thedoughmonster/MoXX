@@ -1,6 +1,8 @@
 import { readdir } from "node:fs/promises"
 import { join } from "node:path"
 
+import { buildExecutionAuthorityDatabaseOwners } from
+  "./build_execution_authority_database_owners.ts"
 import type {
   ExecutionAuthority,
   LoadedExecutionAuthority,
@@ -41,6 +43,7 @@ export async function findExecutionAuthorityViolations(
       packages: manifest.approved_packages,
     },
   ]))
+  const databaseOwners = buildExecutionAuthorityDatabaseOwners(services)
   const violations: string[] = []
   const grants: LoadedExecutionAuthority[] = []
   for (const entry of entries.sort((left, right) =>
@@ -62,10 +65,15 @@ export async function findExecutionAuthorityViolations(
     const diagnostics = await validateExecutionAuthority(grant, schema, {
       root,
       repository: "thedoughmonster/momi-backend",
-      baseRevision: process.env.MOMI_BASE_REF ?? "",
-      sourceDigest: process.env.MOMI_EXECUTION_AUTHORITY_SOURCE_DIGEST ?? "",
+      baseRevision: grant.base_revision,
+      sourceDigest: grant.source_digest,
       services: indexed,
-      externalAuthorities: [],
+      databaseOwners,
+      externalAuthorities: grant.provenance.external_authorities.flatMap(
+        ({ source }) => source.startsWith("external-authority:")
+          ? [source.slice("external-authority:".length)]
+          : [],
+      ),
       debtTargets,
     })
     violations.push(...diagnostics.map((item) =>

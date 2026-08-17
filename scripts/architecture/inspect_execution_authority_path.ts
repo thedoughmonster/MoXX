@@ -2,6 +2,8 @@ import { lstat, realpath } from "node:fs/promises"
 import { isAbsolute, posix, relative, resolve, sep } from "node:path"
 
 import type { PathAuthority } from "./execution_authority_types.ts"
+import { inspectExecutionAuthorityDirectory } from
+  "./inspect_execution_authority_directory.ts"
 
 export async function inspectExecutionAuthorityPath(
   root: string,
@@ -29,6 +31,9 @@ export async function inspectExecutionAuthorityPath(
     if (authority.kind === "file" && !targetStat.isFile()) return "path_kind"
     if (authority.kind === "directory" && !targetStat.isDirectory()) {
       return "path_kind"
+    }
+    if (authority.kind === "directory" && authority.recursive) {
+      return await inspectExecutionAuthorityDirectory(rootReal, target)
     }
   } catch {
     return "path_missing"

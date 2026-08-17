@@ -47,9 +47,20 @@ export function findExecutionAuthorityBoundaryDiagnostics(
         report(`${path}/qualified_object`, "object_kind_mismatch",
           item.qualified_object)
       }
-      if (item.owner_service !== grant.service) {
+      const ownerKind = item.object_kind === "routine"
+        ? "routines"
+        : item.object_kind === "schema" ? "schemas" : "relations"
+      const canonicalOwners = context.databaseOwners[ownerKind][
+        item.qualified_object
+      ] ?? []
+      const canonicalOwner = canonicalOwners.length === 1
+        ? canonicalOwners[0]
+        : undefined
+      if (canonicalOwner !== item.owner_service ||
+        item.owner_service !== grant.service) {
         report(`${path}/owner_service`, "cross_owner_target", item.owner_service)
-        if (providers.has(item.owner_service)) {
+        if (providers.has(canonicalOwner ?? "") ||
+          providers.has(item.owner_service)) {
           report(path, "provider_leakage", item.qualified_object)
         }
       }
@@ -57,8 +68,11 @@ export function findExecutionAuthorityBoundaryDiagnostics(
       const allowed = manifest?.database[mode].some((entry) =>
         entry === schemaName || entry === item.qualified_object)
       if (!allowed) report(path, "manifest_mismatch", item.qualified_object)
-      if (debt.has(item.qualified_object)) {
-        report(path, "debt_derived_authority", item.qualified_object)
+      const debtTarget = [...debt].sort().find((target) =>
+        target === item.qualified_object ||
+        (schemaWide && target.startsWith(`${item.qualified_object}.`)))
+      if (debtTarget) {
+        report(path, "debt_derived_authority", debtTarget)
       }
     }
   }
