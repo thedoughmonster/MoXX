@@ -10,6 +10,12 @@ export type DatabaseAuthority = {
   qualified_object: string
 }
 
+export type ExternalAuthority = {
+  authority_key: string
+  operation: string
+  resource: string
+}
+
 export type ExecutionAuthority = {
   $schema?: string
   schema_version: "execution-authority/v1"
@@ -25,9 +31,7 @@ export type ExecutionAuthority = {
   network: { connect: Array<{ protocol: string; host: string; port: number }> }
   secrets: { reference: string[] }
   packages: { use: string[] }
-  external: {
-    invoke: Array<{ authority_key: string; operation: string; resource: string }>
-  }
+  external: { invoke: ExternalAuthority[] }
   forbidden: {
     paths: string[]
     services: string[]
@@ -35,11 +39,7 @@ export type ExecutionAuthority = {
     contracts: string[]
     hosts: string[]
     secret_names: string[]
-    external_actions: Array<{
-      authority_key: string
-      operation: string
-      resource: string
-    }>
+    external_actions: ExternalAuthority[]
     operation_classes: string[]
   }
   escalate_on: string[]
@@ -79,7 +79,7 @@ export type ExecutionAuthorityTrustContext = {
   grants: Record<string, {
     baseRevision: string
     sourceDigest: string
-    externalAuthorities: string[]
+    externalAuthorities: ExternalAuthority[]
   }>
 }
 
@@ -90,7 +90,7 @@ export type ExecutionAuthorityContext = {
   sourceDigest: string
   services: Record<string, ManifestAuthority>
   databaseOwners: DatabaseOwnerIndex
-  externalAuthorities: string[]
+  externalAuthorities: ExternalAuthority[]
   debtTargets: string[]
 }
 

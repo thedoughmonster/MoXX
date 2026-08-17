@@ -84,7 +84,11 @@ test("repository scanner requires issue-scoped trust", async (t) => {
   await writeFile(join(root, "execution-authorities", "external.json"),
     JSON.stringify(external))
   const services = await discoverServices("services")
-  const externalKey = "github.contents:read:thedoughmonster/momi-backend"
+  const externalKey = {
+    authority_key: "github.contents",
+    operation: "read",
+    resource: "thedoughmonster/momi-backend",
+  }
   const trust = {
     grants: {
       "MOX-201": {

@@ -49,7 +49,11 @@ export const context: ExecutionAuthorityContext = {
     },
   },
   externalAuthorities: [
-    "github.contents:read:thedoughmonster/momi-backend",
+    {
+      authority_key: "github.contents",
+      operation: "read",
+      resource: "thedoughmonster/momi-backend",
+    },
   ],
   debtTargets: ["legacy.private_table"],
 }

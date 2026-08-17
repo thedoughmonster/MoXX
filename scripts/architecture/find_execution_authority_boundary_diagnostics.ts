@@ -71,9 +71,7 @@ export function findExecutionAuthorityBoundaryDiagnostics(
       const debtTarget = [...debt].sort().find((target) =>
         target === item.qualified_object ||
         (schemaWide && target.startsWith(`${item.qualified_object}.`)))
-      if (debtTarget) {
-        report(path, "debt_derived_authority", debtTarget)
-      }
+      if (debtTarget) report(path, "debt_derived_authority", debtTarget)
     }
   }
   for (const [index, item] of grant.contracts.call.entries()) {
@@ -104,9 +102,13 @@ export function findExecutionAuthorityBoundaryDiagnostics(
     }
   })
   grant.external.invoke.forEach((item, index) => {
-    const key = `${item.authority_key}:${item.operation}:${item.resource}`
-    if (!context.externalAuthorities.includes(key)) {
-      report(`/external/invoke/${index}`, "external_authority_missing", key)
+    const accepted = context.externalAuthorities.some((authority) =>
+      authority.authority_key === item.authority_key &&
+      authority.operation === item.operation &&
+      authority.resource === item.resource)
+    if (!accepted) {
+      report(`/external/invoke/${index}`, "external_authority_missing",
+        JSON.stringify(item))
     }
   })
   return diagnostics
