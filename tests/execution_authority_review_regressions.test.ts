@@ -60,7 +60,7 @@ test("schema-wide grants cannot contain exact debt targets", async () => {
     item.target === "momi_orders.debt_relation"))
 })
 
-test("repository scanner requires a separate exact trust context", async (t) => {
+test("repository scanner requires issue-scoped trust", async (t) => {
   const root = await mkdtemp(join(tmpdir(), "momi-authority-scan-"))
   t.after(async () => await rm(root, { recursive: true, force: true }))
   await mkdir(join(root, "execution-authorities"), { recursive: true })
@@ -84,23 +84,29 @@ test("repository scanner requires a separate exact trust context", async (t) => 
   await writeFile(join(root, "execution-authorities", "external.json"),
     JSON.stringify(external))
   const services = await discoverServices("services")
+  const externalKey = "github.contents:read:thedoughmonster/momi-backend"
   const trust = {
     grants: {
       "MOX-201": {
-        baseRevision: zero.base_revision, sourceDigest: zero.source_digest,
+        baseRevision: zero.base_revision,
+        sourceDigest: zero.source_digest,
+        externalAuthorities: [],
       },
       "MOX-202": {
         baseRevision: external.base_revision,
         sourceDigest: external.source_digest,
+        externalAuthorities: [externalKey],
       },
     },
-    externalAuthorities: [
-      "github.contents:read:thedoughmonster/momi-backend",
-    ],
   }
   assert.deepEqual(
     await findExecutionAuthorityViolations(services, root, trust), [],
   )
+  const crossed = structuredClone(trust)
+  crossed.grants["MOX-201"].externalAuthorities = [externalKey]
+  crossed.grants["MOX-202"].externalAuthorities = []
+  assert((await findExecutionAuthorityViolations(services, root, crossed))
+    .some((item) => item.includes("external_authority_missing")))
   const untrusted = await findExecutionAuthorityViolations(services, root)
   assert(untrusted.some((item) => item.includes("base_revision_drift")))
   assert(untrusted.some((item) => item.includes("source_digest_drift")))

@@ -72,7 +72,7 @@ export async function findExecutionAuthorityViolations(
       sourceDigest: accepted?.sourceDigest ?? "",
       services: indexed,
       databaseOwners,
-      externalAuthorities: trust?.externalAuthorities ?? [],
+      externalAuthorities: accepted?.externalAuthorities ?? [],
       debtTargets,
     })
     violations.push(...diagnostics.map((item) =>
