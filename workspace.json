@@ -38,7 +38,8 @@
     "legacy_recipe_staging",
     "momi_archive",
     "momi_communications",
-    "momi_agent_ops"
+    "momi_agent_ops",
+    "momi_governance"
   ],
   "policies": {
     "max_handwritten_lines": 120,

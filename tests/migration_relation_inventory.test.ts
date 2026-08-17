@@ -16,8 +16,8 @@ test("replays the exact current application relation inventory", async () => {
   ));
   const inventory = replayRelationInventory(migrations);
   const kinds = [...inventory.values()];
-  assert.equal(inventory.size, 169);
-  assert.equal(kinds.filter((kind) => kind === "table").length, 138);
+  assert.equal(inventory.size, 174);
+  assert.equal(kinds.filter((kind) => kind === "table").length, 143);
   assert.equal(kinds.filter((kind) => kind === "view").length, 31);
   for (
     const relation of [
@@ -53,6 +53,11 @@ test("replays the exact current application relation inventory", async () => {
       "momi_agent_ops.project_mappings",
       "momi_agent_ops.raw_webhook_envelopes",
       "momi_agent_ops.run_records",
+      "momi_governance.bootstrap_reconciliations",
+      "momi_governance.decision_evidence",
+      "momi_governance.decision_events",
+      "momi_governance.decision_external_references",
+      "momi_governance.material_decisions",
       "trello_acquisition.webhook_inventory_jobs",
     ]
   ) assert.equal(inventory.get(relation), "table");
