@@ -1,7 +1,14 @@
 import { readdir } from "node:fs/promises"
 import { join } from "node:path"
 
-import type { ExecutionAuthority } from "./execution_authority_types.ts"
+import type {
+  ExecutionAuthority,
+  LoadedExecutionAuthority,
+} from "./execution_authority_types.ts"
+import { findExecutionAuthorityIdentityViolations } from
+  "./find_execution_authority_identity_violations.ts"
+import { loadExecutionAuthorityDebtTargets } from
+  "./load_execution_authority_debt_targets.ts"
 import type { LoadedService } from "./types.ts"
 import { readJson } from "./read_json.ts"
 import { validateExecutionAuthority } from "./validate_execution_authority.ts"
@@ -35,13 +42,23 @@ export async function findExecutionAuthorityViolations(
     },
   ]))
   const violations: string[] = []
-  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+  const grants: LoadedExecutionAuthority[] = []
+  for (const entry of entries.sort((left, right) =>
+    left.name.localeCompare(right.name))) {
     const label = `execution-authorities/${entry.name}`
-    if (entry.isSymbolicLink() || !entry.isFile() || !entry.name.endsWith(".json")) {
+    if (entry.isSymbolicLink() || !entry.isFile() ||
+      !entry.name.endsWith(".json")) {
       violations.push(`${label}: only JSON files are allowed`)
       continue
     }
-    const grant = await readJson<ExecutionAuthority>(join(directory, entry.name))
+    grants.push({
+      label,
+      grant: await readJson<ExecutionAuthority>(join(directory, entry.name)),
+    })
+  }
+  violations.push(...findExecutionAuthorityIdentityViolations(grants))
+  const debtTargets = await loadExecutionAuthorityDebtTargets(root)
+  for (const { label, grant } of grants) {
     const diagnostics = await validateExecutionAuthority(grant, schema, {
       root,
       repository: "thedoughmonster/momi-backend",
@@ -49,10 +66,10 @@ export async function findExecutionAuthorityViolations(
       sourceDigest: process.env.MOMI_EXECUTION_AUTHORITY_SOURCE_DIGEST ?? "",
       services: indexed,
       externalAuthorities: [],
-      debtTargets: [],
+      debtTargets,
     })
     violations.push(...diagnostics.map((item) =>
       `${label}${item.field_path}: ${item.code}: ${item.target}`))
   }
-  return violations
+  return violations.sort((left, right) => left.localeCompare(right))
 }

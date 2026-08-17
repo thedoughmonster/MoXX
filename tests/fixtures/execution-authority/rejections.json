@@ -76,5 +76,23 @@
     "path": "external.invoke.0.resource",
     "value": "another/repository",
     "code": "external_authority_missing"
+  },
+  {
+    "name": "64-character git revision",
+    "path": "base_revision",
+    "value": "0000000000000000000000000000000000000000000000000000000000000000",
+    "code": "schema_invalid"
+  },
+  {
+    "name": "40-character source digest",
+    "path": "source_digest",
+    "value": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "code": "schema_invalid"
+  },
+  {
+    "name": "40-character provenance digest",
+    "path": "provenance.issue_authorization.digest",
+    "value": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "code": "schema_invalid"
   }
 ]

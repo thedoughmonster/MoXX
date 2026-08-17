@@ -55,6 +55,11 @@ export type ExecutionAuthority = {
   }
 }
 
+export type LoadedExecutionAuthority = {
+  label: string
+  grant: ExecutionAuthority
+}
+
 export type ManifestAuthority = {
   database: { read: string[]; write: string[] }
   provides: string[]

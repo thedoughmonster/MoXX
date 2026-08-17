@@ -8,7 +8,7 @@ The reviewed declaration is authoritative. A future execution packet may contain
 
 ## Identity and fail-closed rule
 
-Identity is `schema_version`, `grant_id`, `work_item`, `service`, `repository`, exact `base_revision`, and `source_digest`. `source_digest` binds the accepted decision in `provenance.accepted_decisions`. Unknown fields, unsupported versions, missing provenance, base or digest drift, ambiguity, and contradictions fail closed. No weaker source is unioned into a grant and no permissive fallback exists.
+Identity is `schema_version`, `grant_id`, `work_item`, `service`, `repository`, exact 40-character Git `base_revision`, and 64-character SHA-256 `source_digest`. `source_digest` binds the accepted decision in `provenance.accepted_decisions`. Unknown fields, unsupported versions, missing provenance, base or digest drift, ambiguity, and contradictions fail closed. No weaker source is unioned into a grant and no permissive fallback exists.
 
 Every collection is required, unique, canonically sorted by its JSON representation, and may be empty. Diagnostics are sorted by `grant_id`, field path, code, and target.
 

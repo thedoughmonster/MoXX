@@ -13,6 +13,15 @@ const protectedOperations = [
   "deployment", "destructive", "production", "restoration", "runtime",
 ]
 
+function findContained(
+  allowed: string[],
+  denied: string[],
+  separator: "/" | ".",
+): string[] {
+  return allowed.filter((target) => denied.some((prohibition) =>
+    target === prohibition || target.startsWith(`${prohibition}${separator}`)))
+}
+
 export function findExecutionAuthorityOverlapDiagnostics(
   grant: ExecutionAuthority,
 ): ExecutionAuthorityDiagnostic[] {
@@ -21,20 +30,28 @@ export function findExecutionAuthorityOverlapDiagnostics(
     diagnostics.push({ grant_id: grant.grant_id, field_path, code, target,
       message: `${code}: ${target}` })
   }
-  const overlaps: Array<[string, string[], string[]]> = [
-    ["paths", [...grant.filesystem.read, ...grant.filesystem.write].map((x) => x.path), grant.forbidden.paths],
-    ["database_objects", [...grant.database.read, ...grant.database.write].map((x) => x.qualified_object), grant.forbidden.database_objects],
-    ["contracts", grant.contracts.call.map((x) => x.contract), grant.forbidden.contracts],
-    ["hosts", grant.network.connect.map((x) => x.host), grant.forbidden.hosts],
-    ["secret_names", grant.secrets.reference, grant.forbidden.secret_names],
-    ["external_actions", grant.external.invoke.map((x) =>
-      `${x.authority_key}:${x.operation}:${x.resource}`),
-      grant.forbidden.external_actions.map((x) =>
-        `${x.authority_key}:${x.operation}:${x.resource}`)],
+  const paths = [...grant.filesystem.read, ...grant.filesystem.write]
+    .map((item) => item.path)
+  const database = [...grant.database.read, ...grant.database.write]
+    .map((item) => item.qualified_object)
+  const overlaps: Array<[string, string[]]> = [
+    ["paths", findContained(paths, grant.forbidden.paths, "/")],
+    ["database_objects", findContained(
+      database, grant.forbidden.database_objects, ".",
+    )],
+    ["contracts", grant.contracts.call.map((item) => item.contract).filter(
+      (target) => grant.forbidden.contracts.includes(target))],
+    ["hosts", grant.network.connect.map((item) => item.host).filter(
+      (target) => grant.forbidden.hosts.includes(target))],
+    ["secret_names", grant.secrets.reference.filter(
+      (target) => grant.forbidden.secret_names.includes(target))],
+    ["external_actions", grant.external.invoke.map((item) =>
+      `${item.authority_key}:${item.operation}:${item.resource}`).filter(
+        (target) => grant.forbidden.external_actions.some((item) =>
+          target === `${item.authority_key}:${item.operation}:${item.resource}`))],
   ]
-  overlaps.forEach(([field, allowed, denied]) => allowed.filter((target) =>
-    denied.includes(target)).forEach((target) =>
-      report(`/forbidden/${field}`, "allow_deny_overlap", target)))
+  overlaps.forEach(([field, targets]) => targets.forEach((target) =>
+    report(`/forbidden/${field}`, "allow_deny_overlap", target)))
   const directServices = [
     ...grant.contracts.call.map((item) => item.provider_service),
     ...grant.database.read.map((item) => item.owner_service),
@@ -48,8 +65,10 @@ export function findExecutionAuthorityOverlapDiagnostics(
   protectedOperations.filter((item) =>
     !grant.forbidden.operation_classes.includes(item)).forEach((item) =>
       report("/forbidden/operation_classes", "protected_operation", item))
-  if (grant.provenance.issue_authorization.source !== `linear:${grant.work_item}`) {
-    report("/provenance/issue_authorization", "provenance_missing", grant.work_item)
+  if (grant.provenance.issue_authorization.source !==
+    `linear:${grant.work_item}`) {
+    report("/provenance/issue_authorization", "provenance_missing",
+      grant.work_item)
   }
   if (!grant.provenance.accepted_decisions.some((item) =>
     item.digest === grant.source_digest)) {

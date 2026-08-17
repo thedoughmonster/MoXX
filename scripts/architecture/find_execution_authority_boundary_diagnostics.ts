@@ -14,6 +14,25 @@ export function findExecutionAuthorityBoundaryDiagnostics(
       message: `${code}: ${target}` })
   }
   const manifest = context.services[grant.service]
+  if (grant.provenance.repository_rules.length === 0) {
+    report("/provenance/repository_rules", "provenance_missing",
+      "repository_rules")
+  }
+  const manifestBound = grant.database.read.length > 0 ||
+    grant.database.write.length > 0 || grant.network.connect.length > 0 ||
+    grant.secrets.reference.length > 0 || grant.packages.use.length > 0
+  if (manifestBound && grant.provenance.manifests.length === 0) {
+    report("/provenance/manifests", "provenance_missing", "manifests")
+  }
+  if (grant.contracts.call.length > 0 &&
+    grant.provenance.contracts.length === 0) {
+    report("/provenance/contracts", "provenance_missing", "contracts")
+  }
+  if (grant.external.invoke.length > 0 &&
+    grant.provenance.external_authorities.length === 0) {
+    report("/provenance/external_authorities", "provenance_missing",
+      "external_authorities")
+  }
   if (!manifest) report("/service", "manifest_mismatch", grant.service)
   const providers = new Set(grant.contracts.call.map((item) =>
     item.provider_service))

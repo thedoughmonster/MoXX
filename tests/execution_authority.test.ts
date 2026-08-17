@@ -4,42 +4,12 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import test from "node:test"
 import { digestExecutionAuthority } from "../scripts/architecture/digest_execution_authority.ts"
-import type { ExecutionAuthority, ExecutionAuthorityContext } from
+import type { ExecutionAuthority } from
   "../scripts/architecture/execution_authority_types.ts"
-import { workspaceRoot } from "../scripts/architecture/paths.ts"
 import { readJson } from "../scripts/architecture/read_json.ts"
 import { validateExecutionAuthority } from "../scripts/architecture/validate_execution_authority.ts"
-const fixtureRoot = join(workspaceRoot, "tests", "fixtures",
-  "execution-authority")
-const schema = await readJson<object>(join(workspaceRoot,
-  "schemas", "execution-authority-v1.schema.json"))
-const positive = await readJson<ExecutionAuthority>(
-  join(fixtureRoot, "positive.json"))
-const context: ExecutionAuthorityContext = {
-  root: workspaceRoot,
-  repository: "thedoughmonster/momi-backend",
-  baseRevision: "99c8a6dd0f5306fe9a450e1d1e0ba256bb1931f8",
-  sourceDigest: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-  services: {
-    "preorder-operations": {
-      database: { read: ["momi_orders"], write: ["momi_orders"] },
-      provides: [],
-      consumes: ["toast-data-acquisition:momi.toast_order_api.v1"],
-      network: ["example.com"],
-      secrets: ["MOMI_TEST_SECRET"],
-      packages: ["@momi/test-contract"],
-    },
-    "toast-data-acquisition": {
-      database: { read: ["toast_raw"], write: ["toast_raw"] },
-      provides: ["momi.toast_order_api.v1"],
-      consumes: [], network: [], secrets: [], packages: [],
-    },
-  },
-  externalAuthorities: [
-    "github.contents:read:thedoughmonster/momi-backend",
-  ],
-  debtTargets: ["legacy.private_table"],
-}
+import { context, fixtureRoot, positive, schema } from
+  "./execution_authority_test_support.ts"
 test("accepts exact positive, zero, and contract-only grants", async () => {
   const zero = await readJson<ExecutionAuthority>(
     join(fixtureRoot, "zero-authority.json"))
