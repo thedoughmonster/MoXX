@@ -32,6 +32,11 @@ export function findExecutionAuthorityOverlapDiagnostics(
       target: item.qualified_object,
       recursive: item.object_kind === "schema",
     }))
+  const externalActions = grant.external.invoke.filter((allowed) =>
+    grant.forbidden.external_actions.some((denied) =>
+      allowed.authority_key === denied.authority_key &&
+      allowed.operation === denied.operation &&
+      allowed.resource === denied.resource)).map((item) => JSON.stringify(item))
   const overlaps: Array<[string, string[]]> = [
     ["paths", findContained(paths, grant.forbidden.paths, "/")],
     ["database_objects", findContained(
@@ -43,10 +48,7 @@ export function findExecutionAuthorityOverlapDiagnostics(
       (target) => grant.forbidden.hosts.includes(target))],
     ["secret_names", grant.secrets.reference.filter(
       (target) => grant.forbidden.secret_names.includes(target))],
-    ["external_actions", grant.external.invoke.map((item) =>
-      `${item.authority_key}:${item.operation}:${item.resource}`).filter(
-        (target) => grant.forbidden.external_actions.some((item) =>
-          target === `${item.authority_key}:${item.operation}:${item.resource}`))],
+    ["external_actions", externalActions],
   ]
   overlaps.forEach(([field, targets]) => targets.forEach((target) =>
     report(`/forbidden/${field}`, "allow_deny_overlap", target)))
