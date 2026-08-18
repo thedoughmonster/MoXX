@@ -31,3 +31,12 @@ dynamic expression is replaced with an exact declared identity.
 Versioned public relation reads and routine calls are exempt only when the owner
 maps the exact object to a provided contract and the consumer declares that
 exact provider contract.
+
+## Lifecycle metadata
+
+Every currently accepted fingerprint must also appear exactly once in
+`docs/debt-lifecycle-registry.json`. The sidecar adds temporary ownership,
+risk, review, expiry, renewal, removal, and focused remediation-issue metadata
+without copying or redefining finding identity. Local checks remain network-free;
+the trusted-base GitHub workflow separately proves the referenced issues open.
+Removing debt removes the baseline finding and lifecycle reference together.
