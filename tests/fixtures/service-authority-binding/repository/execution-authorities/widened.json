@@ -1,0 +1,72 @@
+{
+  "$schema": "../../../../../schemas/execution-authority-v1.schema.json",
+  "schema_version": "execution-authority/v1",
+  "grant_id": "ea-mox-204-fixture-widened",
+  "work_item": "MOX-204",
+  "service": "fixture-owner",
+  "repository": "thedoughmonster/momi-backend",
+  "base_revision": "1111111111111111111111111111111111111111",
+  "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "filesystem": { "read": [], "write": [] },
+  "database": {
+    "read": [
+      {
+        "owner_service": "fixture-no-dataset",
+        "object_kind": "table",
+        "qualified_object": "legacy_private.records"
+      }
+    ],
+    "write": []
+  },
+  "contracts": { "call": [] },
+  "network": { "connect": [] },
+  "secrets": { "reference": [] },
+  "packages": { "use": [] },
+  "external": { "invoke": [] },
+  "forbidden": {
+    "paths": [".env", "supabase/migrations"],
+    "services": ["unrelated-service"],
+    "database_objects": ["other.private_table"],
+    "contracts": ["private.contract.v1"],
+    "hosts": ["blocked.example.com"],
+    "secret_names": ["PRODUCTION_SECRET"],
+    "external_actions": [],
+    "operation_classes": [
+      "deployment", "destructive", "production", "restoration", "runtime"
+    ]
+  },
+  "escalate_on": [
+    "allow_deny_overlap", "ambiguous_authority", "base_revision_drift",
+    "contract_mismatch", "cross_owner_target", "debt_derived_authority",
+    "external_authority_missing", "manifest_mismatch", "path_escape",
+    "protected_operation", "provider_leakage", "secret_value", "unknown_version"
+  ],
+  "provenance": {
+    "issue_authorization": {
+      "source": "linear:MOX-204",
+      "digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    },
+    "accepted_decisions": [
+      {
+        "source": "linear:comment:6ad13967-4dc6-4dcb-8a18-6b2522e375a5",
+        "digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      }
+    ],
+    "repository_rules": [
+      {
+        "source": "AGENTS.md",
+        "digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    ],
+    "manifests": [
+      {
+        "source": "services/fixture-owner/service.json",
+        "digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+      }
+    ],
+    "contracts": [],
+    "external_authorities": [],
+    "runtime_observations": [],
+    "legacy_debt": []
+  }
+}

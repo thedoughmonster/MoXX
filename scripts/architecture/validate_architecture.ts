@@ -14,6 +14,8 @@ import { findAdapterViolations } from "./find_adapter_violations.ts"
 import { findAdrNumberViolations } from "./find_adr_number_violations.ts"
 import { findExecutionAuthorityViolations } from
   "./find_execution_authority_violations.ts"
+import { findServiceAuthorityBindingViolations } from
+  "./find_service_authority_binding_violations.ts"
 import { loadRetirements } from "./load_retirements.ts"
 import { findFunctionInventoryViolations } from
   "./find_function_inventory_violations.ts"
@@ -54,6 +56,7 @@ export async function validateArchitecture(): Promise<Architecture> {
   const modules = await loadSourceModules(services)
   const violations = [
     ...await findExecutionAuthorityViolations(services),
+    ...await findServiceAuthorityBindingViolations(services),
     ...await findAdrNumberViolations(
       join(workspaceRoot, "docs", "decisions"),
     ),

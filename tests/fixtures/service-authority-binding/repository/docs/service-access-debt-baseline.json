@@ -1,0 +1,35 @@
+{
+  "$schema": "https://momi.local/schemas/service-access-debt-baseline-v1.schema.json",
+  "schema_version": 1,
+  "generated_from": "dev@fafe25d",
+  "notes": ["This test-only baseline is removal-only and never grants permission."],
+  "findings": [
+    {
+      "rule_version": 1,
+      "rule_id": "direct_private_relation_access",
+      "subject": "services/fixture-no-dataset/src/store_record.ts",
+      "evidence": {
+        "access": "write",
+        "consumer_service": "fixture-no-dataset",
+        "owner_service": "fixture-owner",
+        "reference_count": "1",
+        "relation": "fixture_private.records",
+        "sql_source_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "summary": "fixture-no-dataset directly writes fixture-owner records as removal-only debt.",
+      "fingerprint": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+    },
+    {
+      "rule_version": 1,
+      "rule_id": "dynamic_event_name",
+      "subject": "database/routines/fixture_dynamic.emit_event--abcdef123456.sql",
+      "evidence": {
+        "expressions": "'fixture.' || event_type",
+        "service_key": "fixture-dynamic-debt",
+        "service_source_hash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+      },
+      "summary": "fixture-dynamic-debt constructs an event identity dynamically.",
+      "fingerprint": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+    }
+  ]
+}
