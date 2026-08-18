@@ -17,10 +17,18 @@ import { findExecutionAuthorityViolations } from
 import { loadRetirements } from "./load_retirements.ts"
 import { findFunctionInventoryViolations } from
   "./find_function_inventory_violations.ts"
+import { findServiceStatusViolations } from
+  "./find_service_status_violations.ts"
 
 export async function validateArchitecture(): Promise<Architecture> {
   const workspace = await loadWorkspace()
   const services = await discoverServices(workspace.paths.services)
+  const statusViolations = findServiceStatusViolations(services)
+  if (statusViolations.length > 0) {
+    throw new Error(
+      `Architecture violations:\n- ${statusViolations.join("\n- ")}`,
+    )
+  }
   const retirements = await loadRetirements(workspace.paths.retirements, services)
   const inventoryViolations = await findFunctionInventoryViolations(
     workspace,

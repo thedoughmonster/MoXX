@@ -6,7 +6,10 @@ import { workspaceRoot } from "./architecture/paths.ts"
 import { renderFunctionCatalog } from "./function_catalog.ts"
 
 const architecture = await validateArchitecture()
-const expected = renderFunctionCatalog(architecture.functions)
+const expected = renderFunctionCatalog(
+  architecture.functions,
+  architecture.services,
+)
 const actual = await readFile(join(workspaceRoot, "docs", "service-catalog.md"), "utf8")
 
 if (actual !== expected) {

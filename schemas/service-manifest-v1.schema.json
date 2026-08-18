@@ -33,7 +33,7 @@
         "db_role": { "type": "string", "pattern": "^svc_[a-z][a-z0-9_]*$" }
       }
     },
-    "lifecycle_status": { "enum": ["active", "retiring", "retired"] },
+    "lifecycle_status": { "enum": ["active", "retiring", "retired"] }, "implementation_status": { "enum": ["declared", "implemented", "hosted_inactive", "operational"] },
     "functions": {
       "type": "array", "uniqueItems": true,
       "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]+-v[0-9]+$" }

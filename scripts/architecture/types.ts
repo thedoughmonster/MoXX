@@ -1,8 +1,5 @@
-import type {
-  OwnedDataset,
-  ServiceDeployment,
-  ServiceType,
-} from "./service_manifest_types.ts"
+import type { ImplementationStatus, OwnedDataset, ServiceDeployment, ServiceType } from
+  "./service_manifest_types.ts"
 
 export type WorkspaceConfig = {
   schema_version: 1
@@ -43,6 +40,7 @@ export type ServiceManifest = {
   kind: "source_adapter" | "core_capability" | "destination_adapter"
   service_type?: ServiceType
   lifecycle_status: "active" | "retiring" | "retired"
+  implementation_status?: ImplementationStatus
   functions: string[]
   contracts: {
     provides: string[]
