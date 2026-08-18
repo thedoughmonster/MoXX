@@ -107,14 +107,14 @@ test("validation receipt counts are recomputed", () => {
     ...receipt,
     commands: [{ ...receipt.commands[0], enforcement: "unknown" }],
   }), /Invalid authoritative validation receipt/)
-  assert.throws(() => validateValidationReceipt({
-    ...receipt,
-    commands: [receipt.commands[1]],
+  for (const [gate, id] of [
+    ["full", "full-repository:hard_stop,quality-report"],
+    ["path_scoped", "focused-tests:hard_stop,source-quality:hard_stop," +
+      "quality-report-validity:hard_stop,quality-report"],
+  ] as const) assert.throws(() => validateValidationReceipt({
+    ...receipt, gate, commands: [{ ...receipt.commands[1], id }],
     counts: { commands: 1, hard_passed: 0, hard_failed: 0,
-      advisory_passed: 1, advisory_findings: 0 },
-    duration_ms: 1,
+      advisory_passed: 1, advisory_findings: 0 }, duration_ms: 1,
   }), /Invalid authoritative validation receipt/)
-  assert.throws(() => validateValidationReceipt({
-    ...receipt, commands: {},
-  }), /Invalid authoritative validation receipt/)
+  assert.throws(() => validateValidationReceipt({ ...receipt, commands: {} }), /Invalid authoritative validation receipt/)
 })

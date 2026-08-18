@@ -3,15 +3,22 @@ import type { ValidationReceipt } from "./types.ts"
 export function validateValidationReceipt(value: unknown): ValidationReceipt {
   const receipt = value as ValidationReceipt
   const commands = Array.isArray(receipt?.commands) ? receipt.commands : []
-  const signatures = commands.map((item) => `${item.id}:${item.enforcement}`)
-  const expectedSignatures = receipt?.gate === "full"
-    ? ["full-repository:hard_stop", "quality-report:advisory"]
-    : [
-      "focused-tests:hard_stop",
-      "source-quality:hard_stop",
-      "quality-report-validity:hard_stop",
-      "quality-report:advisory",
+  const expectedCommands = receipt?.gate === "full"
+    ? [
+      { id: "full-repository", enforcement: "hard_stop" },
+      { id: "quality-report", enforcement: "advisory" },
     ]
+    : [
+      { id: "focused-tests", enforcement: "hard_stop" },
+      { id: "source-quality", enforcement: "hard_stop" },
+      { id: "quality-report-validity", enforcement: "hard_stop" },
+      { id: "quality-report", enforcement: "advisory" },
+    ]
+  const planMismatch = commands.length !== expectedCommands.length ||
+    commands.some((item, index) =>
+      item.id !== expectedCommands[index]?.id ||
+      item.enforcement !== expectedCommands[index]?.enforcement
+    )
   const hardPassed = commands.filter((item) =>
     item.enforcement === "hard_stop" && item.status === 0
   ).length
@@ -54,7 +61,7 @@ export function validateValidationReceipt(value: unknown): ValidationReceipt {
     !/^[0-9a-f]{64}$/.test(receipt.identities?.impact_sha256 ?? "") ||
     !/^[0-9a-f]{64}$/.test(receipt.identities?.plan_sha256 ?? "") ||
     !Array.isArray(receipt.commands) || commands.length === 0 ||
-    signatures.join(",") !== expectedSignatures.join(",") ||
+    planMismatch ||
     invalidCommand || receipt.counts?.commands !== commands.length ||
     receipt.counts.hard_passed !== hardPassed ||
     receipt.counts.hard_failed !== hardFailed ||
