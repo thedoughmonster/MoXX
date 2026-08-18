@@ -5,7 +5,7 @@
 The service moved to its own repository. This folder is a signpost that keeps
 old database-history checks valid and rejects new implementation work here.
 
-Executable ownership moved to the private `thedoughmonster/momi-symphony`
+Executable ownership moved to the dedicated public `thedoughmonster/momi-symphony`
 repository on `main` under MOX-233.
 
 This tombstone has no code, functions, runtime configuration, deployment, or
