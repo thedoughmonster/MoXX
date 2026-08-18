@@ -22,7 +22,7 @@ test("indexes the bounded canonical corpus and preserves absent authority", asyn
     "1111111111111111111111111111111111111111",
     { grants: {} },
   )
-  assert.equal(Object.keys(context.manifests).length, 30)
+  assert.equal(Object.keys(context.manifests).length, 29)
   assert.equal(context.debt.findings.length, 133)
   assert.deepEqual(context.executions, {})
   assert.deepEqual(

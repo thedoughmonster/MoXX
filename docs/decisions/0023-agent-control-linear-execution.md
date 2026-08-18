@@ -1,5 +1,11 @@
 # 0023: Linear-driven Codex agent control
 
+> Repository handoff (2026-08-18): the architecture remains valid, but
+> executable ownership, development deployment, and every future
+> `momi_agent_ops` migration moved to `thedoughmonster/momi-symphony` on
+> `main`. This repository retains this decision and its seven applied
+> development migrations as immutable history only.
+
 - Status: accepted
 - Date: 2026-08-14
 - Owning issues: #504 / MOX-151; #517 / MOX-152; #519 / MOX-153;
