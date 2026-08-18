@@ -36,3 +36,7 @@ as the recurring debt.
 
 Run `pnpm constitution:check`. Findings are printed in deterministic order for
 the required pre-merge architecture review; no generated report is written.
+
+Any future accepted finding would also require an exact entry in the versioned
+debt lifecycle registry. The current empty constitution baseline therefore adds
+zero lifecycle entries and cannot borrow metadata from runtime-access debt.

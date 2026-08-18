@@ -1,3 +1,4 @@
+import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 
 import { workspaceRoot } from "./architecture/paths.ts"
@@ -18,6 +19,16 @@ import { loadTargetBaselineFingerprints } from
   "./constitution/load_target_baseline_fingerprints.ts"
 import { loadTargetAccessBaselineFingerprints } from
   "./constitution/load_target_access_baseline_fingerprints.ts"
+import { buildDebtLifecycleTrend } from
+  "./constitution/build_debt_lifecycle_trend.ts"
+import { findDebtLifecycleViolations } from
+  "./constitution/find_debt_lifecycle_violations.ts"
+import { loadDebtLifecycleRegistry } from
+  "./constitution/load_debt_lifecycle_registry.ts"
+import { loadTargetDebtLifecycleRegistry } from
+  "./constitution/load_target_debt_lifecycle_registry.ts"
+import { renderDebtLifecycleTrend } from
+  "./constitution/render_debt_lifecycle_trend.ts"
 import { replayRelationInventory } from
   "./constitution/replay_relation_inventory.ts"
 import { replayRelationDefinitions } from
@@ -61,7 +72,31 @@ const accessViolations = findBaselineViolations(
   accessBaseline,
   loadTargetAccessBaselineFingerprints(),
 )
-const violations = [...declarationViolations, ...accessViolations]
+const registry = await loadDebtLifecycleRegistry()
+const lifecycleFindings = [...baseline.findings, ...accessBaseline.findings]
+const lifecycleViolations = findDebtLifecycleViolations(
+  lifecycleFindings,
+  registry,
+  loadTargetDebtLifecycleRegistry(),
+)
+const expectedTrend = renderDebtLifecycleTrend(
+  buildDebtLifecycleTrend(lifecycleFindings, registry),
+)
+const actualTrend = await readFile(join(
+  workspaceRoot,
+  "docs",
+  "debt-lifecycle-trend.json",
+), "utf8")
+if (actualTrend.replaceAll("\r\n", "\n") !== expectedTrend) {
+  lifecycleViolations.push(
+    "debt lifecycle trend is stale; run pnpm debt-lifecycle:generate",
+  )
+}
+const violations = [
+  ...declarationViolations,
+  ...accessViolations,
+  ...lifecycleViolations,
+]
 
 if (violations.length > 0) {
   throw new Error(`Service constitution violations:\n- ${violations.join("\n- ")}`)
@@ -71,6 +106,7 @@ console.log(
   `Service constitution declarations valid: ${findings.length} exact baselined findings.`,
 )
 console.log(`Runtime access ratchet valid: ${accessFindings.length} exact findings.`)
+console.log(`Debt lifecycle registry valid: ${lifecycleFindings.length} exact findings.`)
 for (const finding of findings) {
   console.log(
     `- ${finding.rule_id}@${finding.rule_version} ${finding.subject} ` +
