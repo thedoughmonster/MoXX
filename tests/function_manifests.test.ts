@@ -3,8 +3,10 @@ import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 import test from "node:test"
 
+import { functionSchemaPath, workspaceRoot } from "../scripts/architecture/paths.ts"
+import { readJson } from "../scripts/architecture/read_json.ts"
+import { validateJson } from "../scripts/architecture/validate_json.ts"
 import { validateArchitecture } from "../scripts/architecture/validate_architecture.ts"
-import { workspaceRoot } from "../scripts/architecture/paths.ts"
 import { renderFunctionCatalog } from "../scripts/function_catalog.ts"
 
 test("validates discovered services, functions, and generated catalog", async () => {
@@ -25,6 +27,32 @@ test("validates discovered services, functions, and generated catalog", async ()
       (count, service) => count + service.manifest.functions.length,
       0,
     ),
+  )
+
+  const loadedFunction = architecture.functions[0]
+  const functionSchema = await readJson<object>(functionSchemaPath)
+  const label = `${loadedFunction.slug}/function.json`
+  assert.throws(
+    () => validateJson(functionSchema, {
+      ...loadedFunction.manifest,
+      unexpected_policy_ref: "policy.example.v1",
+    }, label),
+    {
+      message: `${label}: /unexpected_policy_ref must NOT have additional properties`,
+    },
+  )
+  assert.throws(
+    () => validateJson(functionSchema, {
+      ...loadedFunction.manifest,
+      probe: {
+        method: "GET",
+        acceptable_statuses: [401],
+        unexpected_probe_option: true,
+      },
+    }, label),
+    {
+      message: `${label}: /probe/unexpected_probe_option must NOT have additional properties`,
+    },
   )
 
   const catalog = await readFile(
