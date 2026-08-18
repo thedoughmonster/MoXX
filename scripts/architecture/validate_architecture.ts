@@ -19,10 +19,21 @@ import { findFunctionInventoryViolations } from
   "./find_function_inventory_violations.ts"
 import { findServiceStatusViolations } from
   "./find_service_status_violations.ts"
+import { findServiceTestImpactDiagnostics } from
+  "./find_service_test_impact_diagnostics.ts"
 
 export async function validateArchitecture(): Promise<Architecture> {
   const workspace = await loadWorkspace()
   const services = await discoverServices(workspace.paths.services)
+  const testImpactViolations = (await findServiceTestImpactDiagnostics(
+    services, workspaceRoot,
+  )).filter((item) => item.code !== "metadata_absent")
+  if (testImpactViolations.length > 0) {
+    throw new Error(
+      `Architecture violations:\n- ${testImpactViolations.map((item) =>
+        JSON.stringify(item)).join("\n- ")}`,
+    )
+  }
   const statusViolations = findServiceStatusViolations(services)
   if (statusViolations.length > 0) {
     throw new Error(

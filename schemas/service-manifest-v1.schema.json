@@ -64,6 +64,7 @@
     "secrets": { "$ref": "#/$defs/string_set" },
     "configuration": { "$ref": "#/$defs/string_set" },
     "deployment": { "$ref": "#/$defs/deployment" },
+    "test_impact": { "$ref": "#/$defs/test_impact" },
     "runtime_dependencies": { "$ref": "#/$defs/string_set" },
     "approved_packages": { "$ref": "#/$defs/string_set" }
   },
@@ -112,6 +113,24 @@
         "kind": { "enum": ["database_processor", "cron_job", "queue",
           "event_subscription", "postgres_extension", "vault_secret"] },
         "key": { "type": "string", "pattern": "^[a-z][a-z0-9_.:-]+$" } } },
+    "test_impact": { "type": "object", "additionalProperties": false, "required": ["schema_version", "owner_service", "categories"], "properties": {
+      "schema_version": { "const": 1 }, "owner_service": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" }, "categories": { "$ref": "#/$defs/test_impact_categories" } } },
+    "test_impact_categories": { "type": "object", "additionalProperties": false,
+      "required": ["local_unit", "local_integration", "provider_contract", "consumer_contract", "cross_service_integration", "mandatory_global", "risk_triggered"], "properties": {
+        "local_unit": { "$ref": "#/$defs/test_impact_selectors" }, "local_integration": { "$ref": "#/$defs/test_impact_selectors" },
+        "provider_contract": { "$ref": "#/$defs/test_impact_selectors" }, "consumer_contract": { "$ref": "#/$defs/test_impact_selectors" },
+        "cross_service_integration": { "$ref": "#/$defs/test_impact_selectors" }, "mandatory_global": { "$ref": "#/$defs/test_impact_selectors" },
+        "risk_triggered": { "$ref": "#/$defs/test_impact_selectors" } } },
+    "test_impact_selectors": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/test_impact_selector" } },
+    "test_impact_selector": { "type": "object", "additionalProperties": false,
+      "required": ["id", "test", "reason", "services", "contracts", "triggers"], "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]+:(local_unit|local_integration|provider_contract|consumer_contract|cross_service_integration|mandatory_global|risk_triggered):[a-z0-9][a-z0-9-]*:v[1-9][0-9]*$" },
+        "test": { "type": "string", "minLength": 1 }, "reason": { "type": "string", "pattern": "\\S" },
+        "services": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" } },
+        "contracts": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/test_impact_contract" } },
+        "triggers": { "type": "array", "uniqueItems": true, "items": { "enum": ["architecture", "docs", "issue_automation", "manifest", "migration", "repository_tooling", "runtime", "unknown", "workflow"] } } } },
+    "test_impact_contract": { "type": "object", "additionalProperties": false, "required": ["provider_service", "contract"], "properties": {
+      "provider_service": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" }, "contract": { "$ref": "#/$defs/versioned_contract" } } },
     "consumed_contract": { "type": "object", "additionalProperties": false,
       "required": ["service", "contract"], "properties": {
         "service": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },

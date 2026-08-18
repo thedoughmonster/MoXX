@@ -113,6 +113,12 @@ These fields remain optional during the constitution bootstrap, but a new
 database-only service uses an empty `functions` list and declares its owned
 operational units before implementation.
 
+## Service Test Impact Metadata v1
+
+The optional `test_impact` field follows
+[Service Test Impact Metadata v1](./service-test-impact-metadata-v1.md).
+Declared metadata is strict; absence remains compatible during staged adoption.
+
 ## Verification
 
 Run `pnpm constitution:check` for the ownership law and
