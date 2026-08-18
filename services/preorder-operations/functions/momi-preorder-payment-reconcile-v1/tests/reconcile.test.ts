@@ -86,20 +86,23 @@ test("does not retrieve for busy, terminal, or operator review", async () => {
   }
 })
 
-test("projects an indeterminate read without inventing success", async () => {
-  const deps = dependencies()
-  deps.retrieve = () => { throw new Error("ambiguous retrieval") }
-  let projected = ""
-  deps.project = (_attempt, _claim, evidence) => {
-    projected = JSON.stringify(evidence)
-    return Promise.resolve({ disposition: "applied", receipt: {
-      ...receipt, outcome: "indeterminate", payment_status: "indeterminate",
-    } })
+test("projects unavailable or malformed retrieval as indeterminate", async () => {
+  for (const kind of ["unavailable", "malformed"] as const) {
+    const deps = dependencies()
+    deps.retrieve = kind === "unavailable"
+      ? async () => { throw new Error("ambiguous retrieval") }
+      : () => Promise.resolve({ disposition: "matched", payment_status: "paid" })
+    let projected = ""
+    deps.project = (_attempt, _claim, evidence) => {
+      projected = JSON.stringify(evidence)
+      return Promise.resolve({ disposition: "applied", receipt: { ...receipt,
+        outcome: "indeterminate", payment_status: "indeterminate" } })
+    }
+    const result = await orchestrate(input, "a".repeat(32), deps)
+    assert.equal(result.result?.receipt?.payment_status, "indeterminate")
+    assert.match(projected, /momi:reconciliation:indeterminate:/)
+    assert.doesNotMatch(projected, /paid/)
   }
-  const result = await orchestrate(input, "a".repeat(32), deps)
-  assert.equal(result.result?.receipt?.payment_status, "indeterminate")
-  assert.match(projected, /momi:reconciliation:indeterminate:/)
-  assert.doesNotMatch(projected, /paid/)
 })
 
 test("returns 429 before retrieval when admission rejects", async () => {

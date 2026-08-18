@@ -10,15 +10,15 @@ import { createCapabilityArchitecture } from
   "./function_capability_model_fixture.ts"
 import { graphSourceSnapshot } from "./service_dependency_graph_fixture.ts"
 
-test("projects the two adopted consumers without provider authority", async () => {
+test("projects the three adopted consumers without provider authority", async () => {
   const architecture = await validateArchitecture()
   const result = await provideFunctionCapabilityModel(
     architecture, graphSourceSnapshot, graphSourceSnapshot,
   )
   assert(result.projection)
-  assert.equal(result.projection.functions.length, 2)
+  assert.equal(result.projection.functions.length, 3)
   assert.equal(result.diagnostics.filter((item) =>
-    item.code === "capability_model_absent").length, 39)
+    item.code === "capability_model_absent").length, 38)
   const square = result.projection.functions.find((item) =>
     item.function_key === "momi.preorder.payment.initiate.v1")!
   assert.deepEqual(square.direct_capabilities, [
@@ -32,6 +32,21 @@ test("projects the two adopted consumers without provider authority", async () =
     effect.effect_kind === "network_outbound_host" &&
     effect.target === "connect.squareupsandbox.com"))
   assert(square.transitive_effects.some((effect) =>
+    effect.effect_kind === "secret_reference" &&
+    effect.target === "SQUARE_SANDBOX_ACCESS_TOKEN"))
+  const reconciliation = result.projection.functions.find((item) =>
+    item.function_key === "momi.preorder.payment.reconcile.v1")!
+  assert.deepEqual(reconciliation.direct_capabilities, [
+    "database_read", "database_write",
+  ])
+  assert.deepEqual(reconciliation.called_contracts, [{
+    service: "square-payment-acquisition",
+    contract: "square.payment.retrieve.v1",
+  }])
+  assert(reconciliation.transitive_effects.some((effect) =>
+    effect.effect_kind === "network_outbound_host" &&
+    effect.target === "connect.squareupsandbox.com"))
+  assert(reconciliation.transitive_effects.some((effect) =>
     effect.effect_kind === "secret_reference" &&
     effect.target === "SQUARE_SANDBOX_ACCESS_TOKEN"))
   const model = result.projection.functions.find((item) =>
