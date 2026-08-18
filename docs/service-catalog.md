@@ -31,7 +31,7 @@ implementation status is rendered explicitly and is never inferred.
 | `toast-data-acquisition` | active | unclassified | not_asserted | `toast.data.acquisition.v1` | `toast-data-acquisition-v1` | `cron_job:momi-toast-acquisition-due-v1`, `cron_job:momi-toast-acquisition-wakeup-v1`, `cron_job:momi-toast-attempt-reconciliation-v1` |
 | `toast-order-hydration` | retiring | unclassified | not_asserted | `toast.orders.fetch_by_guid.v1` | `toast-orders-fetch-by-guid-v1` | none |
 | `toast-order-ingest` | active | unclassified | not_asserted | `toast.orders.webhook_ingest.v1` | `toast-orders-webhook-ingest-v1` | none |
-| `toast-order-read-api` | active | unclassified | not_asserted | `momi.toast_orders.get_by_id.v1` | `momi-toast-orders-get-by-id-v1` | none |
+| `toast-order-read-api` | retiring | implemented | not_asserted | `momi.toast_orders.get_by_id.v1` | `momi-toast-orders-get-by-id-v1` | none |
 | `toast-stock-ingest` | active | unclassified | not_asserted | `toast.stock.webhook_ingest.v1` | `toast-stock-webhook-ingest-v1` | none |
 | `toast-webhook-ingestion` | active | unclassified | not_asserted | `toast.webhooks.webhook_ingest.v1` | `toast-webhooks-ingest-v1` | none |
 | `trello-data-acquisition` | active | unclassified | not_asserted | `trello.data.acquisition.request.v1` | `trello-board-snapshot-v1`, `trello-webhook-inventory-v1` | none |

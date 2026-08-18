@@ -8,10 +8,11 @@ anything.
 
 ## Purpose
 
-This source-specific read facade protects the warehouse boundary. It validates
-durable work capability, reads an approved versioned view, and returns the
-complete source payload separately from its source-neutral presentation. It
-owns no dataset.
+This implemented, retiring source-specific read facade protects the warehouse
+boundary. Its availability is not asserted from repository evidence. It
+validates durable work capability, reads an approved versioned view, and
+returns the complete source payload separately from its source-neutral
+presentation. It owns no dataset.
 
 ## Owned Function
 
@@ -20,10 +21,28 @@ Square reader can provide its own source contract without changing Toast history
 
 ## Contracts
 
-The service provides `momi.toast_orders.get_by_id.v1`. The order-alerting service
-consumes this exact registered contract and validates the returned identity.
-The facade consumes `momi.warehouse.toast_order_read_view.v1` from
-`warehouse-projection` for its one approved database view.
+The service provides `momi.toast_orders.get_by_id.v1`. `order-alerting` is its
+only permitted current service consumer, and only for already-created legacy
+invocation work plus bounded repair or rollback compatibility. New service
+consumers and automatic or normal legacy work are prohibited. The facade
+consumes `momi.warehouse.toast_order_read_view.v1` from `warehouse-projection`
+for its one approved database view.
+
+`toast-order-hydration` is an indirect producer, not a consumer. It may target
+this contract only through a separately approved, bounded operator or
+reconciliation job tied to named historical work. Bulk, speculative, and
+open-ended legacy issuance are prohibited.
+
+## Retirement
+
+The service remains `retiring` until the canonical reader passes controlled
+acceptance, every consumer and executable legacy branch is removed, hydration
+creation is fenced and its jobs and attempts are drained or dispositioned,
+legacy invocation work is drained, the route and registries are inactive,
+invocation readback has no unexplained calls, and documentation agrees. Any
+unknown caller, unfinished or late hydration, unresolved work, registry
+ambiguity, or canonical failure preserves the existing path. Unhosting or
+removal requires separate operational authority.
 
 ## Authority
 
