@@ -74,9 +74,7 @@ jobs:
               { ...context.repo, issue_number, per_page: 100 },
             )
             if (!comments.some((comment) => comment.body?.includes(marker))) {
-              const result = disposition === "complete"
-                ? "issue closed"
-                : "issue remains open"
+              const result = "issue remains open; closure is a deliberate owner action"
               await github.rest.issues.createComment({
                 ...context.repo,
                 issue_number,
@@ -89,20 +87,5 @@ jobs:
                   "- Disposition: **" + disposition.toUpperCase() + "**",
                   "- Result: " + result,
                 ].join("\n"),
-              })
-            }
-            if (disposition === "complete") {
-              const issue = await github.rest.issues.get({
-                ...context.repo,
-                issue_number,
-              })
-              const labels = issue.data.labels
-                .map((label) => typeof label === "string" ? label : label.name)
-                .filter((label) => label && !label.startsWith("status:"))
-              await github.rest.issues.update({
-                ...context.repo,
-                issue_number,
-                labels,
-                state: "closed",
               })
             }

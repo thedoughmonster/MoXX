@@ -28,18 +28,16 @@ test("rejects absent, duplicate, and invalid metadata", () => {
   ))
 })
 
-test("workflow validates and reconciles development PRs", async () => {
+test("workflow validates and records delivery without closing issues", async () => {
   const workflow = await readFile(".github/workflows/issue-ledger.yml", "utf8")
   const reconcile = workflow.slice(workflow.indexOf("  reconcile:"))
   assert.match(workflow, /check_pull_request_issue_tracking\.ts/)
   assert.match(workflow, /ref: \$\{\{ github\.event\.pull_request\.head\.sha \}\}/)
   assert.match(workflow, /pull_request_target:/)
   assert.match(workflow, /issues: write/)
-  assert.match(workflow, /disposition === "complete"/)
-  assert.match(workflow, /github\.rest\.issues\.get/)
-  assert.match(workflow, /!label\.startsWith\("status:"\)/)
-  assert.match(workflow, /issue_number,\n\s+labels,\n\s+state: "closed"/)
-  assert.match(workflow, /state: "closed"/)
+  assert.match(workflow, /closure is a deliberate owner action/)
+  assert.doesNotMatch(reconcile, /github\.rest\.issues\.update/)
+  assert.doesNotMatch(reconcile, /state: "closed"/)
   assert.match(workflow, /momi-issue-ledger:v1 pr=/)
   assert.match(workflow, /comments\.some/)
   assert.match(workflow, /if \(!comments\.some/)
