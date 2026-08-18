@@ -15,7 +15,16 @@
   "timeout_policy_key": "momi.communications.evaluator_lease.v1",
   "retry_policy_key": "momi.communications.evaluator_backoff.v1",
   "idempotency_policy_key": "momi.communications.evaluation_job.v1",
-  "required_capabilities": ["database_read", "database_write", "model_inference"],
+  "capability_model": {
+    "schema_version": 1,
+    "called_contracts": [
+      {
+        "service": "model-execution-gateway",
+        "contract": "momi.model_execution.execute.v1"
+      }
+    ]
+  },
+  "required_capabilities": ["database_read", "database_write"],
   "declared_side_effects": [
     "claims_evaluation_lease",
     "calls_configured_model",

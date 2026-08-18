@@ -17,7 +17,7 @@ import { validateJson } from "../scripts/architecture/validate_json.ts"
 
 const identity: ArchitectureSnapshotIdentity = {
   $schema: architectureSnapshotIdentitySchemaId,
-  architecture_contract_version: 1,
+  architecture_contract_version: 2,
   branch: "dev",
   commit: "199b290990aea2731542a08bb91757ca83a72eb3",
   function_manifest_schema: {
@@ -37,7 +37,7 @@ test("validates and digests the accepted current-dev identity", async () => {
   assert.doesNotThrow(() => validateJson(schema, identity, "identity"))
   assert.equal(
     digestArchitectureSnapshotIdentity(identity),
-    "986a0cd2a92ce2e144ac70294a544411800811d5628696b4fee6ed5dd548a77c",
+    "fe73901c2fd9af22383185da9a47ff820c3af358fcc266effac3aa6f9902da21",
   )
   const reordered = Object.fromEntries(
     Object.entries(identity).reverse(),

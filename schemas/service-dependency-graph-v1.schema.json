@@ -68,7 +68,7 @@
         "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
         "service_manifest_schema": { "$ref": "#/$defs/service_manifest_schema" },
         "function_manifest_schema": { "$ref": "#/$defs/function_manifest_schema" },
-        "architecture_contract_version": { "const": 1 }
+        "architecture_contract_version": { "const": 2 }
       }
     },
     "service_manifest_schema": {

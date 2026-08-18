@@ -16,6 +16,15 @@
   "probe": { "method": "OPTIONS", "acceptable_statuses": [204] },
   "timeout_policy_key": "square.payment.create.bounded.v1",
   "idempotency_policy_key": "preorder.payment_attempt.v1",
-  "required_capabilities": ["database_read", "database_write", "external_api"],
+  "capability_model": {
+    "schema_version": 1,
+    "called_contracts": [
+      {
+        "service": "square-payment-delivery",
+        "contract": "square.payment.execute.v1"
+      }
+    ]
+  },
+  "required_capabilities": ["database_read", "database_write"],
   "declared_side_effects": ["records_rate_limit_bucket", "claims_payment_attempt", "creates_provider_payment", "projects_payment_evidence"]
 }

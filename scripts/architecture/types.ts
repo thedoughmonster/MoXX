@@ -76,6 +76,10 @@ export type FunctionManifest = {
   entrypoint: string
   input_schema: string
   output_schema: string
+  capability_model?: {
+    schema_version: 1
+    called_contracts: ConsumedContract[]
+  }
   probe?: {
     method: "GET" | "OPTIONS"
     acceptable_statuses: number[]

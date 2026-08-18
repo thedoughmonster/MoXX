@@ -36,7 +36,18 @@ define its business purpose.
 
 - `required_capabilities` lists the resources the function must access.
 - `declared_side_effects` lists every durable or external effect it can cause.
+- Optional `capability_model` opts a function into
+  [Function Capability Model v1](./function-capability-model-v1.md). Its
+  `called_contracts` are exact direct contract calls and must be a sorted,
+  unique subset of the owning service's consumed contracts.
 - Policy keys for timeout, retry, and idempotency are included when applicable.
+
+For an opted-in function, only `database_read` and `database_write` are valid
+direct non-contract capability values. A called contract is a separate direct
+namespace. Provider effects derived behind that contract and
+`declared_side_effects` are analysis-only and never grant authority. Missing
+`capability_model` remains schema-compatible during staged adoption but cannot
+support a completeness or positive-grant claim.
 
 Arrays may be empty but may not be omitted. Fields not declared by the v1 schema
 are invalid at every closed object boundary. Add a field only through a reviewed

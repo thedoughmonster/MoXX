@@ -26,7 +26,7 @@ export const graphSnapshotIdentity: ArchitectureSnapshotIdentity = {
     id: "https://momi.local/schemas/function-manifest-v1.schema.json",
     version: 1,
   },
-  architecture_contract_version: 1,
+  architecture_contract_version: 2,
 }
 
 export const graphSourceSnapshot = {

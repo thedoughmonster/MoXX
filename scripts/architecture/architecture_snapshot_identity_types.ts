@@ -14,7 +14,7 @@ export type ArchitectureSnapshotIdentity = {
   commit: string
   service_manifest_schema: ArchitectureManifestSchemaIdentity
   function_manifest_schema: ArchitectureManifestSchemaIdentity
-  architecture_contract_version: 1
+  architecture_contract_version: 2
 }
 
 export type ArchitectureSnapshot = {

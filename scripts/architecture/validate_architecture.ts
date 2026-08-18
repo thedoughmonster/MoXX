@@ -23,6 +23,8 @@ import { findServiceStatusViolations } from
   "./find_service_status_violations.ts"
 import { findServiceTestImpactDiagnostics } from
   "./find_service_test_impact_diagnostics.ts"
+import { findFunctionCapabilityModelDiagnostics } from
+  "./find_function_capability_model_diagnostics.ts"
 
 export async function validateArchitecture(): Promise<Architecture> {
   const workspace = await loadWorkspace()
@@ -53,6 +55,15 @@ export async function validateArchitecture(): Promise<Architecture> {
     )
   }
   const functions = await loadFunctions(workspace, services)
+  const capabilityViolations = findFunctionCapabilityModelDiagnostics({
+    services, functions,
+  }).filter((item) => item.code !== "capability_model_absent")
+  if (capabilityViolations.length > 0) {
+    throw new Error(
+      `Architecture violations:\n- ${capabilityViolations.map((item) =>
+        JSON.stringify(item)).join("\n- ")}`,
+    )
+  }
   const modules = await loadSourceModules(services)
   const violations = [
     ...await findExecutionAuthorityViolations(services),
