@@ -1,9 +1,9 @@
 # MoMi Backend Agent Contract
 
 ## Ownership
-This repository owns MoMi backend services, database migrations, and their
-explicit contracts. Modules are separated by business capability even when
-they deploy from the same repository.
+This repository owns active MoMi application-backend services, migrations, and
+explicit contracts. It retains immutable migration records for transferred
+capabilities. Modules remain separated by business capability.
 
 - Ingest modules authenticate sources and preserve complete source records.
 - Decision modules create durable outcomes from configured rules and mappings.
@@ -41,16 +41,17 @@ they deploy from the same repository.
   need, with an ADR, explicit owner, and tests.
 - Require an ADR for a service, external host, shared package, schema ownership
   change, or cross-service contract.
-- Keep one ordered Supabase migration history in this repository.
-- Do not split migrations into a repository separate from the code they support.
+- Keep active migrations with their code in one ordered Supabase history.
+- The seven applied `agent-control` migrations are a byte-immutable baseline;
+  `thedoughmonster/momi-symphony` owns future `momi_agent_ops` migrations; reject them here.
 - Never modify or delete a migration already present on `prod`.
 - Keep `supabase/migrations/` flat; only `AGENTS.md` and migration SQL belong there.
 - Start each migration absent from production with one `-- service-owner: <service-key>` header.
 - Land an ownership transfer as a manifest-only change before any later migration mutates it; checks pin existing authority to trusted `dev`.
 - Never deploy with `--prune`; retire hosted functions through an expiring manifest and explicit caller-verified removal.
+- Do not build, host, deploy, or change the retired services; see `docs/agent-control-relocation.md`.
 - GitHub Actions is the sole authority for repository code and Edge Function deployments. Local apply, Supabase Git deployment, and second deployers are forbidden by ADR `0006`.
-- Run focused changed-path checks while iterating and exactly one final
-  authoritative validation gate for the committed tree.
+- Run focused changed-path checks, then one authoritative gate for the committed tree.
 - Only `.github/workflows/deploy-dev.yml` and `deploy-prod.yml` may invoke the
   deployment apply command.
 - The Node 24 release coordinator is the sole normal release orchestrator.

@@ -132,9 +132,3 @@ verify_jwt = false
 
 [functions.momi-cron-history-governor-v1]
 verify_jwt = false
-
-[functions.momi-agent-control-linear-webhook-v1]
-verify_jwt = false
-
-[functions.momi-agent-control-dispatch-v1]
-verify_jwt = false
