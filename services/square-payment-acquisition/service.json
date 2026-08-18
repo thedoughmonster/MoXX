@@ -6,6 +6,7 @@
   "kind": "source_adapter",
   "service_type": "procurement_adapter",
   "lifecycle_status": "active",
+  "implementation_status": "implemented",
   "functions": [],
   "contracts": {
     "provides": ["square.payment.retrieve.v1", "square.payment.webhook.authenticate.v1"],

@@ -15,9 +15,8 @@ test("declares a read-only Sandbox acquisition boundary without runtime activati
     new URL("contracts/public/square.payment.webhook.authenticate.v1/output.schema.json", directory), "utf8",
   ))
 
-  assert.equal(manifest.service_type, "procurement_adapter")
-  assert.deepEqual(manifest.network.outbound_hosts, ["connect.squareupsandbox.com"])
-  assert.deepEqual(manifest.functions, [])
+  assert.deepEqual([manifest.service_type, manifest.implementation_status, manifest.network.outbound_hosts], ["procurement_adapter", "implemented", ["connect.squareupsandbox.com"]])
+  assert.deepEqual([manifest.functions, manifest.contracts.provides, manifest.deployment.owns], [[], ["square.payment.retrieve.v1", "square.payment.webhook.authenticate.v1"], []])
   assert.equal(contract.$id, "momi://square.payment.retrieve.v1/input")
   assert.equal(result.$id, "momi://square.payment.retrieve.v1/output")
   assert.equal(webhook.$id, "momi://square.payment.webhook.authenticate.v1/output")

@@ -26,8 +26,8 @@ implementation status is rendered explicitly and is never inferred.
 | `project-baseline-governance` | active | unclassified | not_asserted | none | none | none |
 | `runtime-registry` | active | unclassified | not_asserted | none | none | none |
 | `slack-order-delivery` | active | unclassified | not_asserted | `momi.slack.order_alert.deliver.v1` | `slack-order-alert-delivery-v1` | none |
-| `square-payment-acquisition` | active | unclassified | not_asserted | `square.payment.retrieve.v1`, `square.payment.webhook.authenticate.v1` | none | none |
-| `square-payment-delivery` | active | unclassified | not_asserted | `square.payment.execute.v1`, `square.payment.refund.v1` | none | none |
+| `square-payment-acquisition` | active | implemented | not_asserted | `square.payment.retrieve.v1`, `square.payment.webhook.authenticate.v1` | none | none |
+| `square-payment-delivery` | active | implemented | not_asserted | `square.payment.execute.v1`, `square.payment.refund.v1` | none | none |
 | `toast-data-acquisition` | active | unclassified | not_asserted | `toast.data.acquisition.v1` | `toast-data-acquisition-v1` | `cron_job:momi-toast-acquisition-due-v1`, `cron_job:momi-toast-acquisition-wakeup-v1`, `cron_job:momi-toast-attempt-reconciliation-v1` |
 | `toast-order-hydration` | retiring | unclassified | not_asserted | `toast.orders.fetch_by_guid.v1` | `toast-orders-fetch-by-guid-v1` | none |
 | `toast-order-ingest` | active | unclassified | not_asserted | `toast.orders.webhook_ingest.v1` | `toast-orders-webhook-ingest-v1` | none |

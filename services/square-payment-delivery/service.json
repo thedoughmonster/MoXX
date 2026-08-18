@@ -6,6 +6,7 @@
   "kind": "destination_adapter",
   "service_type": "destination_adapter",
   "lifecycle_status": "active",
+  "implementation_status": "implemented",
   "functions": [],
   "contracts": {
     "provides": ["square.payment.execute.v1", "square.payment.refund.v1"],
