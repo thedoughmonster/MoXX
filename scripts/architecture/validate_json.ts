@@ -14,8 +14,11 @@ export function validateJson(
     return
   }
 
-  const details = validate.errors?.map((error) =>
-    `${error.instancePath || "/"} ${error.message}`
-  ).join("; ")
+  const details = validate.errors?.map((error) => {
+    const instancePath = error.keyword === "additionalProperties"
+      ? `${error.instancePath}/${error.params.additionalProperty}`
+      : error.instancePath || "/"
+    return `${instancePath} ${error.message}`
+  }).join("; ")
   throw new Error(`${label}: ${details ?? "schema validation failed"}`)
 }

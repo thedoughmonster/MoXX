@@ -38,8 +38,10 @@ define its business purpose.
 - `declared_side_effects` lists every durable or external effect it can cause.
 - Policy keys for timeout, retry, and idempotency are included when applicable.
 
-Arrays may be empty but may not be omitted. Unknown fields are allowed so later
-versions can add policy references without weakening this baseline.
+Arrays may be empty but may not be omitted. Fields not declared by the v1 schema
+are invalid at every closed object boundary. Add a field only through a reviewed
+change that updates the schema, this contract, and focused regression coverage;
+do not rely on unknown fields for forward compatibility.
 
 ## Generated Catalog
 
