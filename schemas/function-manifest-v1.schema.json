@@ -41,10 +41,36 @@
     "timeout_policy_key": { "type": "string", "minLength": 1 },
     "retry_policy_key": { "type": "string", "minLength": 1 },
     "idempotency_policy_key": { "type": "string", "minLength": 1 },
+    "capability_model": { "$ref": "#/$defs/capability_model" },
     "required_capabilities": { "$ref": "#/$defs/string_set" },
     "declared_side_effects": { "$ref": "#/$defs/string_set" }
   },
   "$defs": {
+    "called_contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["service", "contract"],
+      "properties": {
+        "service": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
+        "contract": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*\\.v[1-9][0-9]*$"
+        }
+      }
+    },
+    "capability_model": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "called_contracts"],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "called_contracts": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/called_contract" }
+        }
+      }
+    },
     "string_set": {
       "type": "array", "uniqueItems": true,
       "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }

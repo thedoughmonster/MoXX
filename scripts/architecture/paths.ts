@@ -18,6 +18,11 @@ export const functionSchemaPath = join(
   "schemas",
   "function-manifest-v1.schema.json",
 )
+export const functionCapabilityModelSchemaPath = join(
+  workspaceRoot,
+  "schemas",
+  "function-capability-model-v1.schema.json",
+)
 export const architectureSnapshotIdentitySchemaPath = join(
   workspaceRoot,
   "schemas",

@@ -51,7 +51,7 @@ test("assertion names architecture-version and digest mismatch fields", async (t
     identity: Record<string, unknown>
     digest: string
   }
-  stale.identity.architecture_contract_version = 2
+  stale.identity.architecture_contract_version = 1
   stale.digest = "0".repeat(64)
   await assert.rejects(
     assertArchitectureSnapshotIdentity(stale as unknown as ArchitectureSnapshot,

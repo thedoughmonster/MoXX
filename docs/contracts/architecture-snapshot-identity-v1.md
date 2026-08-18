@@ -16,7 +16,9 @@ The identity contains only:
 - repository `thedoughmonster/momi-backend` and authoritative branch `dev`;
 - the full lowercase 40-character commit SHA;
 - the service-manifest and function-manifest schema identifiers and v1 versions;
-- architecture-contract version 1.
+- architecture-contract version 2. Version 2 means Function Manifest v1 may
+  opt into the direct-capability and transitive-effect interpretation without
+  changing either manifest schema identity.
 
 The digest is lowercase SHA-256 over the existing `canonicalJson` UTF-8 output
 for the entire identity, including `$schema`, with no trailing newline. It is

@@ -35,7 +35,7 @@ export async function buildArchitectureSnapshotIdentity(
       id: "https://momi.local/schemas/function-manifest-v1.schema.json",
       version: 1,
     },
-    architecture_contract_version: 1,
+    architecture_contract_version: 2,
   }
   const schema = await readJson<object>(join(
     root, "schemas", "architecture-snapshot-identity-v1.schema.json",

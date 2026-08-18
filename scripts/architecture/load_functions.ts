@@ -11,6 +11,8 @@ import { functionSchemaPath, workspaceRoot } from "./paths.ts"
 import { readJson } from "./read_json.ts"
 import { resolveFunctionDirectory } from "./resolve_function_directory.ts"
 import { validateJson } from "./validate_json.ts"
+import { inspectRawFunctionCapabilityModel } from
+  "./inspect_raw_function_capability_model.ts"
 
 export async function loadFunctions(
   workspace: WorkspaceConfig,
@@ -46,7 +48,19 @@ export async function loadFunctions(
           throw new Error(`${slug}: missing README section ${section}`)
         }
       }
-      const manifest = await readJson<FunctionManifest>(join(directory, "function.json"))
+      const manifestPath = join(directory, "function.json")
+      const rawManifest = await readJson<unknown>(manifestPath)
+      const capabilityDiagnostics = inspectRawFunctionCapabilityModel(
+        rawManifest,
+        `services/${service.manifest.service_key}/functions/${slug}/function.json`,
+      ).filter((item) => item.code !== "capability_model_absent")
+      if (capabilityDiagnostics.length > 0) {
+        throw new Error(
+          `${slug}/function.json capability model: ${capabilityDiagnostics
+            .map((item) => JSON.stringify(item)).join("; ")}`,
+        )
+      }
+      const manifest = rawManifest as FunctionManifest
       validateJson(schema, manifest, `${slug}/function.json`)
       if (manifest.owner_service !== service.manifest.service_key) {
         throw new Error(`${slug}: owner_service must be ${service.manifest.service_key}`)

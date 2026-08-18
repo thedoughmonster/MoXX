@@ -16,6 +16,10 @@ contains `provider`, `consumer`, `contract`, and both exact manifest paths.
 Edges point provider to consumer. Their identity is the tuple
 `[provider, consumer, contract]`.
 
+The embedded snapshot requires `architecture_contract_version: 2` so consumers
+can interpret opted-in function capability metadata. The graph schema version,
+shape, edge meaning, and dependency semantics remain v1.
+
 Every provided contract identifier has exactly one provider across the whole
 repository. Each consumed contract must name that existing provider and one of
 its exact provided identifiers. Duplicate services, duplicate edge identities,

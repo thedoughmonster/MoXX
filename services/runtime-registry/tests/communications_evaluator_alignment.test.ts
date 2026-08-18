@@ -20,11 +20,14 @@ test("aligns evaluator registry ownership without changing behavior", async () =
     import.meta.url,
   ))
   const manifestDigest = createHash("sha256").update(manifest).digest("hex")
+  const registeredManifestDigest =
+    "dda1dd7becf240cdb55ddcb242afb72148f9be8e785f1b5b8bc0e6005066e65c"
 
   assert.match(sql, /^-- service-owner: runtime-registry\n/)
   assert.equal(manifestDigest,
-    "dda1dd7becf240cdb55ddcb242afb72148f9be8e785f1b5b8bc0e6005066e65c")
-  assert.match(sql, new RegExp(manifestDigest, "g"))
+    "1523e4e5b7865a095c954493d17ce512918866dcd3235a4c73aef169d778e427")
+  assert.match(sql, new RegExp(registeredManifestDigest, "g"))
+  assert.doesNotMatch(sql, new RegExp(manifestDigest, "g"))
   assert.equal(
     createHash("sha256").update(historical).digest("hex"),
     "eea2b2b5ba0f7bdb6df51fb830818f19e37d0f48b5abdcce94a9826396813f1e",
