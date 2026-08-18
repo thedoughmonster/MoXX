@@ -24,7 +24,7 @@ implementation status is rendered explicitly and is never inferred.
 | `order-alerting` | active | unclassified | not_asserted | `momi.order_api.invocation_work.v1`, `momi.orders.alert.evaluate.v1`, `toast.order.webhook_alert_work.v1` | `momi-order-alert-worker-v1` | `cron_job:momi-order-alert-event-wakeup-v1` |
 | `preorder-operations` | active | unclassified | not_asserted | `momi.preorder.bootstrap.read.v1`, `momi.preorder.checkout_hold.manage.v1`, `momi.preorder.order_intent.create.v1`, `momi.preorder.order_status.read.v1`, `momi.preorder.payment.initiate.v1`, `momi.preorder.payment.reconcile.v1`, `momi.preorder.quote.create.v1` | `momi-preorder-bootstrap-v1`, `momi-preorder-checkout-hold-v1`, `momi-preorder-order-intent-v1`, `momi-preorder-order-status-v1`, `momi-preorder-payment-initiate-v1`, `momi-preorder-payment-reconcile-v1`, `momi-preorder-quote-v1`, `momi-preorder-square-webhook-v1` | none |
 | `project-baseline-governance` | active | unclassified | not_asserted | none | none | none |
-| `runtime-registry` | active | unclassified | not_asserted | none | none | none |
+| `runtime-registry` | active | implemented | not_asserted | none | none | none |
 | `slack-order-delivery` | active | unclassified | not_asserted | `momi.slack.order_alert.deliver.v1` | `slack-order-alert-delivery-v1` | none |
 | `square-payment-acquisition` | active | implemented | not_asserted | `square.payment.retrieve.v1`, `square.payment.webhook.authenticate.v1` | none | none |
 | `square-payment-delivery` | active | implemented | not_asserted | `square.payment.execute.v1`, `square.payment.refund.v1` | none | none |
