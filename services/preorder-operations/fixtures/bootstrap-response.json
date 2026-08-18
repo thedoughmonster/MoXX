@@ -63,8 +63,8 @@
       }
     ],
     "cancellation_policy": {
-      "summary": "Synthetic cancellation policy.",
-      "customer_cancellation_allowed": true,
+      "summary": "For cancellation or modification, contact Dough Monster by 5:00 PM on the day before pickup. Self-service changes are not available at launch.",
+      "customer_cancellation_allowed": false,
       "customer_modification_allowed": false
     },
     "fresh_at": "2026-07-28T12:00:00Z",

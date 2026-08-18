@@ -11,12 +11,23 @@ async function readJson<T>(path: string): Promise<T> {
 }
 
 type OpenApi = {
+  info: { description: string }
   paths: Record<string, Record<string, {
     operationId: string
     security?: Array<Record<string, unknown[]>>
     "x-momi-contract-key": string
   }>>
   components: { schemas: Record<string, object> }
+}
+
+type Bootstrap = {
+  data: {
+    cancellation_policy: {
+      summary: string
+      customer_cancellation_allowed: boolean
+      customer_modification_allowed: boolean
+    }
+  }
 }
 
 type Manifest = {
@@ -39,6 +50,11 @@ test("manifest and OpenAPI declare the same public contracts", async () => {
 
   assert.deepEqual(contractKeys, [...manifest.contracts.provides].sort())
   assert.equal(new Set(contractKeys).size, contractKeys.length)
+  assert.equal(api.paths["/momi-preorder-change-request-v1"], undefined)
+  assert.equal(api.components.schemas.ChangeRequest, undefined)
+  assert.equal(api.components.schemas.ChangeResponse, undefined)
+  assert.doesNotMatch(api.info.description, /\bchanges\b/i)
+  assert.doesNotMatch(JSON.stringify(api), /change_not_allowed/)
   assert.ok(operations.every((operation) =>
     operation.path.startsWith("/momi-preorder-") &&
     operation.path.endsWith("-v1")
@@ -57,7 +73,6 @@ test("order and payment routes require header authority", async () => {
     "/momi-preorder-payment-initiate-v1",
     "/momi-preorder-payment-reconcile-v1",
     "/momi-preorder-order-status-v1",
-    "/momi-preorder-change-request-v1",
   ]
 
   for (const path of protectedPaths) {
@@ -70,7 +85,7 @@ test("synthetic bootstrap and quote fixtures match the frozen schemas", async ()
   const api = await readJson<OpenApi>(
     "contracts/preorder-public-v1.openapi.json",
   )
-  const bootstrap = await readJson<object>("fixtures/bootstrap-response.json")
+  const bootstrap = await readJson<Bootstrap>("fixtures/bootstrap-response.json")
   const quote = await readJson<{ request: object; response: object }>(
     "fixtures/quote-exchange.json",
   )
@@ -99,6 +114,11 @@ test("synthetic bootstrap and quote fixtures match the frozen schemas", async ()
   assert.equal(validateQuoteResponse(quote.response), true, ajv.errorsText(
     validateQuoteResponse.errors,
   ))
+  const policy = bootstrap.data.cancellation_policy
+  assert.equal(policy.customer_cancellation_allowed, false)
+  assert.equal(policy.customer_modification_allowed, false)
+  assert.match(policy.summary, /contact Dough Monster/i)
+  assert.match(policy.summary, /self-service changes are not available/i)
 })
 
 test("synthetic fixtures contain no customer or provider credentials", async () => {
