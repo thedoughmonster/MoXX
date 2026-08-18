@@ -16,8 +16,14 @@ test("declares a read-only Sandbox acquisition boundary without runtime activati
   ))
 
   assert.equal(manifest.service_type, "procurement_adapter")
+  assert.equal(manifest.implementation_status, "implemented")
   assert.deepEqual(manifest.network.outbound_hosts, ["connect.squareupsandbox.com"])
   assert.deepEqual(manifest.functions, [])
+  assert.deepEqual(manifest.contracts.provides, [
+    "square.payment.retrieve.v1",
+    "square.payment.webhook.authenticate.v1",
+  ])
+  assert.deepEqual(manifest.deployment.owns, [])
   assert.equal(contract.$id, "momi://square.payment.retrieve.v1/input")
   assert.equal(result.$id, "momi://square.payment.retrieve.v1/output")
   assert.equal(webhook.$id, "momi://square.payment.webhook.authenticate.v1/output")

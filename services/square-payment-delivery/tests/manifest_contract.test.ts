@@ -16,9 +16,15 @@ test("declares one Sandbox-only host-ready boundary without deployment", async (
   ))
 
   assert.equal(manifest.service_type, "destination_adapter")
+  assert.equal(manifest.implementation_status, "implemented")
   assert.deepEqual(manifest.network.outbound_hosts, ["connect.squareupsandbox.com"])
   assert.deepEqual(manifest.secrets, ["SQUARE_SANDBOX_ACCESS_TOKEN"])
   assert.deepEqual(manifest.functions, [])
+  assert.deepEqual(manifest.contracts.provides, [
+    "square.payment.execute.v1",
+    "square.payment.refund.v1",
+  ])
+  assert.deepEqual(manifest.deployment.owns, [])
   assert.equal(contract.$id, "momi://square.payment.execute.v1/input")
   assert.equal(result.$id, "momi://square.payment.execute.v1/output")
   assert.equal(contract.properties.source_token.writeOnly, true)
