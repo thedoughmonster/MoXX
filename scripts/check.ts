@@ -11,7 +11,7 @@ const scripts = [
   "check_service_constitution.ts",
   "check_catalog.ts",
   "check_source_quality.ts",
-  "check_quality_report.ts",
+  "check_quality_report_validity.ts",
   "check_migrations.ts",
   "check_edge_functions.ts",
 ]

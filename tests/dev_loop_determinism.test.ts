@@ -27,11 +27,13 @@ test("compact receipts omit success logs and bound redacted failures", () => {
     head_sha: "a".repeat(40),
     commands: [{
       id: "pass",
+      enforcement: "hard_stop" as const,
       status: 0,
       duration_ms: 7,
       stdout: "a very large successful log",
     }, {
       id: "fail",
+      enforcement: "hard_stop" as const,
       status: 1,
       duration_ms: 9,
       stderr: `token=secret-value\n${"failure\n".repeat(40)}`,
@@ -42,7 +44,7 @@ test("compact receipts omit success logs and bound redacted failures", () => {
   assert.equal(first, second)
   const receipt = buildCompactReceipt(input)
   assert.equal(receipt.duration_ms, 16)
-  assert.equal(receipt.counts.failed, 1)
+  assert.equal(receipt.counts.hard_failed, 1)
   assert.equal("failure_excerpt" in receipt.commands[0], false)
   assert.doesNotMatch(receipt.commands[1].failure_excerpt ?? "", /secret-value/)
   assert.ok((receipt.commands[1].failure_excerpt ?? "").split("\n").length <= 20)

@@ -1,4 +1,4 @@
-import { mkdir, writeFile } from "node:fs/promises"
+import { appendFile, mkdir, writeFile } from "node:fs/promises"
 import { dirname } from "node:path"
 
 import { buildBoundPlan } from "./dev_loop/build_bound_plan.ts"
@@ -6,6 +6,8 @@ import { buildCompactReceipt } from "./dev_loop/build_compact_receipt.ts"
 import { canonicalJson } from "./dev_loop/canonical_json.ts"
 import { executeChecks } from "./dev_loop/execute_checks.ts"
 import { hashText } from "./dev_loop/hash_text.ts"
+import { renderValidationSummary } from "./dev_loop/render_validation_summary.ts"
+import { validationExitCode } from "./dev_loop/validation_exit_code.ts"
 import { readOption } from "./read_option.ts"
 
 if (process.argv[2] !== "changed") throw new Error("Usage: momi-check changed")
@@ -41,4 +43,7 @@ const receipt = {
 await mkdir(dirname(output), { recursive: true })
 await writeFile(output, `${canonicalJson(receipt)}\n`)
 process.stdout.write(`${canonicalJson(receipt)}\n`)
-if (evidence.some((item) => item.status !== 0)) process.exit(1)
+if (process.env.GITHUB_STEP_SUMMARY) {
+  await appendFile(process.env.GITHUB_STEP_SUMMARY, renderValidationSummary(compact))
+}
+process.exit(validationExitCode(compact))

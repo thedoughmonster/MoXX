@@ -1,7 +1,7 @@
 import type { Architecture } from "../architecture/types.ts"
 import { classifyPath } from "./classify_path.ts"
 import { selectTestPaths } from "./select_test_paths.ts"
-import type { ImpactClass, ImpactPlan } from "./types.ts"
+import type { CheckCommand, ImpactClass, ImpactPlan } from "./types.ts"
 
 const classes: ImpactClass[] = [
   "architecture", "docs", "issue_automation", "manifest", "migration",
@@ -47,7 +47,23 @@ export function buildImpactPlan(
     affectedServices,
     affectedFunctions,
   )
-  const focused = { id: "focused-tests", command: "node", args: ["--test", ...tests] }
+  const focused: CheckCommand = {
+    id: "focused-tests",
+    command: "node",
+    args: ["--test", ...tests],
+    enforcement: "hard_stop",
+  }
+  const qualityReport: CheckCommand = {
+    id: "quality-report",
+    command: "node",
+    args: ["scripts/check_quality_report.ts"],
+    enforcement: "advisory",
+    advisory: {
+      rule: "quality-report-freshness",
+      path: "docs/quality-metrics.json",
+      regenerate: "pnpm quality:generate",
+    },
+  }
   return {
     schema_version: 1,
     classifications,
@@ -61,11 +77,15 @@ export function buildImpactPlan(
         reason: `Full gate selected for ${fullClasses.filter((kind) =>
           classifications[kind].length > 0
         ).join(", ")} impact.`,
-        checks: [{
-          id: "full-repository",
-          command: "node",
-          args: ["scripts/check.ts", "--service", "all"],
-        }],
+        checks: [
+          {
+            id: "full-repository",
+            command: "node",
+            args: ["scripts/check.ts", "--service", "all"],
+            enforcement: "hard_stop",
+          },
+          qualityReport,
+        ],
       }
       : {
         kind: "path_scoped",
@@ -76,12 +96,15 @@ export function buildImpactPlan(
             id: "source-quality",
             command: "node",
             args: ["scripts/check_source_quality.ts"],
+            enforcement: "hard_stop",
           },
           {
-            id: "quality-report",
+            id: "quality-report-validity",
             command: "node",
-            args: ["scripts/check_quality_report.ts"],
+            args: ["scripts/check_quality_report_validity.ts"],
+            enforcement: "hard_stop",
           },
+          qualityReport,
         ],
       },
     release: {

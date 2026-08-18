@@ -27,11 +27,14 @@ test("repository-only plans use a path gate and deploy nothing", () => {
     new Map(),
   )
   assert.equal(plan.final_gate.kind, "path_scoped")
+  assert.deepEqual(plan.final_gate.checks.map((item) => `${item.id}:${item.enforcement}`), [
+    "focused-tests:hard_stop", "source-quality:hard_stop",
+    "quality-report-validity:hard_stop", "quality-report:advisory",
+  ])
   assert.equal(plan.release.database, "none")
   assert.deepEqual(plan.release.services, [])
   assert.deepEqual(plan.release.functions, [])
 })
-
 test("runtime plans deploy only manifest-owned affected functions", () => {
   const plan = buildImpactPlan(
     ["services/alpha/functions/alpha-v1/src/index.ts"],
@@ -96,13 +99,15 @@ test("release receipts bind the exact plan and validation digest", () => {
     impact,
   } as BoundPlan
   const validation = {
-    schema_version: 1,
+    schema_version: 2,
     kind: "validation",
     identities: {},
-    counts: { commands: 1, passed: 1, failed: 0 },
+    counts: { commands: 1, hard_passed: 1, hard_failed: 0,
+      advisory_passed: 0, advisory_findings: 0 },
     duration_ms: 1,
     run_log: {},
-    commands: [],
+    commands: [{ id: "focused-tests", enforcement: "hard_stop",
+      status: 0, duration_ms: 1 }],
     gate: "path_scoped",
     required_job: "validate-final",
   } as ValidationReceipt

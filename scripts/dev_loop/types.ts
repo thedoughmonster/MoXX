@@ -1,3 +1,6 @@
+import type { CheckCommand, CommandEvidence } from "./check_types.ts"
+export type { AdvisoryMetadata, CheckCommand, CommandEvidence } from "./check_types.ts"
+
 export type ImpactClass =
   | "architecture"
   | "docs"
@@ -8,12 +11,6 @@ export type ImpactClass =
   | "runtime"
   | "unknown"
   | "workflow"
-
-export type CheckCommand = {
-  id: string
-  command: string
-  args: string[]
-}
 
 export type ImpactPlan = {
   schema_version: 1
@@ -44,16 +41,6 @@ export type BoundPlan = {
   impact: ImpactPlan
 }
 
-export type CommandEvidence = {
-  id: string
-  status: number
-  duration_ms: number
-  stdout_path?: string
-  stderr_path?: string
-  stdout?: string
-  stderr?: string
-}
-
 export type ReceiptInput = {
   kind: "validation" | "release" | "command"
   base_sha?: string
@@ -69,7 +56,7 @@ export type ReceiptInput = {
 }
 
 export type CompactReceipt = {
-  schema_version: 1
+  schema_version: 2
   kind: ReceiptInput["kind"]
   identities: {
     base_sha?: string
@@ -80,16 +67,29 @@ export type CompactReceipt = {
     impact_sha256?: string
     plan_sha256?: string
   }
-  counts: { commands: number; passed: number; failed: number }
+  counts: {
+    commands: number
+    hard_passed: number
+    hard_failed: number
+    advisory_passed: number
+    advisory_findings: number
+  }
   duration_ms: number
   run_log: { run_id?: string; log_url?: string }
   commands: Array<{
     id: string
+    enforcement: "hard_stop" | "advisory"
+    advisory?: {
+      rule: "quality-report-freshness"
+      path: "docs/quality-metrics.json"
+      regenerate: "pnpm quality:generate"
+    }
     status: number
     duration_ms: number
     stdout_path?: string
     stderr_path?: string
     failure_excerpt?: string
+    advisory_excerpt?: string
   }>
 }
 
