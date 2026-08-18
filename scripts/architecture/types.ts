@@ -1,5 +1,7 @@
 import type { ImplementationStatus, OwnedDataset, ServiceDeployment, ServiceType } from
   "./service_manifest_types.ts"
+import type { ServiceTestImpactMetadata } from
+  "./service_test_impact_types.ts"
 
 export type WorkspaceConfig = {
   schema_version: 1
@@ -54,6 +56,7 @@ export type ServiceManifest = {
   secrets: string[]
   configuration?: string[]
   deployment?: ServiceDeployment
+  test_impact?: ServiceTestImpactMetadata
   runtime_dependencies: string[]
   approved_packages: string[]
   owned_dataset?: OwnedDataset
