@@ -2,6 +2,7 @@
 
 - Status: accepted
 - Date: 2026-07-28
+- Partially superseded by: ADR 0027 for the unimplemented change-request contract
 
 ## Context
 
@@ -61,6 +62,9 @@ services/preorder-operations/contracts/preorder-public-v1.openapi.json.
 Contract keys and route paths are immutable within version one. Additive schema
 changes require compatibility proof; incompatible changes require new contract
 and route versions.
+
+ADR 0027 removes the unimplemented change-request declaration from the current
+surface until a separately accepted design supplies an exact callable binding.
 
 ## Correctness Rules
 

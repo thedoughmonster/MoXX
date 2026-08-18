@@ -16,8 +16,8 @@ test("projects the accepted current dev service graph exactly", async () => {
   )
   assert.equal(graph.nodes.length, 30)
   assert.equal(graph.edges.length, 30)
-  assert.equal(new Set(provided).size, 74)
-  assert.equal(provided.length, 74)
+  assert.equal(new Set(provided).size, 73)
+  assert.equal(provided.length, 73)
   assert.equal(new Set(graph.nodes.map((node) => node.service_key)).size, 30)
   assert.equal(new Set(graph.edges.map((edge) => canonicalJson([
     edge.provider, edge.consumer, edge.contract,
