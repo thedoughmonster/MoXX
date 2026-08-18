@@ -16,23 +16,17 @@ test("quality metric drift is advisory with deterministic guidance", () => {
   assert.equal(isQualityReportCurrent("135191\n", "135205\n"), false)
   const receipt = buildCompactReceipt({
     kind: "validation",
-    base_sha: "a".repeat(40),
-    head_sha: "b".repeat(40),
-    base_tree: "c".repeat(40),
-    head_tree: "d".repeat(40),
-    diff_sha256: "e".repeat(64),
-    impact_sha256: "f".repeat(64),
+    base_sha: "a".repeat(40), head_sha: "b".repeat(40),
+    base_tree: "c".repeat(40), head_tree: "d".repeat(40),
+    diff_sha256: "e".repeat(64), impact_sha256: "f".repeat(64),
     plan_sha256: "1".repeat(64),
     commands: [{
       id: "quality-report",
       command: "node",
       args: ["scripts/check_quality_report.ts"],
       enforcement: "advisory",
-      advisory: {
-        rule: "quality-report-freshness",
-        path: "docs/quality-metrics.json",
-        regenerate: "pnpm quality:generate",
-      },
+      advisory: { rule: "quality-report-freshness",
+        path: "docs/quality-metrics.json", regenerate: "pnpm quality:generate" },
       status: 1,
       duration_ms: 4,
       stderr: "token=advisory-secret\nStatus: stale\nRegenerate: pnpm quality:generate",
@@ -48,24 +42,19 @@ test("quality metric drift is advisory with deterministic guidance", () => {
   assert.match(summary, /quality-report-freshness/)
   assert.match(summary, /pnpm quality:generate/)
 })
-
 test("hard source quality failures still stop validation", () => {
   const receipt = buildCompactReceipt({
     kind: "validation",
     commands: [{
-      id: "source-quality",
-      command: "node",
-      args: ["scripts/check_source_quality.ts"],
-      enforcement: "hard_stop",
-      status: 1,
-      duration_ms: 2,
+      id: "source-quality", command: "node",
+      args: ["scripts/check_source_quality.ts"], enforcement: "hard_stop",
+      status: 1, duration_ms: 2,
       stderr: "source exceeds the hard line threshold",
     }],
   })
   assert.equal(receipt.counts.hard_failed, 1)
   assert.equal(validationExitCode(receipt), 1)
 })
-
 test("unknown enforcement metadata fails closed", () => {
   assert.throws(() => executeChecks([{ id: "unknown", command: process.execPath,
     args: ["-e", "process.exit(99)"], enforcement: "unknown" }] as never),
@@ -73,12 +62,8 @@ test("unknown enforcement metadata fails closed", () => {
   assert.throws(() => buildCompactReceipt({
     kind: "validation",
     commands: [{
-      id: "unknown",
-      command: "node",
-      args: [],
-      enforcement: "unknown",
-      status: 0,
-      duration_ms: 1,
+      id: "unknown", command: "node", args: [], enforcement: "unknown",
+      status: 0, duration_ms: 1,
     }],
   } as never), /Invalid command evidence/)
 })
@@ -100,12 +85,17 @@ test("validation receipt counts are recomputed", () => {
     diff_sha256: "e".repeat(64), impact_sha256: "f".repeat(64),
     plan_sha256: "1".repeat(64), run_id: "7",
     commands: [{
-      id: "hard", command: "node", args: [], enforcement: "hard_stop",
+      id: "full-repository", command: "node", args: [], enforcement: "hard_stop",
+      status: 0, duration_ms: 1,
+    }, {
+      id: "quality-report", command: "node", args: [], enforcement: "advisory",
+      advisory: { rule: "quality-report-freshness",
+        path: "docs/quality-metrics.json", regenerate: "pnpm quality:generate" },
       status: 0, duration_ms: 1,
     }],
   })
   const receipt = {
-    ...compact, kind: "validation" as const, gate: "path_scoped" as const,
+    ...compact, kind: "validation" as const, gate: "full" as const,
     required_job: "validate-final",
   }
   assert.equal(validateValidationReceipt(receipt), receipt)
@@ -116,5 +106,15 @@ test("validation receipt counts are recomputed", () => {
   assert.throws(() => validateValidationReceipt({
     ...receipt,
     commands: [{ ...receipt.commands[0], enforcement: "unknown" }],
+  }), /Invalid authoritative validation receipt/)
+  assert.throws(() => validateValidationReceipt({
+    ...receipt,
+    commands: [receipt.commands[1]],
+    counts: { commands: 1, hard_passed: 0, hard_failed: 0,
+      advisory_passed: 1, advisory_findings: 0 },
+    duration_ms: 1,
+  }), /Invalid authoritative validation receipt/)
+  assert.throws(() => validateValidationReceipt({
+    ...receipt, commands: {},
   }), /Invalid authoritative validation receipt/)
 })

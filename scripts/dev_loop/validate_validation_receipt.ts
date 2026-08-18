@@ -3,6 +3,15 @@ import type { ValidationReceipt } from "./types.ts"
 export function validateValidationReceipt(value: unknown): ValidationReceipt {
   const receipt = value as ValidationReceipt
   const commands = Array.isArray(receipt?.commands) ? receipt.commands : []
+  const signatures = commands.map((item) => `${item.id}:${item.enforcement}`)
+  const expectedSignatures = receipt?.gate === "full"
+    ? ["full-repository:hard_stop", "quality-report:advisory"]
+    : [
+      "focused-tests:hard_stop",
+      "source-quality:hard_stop",
+      "quality-report-validity:hard_stop",
+      "quality-report:advisory",
+    ]
   const hardPassed = commands.filter((item) =>
     item.enforcement === "hard_stop" && item.status === 0
   ).length
@@ -44,6 +53,8 @@ export function validateValidationReceipt(value: unknown): ValidationReceipt {
     !/^[0-9a-f]{64}$/.test(receipt.identities?.diff_sha256 ?? "") ||
     !/^[0-9a-f]{64}$/.test(receipt.identities?.impact_sha256 ?? "") ||
     !/^[0-9a-f]{64}$/.test(receipt.identities?.plan_sha256 ?? "") ||
+    !Array.isArray(receipt.commands) || commands.length === 0 ||
+    signatures.join(",") !== expectedSignatures.join(",") ||
     invalidCommand || receipt.counts?.commands !== commands.length ||
     receipt.counts.hard_passed !== hardPassed ||
     receipt.counts.hard_failed !== hardFailed ||
