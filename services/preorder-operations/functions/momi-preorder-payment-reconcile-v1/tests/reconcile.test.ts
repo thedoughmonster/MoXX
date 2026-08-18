@@ -90,7 +90,7 @@ test("projects unavailable or malformed retrieval as indeterminate", async () =>
   for (const kind of ["unavailable", "malformed"] as const) {
     const deps = dependencies()
     deps.retrieve = kind === "unavailable"
-      ? async () => { throw new Error("ambiguous retrieval") }
+      ? () => Promise.reject(new Error("ambiguous retrieval"))
       : () => Promise.resolve({ disposition: "matched", payment_status: "paid" })
     let projected = ""
     deps.project = (_attempt, _claim, evidence) => {
