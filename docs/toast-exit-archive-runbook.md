@@ -64,6 +64,13 @@ published menu versions win reads over later sparse snapshots.
 
 ## Manual Exports
 
+These steps are a private operator procedure for Archive Governance objects.
+This runbook grants no identity, credential, role, permission, hosted route,
+runtime authority, or service-client contract. Object access must be separately
+authorized. A future service client must use a separately accepted versioned
+owner contract with separately authorized runtime and role work instead of
+direct private-object access.
+
 Register every enabled product without API coverage in
 `momi_archive.product_gap_register`. Record operator, method, last export, next
 due date, archive path, byte size, and SHA-256 for every run.
