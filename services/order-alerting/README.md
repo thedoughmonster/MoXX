@@ -24,10 +24,12 @@ never forwarded as canonical reader authority.
 ## Contracts
 
 The active business path consumes the event delivery lifecycle and exact
-`momi.orders.get_by_version.v1`. The latest-version canonical reader and old
-`momi.toast_orders.get_by_id.v1` work path remain available only for dual-run
-compatibility. The current Slack view still reads the candidate snapshot
-directly; that transition access is removal-only constitution debt until an
+`momi.orders.get_by_version.v1`. `order-alerting` is the only permitted current
+consumer of the retiring `momi.toast_orders.get_by_id.v1` contract. That branch
+is limited to already-created legacy invocation work and bounded repair or
+rollback compatibility; it is not a normal path and cannot admit a new service
+consumer. The current Slack view still reads the candidate snapshot directly;
+that transition access is removal-only constitution debt until an
 owner-controlled versioned read view replaces it.
 
 ## Dual-Run Safety
@@ -44,6 +46,11 @@ reader and worker, fences duplicates across the transitional and canonical
 paths, disables new legacy work, and starts the subscription at a bounded
 handoff watermark. Existing terminal legacy records remain available for
 repair while every new alert starts from the canonical warehouse event.
+
+The Toast compatibility branch stays available while any legacy invocation
+work is unresolved or a separately approved historical hydration repair can
+still complete. Unknown callers, late hydration work, registry ambiguity, or a
+failed canonical acceptance event preserves the branch and stops retirement.
 
 ## Authority
 

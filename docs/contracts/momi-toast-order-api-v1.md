@@ -66,6 +66,42 @@ not select a newer order, trigger hydration, wait for Toast, or silently fall
 back to a source API. Unknown or mismatched work is forbidden; inactive
 contracts and missing warehouse versions are explicit failures.
 
+## Retirement Policy
+
+This contract is implemented and retiring; repository evidence does not assert
+that it is hosted or operational. `order-alerting` is the only permitted current
+service consumer. It may use the contract only for already-created legacy
+invocation work and bounded repair or rollback compatibility. No new service
+consumer or automatic or normal legacy work producer may adopt it.
+
+`toast-order-hydration` is the only recognized indirect producer. It may target
+this contract only for a separately approved, bounded operator or
+reconciliation job tied to named historical work. The approval must identify
+the owner, reason, environment, and maximum job set. Automatic webhook, normal,
+bulk, speculative, and open-ended issuance are prohibited.
+
+Retirement is conjunctive and requires all of the following:
+
+- no service-manifest consumer, executable compatibility branch, enabled
+  webhook mapping, or unfenced hydration insertion path remains;
+- new legacy-targeted hydration jobs are fenced, and all matching jobs and
+  attempts are terminal or explicitly dispositioned before invocation work is
+  drained;
+- legacy invocation work has no pending, running, retry-wait, or unresolved
+  failed row in any affected environment;
+- the route and function/trigger registries are inactive, with no normal route;
+- controlled acceptance proves the canonical reader path, identity checks,
+  decision result, and retry behavior on the exact replacement release;
+- readback since the later of canonical activation or the hydration fence has
+  no unexplained attempted or successful legacy call;
+- contract, service, catalog, runbook, consumer, producer, hydration, and work
+  inventories agree; and
+- any unhosting or removal has separate operational authority and rollback.
+
+An unknown caller, unfinished or late hydration, unresolved work, registry
+ambiguity, or failed canonical acceptance preserves the existing path and the
+`retiring` lifecycle. Failure never deletes historical work or attempts.
+
 ## Non-Goals
 
 - No direct Toast calls.
@@ -73,3 +109,4 @@ contracts and missing warehouse versions are explicit failures.
 - No request-time hydration.
 - No order mutation, alert decision, or Slack delivery.
 - No mutation or replacement of the complete Toast payload.
+- No new consumer, automatic producer, unhosting, or removal authority.

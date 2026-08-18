@@ -22,8 +22,20 @@ webhook-to-Slack path and accepts no new acquisition responsibilities.
 
 The service provides the complete source operation. Its legacy direct write to
 order-alerting work is frozen as runtime access debt, not declared as an
-authorized procurement dependency. Durable jobs are created only by a
-separately approved reconciliation or operator workflow.
+authorized procurement dependency. It is an indirect producer of downstream
+invocation work, not a consumer of the read contract.
+
+A job may target the retiring `momi.toast_orders.get_by_id.v1` contract only
+through a separately approved, bounded reconciliation or operator workflow
+that names the historical order or work, owner, reason, environment, and
+maximum job set. Automatic webhook, normal, bulk, speculative, and open-ended
+legacy issuance are prohibited.
+
+Before the read facade can retire, creation of legacy-targeted jobs is fenced
+first. Every matching hydration job and attempt must then be terminal or
+explicitly dispositioned, with no claimed, running, or late completion able to
+insert more legacy invocation work. Unknown or unfinished hydration preserves
+the existing read path and the `retiring` classification.
 
 ## Authority
 

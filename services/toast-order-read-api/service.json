@@ -5,7 +5,8 @@
   "purpose": "Serve the retiring source-specific Toast order read facade.",
   "kind": "core_capability",
   "service_type": "read_facade",
-  "lifecycle_status": "active",
+  "lifecycle_status": "retiring",
+  "implementation_status": "implemented",
   "functions": ["momi-toast-orders-get-by-id-v1"],
   "contracts": {
     "provides": ["momi.toast_orders.get_by_id.v1"],
