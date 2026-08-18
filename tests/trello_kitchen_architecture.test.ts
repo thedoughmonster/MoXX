@@ -62,6 +62,35 @@ test("keeps procurement isolated and routes archive capture through ingestion", 
   assert(!archive.contracts.provides.includes("momi.raw_json.read_evidence.v1"))
 })
 
+test("keeps kitchen contracts declared, reserved, and unbound", async () => {
+  const tasks = await readJson<ServiceManifest>(join(
+    workspaceRoot, "services", "kitchen-task-management", "service.json",
+  ))
+  const readme = await readFile(join(
+    workspaceRoot, "services", "kitchen-task-management", "README.md",
+  ), "utf8")
+
+  assert.equal(tasks.implementation_status, "declared")
+  assert.deepEqual(tasks.functions, [])
+  assert.deepEqual(tasks.contracts.provides, [
+    "momi.kitchen_tasks.command.v1",
+    "momi.kitchen_tasks.consume_trello_evidence.v1",
+  ])
+  assert.deepEqual(tasks.deployment.owns, [])
+  assert.deepEqual(tasks.owned_dataset?.private_relations, [])
+  assert.deepEqual(tasks.owned_dataset?.private_routines, [])
+  assert.deepEqual(tasks.owned_dataset?.public_reads, [])
+  assert.deepEqual(tasks.owned_dataset?.public_commands, tasks.contracts.provides)
+  assert.deepEqual(tasks.owned_dataset?.emitted_events, ["kitchen.task.changed"])
+  assert.match(readme, /momi\.kitchen_tasks\.command\.v1/u)
+  assert.match(readme, /momi\.kitchen_tasks\.consume_trello_evidence\.v1/u)
+  assert.match(readme, /kitchen\.task\.changed/u)
+  assert.match(readme, /reserved and unbound/u)
+  assert.match(readme, /non-callable/u)
+  assert.match(readme, /no runtime emission is asserted/u)
+  assert.match(readme, /not evidence that database objects exist/u)
+})
+
 test("accepts explicit Trello inbound and outbound function boundaries", () => {
   const fixture = (boundary: string, owner_service: string) => ({
     function_key: "trello.fixture.operation.v1",
