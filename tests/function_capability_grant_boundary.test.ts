@@ -1,6 +1,5 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-
 import type { ExecutionAuthority } from
   "../scripts/architecture/execution_authority_types.ts"
 import { provideFunctionCapabilityModel } from
@@ -11,14 +10,11 @@ import { validateFunctionCapabilityGrantBoundary } from
   "../scripts/architecture/validate_function_capability_grant_boundary.ts"
 import { positive } from "./execution_authority_test_support.ts"
 import { graphSourceSnapshot } from "./service_dependency_graph_fixture.ts"
-
 const architecture = await validateArchitecture()
-const result = await provideFunctionCapabilityModel(
-  architecture, graphSourceSnapshot, graphSourceSnapshot,
-)
+const result = await provideFunctionCapabilityModel(architecture,
+  graphSourceSnapshot, graphSourceSnapshot)
 if (!result.projection) throw new Error("expected capability projection")
 const model = result.projection
-
 function squareGrant(): ExecutionAuthority {
   const grant = structuredClone(positive)
   grant.service = "preorder-operations"
@@ -33,14 +29,12 @@ function squareGrant(): ExecutionAuthority {
   grant.external.invoke = []
   return grant
 }
-
 test("admits only mapped database namespaces and the exact called contract", () => {
   assert.deepEqual(validateFunctionCapabilityGrantBoundary(model, {
     function_key: "momi.preorder.payment.initiate.v1",
     execution_authority: squareGrant(),
   }), [])
 })
-
 test("rejects Square and OpenAI provider effects as caller authority", () => {
   const grant = squareGrant()
   grant.network.connect.push({
@@ -58,7 +52,6 @@ test("rejects Square and OpenAI provider effects as caller authority", () => {
   assert.equal(diagnostics.filter((item) =>
     item.code === "positive_namespace_unmapped").length, 4)
 })
-
 test("admits reconciliation contract but rejects its provider authority", () => {
   const grant = squareGrant()
   grant.contracts.call = [{ provider_service: "square-payment-acquisition", contract: "square.payment.retrieve.v1" }]
@@ -78,7 +71,36 @@ test("admits reconciliation contract but rejects its provider authority", () => 
   assert.equal(diagnostics.filter((item) =>
     item.code === "positive_namespace_unmapped").length, 5)
 })
-
+test("admits webhook contracts but rejects provider and archive authority", () => {
+  const grant = squareGrant()
+  grant.contracts.call = [
+    { provider_service: "communications-archive",
+      contract: "momi.raw_json.capture_evidence.v1" },
+    { provider_service: "square-payment-acquisition",
+      contract: "square.payment.webhook.authenticate.v1" },
+  ]
+  assert.deepEqual(validateFunctionCapabilityGrantBoundary(model, {
+    function_key: "momi.preorder.square_webhook.process.v1",
+    execution_authority: grant,
+  }), [])
+  grant.contracts.call.push({ provider_service: "communications-archive",
+    contract: "momi.private.capture.v1" })
+  grant.database.write[0] = { owner_service: "communications-archive",
+    object_kind: "table", qualified_object: "momi_communications.archive_items" }
+  grant.filesystem.read.push("services/square-payment-acquisition/src/webhook.ts")
+  grant.network.connect.push({ protocol: "https",
+    host: "connect.squareupsandbox.com", port: 443 })
+  grant.secrets.reference.push("SQUARE_WEBHOOK_SIGNATURE_KEY")
+  grant.packages.use.push("npm:square@44.0.0")
+  grant.external.invoke.push({ authority_key: "provider.square",
+    operation: "authenticate", resource: "webhook" })
+  const diagnostics = validateFunctionCapabilityGrantBoundary(model, {
+    function_key: "momi.preorder.square_webhook.process.v1",
+    execution_authority: grant,
+  })
+  assert.equal(diagnostics.filter((item) =>
+    item.code === "positive_namespace_unmapped").length, 7)
+})
 test("rejects unknown contract, owner, missing, and multi-function selection", () => {
   const grant = squareGrant()
   grant.service = "communications-evaluation"
@@ -103,7 +125,6 @@ test("rejects unknown contract, owner, missing, and multi-function selection", (
     execution_authority: squareGrant(),
   }).some((item) => item.code === "multiple_function_scope"))
 })
-
 test("rejects a duplicate selected function identity", () => {
   const duplicate = structuredClone(model)
   duplicate.functions.push({

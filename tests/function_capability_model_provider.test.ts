@@ -10,15 +10,15 @@ import { createCapabilityArchitecture } from
   "./function_capability_model_fixture.ts"
 import { graphSourceSnapshot } from "./service_dependency_graph_fixture.ts"
 
-test("projects the three adopted consumers without provider authority", async () => {
+test("projects the four adopted consumers without provider authority", async () => {
   const architecture = await validateArchitecture()
   const result = await provideFunctionCapabilityModel(
     architecture, graphSourceSnapshot, graphSourceSnapshot,
   )
   assert(result.projection)
-  assert.equal(result.projection.functions.length, 3)
+  assert.equal(result.projection.functions.length, 4)
   assert.equal(result.diagnostics.filter((item) =>
-    item.code === "capability_model_absent").length, 36)
+    item.code === "capability_model_absent").length, 35)
   const square = result.projection.functions.find((item) =>
     item.function_key === "momi.preorder.payment.initiate.v1")!
   assert.deepEqual(square.direct_capabilities, [
@@ -49,6 +49,25 @@ test("projects the three adopted consumers without provider authority", async ()
   assert(reconciliation.transitive_effects.some((effect) =>
     effect.effect_kind === "secret_reference" &&
     effect.target === "SQUARE_SANDBOX_ACCESS_TOKEN"))
+  const webhook = result.projection.functions.find((item) =>
+    item.function_key === "momi.preorder.square_webhook.process.v1")!
+  assert.deepEqual(webhook.direct_capabilities, [
+    "database_read", "database_write",
+  ])
+  assert.deepEqual(webhook.called_contracts, [{
+    service: "communications-archive",
+    contract: "momi.raw_json.capture_evidence.v1",
+  }, {
+    service: "square-payment-acquisition",
+    contract: "square.payment.webhook.authenticate.v1",
+  }])
+  for (const [effect_kind, target] of [
+    ["database_write", "momi_communications"],
+    ["runtime_dependency", "npm:postgres@3.4.3"],
+    ["network_outbound_host", "connect.squareupsandbox.com"],
+    ["secret_reference", "SQUARE_WEBHOOK_SIGNATURE_KEY"],
+  ]) assert(webhook.transitive_effects.some((effect) =>
+    effect.effect_kind === effect_kind && effect.target === target))
   const model = result.projection.functions.find((item) =>
     item.function_key === "momi.communications.evaluate_item.v1")!
   assert(model.transitive_effects.some((effect) =>

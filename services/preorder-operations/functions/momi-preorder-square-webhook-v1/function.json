@@ -16,6 +16,19 @@
   "probe": { "method": "GET", "acceptable_statuses": [405] },
   "timeout_policy_key": "square.webhook.processing.bounded.v1",
   "idempotency_policy_key": "square.webhook.evidence_id.v1",
-  "required_capabilities": ["database_read", "database_write", "external_api"],
+  "capability_model": {
+    "schema_version": 1,
+    "called_contracts": [
+      {
+        "service": "communications-archive",
+        "contract": "momi.raw_json.capture_evidence.v1"
+      },
+      {
+        "service": "square-payment-acquisition",
+        "contract": "square.payment.webhook.authenticate.v1"
+      }
+    ]
+  },
+  "required_capabilities": ["database_read", "database_write"],
   "declared_side_effects": ["captures_raw_json_evidence", "resolves_payment_attempt", "projects_payment_evidence"]
 }
