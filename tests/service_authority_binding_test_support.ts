@@ -38,9 +38,13 @@ const owner = await readJson<ServiceManifest>(join(
 const noDataset = await readJson<ServiceManifest>(join(
   bindingSourceRoot, "services", "fixture-no-dataset", "service.json",
 ))
+const dynamicDebt = await readJson<ServiceManifest>(join(
+  bindingSourceRoot, "services", "fixture-dynamic-debt", "service.json",
+))
 validateJson(serviceSchema, owner, "fixture-owner manifest")
 validateJson(serviceSchema, noDataset, "fixture-no-dataset manifest")
-const services: LoadedService[] = [owner, noDataset].map((manifest) => ({
+validateJson(serviceSchema, dynamicDebt, "fixture-dynamic-debt manifest")
+const services: LoadedService[] = [owner, noDataset, dynamicDebt].map((manifest) => ({
   directory: join(bindingSourceRoot, "services", manifest.service_key), manifest,
 }))
 const debtPath = join(

@@ -1,4 +1,5 @@
 import { digestExecutionAuthority } from "./digest_execution_authority.ts"
+import { compareUtf16 } from "./compare_utf16.ts"
 import type {
   ServiceAuthorityBinding,
   ServiceAuthorityBindingContext,
@@ -13,7 +14,9 @@ export async function findServiceAuthorityBindingExecutionDiagnostics(
   const diagnostics: ServiceAuthorityBindingDiagnostic[] = []
   const reference = binding.execution_authority
   if (!reference) return diagnostics
-  const sources = context.executions[reference.grant_id] ?? []
+  const sources = [...(context.executions[reference.grant_id] ?? [])].sort(
+    (left, right) => compareUtf16(left.source_path, right.source_path),
+  )
   const sourcePath = sources[0]?.source_path ??
     `execution-authorities/${reference.grant_id}.json`
   const report = (json_pointer: string, code: string, target: string) => {

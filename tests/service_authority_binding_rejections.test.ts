@@ -22,6 +22,7 @@ const rejections: Record<string, string[]> = {
   "runtime-as-owner.json": ["runtime_as_owner"],
   "debt-derived-authority.json": ["debt_derived_authority"],
   "unrecognized-fingerprints.json": ["unrecognized_fingerprint"],
+  "service-key-fingerprint-omission.json": ["debt_reference_incomplete"],
   "execution-widening.json": ["cross_owner_target", "manifest_mismatch"],
 }
 

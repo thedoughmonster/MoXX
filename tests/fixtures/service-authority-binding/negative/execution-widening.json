@@ -4,7 +4,7 @@
   "repository": "thedoughmonster/momi-backend",
   "revision": "1111111111111111111111111111111111111111",
   "service": "fixture-owner",
-  "binding_digest": "ce87db33f03faad72f262ec896a6ba92c0043794156634a3c3eae5bd0970b964",
+  "binding_digest": "87d83717678ed6a38270542a6d7d4173031d7efb8aea74b6c342a2ab0383fbff",
   "target_authority": {
     "source_path": "services/fixture-owner/service.json",
     "json_pointer": "/owned_dataset",
@@ -21,7 +21,7 @@
     "source_path": "docs/service-access-debt-baseline.json",
     "source_schema_id": "https://momi.local/schemas/service-access-debt-baseline-v1.schema.json",
     "source_schema_version": "service-access-debt-baseline/v1",
-    "source_digest": "9a9ddb1aa40fe598cc6a442897781acbc454457c891a649724be5f987260ef9f",
+    "source_digest": "0fdaf1860c40ca3b5d0886b868b9759619c70d8e260fabcef53bb39a56190984",
     "finding_fingerprints": []
   },
   "execution_authority": {

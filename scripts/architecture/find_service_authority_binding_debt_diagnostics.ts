@@ -28,6 +28,7 @@ export function findServiceAuthorityBindingDebtDiagnostics(
   }
   const expected = context.debt.findings.filter((finding) =>
     finding.evidence.consumer_service === binding.service ||
+    finding.evidence.service_key === binding.service ||
     finding.subject.startsWith(`services/${binding.service}/`)
   ).map((finding) => finding.fingerprint).sort(compareUtf16)
   const selected = reference.finding_fingerprints

@@ -4,7 +4,7 @@
   "repository": "thedoughmonster/momi-backend",
   "revision": "1111111111111111111111111111111111111111",
   "service": "fixture-missing",
-  "binding_digest": "a66e9c573ea24ce255a93238b12a0608735e4a9b6f79d1650c5913e10fdc2218",
+  "binding_digest": "23b61f8e749cf4744ea1d27a5535ef0d25446b31726aed5b90fcd49577a96c80",
   "target_authority": null,
   "runtime_compatibility": {
     "source_path": "services/fixture-missing/service.json",
@@ -16,7 +16,7 @@
     "source_path": "docs/service-access-debt-baseline.json",
     "source_schema_id": "https://momi.local/schemas/service-access-debt-baseline-v1.schema.json",
     "source_schema_version": "service-access-debt-baseline/v1",
-    "source_digest": "9a9ddb1aa40fe598cc6a442897781acbc454457c891a649724be5f987260ef9f",
+    "source_digest": "0fdaf1860c40ca3b5d0886b868b9759619c70d8e260fabcef53bb39a56190984",
     "finding_fingerprints": []
   },
   "execution_authority": null

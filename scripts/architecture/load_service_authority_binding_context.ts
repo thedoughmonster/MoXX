@@ -3,6 +3,7 @@ import { join } from "node:path"
 
 import { buildExecutionAuthorityDatabaseOwners } from
   "./build_execution_authority_database_owners.ts"
+import { compareUtf16 } from "./compare_utf16.ts"
 import { digestServiceAuthoritySource } from
   "./digest_service_authority_source.ts"
 import type { ExecutionAuthority } from "./execution_authority_types.ts"
@@ -41,7 +42,8 @@ export async function loadServiceAuthorityBindingContext(
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error
   }
-  for (const entry of entries) {
+  for (const entry of entries.sort((left, right) =>
+    compareUtf16(left.name, right.name))) {
     if (entry.isSymbolicLink() || !entry.isFile() ||
       !entry.name.endsWith(".json")) continue
     const source_path = `execution-authorities/${entry.name}`

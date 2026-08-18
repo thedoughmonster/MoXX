@@ -68,3 +68,30 @@ test("emits deterministic source-identity diagnostics", async () => {
   assert(first.diagnostics.every((item) =>
     !item.message.includes("fixture baseline is removal-only")))
 })
+
+test("sorts ambiguous execution sources before reporting", async () => {
+  const binding = await readJson<ServiceAuthorityBinding>(join(
+    positiveDirectory, "exact-execution.json",
+  ))
+  const source = bindingContext.executions[
+    binding.execution_authority!.grant_id
+  ][0].value
+  const left = { source_path: "execution-authorities/z.json", value: source }
+  const right = { source_path: "execution-authorities/a.json", value: source }
+  const first = await resolveServiceAuthorityBinding(
+    binding, bindingSchema, { ...bindingContext, executions: {
+      ...bindingContext.executions,
+      [binding.execution_authority!.grant_id]: [left, right],
+    } },
+  )
+  const second = await resolveServiceAuthorityBinding(
+    binding, bindingSchema, { ...bindingContext, executions: {
+      ...bindingContext.executions,
+      [binding.execution_authority!.grant_id]: [right, left],
+    } },
+  )
+  assert.deepEqual(first, second)
+  assert(first.diagnostics.some((item) =>
+    item.code === "ambiguous_authority" &&
+    item.source_path === "execution-authorities/a.json"))
+})
