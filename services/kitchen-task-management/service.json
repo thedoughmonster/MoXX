@@ -6,6 +6,7 @@
   "kind": "core_capability",
   "service_type": "dataset_owner",
   "lifecycle_status": "active",
+  "implementation_status": "declared",
   "functions": [],
   "contracts": {
     "provides": [
