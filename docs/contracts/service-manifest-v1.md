@@ -6,7 +6,7 @@ for one cohesive capability. It is validated against
 
 - `service_key` is the stable directory and ownership key.
 - `purpose` explains the capability in one sentence.
-- `lifecycle_status` is `active`, `retiring`, or `retired`.
+- [`lifecycle_status` and optional transitional `implementation_status`](./service-status-v1.md) define the lifecycle and implementation axes.
 - `functions` lists every Edge Function slug owned by the service.
 - `service_type` uses the seven types accepted by ADR `0013`.
 

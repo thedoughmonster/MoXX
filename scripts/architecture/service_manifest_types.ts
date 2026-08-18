@@ -7,6 +7,24 @@ export type ServiceType =
   | "read_facade"
   | "destination_adapter"
 
+export type ImplementationStatus =
+  | "declared"
+  | "implemented"
+  | "hosted_inactive"
+  | "operational"
+
+export type CatalogImplementationStatus = ImplementationStatus | "unclassified"
+
+export type DerivedAvailability =
+  | "not_asserted"
+  | "unavailable"
+  | "expected_available"
+
+export type ServiceStatusClassification = {
+  implementation: CatalogImplementationStatus
+  availability: DerivedAvailability
+}
+
 export type OwnedDataset = {
   dataset_key: string
   dataset_class: "domain" | "operational" | "raw_evidence"

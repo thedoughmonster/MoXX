@@ -59,5 +59,8 @@ test("validates discovered services, functions, and generated catalog", async ()
     join(workspaceRoot, "docs", "service-catalog.md"),
     "utf8",
   )
-  assert.equal(catalog, renderFunctionCatalog(architecture.functions))
+  assert.equal(
+    catalog,
+    renderFunctionCatalog(architecture.functions, architecture.services),
+  )
 })

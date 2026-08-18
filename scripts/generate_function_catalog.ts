@@ -9,6 +9,6 @@ const architecture = await validateArchitecture()
 const catalogPath = join(workspaceRoot, "docs", "service-catalog.md")
 await writeFile(
   catalogPath,
-  renderFunctionCatalog(architecture.functions),
+  renderFunctionCatalog(architecture.functions, architecture.services),
   "utf8",
 )
