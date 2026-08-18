@@ -19,29 +19,35 @@ import {
   context, fixtureRoot, positive, schema,
 } from "./execution_authority_test_support.ts"
 
-test("canonical owned_dataset rejects a runtime-access false owner", async () => {
+test("canonical archive objects reject preorder as a false owner", async () => {
   const services = await discoverServices("services")
   const owners = buildExecutionAuthorityDatabaseOwners(services)
   assert.deepEqual(
-    owners.relations["momi_communications.communication_evaluations"],
-    ["communications-evaluation"],
+    owners.relations["momi_communications.archive_items"],
+    ["communications-archive"],
   )
-  const grant = structuredClone(positive)
-  grant.grant_id = "ea-mox-201-false-owner"
-  grant.database.write[0] = {
-    owner_service: "preorder-operations",
-    object_kind: "table",
-    qualified_object: "momi_communications.communication_evaluations",
+  assert.deepEqual(
+    owners.routines["momi_communications.capture_raw_json_evidence_v1"],
+    ["communications-archive"],
+  )
+  for (const [object_kind, qualified_object] of [
+    ["table", "momi_communications.archive_items"],
+    ["routine", "momi_communications.capture_raw_json_evidence_v1"],
+  ] as const) {
+    const grant = structuredClone(positive)
+    grant.grant_id = `ea-mox-239-false-owner-${object_kind}`
+    grant.database.write[0] = {
+      owner_service: "preorder-operations", object_kind, qualified_object,
+    }
+    const scoped = structuredClone(context)
+    scoped.services["preorder-operations"].database.write.push(
+      "momi_communications",
+    )
+    scoped.databaseOwners = owners
+    const diagnostics = await validateExecutionAuthority(grant, schema, scoped)
+    assert(diagnostics.some((item) => item.code === "cross_owner_target" &&
+      item.field_path === "/database/write/0/owner_service"))
   }
-  const scoped = structuredClone(context)
-  scoped.services["preorder-operations"].database.write.push(
-    "momi_communications",
-  )
-  scoped.databaseOwners = owners
-  const diagnostics = await validateExecutionAuthority(grant, schema, scoped)
-  assert(diagnostics.some((item) =>
-    item.code === "cross_owner_target" &&
-    item.field_path === "/database/write/0/owner_service"))
 })
 
 test("schema-wide grants cannot contain exact debt targets", async () => {

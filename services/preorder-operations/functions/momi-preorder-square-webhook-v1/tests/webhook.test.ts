@@ -29,6 +29,34 @@ test("rejects invalid authentication before archive or projection", async () => 
   assert.deepEqual(calls, [])
 })
 
+test("returns 503 without resolution when archive capture fails", async () => {
+  const calls: string[] = []
+  const deps = dependencies(calls)
+  deps.capture = () => {
+    calls.push("capture")
+    return Promise.reject(new Error("archive unavailable"))
+  }
+  const response = await processWebhook(request(), deps)
+  assert.equal(response.status, 503)
+  assert.deepEqual(calls.map((call) => call.split(":")[0]), [
+    "authenticate", "capture",
+  ])
+})
+
+test("returns 503 after durable capture when projection fails", async () => {
+  const calls: string[] = []
+  const deps = dependencies(calls)
+  deps.project = () => {
+    calls.push("project")
+    return Promise.reject(new Error("projection unavailable"))
+  }
+  const response = await processWebhook(request(), deps)
+  assert.equal(response.status, 503)
+  assert.deepEqual(calls.map((call) => call.split(":")[0]), [
+    "authenticate", "capture", "resolve", "project",
+  ])
+})
+
 test("archives authenticated ignored events before acknowledgement", async () => {
   const calls: string[] = []
   const deps = dependencies(calls)
