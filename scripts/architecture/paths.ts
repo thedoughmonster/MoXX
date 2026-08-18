@@ -23,6 +23,17 @@ export const architectureSnapshotIdentitySchemaPath = join(
   "schemas",
   "architecture-snapshot-identity-v1.schema.json",
 )
+export const serviceDependencyGraphSchemaPath = join(
+  workspaceRoot,
+  "schemas",
+  "service-dependency-graph-v1.schema.json",
+)
+export const serviceDependencyGraphOutputPath = join(
+  workspaceRoot,
+  ".momi",
+  "architecture",
+  "service-dependency-graph-v1.json",
+)
 export const retirementSchemaPath = join(
   workspaceRoot,
   "schemas",

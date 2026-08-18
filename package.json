@@ -9,6 +9,7 @@
   },
   "scripts": {
     "architecture:check": "node scripts/check_architecture.ts",
+    "architecture:graph": "node scripts/generate_service_dependency_graph.ts",
     "catalog:generate": "node scripts/generate_function_catalog.ts",
     "catalog:check": "node scripts/check_catalog.ts",
     "check": "node scripts/check.ts",
