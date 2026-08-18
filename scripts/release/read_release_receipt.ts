@@ -2,10 +2,12 @@ import { readFileSync } from "node:fs"
 
 import { canonicalJson } from "../dev_loop/canonical_json.ts"
 import { hashText } from "../dev_loop/hash_text.ts"
+import { validateValidationReceipt } from "../dev_loop/validate_validation_receipt.ts"
 import type { ReleaseReceipt } from "./types.ts"
 
 export function readReleaseReceipt(path: string): ReleaseReceipt {
   const receipt = JSON.parse(readFileSync(path, "utf8")) as ReleaseReceipt
+  receipt.validation = validateValidationReceipt(receipt.validation)
   receipt.retired_functions ??= []
   if (
     receipt.schema_version !== 1 || receipt.kind !== "release" ||
@@ -26,7 +28,7 @@ export function readReleaseReceipt(path: string): ReleaseReceipt {
     receipt.retired_functions.join(",") !==
       [...new Set(receipt.retired_functions)].sort().join(",") ||
     receipt.validation.required_job !== "validate-final" ||
-    receipt.validation.counts.failed !== 0 ||
+    receipt.validation.counts.hard_failed !== 0 ||
     receipt.validation.identities.head_tree !== receipt.head_tree ||
     receipt.validation.identities.diff_sha256 !== receipt.diff_sha256 ||
     receipt.validation.identities.impact_sha256 !== receipt.impact_sha256

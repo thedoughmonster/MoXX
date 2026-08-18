@@ -7,12 +7,14 @@
   "commands": [
     {
       "id": "focused",
+      "enforcement": "hard_stop",
       "status": 0,
       "duration_ms": 12,
       "stdout": "successful raw output is not copied"
     },
     {
       "id": "failed",
+      "enforcement": "hard_stop",
       "status": 1,
       "duration_ms": 8,
       "stderr": "token=fixture-secret\nbounded failure"
