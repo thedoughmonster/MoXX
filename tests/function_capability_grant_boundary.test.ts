@@ -59,6 +59,26 @@ test("rejects Square and OpenAI provider effects as caller authority", () => {
     item.code === "positive_namespace_unmapped").length, 4)
 })
 
+test("admits reconciliation contract but rejects its provider authority", () => {
+  const grant = squareGrant()
+  grant.contracts.call = [{ provider_service: "square-payment-acquisition", contract: "square.payment.retrieve.v1" }]
+  assert.deepEqual(validateFunctionCapabilityGrantBoundary(model, {
+    function_key: "momi.preorder.payment.reconcile.v1",
+    execution_authority: grant,
+  }), [])
+  grant.filesystem.read.push("services/square-payment-acquisition/src/retrieve_payment.ts")
+  grant.network.connect.push({ protocol: "https", host: "connect.squareupsandbox.com", port: 443 })
+  grant.secrets.reference.push("SQUARE_SANDBOX_ACCESS_TOKEN")
+  grant.packages.use.push("npm:square@44.0.0")
+  grant.external.invoke.push({ authority_key: "provider.square", operation: "retrieve", resource: "payment" })
+  const diagnostics = validateFunctionCapabilityGrantBoundary(model, {
+    function_key: "momi.preorder.payment.reconcile.v1",
+    execution_authority: grant,
+  })
+  assert.equal(diagnostics.filter((item) =>
+    item.code === "positive_namespace_unmapped").length, 5)
+})
+
 test("rejects unknown contract, owner, missing, and multi-function selection", () => {
   const grant = squareGrant()
   grant.service = "communications-evaluation"

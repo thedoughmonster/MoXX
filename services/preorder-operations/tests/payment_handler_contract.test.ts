@@ -44,6 +44,29 @@ test("runtime composition imports only declared Square public contracts", async 
   assert.doesNotMatch(source, /square-payment-(delivery|acquisition)\/src\//)
 })
 
+test("reconciliation manifest and handler retain the public retrieval boundary", async () => {
+  const manifest = await readJson(
+    "functions/momi-preorder-payment-reconcile-v1/function.json",
+  )
+  assert.deepEqual(manifest.capability_model, {
+    schema_version: 1,
+    called_contracts: [{
+      service: "square-payment-acquisition",
+      contract: "square.payment.retrieve.v1",
+    }],
+  })
+  assert.deepEqual(manifest.required_capabilities, [
+    "database_read", "database_write",
+  ])
+  const source = await readFile(new URL(
+    "functions/momi-preorder-payment-reconcile-v1/src/runtime_dependencies.ts",
+    serviceRoot,
+  ), "utf8")
+  assert.match(source, /contracts\/public\/square\.payment\.retrieve\.v1/)
+  assert.doesNotMatch(source,
+    /square-payment-acquisition\/src\/|connect\.squareupsandbox\.com|SQUARE_SANDBOX_ACCESS_TOKEN|fetch\s*\(/)
+})
+
 test("database paths enforce claim, archive, resolve, and projection routines", async () => {
   const files = [
     "functions/momi-preorder-payment-initiate-v1/src/claim_payment.ts",
