@@ -1,0 +1,29 @@
+{
+  "$schema": "../../../../../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "fixture-owner",
+  "purpose": "Own deterministic records used by authority binding contract tests.",
+  "kind": "core_capability",
+  "service_type": "dataset_owner",
+  "lifecycle_status": "active",
+  "functions": [],
+  "contracts": { "provides": [], "consumes": [] },
+  "database": { "read": ["fixture_private"], "write": ["fixture_private"] },
+  "network": { "outbound_hosts": [] },
+  "secrets": [],
+  "runtime_dependencies": [],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "fixture.owner",
+    "dataset_class": "domain",
+    "private_schema": "fixture_private",
+    "private_relations": [
+      "fixture_private.authorized_records",
+      "fixture_private.records"
+    ],
+    "private_routines": [],
+    "public_reads": [],
+    "public_commands": [],
+    "emitted_events": []
+  }
+}

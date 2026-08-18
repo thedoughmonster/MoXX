@@ -1,0 +1,28 @@
+{
+  "$schema": "../../../../schemas/service-authority-binding-v1.schema.json",
+  "schema_version": "service-authority-binding/v1",
+  "repository": "thedoughmonster/momi-backend",
+  "revision": "2222222222222222222222222222222222222222",
+  "service": "fixture-owner",
+  "binding_digest": "63100672b59ea8eb51c2f779f3ae408d730978a53ba5bac7a29afddf0e0f4d48",
+  "target_authority": {
+    "source_path": "services/fixture-owner/service.json",
+    "json_pointer": "/owned_dataset",
+    "source_schema_version": "service-manifest/v1",
+    "value_digest": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "runtime_compatibility": {
+    "source_path": "services/fixture-owner/service.json",
+    "json_pointer": "/database",
+    "source_schema_version": "service-manifest/v1",
+    "value_digest": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "legacy_debt": {
+    "source_path": "docs/service-access-debt-baseline.json",
+    "source_schema_id": "https://momi.local/schemas/service-access-debt-baseline-v1.schema.json",
+    "source_schema_version": "service-access-debt-baseline/v1",
+    "source_digest": "0000000000000000000000000000000000000000000000000000000000000000",
+    "finding_fingerprints": []
+  },
+  "execution_authority": null
+}
