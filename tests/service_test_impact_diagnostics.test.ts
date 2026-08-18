@@ -7,7 +7,14 @@ import test from "node:test"
 import { canonicalJson } from "../scripts/dev_loop/canonical_json.ts"
 import { findServiceTestImpactDiagnostics } from
   "../scripts/architecture/find_service_test_impact_diagnostics.ts"
+import { workspaceRoot } from "../scripts/architecture/paths.ts"
+import { provideServiceTestImpact } from
+  "../scripts/architecture/provide_service_test_impact.ts"
+import { validateArchitecture } from
+  "../scripts/architecture/validate_architecture.ts"
 import type { ServiceTestImpactMetadata } from
+  "../scripts/architecture/service_test_impact_types.ts"
+import { ServiceTestImpactError } from
   "../scripts/architecture/service_test_impact_types.ts"
 import { createServiceTestImpactFixture } from
   "./service_test_impact_fixture.ts"
@@ -42,6 +49,10 @@ test("emits the complete stable fail-closed diagnostic vocabulary", async (t) =>
     id: "preorder-operations:risk_triggered:invalid:v1",
     test: "tests/escape.test.ts",
     triggers: ["runtime", "invented", "migration"],
+  }, {
+    ...metadata.categories.local_integration[0],
+    id: "preorder-operations:risk_triggered:missing-trigger:v1",
+    triggers: [],
   }] as unknown as ServiceTestImpactMetadata["categories"]["risk_triggered"]
   metadata.categories.risk_triggered = risk
   await writeFile(join(root, "outside.test.ts"), "// outside\n")
@@ -62,10 +73,36 @@ test("emits the complete stable fail-closed diagnostic vocabulary", async (t) =>
     "invalid_trigger", "triggers_unsorted", "services_unsorted",
     "contracts_unsorted",
   ]) assert(codes.has(code as never), code)
+  assert(first.some((item) => item.field === "triggers" &&
+    item.code === "category_rule_mismatch" &&
+    item.target === "risk trigger required"))
+  await assert.rejects(() => provideServiceTestImpact(
+    architecture, ["preorder-operations"], ["migration"], root,
+  ), (error: unknown) => error instanceof ServiceTestImpactError)
   for (const item of first) assert.deepEqual(
     Object.keys(item).sort(),
     item.selector_id
       ? ["code", "field", "selector_id", "source", "target"]
       : ["code", "field", "source", "target"],
   )
+})
+
+test("accepts the exact preorder declaration and fails visible path drift", async () => {
+  const architecture = await validateArchitecture()
+  const source = "services/preorder-operations/service.json"
+  const accepted = await findServiceTestImpactDiagnostics(
+    architecture.services, workspaceRoot,
+  )
+  assert.deepEqual(accepted.filter((item) => item.source === source), [])
+  const drifted = structuredClone(architecture.services)
+  const preorder = drifted.find((service) =>
+    service.manifest.service_key === "preorder-operations")
+  assert(preorder?.manifest.test_impact)
+  preorder.manifest.test_impact.categories.local_unit[0].test =
+    "services/preorder-operations/tests/missing.test.ts"
+  const diagnostics = await findServiceTestImpactDiagnostics(
+    drifted, workspaceRoot,
+  )
+  assert(diagnostics.some((item) => item.source === source &&
+    item.code === "test_missing"))
 })
