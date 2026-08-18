@@ -6,8 +6,11 @@
 - Keep `index.ts` limited to imports and runtime registration.
 - Give every direct function directory a `README.md` with an early `ELI5`
   section, then its purpose, contract, flow, configuration, and authority.
-- Give every direct function directory a local `AGENTS.md` containing only its
-  function-specific invariants; inherit shared rules from this file.
+- Direct function directories inherit repository-root, this adapter-tree,
+  owning-service, and applicable source-function rules.
+- Do not add `supabase/functions/<slug>/AGENTS.md` unless it records a named
+  deployment-only invariant not expressed by inherited rules; never copy
+  inherited prose.
 - Give every direct function directory a complete `function.json` conforming to
   `docs/contracts/edge-function-manifest-v1.md`.
 - Treat `purpose`, `capability`, `boundary`, and `owner_service` as the function's
