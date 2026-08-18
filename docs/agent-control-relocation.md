@@ -1,6 +1,6 @@
 # Agent-control relocation
 
-`agent-control` and `agent-control-host` are owned by the private
+`agent-control` and `agent-control-host` are owned by the dedicated public
 `thedoughmonster/momi-symphony` repository on `main`.
 
 This repository no longer contains, builds, hosts, deploys, or accepts feature
