@@ -24,10 +24,10 @@ export function buildLegacyAccessGovernanceReport(
     dynamic_relation_identifier: 0,
   }
   for (const finding of findings) {
-    ruleCounts[finding.rule_id as keyof typeof ruleCounts] += 1
+    ruleCounts[finding.rule_id] += 1
   }
   const bytes = Buffer.from(input.sourceText, "utf8")
-  const report = {
+  const report: LegacyAccessGovernanceReport = {
     $schema:
       "https://momi.local/schemas/legacy-access-governance-report-v1.schema.json",
     schema_version: "legacy-access-governance-report/v1",
@@ -49,7 +49,7 @@ export function buildLegacyAccessGovernanceReport(
     findings_sha256: createHash("sha256").update(canonicalJson(findings)).digest("hex"),
     report_digest: "",
     findings,
-  } as LegacyAccessGovernanceReport
+  }
   const { $schema: _schema, report_digest: _digest, ...digestPayload } = report
   report.report_digest = createHash("sha256").update(
     canonicalJson(digestPayload),

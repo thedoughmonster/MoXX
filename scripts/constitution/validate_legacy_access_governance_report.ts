@@ -6,15 +6,16 @@ import type { LegacyAccessGovernanceReport } from
   "./legacy_access_governance_report_types.ts"
 
 export function validateLegacyAccessGovernanceReport(
-  report: LegacyAccessGovernanceReport,
+  value: unknown,
   schema: object,
   expected: LegacyAccessGovernanceReport,
 ): void {
   try {
-    validateJson(schema, report, "legacy access governance report")
+    validateJson(schema, value, "legacy access governance report")
   } catch (error) {
     throw new Error("legacy_report_known_variant_incomplete", { cause: error })
   }
+  const report = value as LegacyAccessGovernanceReport
   if (canonicalJson(report.source) !== canonicalJson(expected.source)) {
     throw new Error("legacy_report_provenance_incomplete")
   }

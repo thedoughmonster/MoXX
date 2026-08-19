@@ -5,6 +5,7 @@ import test from "node:test"
 
 import { readJson } from "../scripts/architecture/read_json.ts"
 import { workspaceRoot } from "../scripts/architecture/paths.ts"
+import { canonicalJson } from "../scripts/dev_loop/canonical_json.ts"
 import { buildLegacyAccessGovernanceReport } from
   "../scripts/constitution/build_legacy_access_governance_report.ts"
 import { loadTargetAccessBaselineFingerprints } from
@@ -80,6 +81,7 @@ test("checked-in artifact is the exact current 133-row projection", async () => 
     "ee71cd2cbe0245fc8eb4091ff5d2e0603e2134f17e96380b8e07ec799f467788")
   assert.equal(report.source.finding_count, 133)
   assert.equal(artifactText, renderLegacyAccessGovernanceReport(report))
+  assert.equal(artifactText, `${canonicalJson(JSON.parse(artifactText))}\n`)
   validateLegacyAccessGovernanceReport(
     JSON.parse(artifactText), reportSchema, report,
   )

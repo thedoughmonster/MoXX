@@ -1,0 +1,7 @@
+{
+  "$schema": "https://momi.local/schemas/service-access-debt-baseline-v1.schema.json",
+  "schema_version": 1,
+  "generated_from": "dev@fafe25d",
+  "notes": ["Wrong-type findings collection fixture."],
+  "findings": { "not": "an array" }
+}

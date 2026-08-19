@@ -33,6 +33,7 @@ const happy = buildLegacyAccessGovernanceReport({
 for (const [name, code, fingerprints] of [
   ["invalid-json.json", "legacy_report_source_json_invalid", []],
   ["unsupported-rule.json", "legacy_report_finding_kind_unsupported", []],
+  ["wrong-type-findings.json", "legacy_report_known_variant_incomplete", []],
   ["incomplete-relation.json", "legacy_report_known_variant_incomplete",
     ["sha256:5a321f055971f29456acfbdceed3a70fd638674bd015736a03d2e808ad63675a"]],
 ] as const) {
@@ -45,6 +46,9 @@ for (const [name, code, fingerprints] of [
 }
 
 test("rejects versions, duplicate identities, and unknown access", () => {
+  assert.throws(() => buildLegacyAccessGovernanceReport({
+    sourceText: "[]", sourceSchema, trustedFingerprints: trusted,
+  }), /legacy_report_known_variant_incomplete/)
   const version = structuredClone(happySource)
   version.schema_version = 2
   assert.throws(() => buildLegacyAccessGovernanceReport({
@@ -68,10 +72,10 @@ test("rejects versions, duplicate identities, and unknown access", () => {
 test("rejects schema, provenance, set, count, order, and digest drift", () => {
   const authority = { ...structuredClone(happy), grant: true }
   assert.throws(() => validateLegacyAccessGovernanceReport(
-    authority as typeof happy, reportSchema, happy,
+    authority, reportSchema, happy,
   ), /legacy_report_known_variant_incomplete/)
   const provenance = structuredClone(happy)
-  provenance.source.path = "docs/another.json" as typeof provenance.source.path
+  Object.assign(provenance.source, { path: "docs/another.json" })
   assert.throws(() => validateLegacyAccessGovernanceReport(
     provenance, reportSchema, happy,
   ), /legacy_report_known_variant_incomplete|legacy_report_provenance_incomplete/)

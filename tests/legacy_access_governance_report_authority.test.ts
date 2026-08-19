@@ -2,9 +2,6 @@ import assert from "node:assert/strict"
 import { readFile, readdir } from "node:fs/promises"
 import { join } from "node:path"
 import test from "node:test"
-
-import type { ExecutionAuthority } from
-  "../scripts/architecture/execution_authority_types.ts"
 import { readJson } from "../scripts/architecture/read_json.ts"
 import { resolveServiceAuthorityBinding } from
   "../scripts/architecture/resolve_service_authority_binding.ts"
@@ -15,20 +12,20 @@ import type {
 import { validateExecutionAuthority } from
   "../scripts/architecture/validate_execution_authority.ts"
 import { workspaceRoot } from "../scripts/architecture/paths.ts"
+import type { LegacyAccessGovernanceReport } from
+  "../scripts/constitution/legacy_access_governance_report_types.ts"
 import {
   bindingContext, bindingFixtureRoot, bindingSchema,
 } from "./service_authority_binding_test_support.ts"
 import {
   context, positive, schema as executionSchema,
 } from "./execution_authority_test_support.ts"
-
-const report = await readJson<{
-  findings: Array<Record<string, unknown>>
-}>(join(workspaceRoot, "docs", "legacy-access-governance-report.json"))
+const report = await readJson<LegacyAccessGovernanceReport>(join(
+  workspaceRoot, "docs", "legacy-access-governance-report.json",
+))
 const binding = await readJson<ServiceAuthorityBinding>(join(
   bindingFixtureRoot, "positive", "debt-referenced.json",
 ))
-
 test("Service Authority Binding rejects report paths and copied rows", async () => {
   const reportPath = structuredClone(binding)
   reportPath.legacy_debt.source_path = "docs/legacy-access-governance-report.json"
@@ -36,11 +33,13 @@ test("Service Authority Binding rejects report paths and copied rows", async () 
     reportPath, bindingSchema, bindingContext,
   )
   assert(pathResult.diagnostics.some((item) => item.code === "schema_invalid"))
-  const reportSchema = structuredClone(binding)
-  reportSchema.legacy_debt.source_schema_id =
-    "https://momi.local/schemas/legacy-access-governance-report-v1.schema.json"
-  reportSchema.legacy_debt.source_schema_version =
-    "legacy-access-governance-report/v1" as typeof reportSchema.legacy_debt.source_schema_version
+  const reportSchema = structuredClone(binding) as unknown as Record<string, unknown>
+  reportSchema.legacy_debt = {
+    ...binding.legacy_debt,
+    source_schema_id:
+      "https://momi.local/schemas/legacy-access-governance-report-v1.schema.json",
+    source_schema_version: "legacy-access-governance-report/v1",
+  }
   const schemaResult = await resolveServiceAuthorityBinding(
     reportSchema, bindingSchema, bindingContext,
   )
@@ -53,7 +52,6 @@ test("Service Authority Binding rejects report paths and copied rows", async () 
   assert(copiedResult.diagnostics.some((item) =>
     item.code === "schema_invalid" || item.code === "copied_authority_body"))
 })
-
 test("Execution Authority rejects report references and debt authority", async () => {
   const reference = structuredClone(positive) as unknown as Record<string, unknown>
   reference.legacy_access_governance_report =
@@ -75,7 +73,6 @@ test("Execution Authority rejects report references and debt authority", async (
   )
   assert(diagnostics.some((item) => item.code === "debt_derived_authority"))
 })
-
 test("current authority results ignore report evidence context", async () => {
   const bindingWithReport = {
     ...bindingContext, legacyAccessGovernanceReport: report,
@@ -92,18 +89,30 @@ test("current authority results ignore report evidence context", async () => {
     await validateExecutionAuthority(positive, executionSchema, context),
   )
 })
-
-test("current authority modules have no report import or reference", async () => {
-  const root = join(workspaceRoot, "scripts", "architecture")
-  const names = (await readdir(root, { recursive: true })).filter((name) =>
-    /(?:execution_authority|service_authority_binding).*\.ts$/.test(name))
-  const schemaNames = [
-    "schemas/execution-authority-v1.schema.json",
-    "schemas/service-authority-binding-v1.schema.json",
+test("current architecture and authority surface has no report reference", async () => {
+  const architectureRoot = join(workspaceRoot, "scripts", "architecture")
+  const architectureNames = await readdir(architectureRoot, { recursive: true })
+  const serviceRoot = join(workspaceRoot, "services")
+  const manifestNames = (await readdir(serviceRoot, { recursive: true })).filter(
+    (name) => name.endsWith("service.json") || name.endsWith("function.json"),
+  )
+  const schemaRoot = join(workspaceRoot, "schemas")
+  const schemaNames = (await readdir(schemaRoot)).filter((name) =>
+    name !== "legacy-access-governance-report-v1.schema.json")
+  const contractRoot = join(workspaceRoot, "docs", "contracts")
+  const contractNames = (await readdir(contractRoot)).filter((name) =>
+    name !== "legacy-access-governance-report-v1.md")
+  const explicitNames = [
+    "scripts/check_architecture.ts", "workspace.json", "docs/architecture.md",
+    "docs/service-access-debt-baseline.json",
   ]
   const contents = await Promise.all([
-    ...names.map((name) => readFile(join(root, name), "utf8")),
-    ...schemaNames.map((name) => readFile(join(workspaceRoot, name), "utf8")),
+    ...architectureNames.map((name) =>
+      readFile(join(architectureRoot, name), "utf8")),
+    ...manifestNames.map((name) => readFile(join(serviceRoot, name), "utf8")),
+    ...schemaNames.map((name) => readFile(join(schemaRoot, name), "utf8")),
+    ...contractNames.map((name) => readFile(join(contractRoot, name), "utf8")),
+    ...explicitNames.map((name) => readFile(join(workspaceRoot, name), "utf8")),
   ])
   assert.equal(contents.some((text) =>
     text.includes("legacy-access-governance-report") ||

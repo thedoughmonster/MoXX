@@ -14,12 +14,21 @@ export function parseLegacyAccessGovernanceReportSource(
   } catch {
     throw new Error("legacy_report_source_json_invalid")
   }
-  const raw = value as { schema_version?: unknown; findings?: unknown[] }
-  if (raw?.schema_version !== 1) {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    throw new Error("legacy_report_known_variant_incomplete")
+  }
+  const raw = value as { schema_version?: unknown; findings?: unknown }
+  if (raw.schema_version !== 1) {
     throw new Error("legacy_report_source_version_unsupported")
   }
-  for (const finding of raw.findings ?? []) {
-    const rule = (finding as { rule_id?: unknown })?.rule_id
+  if (!Array.isArray(raw.findings)) {
+    throw new Error("legacy_report_known_variant_incomplete")
+  }
+  for (const finding of raw.findings) {
+    if (typeof finding !== "object" || finding === null || Array.isArray(finding)) {
+      throw new Error("legacy_report_known_variant_incomplete")
+    }
+    const rule = (finding as { rule_id?: unknown }).rule_id
     if (![
       "direct_private_relation_access", "direct_private_routine_call",
       "dynamic_event_name", "dynamic_relation_identifier",
