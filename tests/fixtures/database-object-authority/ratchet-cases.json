@@ -1,0 +1,11 @@
+{
+  "schema_version": "database-object-authority-ratchet-cases/v1",
+  "cases": [
+    { "name": "unchanged unrelated touch", "base": [["svc-a", "database.read", "broad", "momi_a"]], "candidate": [["svc-a", "database.read", "broad", "momi_a"]], "expected": [] },
+    { "name": "addition", "base": [], "candidate": [["svc-a", "database.read", "broad", "momi_a"]], "expected": ["broad_declaration_added"] },
+    { "name": "exact to broad widening", "base": [["svc-a", "database.read", "exact", "momi_a.orders"]], "candidate": [["svc-a", "database.read", "broad", "momi_a"]], "expected": ["broad_declaration_widened"] },
+    { "name": "broad read to write worsening wins precedence", "base": [["svc-a", "database.read", "broad", "momi_a"], ["svc-a", "database.write", "exact", "momi_a.orders"]], "candidate": [["svc-a", "database.write", "broad", "momi_a"]], "expected": ["broad_declaration_worsened"] },
+    { "name": "removal", "base": [["svc-a", "database.read", "broad", "momi_a"]], "candidate": [], "expected": [] },
+    { "name": "zero base recurrence", "base": [], "candidate": [["svc-a", "database.write", "broad", "momi_a"]], "expected": ["broad_declaration_added"] }
+  ]
+}

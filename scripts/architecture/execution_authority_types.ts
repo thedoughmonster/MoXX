@@ -57,7 +57,8 @@ export type ExecutionAuthority = {
 
 export type LoadedExecutionAuthority = {
   label: string
-  grant: ExecutionAuthority
+  grant: ExecutionAuthority |
+    import("./execution_authority_v2_types.ts").ExecutionAuthorityV2
 }
 
 export type ManifestAuthority = {
