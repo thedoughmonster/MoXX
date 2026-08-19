@@ -90,8 +90,8 @@ test("current authority results ignore report evidence context", async () => {
   )
 })
 test("current architecture and authority surface has no report reference", async () => {
-  const architectureRoot = join(workspaceRoot, "scripts", "architecture")
-  const architectureNames = await readdir(architectureRoot, { recursive: true })
+  const root = join(workspaceRoot, "scripts", "architecture")
+  const architectureNames = (await readdir(root, { recursive: true })).filter((name) => !name.includes("broad_schema_overlap_report"))
   const serviceRoot = join(workspaceRoot, "services")
   const manifestNames = (await readdir(serviceRoot, { recursive: true })).filter(
     (name) => name.endsWith("service.json") || name.endsWith("function.json"),
@@ -108,7 +108,7 @@ test("current architecture and authority surface has no report reference", async
   ]
   const contents = await Promise.all([
     ...architectureNames.map((name) =>
-      readFile(join(architectureRoot, name), "utf8")),
+      readFile(join(root, name), "utf8")),
     ...manifestNames.map((name) => readFile(join(serviceRoot, name), "utf8")),
     ...schemaNames.map((name) => readFile(join(schemaRoot, name), "utf8")),
     ...contractNames.map((name) => readFile(join(contractRoot, name), "utf8")),

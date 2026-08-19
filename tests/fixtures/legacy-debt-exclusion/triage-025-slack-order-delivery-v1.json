@@ -3,8 +3,8 @@
   "fixture_id": "triage-025-slack-order-delivery-order-alert-candidates-read-v1",
   "source_revision": {
     "repository": "thedoughmonster/momi-backend",
-    "commit": "afe9350bd0fb4d807e94bdff855bdfc9adcad17d",
-    "tree": "fdd544c4c2c00effec9e22a3132ebfcc0c448844"
+    "commit": "ff54beed51df9c75e25ec7eb8b5484fcb35e0769",
+    "tree": "16fa1d8c35ba22fdaa1419f5dfbacdfafe6c6bef"
   },
   "baseline": {
     "path": "docs/service-access-debt-baseline.json",
@@ -35,5 +35,5 @@
   "positive_control_pointer": "/database/read/0",
   "negative_debt_pointer": "/database/read/0",
   "negative_control_pointer": "/database/read/1",
-  "fixture_digest": "149107387b1e9980684449843ce5a77a0723ad6ef4592ef261eb58e23124f41f"
+  "fixture_digest": "8456f73150c1f2dbf9f22f41224e968c90ebb7e45f83bff28506a537810b2e45"
 }

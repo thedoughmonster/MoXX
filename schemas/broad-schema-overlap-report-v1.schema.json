@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://momi.local/schemas/broad-schema-overlap-report-v1.schema.json",
+  "title": "Broad Schema Overlap Report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "artifact_kind", "semantics", "inputs", "input_digest", "counts", "rows", "report_digest"],
+  "properties": {
+    "$schema": { "const": "https://momi.local/schemas/broad-schema-overlap-report-v1.schema.json" },
+    "schema_version": { "const": "broad-schema-overlap-report/v1" },
+    "artifact_kind": { "const": "broad_schema_overlap_report" },
+    "semantics": { "const": "diagnostic_evidence_only" },
+    "inputs": { "$ref": "#/$defs/inputs" },
+    "input_digest": { "$ref": "#/$defs/sha256" },
+    "counts": { "$ref": "#/$defs/counts" },
+    "rows": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/row" } },
+    "report_digest": { "$ref": "#/$defs/sha256" }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "fingerprint": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "git_revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "identifier": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "service": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_path", "json_pointer"],
+      "properties": { "source_path": { "type": "string", "minLength": 1 }, "json_pointer": { "type": "string" } }
+    },
+    "object_source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["source_path", "json_pointer", "replay_identity"],
+      "properties": {
+        "source_path": { "type": "string", "minLength": 1 },
+        "json_pointer": { "type": "string" },
+        "replay_identity": { "type": "string", "minLength": 1 }
+      }
+    },
+    "relation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["class", "schema", "name"],
+      "properties": { "class": { "const": "relation" }, "schema": { "$ref": "#/$defs/identifier" }, "name": { "$ref": "#/$defs/identifier" } }
+    },
+    "inputs": {
+      "type": "object", "additionalProperties": false,
+      "required": ["database_object_authority", "legacy_debt_baseline"],
+      "properties": {
+        "database_object_authority": {
+          "type": "object", "additionalProperties": false,
+          "required": ["schema_version", "repository", "revision", "source_digest", "authority_digest"],
+          "properties": {
+            "schema_version": { "const": "database-object-authority/v1" },
+            "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+            "revision": { "$ref": "#/$defs/git_revision" },
+            "source_digest": { "$ref": "#/$defs/sha256" },
+            "authority_digest": { "$ref": "#/$defs/sha256" }
+          }
+        },
+        "legacy_debt_baseline": {
+          "type": "object", "additionalProperties": false,
+          "required": ["path", "schema_version", "digest"],
+          "properties": {
+            "path": { "const": "docs/service-access-debt-baseline.json" },
+            "schema_version": { "const": "service-access-debt-baseline/v1" },
+            "digest": { "$ref": "#/$defs/sha256" }
+          }
+        }
+      }
+    },
+    "counts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["broad_declarations", "rows", "same_owner", "cross_owner", "known_direct_debt", "undiscoverable"],
+      "properties": {
+        "broad_declarations": { "type": "integer", "minimum": 0 },
+        "rows": { "type": "integer", "minimum": 0 },
+        "same_owner": { "type": "integer", "minimum": 0 },
+        "cross_owner": { "type": "integer", "minimum": 0 },
+        "known_direct_debt": { "type": "integer", "minimum": 0 },
+        "undiscoverable": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "row": {
+      "type": "object", "additionalProperties": false,
+      "required": ["row_identity", "declaring_service", "compatibility_mode", "broad_schema", "declaration_source", "exact_relation", "owner_service", "relation_kind", "object_source", "classification", "debt_fingerprints"],
+      "properties": {
+        "row_identity": { "type": "string", "minLength": 1 },
+        "declaring_service": { "$ref": "#/$defs/service" },
+        "compatibility_mode": { "enum": ["database.read", "database.write"] },
+        "broad_schema": { "$ref": "#/$defs/identifier" },
+        "declaration_source": { "$ref": "#/$defs/source" },
+        "exact_relation": { "oneOf": [{ "$ref": "#/$defs/relation" }, { "type": "null" }] },
+        "owner_service": { "oneOf": [{ "$ref": "#/$defs/service" }, { "type": "null" }] },
+        "relation_kind": { "enum": ["table", "view", "materialized view", null] },
+        "object_source": { "oneOf": [{ "$ref": "#/$defs/object_source" }, { "type": "null" }] },
+        "classification": { "enum": ["same-owner", "cross-owner", "known-direct-debt", "undiscoverable"] },
+        "debt_fingerprints": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/fingerprint" } }
+      }
+    }
+  }
+}

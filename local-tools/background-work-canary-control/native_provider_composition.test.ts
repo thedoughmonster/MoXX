@@ -1,5 +1,6 @@
 import assert from "node:assert/strict"
 import { readFile } from "node:fs/promises"
+import { mkdirSync } from "node:fs"
 import { join } from "node:path"
 import { test } from "node:test"
 import { createHeldNativeProvider } from "./create_held_native_provider.ts"
@@ -11,6 +12,8 @@ import type { BoundedChildRunner,
 
 test("real resolver and owner compose through every production provider stage", async () => {
   const repositoryRoot = join(import.meta.dirname, "../..")
+  const temporaryRoot = join(import.meta.dirname, "tmp-native-provider")
+  mkdirSync(temporaryRoot, { recursive: true })
   const calls: string[][] = []
   const childResult = (stdout: string): BoundedChildResult => {
     const bytes = new TextEncoder().encode(stdout)
@@ -38,7 +41,7 @@ test("real resolver and owner compose through every production provider stage", 
         repositoryRoot, provider,
         sql: createInternalProviderSql(kind, "select 1;\n"),
         parser: () => kind,
-      }, { temporaryRoot: "/tmp" })
+      }, { temporaryRoot })
       assert.deepEqual(result, { status: "success", value: kind })
     }
   } finally { await provider.close() }

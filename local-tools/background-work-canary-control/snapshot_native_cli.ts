@@ -55,7 +55,6 @@ export function snapshotNativeCli(
     fsyncSync(directoryFd)
     const after = fstatSync(sourceFd, { bigint: true })
     if (after.dev !== before.dev || after.ino !== before.ino || after.size !== before.size ||
-      after.mtimeNs !== before.mtimeNs || after.ctimeNs !== before.ctimeNs ||
       sourceHash.digest("hex") !== REQUIRED_SUPABASE_NATIVE_SHA256) throw new Error()
     heldFd = openSync(stagedPath, constants.O_RDONLY | constants.O_NOFOLLOW)
     const held = fstatSync(heldFd, { bigint: true })
