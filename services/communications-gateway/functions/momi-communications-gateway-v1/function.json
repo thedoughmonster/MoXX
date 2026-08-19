@@ -15,7 +15,20 @@
   "timeout_policy_key": "momi.communications.user_timeout.v1",
   "retry_policy_key": "momi.communications.no_ambiguous_paid_retry.v1",
   "idempotency_policy_key": "momi.communications.user_turn.v1",
-  "required_capabilities": ["authenticated_user", "database_read", "database_write", "model_inference"],
+  "capability_model": {
+    "schema_version": 1,
+    "called_contracts": [
+      {
+        "service": "model-execution-gateway",
+        "contract": "momi.model_execution.execute.v1"
+      },
+      {
+        "service": "model-execution-gateway",
+        "contract": "momi.model_execution.retrieve.v1"
+      }
+    ]
+  },
+  "required_capabilities": ["database_read", "database_write"],
   "declared_side_effects": [
     "admits_gateway_invocation",
     "archives_model_boundary_evidence",
