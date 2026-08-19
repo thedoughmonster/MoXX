@@ -43,6 +43,9 @@ test("calls only the archive capture contract with source evidence", async () =>
     sqlText.includes("momi_communications.capture_raw_json_evidence_v1"),
     true,
   )
+  assert.equal(sqlText.match(/capture_raw_json_evidence_v1/g)?.length, 1)
+  assert.doesNotMatch(sqlText, /momi_communications\.(archive_items|source_)/)
+  assert.doesNotMatch(sqlText, /\b(insert|update|delete)\b/i)
   assert.equal(parameters[0], "trello_webhook")
   assert.equal(parameters[1], boardId)
   assert.equal(parameters[2], actorId)

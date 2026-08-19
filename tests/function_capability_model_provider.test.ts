@@ -1,27 +1,19 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 import { canonicalJson } from "../scripts/dev_loop/canonical_json.ts"
-import { provideFunctionCapabilityModel } from
-  "../scripts/architecture/provide_function_capability_model.ts"
-import { validateArchitecture } from
-  "../scripts/architecture/validate_architecture.ts"
-import { createCapabilityArchitecture } from
-  "./function_capability_model_fixture.ts"
+import { provideFunctionCapabilityModel } from "../scripts/architecture/provide_function_capability_model.ts"
+import { validateArchitecture } from "../scripts/architecture/validate_architecture.ts"
+import { createCapabilityArchitecture } from "./function_capability_model_fixture.ts"
 import { graphSourceSnapshot } from "./service_dependency_graph_fixture.ts"
-test("projects the five adopted consumers without provider authority", async () => {
+test("projects the six adopted consumers without provider authority", async () => {
   const architecture = await validateArchitecture()
-  const result = await provideFunctionCapabilityModel(
-    architecture, graphSourceSnapshot, graphSourceSnapshot,
-  )
+  const result = await provideFunctionCapabilityModel(architecture, graphSourceSnapshot, graphSourceSnapshot)
   assert(result.projection)
-  assert.equal(result.projection.functions.length, 5)
+  assert.equal(result.projection.functions.length, 6)
   assert.equal(result.diagnostics.filter((item) =>
-    item.code === "capability_model_absent").length, 34)
-  const square = result.projection.functions.find((item) =>
-    item.function_key === "momi.preorder.payment.initiate.v1")!
-  assert.deepEqual(square.direct_capabilities, [
-    "database_read", "database_write",
-  ])
+    item.code === "capability_model_absent").length, 33)
+  const square = result.projection.functions.find((item) => item.function_key === "momi.preorder.payment.initiate.v1")!
+  assert.deepEqual(square.direct_capabilities, ["database_read", "database_write"])
   assert.deepEqual(square.called_contracts, [{
     service: "square-payment-delivery",
     contract: "square.payment.execute.v1",
@@ -34,9 +26,7 @@ test("projects the five adopted consumers without provider authority", async () 
     effect.target === "SQUARE_SANDBOX_ACCESS_TOKEN"))
   const reconciliation = result.projection.functions.find((item) =>
     item.function_key === "momi.preorder.payment.reconcile.v1")!
-  assert.deepEqual(reconciliation.direct_capabilities, [
-    "database_read", "database_write",
-  ])
+  assert.deepEqual(reconciliation.direct_capabilities, ["database_read", "database_write"])
   assert.deepEqual(reconciliation.called_contracts, [{
     service: "square-payment-acquisition",
     contract: "square.payment.retrieve.v1",
@@ -66,6 +56,16 @@ test("projects the five adopted consumers without provider authority", async () 
     ["secret_reference", "SQUARE_WEBHOOK_SIGNATURE_KEY"],
   ]) assert(webhook.transitive_effects.some((effect) =>
     effect.effect_kind === effect_kind && effect.target === target))
+  const trello = result.projection.functions.find((item) => item.function_key === "trello.webhooks.webhook_ingest.v1")!
+  assert.deepEqual(trello.direct_capabilities, [])
+  assert.deepEqual(trello.called_contracts, [{ service: "communications-archive",
+    contract: "momi.raw_json.capture_evidence.v1" }])
+  for (const [effect_kind, target] of [
+    ["database_read", "momi_communications"], ["database_write", "momi_communications"],
+    ["runtime_dependency", "npm:postgres@3.4.3"], ["secret_reference", "SUPABASE_DB_URL"],
+  ]) assert(trello.transitive_effects.some((effect) =>
+    effect.effect_kind === effect_kind && effect.target === target &&
+    effect.provider_service === "communications-archive"))
   const gateway = result.projection.functions.find((item) =>
     item.function_key === "momi.communications.chat_completions.v1")!
   assert.deepEqual(gateway.direct_capabilities, ["database_read", "database_write"])

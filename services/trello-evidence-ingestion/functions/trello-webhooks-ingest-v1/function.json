@@ -13,6 +13,15 @@
   "input_schema": "contracts/input.schema.json",
   "output_schema": "contracts/output.schema.json",
   "idempotency_policy_key": "trello.webhook.action_id.v1",
-  "required_capabilities": ["database_write"],
+  "required_capabilities": [],
+  "capability_model": {
+    "schema_version": 1,
+    "called_contracts": [
+      {
+        "service": "communications-archive",
+        "contract": "momi.raw_json.capture_evidence.v1"
+      }
+    ]
+  },
   "declared_side_effects": ["captures_raw_json_evidence"]
 }
