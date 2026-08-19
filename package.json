@@ -10,6 +10,8 @@
   "scripts": {
     "architecture:check": "node scripts/check_architecture.ts",
     "architecture:graph": "node scripts/generate_service_dependency_graph.ts",
+    "broad-schema-overlap:generate": "node scripts/generate_broad_schema_overlap_report.ts",
+    "broad-schema-overlap:check": "node scripts/check_broad_schema_overlap_report.ts",
     "catalog:generate": "node scripts/generate_function_catalog.ts",
     "catalog:check": "node scripts/check_catalog.ts",
     "check": "node scripts/run_check.ts",
