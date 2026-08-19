@@ -1,6 +1,5 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-
 import { canonicalJson } from "../scripts/dev_loop/canonical_json.ts"
 import { provideFunctionCapabilityModel } from
   "../scripts/architecture/provide_function_capability_model.ts"
@@ -9,16 +8,15 @@ import { validateArchitecture } from
 import { createCapabilityArchitecture } from
   "./function_capability_model_fixture.ts"
 import { graphSourceSnapshot } from "./service_dependency_graph_fixture.ts"
-
-test("projects the four adopted consumers without provider authority", async () => {
+test("projects the five adopted consumers without provider authority", async () => {
   const architecture = await validateArchitecture()
   const result = await provideFunctionCapabilityModel(
     architecture, graphSourceSnapshot, graphSourceSnapshot,
   )
   assert(result.projection)
-  assert.equal(result.projection.functions.length, 4)
+  assert.equal(result.projection.functions.length, 5)
   assert.equal(result.diagnostics.filter((item) =>
-    item.code === "capability_model_absent").length, 35)
+    item.code === "capability_model_absent").length, 34)
   const square = result.projection.functions.find((item) =>
     item.function_key === "momi.preorder.payment.initiate.v1")!
   assert.deepEqual(square.direct_capabilities, [
@@ -68,6 +66,22 @@ test("projects the four adopted consumers without provider authority", async () 
     ["secret_reference", "SQUARE_WEBHOOK_SIGNATURE_KEY"],
   ]) assert(webhook.transitive_effects.some((effect) =>
     effect.effect_kind === effect_kind && effect.target === target))
+  const gateway = result.projection.functions.find((item) =>
+    item.function_key === "momi.communications.chat_completions.v1")!
+  assert.deepEqual(gateway.direct_capabilities, ["database_read", "database_write"])
+  assert.deepEqual(gateway.called_contracts, [{
+    service: "model-execution-gateway", contract: "momi.model_execution.execute.v1",
+  }, {
+    service: "model-execution-gateway", contract: "momi.model_execution.retrieve.v1",
+  }])
+  for (const [effect_kind, target] of [
+    ["database_read", "momi_model_execution"],
+    ["database_write", "momi_model_execution"],
+    ["network_outbound_host", "api.openai.com"],
+    ["runtime_dependency", "npm:openai@6.35.0"],
+    ["secret_reference", "OPENAI_API_KEY"],
+  ]) assert(gateway.transitive_effects.some((effect) =>
+    effect.effect_kind === effect_kind && effect.target === target))
   const model = result.projection.functions.find((item) =>
     item.function_key === "momi.communications.evaluate_item.v1")!
   assert(model.transitive_effects.some((effect) =>
@@ -75,7 +89,6 @@ test("projects the four adopted consumers without provider authority", async () 
   assert(model.transitive_effects.some((effect) =>
     effect.target === "OPENAI_API_KEY"))
 })
-
 test("is byte-stable under discovery reordering", async () => {
   const architecture = await validateArchitecture()
   const first = await provideFunctionCapabilityModel(
@@ -88,7 +101,6 @@ test("is byte-stable under discovery reordering", async () => {
   assert(first.projection && second.projection)
   assert.equal(canonicalJson(first.projection), canonicalJson(second.projection))
 })
-
 test("keeps direct-only, contract-only, multi-hop, and absent states distinct", async () => {
   const architecture = createCapabilityArchitecture([{
     key: "caller", consumes: [{ service: "alpha", contract: "alpha.call.v1" }],
