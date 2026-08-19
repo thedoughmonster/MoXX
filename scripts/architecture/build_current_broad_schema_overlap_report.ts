@@ -24,7 +24,10 @@ export async function buildCurrentBroadSchemaOverlapReport(
   const baselineSchema = await readJson<object>(join(
     root, "schemas", "service-access-debt-baseline-v1.schema.json",
   ))
-  return buildBroadSchemaOverlapReport(result.authority,
+  const authoritySchema = await readJson<object>(join(
+    root, "schemas", "database-object-authority-v1.schema.json",
+  ))
+  return buildBroadSchemaOverlapReport(result.authority, authoritySchema,
     source.legacy_debt.source, baselineSchema,
     loadTargetAccessBaselineFingerprints())
 }

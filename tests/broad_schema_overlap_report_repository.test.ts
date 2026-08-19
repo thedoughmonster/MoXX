@@ -65,13 +65,12 @@ test("fails stale and invalid baseline inputs without a report", () => {
   const source = loadDatabaseObjectAuthorityRevision(
     workspaceRoot, fixture.revision,
   )
-  const stale = structuredClone(result.authority)
-  stale.legacy_debt_reference.digest = "0".repeat(64)
-  assert.throws(() => buildBroadSchemaOverlapReport(stale,
-    source.legacy_debt.source, baselineSchema,
+  assert.throws(() => buildBroadSchemaOverlapReport(
+    result.authority, authoritySchema, `${source.legacy_debt.source}\n`, baselineSchema,
     loadTargetAccessBaselineFingerprints()),
   /broad_overlap_debt_reference_mismatch/)
   assert.throws(() => buildBroadSchemaOverlapReport(result.authority,
+    authoritySchema,
     "{", baselineSchema, loadTargetAccessBaselineFingerprints()),
   /legacy_report_source_json_invalid/)
 })

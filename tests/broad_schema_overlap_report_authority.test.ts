@@ -6,11 +6,21 @@ import test from "node:test"
 
 import { buildCurrentBroadSchemaOverlapReport } from
   "../scripts/architecture/build_current_broad_schema_overlap_report.ts"
+import { buildBroadSchemaOverlapReport } from
+  "../scripts/architecture/build_broad_schema_overlap_report.ts"
 import { buildDatabaseObjectAuthority } from
   "../scripts/architecture/build_database_object_authority.ts"
+import { calculateBroadSchemaOverlapReportDigest } from
+  "../scripts/architecture/calculate_broad_schema_overlap_report_digest.ts"
+import { loadDatabaseObjectAuthorityRevision } from
+  "../scripts/architecture/load_database_object_authority_revision.ts"
 import { readJson } from "../scripts/architecture/read_json.ts"
 import { validateJson } from "../scripts/architecture/validate_json.ts"
+import { validateBroadSchemaOverlapReport } from
+  "../scripts/architecture/validate_broad_schema_overlap_report.ts"
 import { workspaceRoot } from "../scripts/architecture/paths.ts"
+import { loadTargetAccessBaselineFingerprints } from
+  "../scripts/constitution/load_target_access_baseline_fingerprints.ts"
 
 const revision = "ff54beed51df9c75e25ec7eb8b5484fcb35e0769"
 
@@ -29,6 +39,31 @@ test("generation cannot alter database object authority", async () => {
     "remediation", "preserve", "revoke"]) assert.equal(
       rowKeys.has(forbidden), false,
     )
+})
+
+test("forged authority digest and null concrete kind cannot publish", async () => {
+  const authoritySchema = await readJson<object>(join(
+    workspaceRoot, "schemas", "database-object-authority-v1.schema.json"))
+  const baselineSchema = await readJson<object>(join(
+    workspaceRoot, "schemas", "service-access-debt-baseline-v1.schema.json"))
+  const result = buildDatabaseObjectAuthority(workspaceRoot, revision)
+  const source = loadDatabaseObjectAuthorityRevision(workspaceRoot, revision)
+  result.authority.authority_digest = "0".repeat(64)
+  assert.throws(() => buildBroadSchemaOverlapReport(result.authority,
+    authoritySchema, source.legacy_debt.source, baselineSchema,
+    loadTargetAccessBaselineFingerprints()), /source_digest_drift/)
+  const report = await buildCurrentBroadSchemaOverlapReport(workspaceRoot, revision)
+  const index = report.rows.findIndex((row) => row.exact_relation !== null)
+  report.rows[index]!.relation_kind = null
+  report.report_digest = calculateBroadSchemaOverlapReportDigest(report)
+  const reportSchema = await readJson<object>(join(
+    workspaceRoot, "schemas", "broad-schema-overlap-report-v1.schema.json"))
+  assert.deepEqual(validateBroadSchemaOverlapReport(report, reportSchema).find((item) =>
+    item.field_path === `/rows/${index}/classification`), {
+    field_path: `/rows/${index}/classification`,
+    code: "broad_overlap_report_identity_mismatch",
+    target: report.rows[index]!.classification,
+  })
 })
 
 test("strict Execution Authority schemas reject reports", async () => {

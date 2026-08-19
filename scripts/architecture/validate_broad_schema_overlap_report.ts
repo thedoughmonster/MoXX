@@ -46,7 +46,7 @@ export function validateBroadSchemaOverlapReport(
     }
     const sentinel = row.classification === "undiscoverable"
     const concrete = row.exact_relation !== null && row.owner_service !== null &&
-      row.object_source !== null
+      row.relation_kind !== null && row.object_source !== null
     const sameOwner = concrete && row.owner_service === row.declaring_service
     const debt = row.debt_fingerprints
     const validClass = sentinel

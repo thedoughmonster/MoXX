@@ -16,13 +16,22 @@ import type {
 } from "./broad_schema_overlap_report_types.ts"
 import type { DatabaseObjectAuthority } from
   "./database_object_authority_types.ts"
+import { validateDatabaseObjectAuthority } from
+  "./validate_database_object_authority.ts"
 
 export function buildBroadSchemaOverlapReport(
   authority: DatabaseObjectAuthority,
+  authoritySchema: object,
   baselineText: string,
   baselineSchema: object,
   trustedFingerprints: Set<string>,
 ): BroadSchemaOverlapReport {
+  const authorityDiagnostics = validateDatabaseObjectAuthority(
+    authority, authoritySchema,
+  )
+  if (authorityDiagnostics.length > 0) throw new Error(
+    authorityDiagnostics.map((item) => JSON.stringify(item)).join("\n"),
+  )
   const baseline = parseLegacyAccessGovernanceReportSource(
     baselineText, baselineSchema, trustedFingerprints,
   )
