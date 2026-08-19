@@ -3,9 +3,9 @@
   "purpose": "Repository-wide trend signals; compare this file through Git history.",
   "metrics": {
     "handwritten_files": 2729,
-    "handwritten_lines": 136594,
+    "handwritten_lines": 136596,
     "typescript_files": 1936,
-    "import_declarations": 6876,
+    "import_declarations": 6877,
     "top_level_functions": 1251,
     "branch_complexity_points": 5408
   }
