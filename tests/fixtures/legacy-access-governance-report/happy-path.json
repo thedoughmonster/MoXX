@@ -1,0 +1,61 @@
+{
+  "$schema": "https://momi.local/schemas/service-access-debt-baseline-v1.schema.json",
+  "schema_version": 1,
+  "generated_from": "dev@fafe25d",
+  "notes": ["Complete four-variant report fixture."],
+  "findings": [
+    {
+      "rule_version": 1,
+      "rule_id": "direct_private_relation_access",
+      "subject": "database/routines/momi_a.sample--aaaaaaaaaaaa.sql",
+      "evidence": {
+        "access": "read",
+        "consumer_service": "fixture-consumer",
+        "owner_service": "fixture-owner",
+        "reference_count": "2",
+        "relation": "fixture_private.records",
+        "sql_source_hash": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+      },
+      "fingerprint": "sha256:cea10b46e894304e02ac8892f02c80e14daf4149502cfb76f47757d2042c1b00",
+      "summary": "Fixture relation finding."
+    },
+    {
+      "rule_version": 1,
+      "rule_id": "direct_private_routine_call",
+      "subject": "database/routines/momi_a.sample--aaaaaaaaaaaa.sql",
+      "evidence": {
+        "consumer_service": "fixture-consumer",
+        "owner_service": "fixture-owner",
+        "reference_count": "1",
+        "routine": "fixture_private.process",
+        "sql_source_hash": "sha256:2222222222222222222222222222222222222222222222222222222222222222"
+      },
+      "fingerprint": "sha256:9b6027eb7d06b46166f11b5436fe4bb9d1fbf5bd62cd7d271371b79b4afbd0ab",
+      "summary": "Fixture routine finding."
+    },
+    {
+      "rule_version": 1,
+      "rule_id": "dynamic_event_name",
+      "subject": "database/routines/momi_a.sample--aaaaaaaaaaaa.sql",
+      "evidence": {
+        "expressions": "event_name",
+        "service_key": "fixture-consumer",
+        "service_source_hash": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+      },
+      "fingerprint": "sha256:971f6fabf59beb210937ce0f259ecbf72b73ce60e2020f1e3465b56b6040fdfe",
+      "summary": "Fixture dynamic event finding."
+    },
+    {
+      "rule_version": 1,
+      "rule_id": "dynamic_relation_identifier",
+      "subject": "services/fixture-service/src/read.ts",
+      "evidence": {
+        "expressions": "sql(name)",
+        "service_key": "fixture-service",
+        "service_source_hash": "sha256:4444444444444444444444444444444444444444444444444444444444444444"
+      },
+      "fingerprint": "sha256:53cf038a34f5771a506401d757388e153345e793ef4ab8a3d490d3be9555ce31",
+      "summary": "Fixture dynamic relation finding."
+    }
+  ]
+}

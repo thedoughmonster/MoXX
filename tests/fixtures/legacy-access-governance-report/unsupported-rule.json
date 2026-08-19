@@ -1,0 +1,7 @@
+{
+  "$schema": "https://momi.local/schemas/service-access-debt-baseline-v1.schema.json",
+  "schema_version": 1,
+  "generated_from": "dev@fafe25d",
+  "notes": ["Unsupported future rule fixture."],
+  "findings": [{ "rule_id": "future_authority_rule" }]
+}

@@ -13,6 +13,8 @@ import { buildDatabaseSourceModules } from
   "./constitution/build_database_source_modules.ts"
 import { loadAccessBaseline } from
   "./constitution/load_access_baseline.ts"
+import { checkCurrentLegacyAccessGovernanceReport } from
+  "./constitution/check_current_legacy_access_governance_report.ts"
 import { loadConstitutionBaseline } from
   "./constitution/load_constitution_baseline.ts"
 import { loadTargetBaselineFingerprints } from
@@ -67,6 +69,7 @@ const accessFindings = findRuntimeAccessFindings(
   [...architecture.modules, ...databaseModules],
 )
 const accessBaseline = await loadAccessBaseline()
+await checkCurrentLegacyAccessGovernanceReport()
 const accessViolations = findBaselineViolations(
   accessFindings,
   accessBaseline,
