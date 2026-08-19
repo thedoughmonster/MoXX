@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://momi.local/schemas/legacy-access-governance-report-v1.schema.json",
+  "title": "Legacy Access Governance Report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "artifact_kind", "semantics", "source", "findings_sha256", "report_digest", "findings"],
+  "properties": {
+    "$schema": { "const": "https://momi.local/schemas/legacy-access-governance-report-v1.schema.json" },
+    "schema_version": { "const": "legacy-access-governance-report/v1" },
+    "artifact_kind": { "const": "legacy_access_governance_report" },
+    "semantics": { "const": "legacy_debt_evidence_only" },
+    "source": { "$ref": "#/$defs/source" },
+    "findings_sha256": { "$ref": "#/$defs/sha256" },
+    "report_digest": { "$ref": "#/$defs/sha256" },
+    "findings": { "type": "array", "items": { "$ref": "#/$defs/finding" } }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "finding_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "nonempty": { "type": "string", "minLength": 1 },
+    "source": {
+      "type": "object", "additionalProperties": false,
+      "required": ["repository", "path", "git_blob", "schema_id", "schema_version", "generated_from", "sha256", "finding_count", "rule_counts"],
+      "properties": {
+        "repository": { "const": "thedoughmonster/momi-backend" },
+        "path": { "const": "docs/service-access-debt-baseline.json" },
+        "git_blob": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "schema_id": { "const": "https://momi.local/schemas/service-access-debt-baseline-v1.schema.json" },
+        "schema_version": { "const": "service-access-debt-baseline/v1" },
+        "generated_from": { "$ref": "#/$defs/nonempty" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "finding_count": { "type": "integer", "minimum": 0 },
+        "rule_counts": { "$ref": "#/$defs/rule_counts" }
+      }
+    },
+    "rule_counts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["direct_private_relation_access", "direct_private_routine_call", "dynamic_event_name", "dynamic_relation_identifier"],
+      "properties": {
+        "direct_private_relation_access": { "type": "integer", "minimum": 0 },
+        "direct_private_routine_call": { "type": "integer", "minimum": 0 },
+        "dynamic_event_name": { "type": "integer", "minimum": 0 },
+        "dynamic_relation_identifier": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "object_relation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "identity"],
+      "properties": { "kind": { "const": "relation" }, "identity": { "$ref": "#/$defs/nonempty" } }
+    },
+    "object_routine": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "identity"],
+      "properties": { "kind": { "const": "routine" }, "identity": { "$ref": "#/$defs/nonempty" } }
+    },
+    "relation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["fingerprint", "rule_version", "rule_id", "subject", "consumer_service", "owner_service", "object", "access_mode", "reference_count", "sql_source_hash"],
+      "properties": {
+        "fingerprint": { "$ref": "#/$defs/finding_hash" }, "rule_version": { "const": 1 },
+        "rule_id": { "const": "direct_private_relation_access" }, "subject": { "$ref": "#/$defs/nonempty" },
+        "consumer_service": { "$ref": "#/$defs/nonempty" }, "owner_service": { "$ref": "#/$defs/nonempty" },
+        "object": { "$ref": "#/$defs/object_relation" }, "access_mode": { "enum": ["read", "write"] },
+        "reference_count": { "type": "string", "pattern": "^[1-9][0-9]*$" }, "sql_source_hash": { "$ref": "#/$defs/finding_hash" }
+      }
+    },
+    "routine": {
+      "type": "object", "additionalProperties": false,
+      "required": ["fingerprint", "rule_version", "rule_id", "subject", "consumer_service", "owner_service", "object", "access_mode", "access_mode_basis", "reference_count", "sql_source_hash"],
+      "properties": {
+        "fingerprint": { "$ref": "#/$defs/finding_hash" }, "rule_version": { "const": 1 },
+        "rule_id": { "const": "direct_private_routine_call" }, "subject": { "$ref": "#/$defs/nonempty" },
+        "consumer_service": { "$ref": "#/$defs/nonempty" }, "owner_service": { "$ref": "#/$defs/nonempty" },
+        "object": { "$ref": "#/$defs/object_routine" }, "access_mode": { "const": "call" },
+        "access_mode_basis": { "const": "direct_private_routine_call/v1" },
+        "reference_count": { "type": "string", "pattern": "^[1-9][0-9]*$" }, "sql_source_hash": { "$ref": "#/$defs/finding_hash" }
+      }
+    },
+    "dynamic_event": { "allOf": [
+      { "$ref": "#/$defs/dynamic" },
+      { "type": "object", "properties": { "rule_id": { "const": "dynamic_event_name" } } }
+    ] },
+    "dynamic_relation": { "allOf": [
+      { "$ref": "#/$defs/dynamic" },
+      { "type": "object", "properties": { "rule_id": { "const": "dynamic_relation_identifier" } } }
+    ] },
+    "dynamic": {
+      "type": "object", "additionalProperties": false,
+      "required": ["fingerprint", "rule_version", "rule_id", "subject", "service_key", "expressions", "access_projection", "service_source_hash"],
+      "properties": {
+        "fingerprint": { "$ref": "#/$defs/finding_hash" }, "rule_version": { "const": 1 },
+        "rule_id": { "enum": ["dynamic_event_name", "dynamic_relation_identifier"] }, "subject": { "$ref": "#/$defs/nonempty" },
+        "service_key": { "$ref": "#/$defs/nonempty" }, "expressions": { "$ref": "#/$defs/nonempty" },
+        "access_projection": { "const": "unavailable_from_source" }, "service_source_hash": { "$ref": "#/$defs/finding_hash" }
+      }
+    },
+    "finding": { "oneOf": [
+      { "$ref": "#/$defs/relation" }, { "$ref": "#/$defs/routine" },
+      { "$ref": "#/$defs/dynamic_event" }, { "$ref": "#/$defs/dynamic_relation" }
+    ] }
+  }
+}
