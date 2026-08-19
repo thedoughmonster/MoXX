@@ -1,0 +1,54 @@
+{
+  "schema_version": "execution-authority/v1",
+  "grant_id": "ea-mox-217-slack-order-delivery",
+  "work_item": "MOX-217",
+  "service": "slack-order-delivery",
+  "repository": "thedoughmonster/momi-backend",
+  "base_revision": "afe9350bd0fb4d807e94bdff855bdfc9adcad17d",
+  "source_digest": "bb3f9491f977e91254d7ad90b3e33b7bbe20b3ad616dcfc810affbfc194a77c9",
+  "filesystem": { "read": [], "write": [] },
+  "database": {
+    "read": [{
+      "owner_service": "slack-order-delivery",
+      "object_kind": "table",
+      "qualified_object": "momi_alerting.slack_delivery_attempts"
+    }],
+    "write": []
+  },
+  "contracts": { "call": [] },
+  "network": { "connect": [] },
+  "secrets": { "reference": [] },
+  "packages": { "use": [] },
+  "external": { "invoke": [] },
+  "forbidden": {
+    "paths": [], "services": [], "database_objects": [], "contracts": [],
+    "hosts": [], "secret_names": [], "external_actions": [],
+    "operation_classes": ["deployment", "destructive", "production", "restoration", "runtime"]
+  },
+  "escalate_on": [
+    "allow_deny_overlap", "ambiguous_authority", "base_revision_drift",
+    "contract_mismatch", "cross_owner_target", "debt_derived_authority",
+    "external_authority_missing", "manifest_mismatch", "path_escape",
+    "protected_operation", "provider_leakage", "secret_value", "unknown_version"
+  ],
+  "provenance": {
+    "issue_authorization": {
+      "source": "linear:MOX-217",
+      "digest": "bb3f9491f977e91254d7ad90b3e33b7bbe20b3ad616dcfc810affbfc194a77c9"
+    },
+    "accepted_decisions": [{
+      "source": "linear:comment:40a654bf-beca-4a50-a300-522f9f33e1f5",
+      "digest": "bb3f9491f977e91254d7ad90b3e33b7bbe20b3ad616dcfc810affbfc194a77c9"
+    }],
+    "repository_rules": [{ "source": "AGENTS.md", "digest": "58d461c8a7d1c0d23e23830a1d85b50e8b7d94c0f1d2856a1d0973aab2ed8005" }],
+    "manifests": [{ "source": "services/slack-order-delivery/service.json", "digest": "41d7fbb0de616a97dd418b5ad2ad259cfb67d5940bb7b9f3264111c323e51a6b" }],
+    "contracts": [],
+    "external_authorities": [],
+    "runtime_observations": [],
+    "legacy_debt": [{
+      "source": "docs/service-access-debt-baseline.json",
+      "digest": "ee71cd2cbe0245fc8eb4091ff5d2e0603e2134f17e96380b8e07ec799f467788",
+      "targets": ["momi_alerting.order_alert_candidates"]
+    }]
+  }
+}

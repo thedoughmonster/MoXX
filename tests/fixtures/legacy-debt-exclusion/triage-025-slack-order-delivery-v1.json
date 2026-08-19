@@ -1,0 +1,39 @@
+{
+  "schema_version": "legacy-debt-exclusion-fixture/v1",
+  "fixture_id": "triage-025-slack-order-delivery-order-alert-candidates-read-v1",
+  "source_revision": {
+    "repository": "thedoughmonster/momi-backend",
+    "commit": "afe9350bd0fb4d807e94bdff855bdfc9adcad17d",
+    "tree": "fdd544c4c2c00effec9e22a3132ebfcc0c448844"
+  },
+  "baseline": {
+    "path": "docs/service-access-debt-baseline.json",
+    "schema_version": "service-access-debt-baseline/v1",
+    "git_blob": "ff1769ab6dd2fde77f101e65832341b4e0bf334f",
+    "sha256": "ee71cd2cbe0245fc8eb4091ff5d2e0603e2134f17e96380b8e07ec799f467788",
+    "finding_fingerprint": "sha256:e8f2b38c88970a40a8e77dd0b9e053f365714a04093c6fae53f826a11211d0d2"
+  },
+  "report": {
+    "path": "docs/legacy-access-governance-report.json",
+    "schema_version": "legacy-access-governance-report/v1",
+    "findings_sha256": "7d21eaabed39c4bee682bcdb7d058c80003ec765a0bf59634473f33f034f0485",
+    "report_digest": "0d34ad76fd2eb722472cd809bc2f9b2950a5d6255a2fbcbed6ecde0e9868ca51",
+    "expected_projection": {
+      "fingerprint": "sha256:e8f2b38c88970a40a8e77dd0b9e053f365714a04093c6fae53f826a11211d0d2",
+      "rule_version": 1,
+      "rule_id": "direct_private_relation_access",
+      "subject": "database/views/momi_alerting.slack_order_alert_messages_v1.sql",
+      "consumer_service": "slack-order-delivery",
+      "owner_service": "order-alerting",
+      "object": { "kind": "relation", "identity": "momi_alerting.order_alert_candidates" },
+      "access_mode": "read",
+      "reference_count": "1",
+      "sql_source_hash": "sha256:7c80b3184bad6b0c57e978cb8b823dfcd5c42b77c6c01fdbfff64c998ffd93f4"
+    }
+  },
+  "control_grant_path": "tests/fixtures/legacy-debt-exclusion/control-execution-authority.json",
+  "positive_control_pointer": "/database/read/0",
+  "negative_debt_pointer": "/database/read/0",
+  "negative_control_pointer": "/database/read/1",
+  "fixture_digest": "149107387b1e9980684449843ce5a77a0723ad6ef4592ef261eb58e23124f41f"
+}
