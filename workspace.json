@@ -6,7 +6,8 @@
     "services": "services",
     "function_adapters": "supabase/functions",
     "migrations": "supabase/migrations",
-    "retirements": "retirements"
+    "retirements": "retirements",
+    "external_function_authorities": "external-functions"
   },
   "toolchain": {
     "node": "24.14.0",

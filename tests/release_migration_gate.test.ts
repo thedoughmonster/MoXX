@@ -5,7 +5,7 @@ import test from "node:test"
 test("repository-only releases dispatch no hosted deployment", async () => {
   const dev = await readFile("scripts/release/release_dev.ts", "utf8")
   assert.match(dev, /databaseApplied = plan\.impact\.release\.database !== "none"/)
-  assert.match(dev, /!databaseApplied && plan\.impact\.release\.functions\.length === 0/)
+  assert.match(dev, /!databaseApplied && !inventoryRequired/)
   assert.doesNotMatch(dev, /applyMigrations/)
   assert.match(dev, /\\? undefined/)
 })

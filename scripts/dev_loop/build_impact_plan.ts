@@ -35,9 +35,8 @@ export function buildImpactPlan(
   const migrations = classifications.migration.map((path) =>
     path.match(/^supabase\/migrations\/(\d{14})_/)?.[1] ?? path
   ).sort()
-  const fullClasses: ImpactClass[] = [
-    "runtime", "architecture", "manifest", "migration", "unknown",
-  ]
+  const fullClasses: ImpactClass[] = ["runtime", "architecture", "manifest",
+    "migration", "unknown"]
   const full = fullClasses.some((kind) => classifications[kind].length > 0)
   const tests = selectTestPaths(
     classifications,
@@ -110,8 +109,9 @@ export function buildImpactPlan(
       },
     release: {
       database: migrations.length > 0
-        ? "supabase_cli_preview_apply_parity"
-        : "none",
+        ? "supabase_cli_preview_apply_parity" : "none",
+      hosted_inventory: paths.some((path) => path.startsWith("external-functions/"))
+        ? "development_full_parity" : "none",
       services: affectedServices,
       functions: affectedFunctions,
     },

@@ -17,6 +17,8 @@ import { findExecutionAuthorityViolations } from
 import { findServiceAuthorityBindingViolations } from
   "./find_service_authority_binding_violations.ts"
 import { loadRetirements } from "./load_retirements.ts"
+import { loadExternalFunctionAuthorities } from
+  "./load_external_function_authorities.ts"
 import { findFunctionInventoryViolations } from
   "./find_function_inventory_violations.ts"
 import { findServiceStatusViolations } from
@@ -25,6 +27,8 @@ import { findServiceTestImpactDiagnostics } from
   "./find_service_test_impact_diagnostics.ts"
 import { findFunctionCapabilityModelDiagnostics } from
   "./find_function_capability_model_diagnostics.ts"
+import { findExternalFunctionAuthorityConflicts } from
+  "./find_external_function_authority_conflicts.ts"
 
 export async function validateArchitecture(): Promise<Architecture> {
   const workspace = await loadWorkspace()
@@ -45,6 +49,10 @@ export async function validateArchitecture(): Promise<Architecture> {
     )
   }
   const retirements = await loadRetirements(workspace.paths.retirements, services)
+  const externalFunctionAuthorities = await loadExternalFunctionAuthorities(
+    workspace.paths.external_function_authorities,
+    workspace,
+  )
   const inventoryViolations = await findFunctionInventoryViolations(
     workspace,
     services,
@@ -55,6 +63,14 @@ export async function validateArchitecture(): Promise<Architecture> {
     )
   }
   const functions = await loadFunctions(workspace, services)
+  const externalConflicts = findExternalFunctionAuthorityConflicts(
+    externalFunctionAuthorities,
+    retirements,
+    functions,
+  )
+  if (externalConflicts.length > 0) {
+    throw new Error(`Architecture violations:\n- ${externalConflicts.join("\n- ")}`)
+  }
   const capabilityViolations = findFunctionCapabilityModelDiagnostics({
     services, functions,
   }).filter((item) => item.code !== "capability_model_absent")
@@ -82,5 +98,12 @@ export async function validateArchitecture(): Promise<Architecture> {
     throw new Error(`Architecture violations:\n- ${violations.join("\n- ")}`)
   }
 
-  return { workspace, services, functions, modules, retirements }
+  return {
+    workspace,
+    services,
+    functions,
+    modules,
+    retirements,
+    externalFunctionAuthorities,
+  }
 }

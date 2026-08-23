@@ -29,11 +29,13 @@ export async function releaseDev(
   const plan = await buildBoundPlan(validation.identities.base_sha!, head)
   assertPlanMatchesValidation(plan, validation)
   const databaseApplied = plan.impact.release.database !== "none"
+  const inventoryRequired =
+    plan.impact.release.hosted_inventory === "development_full_parity"
   const planDigest = hashText(canonicalJson(plan))
   const releaseIdentity = hashText(canonicalJson({ plan_sha256: planDigest,
     retire_functions: retireFunctions }))
-  const run = !databaseApplied && plan.impact.release.functions.length === 0 &&
-      retireFunctions.length === 0
+  const run = !databaseApplied && !inventoryRequired &&
+      plan.impact.release.functions.length === 0 && retireFunctions.length === 0
     ? undefined
     : await ensureDispatchedWorkflow("deploy-dev.yml", "dev", head, "deploy", {
       expected_sha: head,

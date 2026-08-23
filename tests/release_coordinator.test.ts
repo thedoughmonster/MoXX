@@ -33,7 +33,8 @@ test("development uses one validation receipt and affected-only deployment", asy
   assert.match(source, /readValidationReceipt/)
   assert.match(source, /assertValidationJob/)
   assert.match(source, /assertPlanMatchesValidation/)
-  assert.match(source, /!databaseApplied && plan\.impact\.release\.functions\.length === 0/)
+  assert.match(source, /hosted_inventory === "development_full_parity"/)
+  assert.match(source, /!databaseApplied && !inventoryRequired/)
   assert.match(source, /release\.services\.join/)
   assert.match(source, /retire_functions: retireFunctions\.join/)
   assert.match(source, /release_identity: releaseIdentity/)
@@ -48,6 +49,24 @@ test("development applies migrations inside its protected deployment", async () 
   assert.match(source, /plan\.impact\.release\.functions\.length === 0/)
   assert.match(source, /if \(functions\.length > 0\) deployFunctions/)
   assert.ok(source.indexOf("applyMigrations(") < source.indexOf("deployFunctions("))
+})
+
+test("inventory-only development releases deploy and probe no functions", async () => {
+  const source = await readFile("scripts/run_deploy_apply.ts", "utf8")
+  assert.match(source, /functions\.length > 0\) deployFunctions/)
+  assert.match(source, /probeFunctions\(environment\.project_ref, functions\)/)
+  assert.ok(source.indexOf("listHostedFunctions(") < source.indexOf("assertInventory("))
+})
+
+test("development workflow permits an empty plan-bound service selection", async () => {
+  const workflow = await readFile(".github/workflows/deploy-dev.yml", "utf8")
+  assert.match(
+    workflow,
+    /services:\n\s+description: [^\n]+\n\s+required: false\n\s+default: ""/,
+  )
+  assert.equal(workflow.match(/test -n "\$MOMI_SERVICES"/g)?.length, 2)
+  assert.match(workflow, /assert_bound_deployment_plan\.ts "\$\{args\[@\]\}"/)
+  assert.match(workflow, /pnpm run deploy:apply -- "\$\{args\[@\]\}"/)
 })
 
 test("production consumes the exact dev receipt without revalidation", async () => {

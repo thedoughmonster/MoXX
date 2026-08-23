@@ -13,6 +13,7 @@ export function classifyPath(path: string): ImpactClass {
   if (
     path === "workspace.json" || path.startsWith("schemas/") ||
     path.startsWith("retirements/") || path.startsWith("scripts/architecture/") ||
+    path.startsWith("external-functions/") ||
     path.startsWith("scripts/constitution/") ||
     path.startsWith("scripts/migrations/")
   ) return "architecture"

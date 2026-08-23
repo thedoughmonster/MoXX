@@ -39,6 +39,7 @@ export async function createFunctionInventoryFixture(
       function_adapters: "supabase/functions",
       migrations: "supabase/migrations",
       retirements: "retirements",
+      external_function_authorities: "external-functions",
     },
   } as WorkspaceConfig
   const services = [{

@@ -23,3 +23,10 @@ test("classifies local operator tools as repository tooling", () => {
     "repository_tooling",
   )
 })
+
+test("classifies external function authorities as architecture", () => {
+  assert.equal(
+    classifyPath("external-functions/external-v1.json"),
+    "architecture",
+  )
+})

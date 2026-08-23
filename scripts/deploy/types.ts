@@ -24,6 +24,7 @@ export type FunctionAttestation = HostedFunction & {
 export type InventoryResult = {
   environment: EnvironmentKey
   active: string[]
+  externally_owned: string[]
   retired: string[]
   hosted: HostedFunction[]
   missing: string[]

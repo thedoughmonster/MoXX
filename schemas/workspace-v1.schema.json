@@ -19,12 +19,16 @@
     "paths": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["services", "function_adapters", "migrations", "retirements"],
+      "required": [
+        "services", "function_adapters", "migrations", "retirements",
+        "external_function_authorities"
+      ],
       "properties": {
         "services": { "const": "services" },
         "function_adapters": { "const": "supabase/functions" },
         "migrations": { "const": "supabase/migrations" },
-        "retirements": { "const": "retirements" }
+        "retirements": { "const": "retirements" },
+        "external_function_authorities": { "const": "external-functions" }
       }
     },
     "toolchain": {

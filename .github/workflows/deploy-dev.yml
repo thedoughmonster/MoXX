@@ -13,8 +13,9 @@ on:
         required: true
         type: string
       services:
-        description: Comma-separated manifest-owned affected services
-        required: true
+        description: Comma-separated affected services; empty for inventory-only
+        required: false
+        default: ""
         type: string
       plan_sha256:
         description: Exact release plan digest
@@ -71,24 +72,30 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Recompute and verify affected deployment plan
+        env:
+          MOMI_SERVICES: ${{ inputs.services }}
         run: |
           pnpm momi-impact plan --base "${{ inputs.base_sha }}" \
             --head "$MOMI_EXPECTED_SHA" --output .momi/release-plan.json
-          node scripts/assert_bound_deployment_plan.ts \
+          args=( \
             --plan .momi/release-plan.json \
             --digest "$MOMI_PLAN_SHA256" \
             --head "$MOMI_EXPECTED_SHA" \
             --tree "$MOMI_VALIDATED_TREE" \
-            --services "${{ inputs.services }}"
+          )
+          if test -n "$MOMI_SERVICES"; then args+=(--services "$MOMI_SERVICES"); fi
+          node scripts/assert_bound_deployment_plan.ts "${args[@]}"
       - name: Apply migrations, prove parity, and deploy affected functions
         run: |
-          args=(--env dev --services "${{ inputs.services }}")
+          args=(--env dev)
+          if test -n "$MOMI_SERVICES"; then args+=(--services "$MOMI_SERVICES"); fi
           if test -n "$MOMI_RETIRE_FUNCTIONS"; then
             args+=(--retire-functions "$MOMI_RETIRE_FUNCTIONS")
           fi
           pnpm run deploy:apply -- "${args[@]}"
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          MOMI_SERVICES: ${{ inputs.services }}
           MOMI_RETIRE_FUNCTIONS: ${{ inputs.retire_functions }}
       - uses: actions/upload-artifact@v4
         with:

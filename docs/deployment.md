@@ -54,6 +54,8 @@ reuses the sole exact `dev`-to-`prod` promotion PR and makes it ready before
 dispatching the receipt-bound fast-forward workflow.
 
 - Repository-only: no database access and zero Edge Function deployments.
+- External authority change: dispatch the protected development workflow, deploy
+  and probe zero functions, assert full hosted inventory, and record the result.
 - Service change: deploy only affected manifest-owned functions.
 - Migration: CLI preview, apply, parity, then affected-only function deployment.
 - Unknown impact: stop before release; never guess or deploy everything.
@@ -66,7 +68,8 @@ success is deterministic even if aggregate run state has not propagated.
 Only `.github/workflows/deploy-dev.yml` and `deploy-prod.yml` call
 `deploy:apply`. Each dispatch carries exact SHA, validated tree, plan digest,
 and affected service list. The apply entry point rejects local execution, wrong
-branch/workflow, invalid identity, or an empty/unknown service selection.
+branch/workflow, or invalid identity. An empty service selection is accepted only
+for a plan-bound development inventory assertion or migration-only release.
 
 The entry point uses the pinned CLI with `--use-api`, checks full hosted
 inventory, probes only affected functions, reads advisors, and writes a release

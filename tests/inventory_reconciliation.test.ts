@@ -29,6 +29,7 @@ const architecture = {
     environments: ["dev"],
     remove_after: "2026-07-20",
   }],
+  externalFunctionAuthorities: [],
 } as unknown as Architecture
 
 test("allows active functions and unexpired retirement manifests", () => {

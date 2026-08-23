@@ -44,3 +44,8 @@ export const retirementSchemaPath = join(
   "schemas",
   "retirement-manifest-v1.schema.json",
 )
+export const externalFunctionAuthoritySchemaPath = join(
+  workspaceRoot,
+  "schemas",
+  "external-function-authority-v1.schema.json",
+)

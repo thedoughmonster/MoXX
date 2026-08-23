@@ -2,33 +2,13 @@ import type { ImplementationStatus, OwnedDataset, ServiceDeployment, ServiceType
   "./service_manifest_types.ts"
 import type { ServiceTestImpactMetadata } from
   "./service_test_impact_types.ts"
+import type { ExternalFunctionAuthority } from
+  "./external_function_authority_types.ts"
+import type { RetirementManifest } from "./retirement_types.ts"
+import type { WorkspaceConfig } from "./workspace_types.ts"
 
-export type WorkspaceConfig = {
-  schema_version: 1
-  layout: "transition" | "service_workspaces"
-  paths: {
-    services: string
-    function_adapters: string
-    migrations: string
-    retirements: string
-  }
-  toolchain: {
-    node: string
-    pnpm: string
-    supabase_cli: string
-    deno: string
-  }
-  environments: Record<"dev" | "prod", {
-    branch: string
-    project_ref: string
-  }>
-  database_schemas: string[]
-  policies: {
-    max_handwritten_lines: number
-    hard_max_handwritten_lines: number
-    minimum_shared_consumers: number
-  }
-}
+export type { RetirementManifest } from "./retirement_types.ts"
+export type { WorkspaceConfig } from "./workspace_types.ts"
 
 export type ConsumedContract = {
   service: string
@@ -109,25 +89,11 @@ export type SourceModule = {
   imports: string[]
 }
 
-export type RetirementManifest = {
-  schema_version: 1
-  function_slug: string
-  owner_service: string
-  reason: string
-  replacement: string
-  environments: Array<"dev" | "prod">
-  remove_after: string
-  removal_evidence?: {
-    issue_url: string
-    verified_at: string
-    summary: string
-  }
-}
-
 export type Architecture = {
   workspace: WorkspaceConfig
   services: LoadedService[]
   functions: LoadedFunction[]
   modules: SourceModule[]
   retirements: RetirementManifest[]
+  externalFunctionAuthorities: ExternalFunctionAuthority[]
 }

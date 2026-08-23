@@ -22,7 +22,8 @@ if (plan.impact.release.services.join(",") !== services.join(",")) {
 }
 if (
   plan.impact.release.functions.length === 0 &&
-  plan.impact.release.database === "none"
+  plan.impact.release.database === "none" &&
+  plan.impact.release.hosted_inventory !== "development_full_parity"
 ) {
   throw new Error("Deployment plan contains no hosted changes")
 }

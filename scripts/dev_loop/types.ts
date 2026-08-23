@@ -1,7 +1,6 @@
 import type { AdvisoryMetadata, CheckCommand, CommandEvidence } from "./check_types.ts"
 import type { DiagnosticSummary } from "./diagnostic_types.ts"
 export type { AdvisoryMetadata, CheckCommand, CommandEvidence } from "./check_types.ts"
-
 export type ImpactClass =
   | "architecture"
   | "docs"
@@ -27,6 +26,7 @@ export type ImpactPlan = {
   }
   release: {
     database: "none" | "supabase_cli_preview_apply_parity"
+    hosted_inventory: "none" | "development_full_parity"
     services: string[]
     functions: string[]
   }

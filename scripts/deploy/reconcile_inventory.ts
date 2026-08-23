@@ -11,6 +11,9 @@ export function reconcileInventory(
   verifyJwt: ReadonlyMap<string, boolean> = readFunctionVerifyJwt(),
 ): InventoryResult {
   const active = architecture.functions.map((item) => item.slug).sort()
+  const externallyOwned = architecture.externalFunctionAuthorities
+    .filter((item) => item.environments.some((entry) => entry.name === environment))
+    .map((item) => item.function_slug).sort()
   const applicable = architecture.retirements.filter((item) =>
     item.environments.includes(environment)
   )
@@ -21,15 +24,22 @@ export function reconcileInventory(
     item.remove_after < today && hostedSlugs.has(item.function_slug)
   )
     .map((item) => item.function_slug).sort()
-  const allowed = new Set([...active, ...retired])
+  const required = [...active, ...externallyOwned].sort()
+  const allowed = new Set([...required, ...retired])
   return {
     environment,
     active,
+    externally_owned: externallyOwned,
     retired,
     hosted,
-    missing: active.filter((slug) => !hostedSlugs.has(slug)),
+    missing: required.filter((slug) => !hostedSlugs.has(slug)),
     unexpected: hosted.map((item) => item.slug).filter((slug) => !allowed.has(slug)),
     expired,
-    invalid_metadata: findHostedFunctionViolations(architecture, hosted, verifyJwt),
+    invalid_metadata: findHostedFunctionViolations(
+      architecture,
+      environment,
+      hosted,
+      verifyJwt,
+    ),
   }
 }
