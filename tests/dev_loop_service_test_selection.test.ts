@@ -93,8 +93,8 @@ test("path-scoped classes retain existing policy", () => {
 })
 
 test("root and special focused selections remain unchanged", () => {
-  assert.deepEqual(selectedTests(["tests/example.test.ts"]),
-    [...baseTests, "tests/example.test.ts"].sort())
+  const rootTest = "tests/service_test_impact_schema.test.ts"
+  assert.deepEqual(selectedTests([rootTest]), [...baseTests, rootTest].sort())
   assert.deepEqual(
     selectedTests([".github/workflows/issue-triage.yml"]), issueTests,
   )
