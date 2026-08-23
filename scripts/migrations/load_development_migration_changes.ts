@@ -9,7 +9,7 @@ export function loadDevelopmentMigrationChanges(
   }
   const result = spawnSync("git", [
     "log", "--reverse", "--first-parent", "--diff-merges=first-parent",
-    "--format=commit:%H", "--name-status", "--no-renames",
+    "--format=commit:%H", "--raw", "--abbrev=40", "--no-renames",
     `origin/prod..${ref}`, "--", migrationPath,
   ], { encoding: "utf8", maxBuffer: 8 * 1024 * 1024 })
   if (result.status !== 0) {

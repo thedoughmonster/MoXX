@@ -3,6 +3,7 @@ import { createHash } from "node:crypto"
 export interface DevelopmentMigrationCorrection {
   from: string
   to: string
+  replacement?: string
 }
 
 export function findMigrationHistoryViolations(
@@ -32,6 +33,16 @@ export function findMigrationHistoryViolations(
       }
     } else if (normalize(local) !== normalize(source)) {
       violations.push(`${name}: ${baselineName} migration was modified`)
+    }
+  }
+  for (const [name, correction] of corrections) {
+    if (
+      correction.replacement &&
+      baseline.get(correction.replacement) !== correction.to
+    ) {
+      violations.push(
+        `${name}: ${baselineName} migration replacement does not match correction`,
+      )
     }
   }
   for (const name of [...current.keys()].sort()) {

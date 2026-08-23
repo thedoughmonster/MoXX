@@ -7,15 +7,19 @@ import { findDevelopmentMigrationChangeViolations } from
 
 test("keeps landed development migrations append-only across later pushes", () => {
   const path = "supabase/migrations"
+  const zero = "0".repeat(40)
+  const one = "1".repeat(40)
+  const two = "2".repeat(40)
+  const three = "3".repeat(40)
   const source = [
     "commit:one",
-    `A\t${path}/001_added.sql`,
+    `:000000 100644 ${zero} ${one} A\t${path}/001_added.sql`,
     "commit:two",
-    `M\t${path}/001_added.sql`,
-    `A\t${path}/002_deleted.sql`,
+    `:100644 100644 ${one} ${two} M\t${path}/001_added.sql`,
+    `:000000 100644 ${zero} ${three} A\t${path}/002_deleted.sql`,
     "commit:three",
-    `D\t${path}/002_deleted.sql`,
-    `A\t${path}/002_deleted.sql`,
+    `:100644 000000 ${three} ${zero} D\t${path}/002_deleted.sql`,
+    `:000000 100644 ${zero} ${three} A\t${path}/002_deleted.sql`,
   ].join("\n")
   assert.deepEqual(findDevelopmentMigrationChangeViolations(
     source,
@@ -30,10 +34,14 @@ test("keeps landed development migrations append-only across later pushes", () =
 
 test("ignores production history and one-time development additions", () => {
   const path = "supabase/migrations"
+  const zero = "0".repeat(40)
+  const one = "1".repeat(40)
+  const two = "2".repeat(40)
   const source = [
-    `M\t${path}/000_production.sql`,
-    `A\t${path}/001_development.sql`,
-    `M\t${path}/AGENTS.md`,
+    "commit:one",
+    `:100644 100644 ${one} ${two} M\t${path}/000_production.sql`,
+    `:000000 100644 ${zero} ${one} A\t${path}/001_development.sql`,
+    `:100644 100644 ${one} ${two} M\t${path}/AGENTS.md`,
   ].join("\n")
   assert.deepEqual(findDevelopmentMigrationChangeViolations(
     source,
@@ -44,7 +52,13 @@ test("ignores production history and one-time development additions", () => {
 
 test("permits only a named development correction", () => {
   const path = "supabase/migrations"
-  const source = `M\t${path}/001_corrected.sql\nM\t${path}/002_other.sql`
+  const one = "1".repeat(40)
+  const two = "2".repeat(40)
+  const source = [
+    "commit:one",
+    `:100644 100644 ${one} ${two} M\t${path}/001_corrected.sql`,
+    `:100644 100644 ${one} ${two} M\t${path}/002_other.sql`,
+  ].join("\n")
   assert.deepEqual(findDevelopmentMigrationChangeViolations(
     source,
     path,
@@ -60,5 +74,6 @@ test("loads development history from the exact accepted ref", async () => {
   ), "utf8")
   assert.match(source, /process\.env\.MOMI_DEV_REF/)
   assert.match(source, /origin\/prod\.\.\$\{ref\}/)
+  assert.match(source, /"--raw", "--abbrev=40", "--no-renames"/)
   assert.doesNotMatch(source, /origin\/prod\.\.origin\/dev/)
 })

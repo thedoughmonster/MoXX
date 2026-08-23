@@ -24,6 +24,12 @@ const current = await loadLocalMigrations(join(workspaceRoot, path))
 const baseline = loadProductionMigrations(path)
 const development = loadDevelopmentMigrations(path)
 const corrections = loadDevelopmentMigrationCorrections()
+const renameCorrections = new Map([...corrections]
+  .filter(([, correction]) => correction.replacement)
+)
+const contentCorrections = new Set([...corrections]
+  .filter(([, correction]) => !correction.replacement)
+  .map(([name]) => name))
 const serviceKeys = new Set(
   architecture.services.map((service) => service.manifest.service_key),
 )
@@ -34,7 +40,7 @@ const violations = [...new Set([
   ),
   ...findDevelopmentMigrationChangeViolations(
     loadDevelopmentMigrationChanges(path), path, new Set(baseline.keys()),
-    new Set(corrections.keys()),
+    contentCorrections, renameCorrections,
   ),
     ...findNewMigrationAuthorityViolations(
       development,
