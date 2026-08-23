@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs"
+
 import type { ImpactClass } from "./types.ts"
 
 export function selectTestPaths(
@@ -12,7 +14,9 @@ export function selectTestPaths(
   ])
   for (const paths of Object.values(classifications)) {
     for (const path of paths) {
-      if (path.startsWith("tests/") && path.endsWith(".test.ts")) selected.add(path)
+      if (
+        path.startsWith("tests/") && path.endsWith(".test.ts") && existsSync(path)
+      ) selected.add(path)
     }
   }
   const changedPaths = Object.values(classifications).flat()
