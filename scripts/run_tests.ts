@@ -1,12 +1,16 @@
-import { spawnSync } from "node:child_process"
-
-import { discoverTestFiles } from "./discover_test_files.ts"
+import { commandExitCode } from "./dev_loop/command_exit_code.ts"
+import { runValidation } from "./dev_loop/run_validation.ts"
 import { readOption } from "./read_option.ts"
 
 const service = readOption("service", "all")
-const paths = await discoverTestFiles(service)
-const result = spawnSync(process.execPath, ["--test", ...paths], {
-  stdio: "inherit",
+const receipt = runValidation({
+  kind: "validation",
+  receipt_path: readOption("receipt", ".momi/test-receipt.json"),
+  checks: [{
+    id: service === "all" ? "tests" : `tests-${service}`,
+    command: process.execPath,
+    args: ["scripts/run_discovered_tests.ts", "--service", service],
+    enforcement: "hard_stop",
+  }],
 })
-
-process.exit(result.status ?? 1)
+process.exit(commandExitCode(receipt))

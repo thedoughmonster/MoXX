@@ -5,6 +5,7 @@ import { buildCompactReceipt } from "../scripts/dev_loop/build_compact_receipt.t
 import { executeChecks } from "../scripts/dev_loop/execute_checks.ts"
 import { renderValidationSummary } from
   "../scripts/dev_loop/render_validation_summary.ts"
+import { repositoryHardCheckIds } from "../scripts/dev_loop/repository_validation_contract.ts"
 import { validateValidationReceipt } from
   "../scripts/dev_loop/validate_validation_receipt.ts"
 import { validationExitCode } from "../scripts/dev_loop/validation_exit_code.ts"
@@ -67,7 +68,6 @@ test("unknown enforcement metadata fails closed", () => {
     }],
   } as never), /Invalid command evidence/)
 })
-
 test("quality report validity rejects malformed required evidence", () => {
   assert.throws(() => parseQualityReport("{"), /valid JSON/)
   assert.throws(() => parseQualityReport(JSON.stringify({
@@ -84,10 +84,10 @@ test("validation receipt counts are recomputed", () => {
     base_tree: "c".repeat(40), head_tree: "d".repeat(40),
     diff_sha256: "e".repeat(64), impact_sha256: "f".repeat(64),
     plan_sha256: "1".repeat(64), run_id: "7",
-    commands: [{
-      id: "full-repository", command: "node", args: [], enforcement: "hard_stop",
+    commands: [...repositoryHardCheckIds.map((id) => ({
+      id, command: "node", args: [], enforcement: "hard_stop" as const,
       status: 0, duration_ms: 1,
-    }, {
+    })), {
       id: "quality-report", command: "node", args: [], enforcement: "advisory",
       advisory: { rule: "quality-report-freshness",
         path: "docs/quality-metrics.json", regenerate: "pnpm quality:generate" },

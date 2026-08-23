@@ -1,13 +1,12 @@
+import { repositoryHardCheckIds } from "./repository_validation_contract.ts"
 import type { ValidationReceipt } from "./types.ts"
 
 export function validateValidationReceipt(value: unknown): ValidationReceipt {
   const receipt = value as ValidationReceipt
   const commands = Array.isArray(receipt?.commands) ? receipt.commands : []
   const expectedCommands = receipt?.gate === "full"
-    ? [
-      { id: "full-repository", enforcement: "hard_stop" },
-      { id: "quality-report", enforcement: "advisory" },
-    ]
+    ? repositoryHardCheckIds.map((id) => ({ id, enforcement: "hard_stop" }))
+      .concat({ id: "quality-report", enforcement: "advisory" })
     : [
       { id: "focused-tests", enforcement: "hard_stop" },
       { id: "source-quality", enforcement: "hard_stop" },
@@ -39,12 +38,35 @@ export function validateValidationReceipt(value: unknown): ValidationReceipt {
       advisory.regenerate === "pnpm quality:generate"
     const hardExcerpt = item.enforcement === "hard_stop" && item.status !== 0
     const advisoryExcerpt = item.enforcement === "advisory" && item.status !== 0
+    const diagnostics = Array.isArray(item.diagnostics) ? item.diagnostics : []
+    const invalidDiagnostic = diagnostics.some((diagnostic) =>
+      !/^diagnostic-[0-9a-f]{12}$/u.test(diagnostic.identity ?? "") ||
+      typeof diagnostic.message !== "string" || diagnostic.message.length > 300 ||
+      !Array.isArray(diagnostic.locations) ||
+      diagnostic.locations.length > 12 ||
+      diagnostic.locations.some((location) => typeof location !== "string") ||
+      !Number.isInteger(diagnostic.location_count) ||
+      diagnostic.location_count < diagnostic.locations.length ||
+      (diagnostic.location_count_capped !== undefined &&
+        diagnostic.location_count_capped !== true) ||
+      !Number.isInteger(diagnostic.occurrences) || diagnostic.occurrences < 1
+    )
     return !item.id || !Number.isInteger(item.status) ||
       !Number.isInteger(item.duration_ms) || item.duration_ms < 0 ||
       (item.enforcement !== "hard_stop" && !validAdvisory) ||
       (item.enforcement === "hard_stop" && advisory !== undefined) ||
       (hardExcerpt !== (typeof item.failure_excerpt === "string")) ||
       (advisoryExcerpt !== (typeof item.advisory_excerpt === "string")) ||
+      !/^[0-9a-f]{64}$/u.test(item.stdout_sha256 ?? "") ||
+      !/^[0-9a-f]{64}$/u.test(item.stderr_sha256 ?? "") ||
+      ((item.status !== 0) !== Array.isArray(item.diagnostics)) ||
+      invalidDiagnostic || diagnostics.length > 8 ||
+      (item.additional_diagnostics !== undefined &&
+        (!Number.isInteger(item.additional_diagnostics) ||
+          item.additional_diagnostics < 1)) ||
+      (item.additional_diagnostics_capped !== undefined &&
+        (item.additional_diagnostics_capped !== true ||
+          item.additional_diagnostics === undefined)) ||
       (item.failure_excerpt?.length ?? 0) > 2000 ||
       (item.advisory_excerpt?.length ?? 0) > 2000
   })

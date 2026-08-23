@@ -1,21 +1,13 @@
-import { spawnSync } from "node:child_process"
-import { join } from "node:path"
+import { buildRepositoryChecks } from "./dev_loop/build_repository_checks.ts"
+import { commandExitCode } from "./dev_loop/command_exit_code.ts"
+import { runValidation } from "./dev_loop/run_validation.ts"
+import { readOption } from "./read_option.ts"
 
-import { workspaceRoot } from "./architecture/paths.ts"
-
-const hard = spawnSync(
-  process.execPath,
-  [join(workspaceRoot, "scripts", "check.ts"), ...process.argv.slice(2)],
-  { stdio: "inherit" },
-)
-if (hard.status !== 0) process.exit(hard.status ?? 1)
-
-const advisory = spawnSync(
-  process.execPath,
-  [join(workspaceRoot, "scripts", "check_quality_report.ts")],
-  { stdio: "inherit" },
-)
-if (advisory.status !== 0) {
-  console.warn("Hard repository checks passed with a quality freshness advisory.")
-}
-process.exit(0)
+const service = readOption("service", "all")
+const receiptPath = readOption("receipt", ".momi/repository-validation-receipt.json")
+const receipt = runValidation({
+  kind: "validation",
+  checks: await buildRepositoryChecks(service, true),
+  receipt_path: receiptPath,
+})
+process.exit(commandExitCode(receipt))

@@ -1,12 +1,10 @@
-import { appendFile, mkdir, writeFile } from "node:fs/promises"
-import { dirname } from "node:path"
+import { appendFile } from "node:fs/promises"
 
 import { buildBoundPlan } from "./dev_loop/build_bound_plan.ts"
-import { buildCompactReceipt } from "./dev_loop/build_compact_receipt.ts"
 import { canonicalJson } from "./dev_loop/canonical_json.ts"
-import { executeChecks } from "./dev_loop/execute_checks.ts"
 import { hashText } from "./dev_loop/hash_text.ts"
 import { renderValidationSummary } from "./dev_loop/render_validation_summary.ts"
+import { runValidation } from "./dev_loop/run_validation.ts"
 import { validationExitCode } from "./dev_loop/validation_exit_code.ts"
 import { readOption } from "./read_option.ts"
 
@@ -17,8 +15,7 @@ const output = readOption("receipt", ".momi/validation-receipt.json")
 const plan = await buildBoundPlan(base, head)
 const final = process.argv.includes("--final")
 const checks = final ? plan.impact.final_gate.checks : plan.impact.iteration_checks
-const evidence = executeChecks(checks)
-const compact = buildCompactReceipt({
+const compact = runValidation({
   kind: "validation",
   base_sha: plan.base.sha,
   head_sha: plan.head.sha,
@@ -32,17 +29,14 @@ const compact = buildCompactReceipt({
       process.env.GITHUB_RUN_ID
     ? `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`
     : undefined,
-  commands: evidence,
+  checks,
+  receipt_path: output,
+  receipt_fields: {
+    kind: "validation",
+    gate: final ? plan.impact.final_gate.kind : "focused",
+    required_job: final ? "validate-final" : "local-focused",
+  },
 })
-const receipt = {
-  ...compact,
-  kind: "validation",
-  gate: final ? plan.impact.final_gate.kind : "focused",
-  required_job: final ? "validate-final" : "local-focused",
-}
-await mkdir(dirname(output), { recursive: true })
-await writeFile(output, `${canonicalJson(receipt)}\n`)
-process.stdout.write(`${canonicalJson(receipt)}\n`)
 if (process.env.GITHUB_STEP_SUMMARY) {
   await appendFile(process.env.GITHUB_STEP_SUMMARY, renderValidationSummary(compact))
 }

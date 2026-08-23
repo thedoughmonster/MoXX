@@ -58,9 +58,12 @@ jobs:
           pnpm momi-check changed --final --base "$MOMI_BASE_REF"
           --head "$MOMI_HEAD_REF" --receipt .momi/validation-receipt.json
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: validation-${{ env.MOMI_HEAD_REF }}
           path: |
             .momi/impact-plan.json
             .momi/validation-receipt.json
+            .momi/check-receipt.json
+            .momi/logs/
           if-no-files-found: error

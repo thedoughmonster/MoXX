@@ -22,6 +22,8 @@ export type CommandEvidence = {
   duration_ms: number
   stdout_path?: string
   stderr_path?: string
+  stdout_sha256?: string
+  stderr_sha256?: string
   stdout?: string
   stderr?: string
 }

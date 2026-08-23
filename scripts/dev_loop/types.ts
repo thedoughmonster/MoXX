@@ -1,4 +1,5 @@
 import type { CheckCommand, CommandEvidence } from "./check_types.ts"
+import type { DiagnosticSummary } from "./diagnostic_types.ts"
 export type { AdvisoryMetadata, CheckCommand, CommandEvidence } from "./check_types.ts"
 
 export type ImpactClass =
@@ -58,15 +59,9 @@ export type ReceiptInput = {
 export type CompactReceipt = {
   schema_version: 2
   kind: ReceiptInput["kind"]
-  identities: {
-    base_sha?: string
-    head_sha?: string
-    base_tree?: string
-    head_tree?: string
-    diff_sha256?: string
-    impact_sha256?: string
-    plan_sha256?: string
-  }
+  identities: { base_sha?: string; head_sha?: string; base_tree?: string
+    head_tree?: string; diff_sha256?: string; impact_sha256?: string
+    plan_sha256?: string }
   counts: {
     commands: number
     hard_passed: number
@@ -88,6 +83,11 @@ export type CompactReceipt = {
     duration_ms: number
     stdout_path?: string
     stderr_path?: string
+    stdout_sha256: string
+    stderr_sha256: string
+    diagnostics?: DiagnosticSummary[]
+    additional_diagnostics?: number
+    additional_diagnostics_capped?: true
     failure_excerpt?: string
     advisory_excerpt?: string
   }>

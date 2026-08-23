@@ -62,12 +62,24 @@ test("committed receipt evidence summarizes byte-identically", async () => {
 })
 
 test("credential-shaped receipt data is redacted recursively", () => {
+  const raw = ["password=hunter2", '{"password":"two words remain-secret"}',
+    '{"Authorization":"Bearer bearer value remain-bearer"}',
+    '{"access_token":"json-value"}', "SUPABASE_ACCESS_TOKEN=env-value",
+    "AWS_ACCESS_KEY_ID=access-value",
+    "prefix ghp_abcdefghijklmnopqrstuvwxyz123456",
+    "https://user:url-value@example.com?access_token=query-value"].join("\n")
   const value = redactValue({
-    note: "password=hunter2",
+    note: raw,
     access_token: "ghp_abcdefghijklmnopqrstuvwxyz123456",
     nested: ["sk-abcdefghijklmnop1234"],
   })
-  const source = canonicalJson(value)
-  assert.doesNotMatch(source, /hunter2|ghp_|sk-/)
+  const receipt = buildCompactReceipt({ kind: "validation", commands: [{
+    id: "credentials", enforcement: "hard_stop", status: 1, duration_ms: 1,
+    stderr: raw,
+  }] })
+  const source = canonicalJson({ value, receipt })
+  assert.doesNotMatch(source,
+    /hunter2|remain-secret|remain-bearer|json-value|env-value|access-value|url-value|query-value|ghp_|sk-/u)
   assert.match(source, /\[REDACTED\]/)
+  assert.match(receipt.commands[0].failure_excerpt ?? "", /prefix \[REDACTED\]/u)
 })

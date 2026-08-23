@@ -1,9 +1,9 @@
-import { mkdirSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync } from "node:fs"
 import { performance } from "node:perf_hooks"
-import { join } from "node:path"
-import { spawnSync } from "node:child_process"
+import { basename, join } from "node:path"
 
 import { workspaceRoot } from "../architecture/paths.ts"
+import { runCapturedCheck } from "./run_captured_check.ts"
 import type { CheckCommand, CommandEvidence } from "./types.ts"
 
 export function executeChecks(checks: CheckCommand[]): CommandEvidence[] {
@@ -20,37 +20,30 @@ export function executeChecks(checks: CheckCommand[]): CommandEvidence[] {
       (check.enforcement === "hard_stop" && advisory !== undefined)
     ) throw new Error(`Invalid enforcement metadata for check ${check.id || "(missing)"}`)
   }
-  const directory = join(workspaceRoot, ".momi", "logs")
-  mkdirSync(directory, { recursive: true })
+  const logRoot = join(workspaceRoot, ".momi", "logs")
+  mkdirSync(logRoot, { recursive: true })
+  const directory = mkdtempSync(join(logRoot, "run-"))
+  const relativeDirectory = `.momi/logs/${basename(directory)}`
   return checks.map((check) => {
     const started = performance.now()
-    const result = spawnSync(check.command, check.args, {
-      cwd: workspaceRoot,
-      encoding: "utf8",
-      env: {
-        ...process.env,
-        SUPABASE_DB_PASSWORD: undefined,
-        PGPASSWORD: undefined,
-      },
-    })
-    const duration = Math.round(performance.now() - started)
     const name = check.id.replaceAll(/[^a-z0-9-]/gi, "-")
-    const stdoutPath = `.momi/logs/${name}.stdout.log`
-    const stderrPath = `.momi/logs/${name}.stderr.log`
-    const stdout = String(result.stdout ?? "")
-    const stderr = String(result.stderr ?? result.error?.message ?? "")
-    writeFileSync(join(workspaceRoot, stdoutPath), stdout)
-    writeFileSync(join(workspaceRoot, stderrPath), stderr)
+    const stdoutPath = `${relativeDirectory}/${name}.stdout.log`
+    const stderrPath = `${relativeDirectory}/${name}.stderr.log`
+    const result = runCapturedCheck(
+      check,
+      join(workspaceRoot, stdoutPath),
+      join(workspaceRoot, stderrPath),
+    )
     return {
       id: check.id,
       enforcement: check.enforcement,
       ...(check.advisory ? { advisory: check.advisory } : {}),
-      status: result.status ?? 1,
-      duration_ms: duration,
+      status: result.status,
+      duration_ms: Math.round(performance.now() - started),
       stdout_path: stdoutPath,
       stderr_path: stderrPath,
-      stdout,
-      stderr,
+      stdout_sha256: result.stdout_sha256,
+      stderr_sha256: result.stderr_sha256,
     }
   })
 }

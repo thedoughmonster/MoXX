@@ -1,13 +1,12 @@
 import type { Architecture } from "../architecture/types.ts"
 import { classifyPath } from "./classify_path.ts"
+import { repositoryCheckScripts } from "./repository_validation_contract.ts"
 import { selectTestPaths } from "./select_test_paths.ts"
 import type { CheckCommand, ImpactClass, ImpactPlan } from "./types.ts"
-
 const classes: ImpactClass[] = [
   "architecture", "docs", "issue_automation", "manifest", "migration",
   "repository_tooling", "runtime", "unknown", "workflow",
 ]
-
 export function buildImpactPlan(
   paths: string[],
   architecture: Architecture,
@@ -78,12 +77,15 @@ export function buildImpactPlan(
           classifications[kind].length > 0
         ).join(", ")} impact.`,
         checks: [
-          {
-            id: "full-repository",
+          ...repositoryCheckScripts.map((script) => ({
+            id: script.replace(/^check_|\.ts$/gu, ""),
             command: "node",
-            args: ["scripts/check.ts", "--service", "all"],
-            enforcement: "hard_stop",
-          },
+            args: [`scripts/${script}`],
+            enforcement: "hard_stop" as const,
+          })),
+          { id: "tests", command: "node",
+            args: ["scripts/run_discovered_tests.ts", "--service", "all"],
+            enforcement: "hard_stop" },
           qualityReport,
         ],
       }

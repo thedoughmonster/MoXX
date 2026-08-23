@@ -1,5 +1,5 @@
-import { readEvidenceText } from "./read_evidence_text.ts"
-import { redactValue } from "./redact_value.ts"
+import { hashEvidence } from "./hash_evidence.ts"
+import { summarizeEvidence } from "./summarize_evidence.ts"
 import type { CompactReceipt, ReceiptInput } from "./types.ts"
 
 export function buildCompactReceipt(input: ReceiptInput): CompactReceipt {
@@ -18,12 +18,12 @@ export function buildCompactReceipt(input: ReceiptInput): CompactReceipt {
   }
   const commands = input.commands.map((command) => {
     const failed = command.status !== 0
-    const raw = failed
-      ? readEvidenceText(command.stderr, command.stderr_path) ||
-        readEvidenceText(command.stdout, command.stdout_path)
-      : ""
-    const excerpt = String(redactValue(raw)).split(/\r?\n/).slice(0, 20)
-      .join("\n").slice(0, 2000)
+    const summary = failed ? summarizeEvidence([
+      { inline: command.stderr, path: command.stderr_path },
+      { inline: command.stdout, path: command.stdout_path },
+    ]) : undefined
+    const excerpt = summary?.diagnostics.map((item) => item.message)
+      .join("\n").slice(0, 2000) ?? ""
     return {
       id: command.id,
       enforcement: command.enforcement,
@@ -32,6 +32,13 @@ export function buildCompactReceipt(input: ReceiptInput): CompactReceipt {
       duration_ms: command.duration_ms,
       ...(command.stdout_path ? { stdout_path: command.stdout_path } : {}),
       ...(command.stderr_path ? { stderr_path: command.stderr_path } : {}),
+      stdout_sha256: command.stdout_sha256 ??
+        hashEvidence(command.stdout, command.stdout_path),
+      stderr_sha256: command.stderr_sha256 ??
+        hashEvidence(command.stderr, command.stderr_path),
+      ...(failed ? { diagnostics: summary?.diagnostics ?? [] } : {}),
+      ...(summary?.additional ? { additional_diagnostics: summary.additional } : {}),
+      ...(summary?.capped ? { additional_diagnostics_capped: true as const } : {}),
       ...(failed && command.enforcement === "hard_stop"
         ? { failure_excerpt: excerpt || "(no failure output)" }
         : {}),
