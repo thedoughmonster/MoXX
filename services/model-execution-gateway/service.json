@@ -73,8 +73,11 @@
       "momi_model_execution.run_completion_recovery_v1",
       "momi_model_execution.wake_completion_worker"
     ],
-    "public_reads": [],
+    "public_reads": ["momi.model_execution.retrieve.v1"],
     "public_commands": [],
+    "public_routine_reads": [
+      {"contract": "momi.model_execution.retrieve.v1", "routine": "momi_model_execution.get_call_v1"}
+    ],
     "emitted_events": []
   }
 }
