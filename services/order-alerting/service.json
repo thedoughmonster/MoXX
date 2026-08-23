@@ -82,6 +82,16 @@
       "momi.orders.alert.evaluate.v1",
       "toast.order.webhook_alert_work.v1"
     ],
+    "public_routine_commands": [
+      {
+        "contract": "momi.order_api.invocation_work.v1",
+        "routine": "momi_alerting.stage_order_event_work"
+      },
+      {
+        "contract": "toast.order.webhook_alert_work.v1",
+        "routine": "momi_orders.enqueue_toast_webhook_order_alert_work"
+      }
+    ],
     "emitted_events": []
   }
 }
