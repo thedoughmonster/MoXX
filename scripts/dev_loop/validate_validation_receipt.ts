@@ -6,11 +6,15 @@ export function validateValidationReceipt(value: unknown): ValidationReceipt {
   const commands = Array.isArray(receipt?.commands) ? receipt.commands : []
   const expectedCommands = receipt?.gate === "full"
     ? repositoryHardCheckIds.map((id) => ({ id, enforcement: "hard_stop" }))
-      .concat({ id: "quality-report", enforcement: "advisory" })
+      .concat(
+        { id: "source-quality-soft-limit", enforcement: "advisory" },
+        { id: "quality-report", enforcement: "advisory" },
+      )
     : [
       { id: "focused-tests", enforcement: "hard_stop" },
       { id: "source-quality", enforcement: "hard_stop" },
       { id: "quality-report-validity", enforcement: "hard_stop" },
+      { id: "source-quality-soft-limit", enforcement: "advisory" },
       { id: "quality-report", enforcement: "advisory" },
     ]
   const planMismatch = commands.length !== expectedCommands.length ||
@@ -32,10 +36,18 @@ export function validateValidationReceipt(value: unknown): ValidationReceipt {
   ).length
   const invalidCommand = commands.some((item) => {
     const advisory = item.advisory
+    const advisoryKeys = Object.keys(advisory ?? {}).sort().join(",")
     const validAdvisory = item.enforcement === "advisory" &&
-      advisory?.rule === "quality-report-freshness" &&
-      advisory.path === "docs/quality-metrics.json" &&
-      advisory.regenerate === "pnpm quality:generate"
+      ((item.id === "quality-report" &&
+        advisoryKeys === "path,regenerate,rule" &&
+        advisory?.rule === "quality-report-freshness" &&
+        advisory.path === "docs/quality-metrics.json" &&
+        advisory.regenerate === "pnpm quality:generate") ||
+        (item.id === "source-quality-soft-limit" &&
+          advisoryKeys === "path,remediate,rule" &&
+          advisory?.rule === "source-quality-soft-limit" &&
+          advisory.path === "." && advisory.remediate ===
+            "Refactor reported handwritten files to 120 lines or fewer"))
     const hardExcerpt = item.enforcement === "hard_stop" && item.status !== 0
     const advisoryExcerpt = item.enforcement === "advisory" && item.status !== 0
     const diagnostics = Array.isArray(item.diagnostics) ? item.diagnostics : []

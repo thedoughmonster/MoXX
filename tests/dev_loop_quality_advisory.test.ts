@@ -1,6 +1,5 @@
 import assert from "node:assert/strict"
 import test from "node:test"
-
 import { buildCompactReceipt } from "../scripts/dev_loop/build_compact_receipt.ts"
 import { executeChecks } from "../scripts/dev_loop/execute_checks.ts"
 import { renderValidationSummary } from
@@ -12,7 +11,6 @@ import { validationExitCode } from "../scripts/dev_loop/validation_exit_code.ts"
 import { isQualityReportCurrent } from
   "../scripts/quality/is_quality_report_current.ts"
 import { parseQualityReport } from "../scripts/quality/parse_quality_report.ts"
-
 test("quality metric drift is advisory with deterministic guidance", () => {
   assert.equal(isQualityReportCurrent("135191\n", "135205\n"), false)
   const receipt = buildCompactReceipt({
@@ -22,14 +20,11 @@ test("quality metric drift is advisory with deterministic guidance", () => {
     diff_sha256: "e".repeat(64), impact_sha256: "f".repeat(64),
     plan_sha256: "1".repeat(64),
     commands: [{
-      id: "quality-report",
-      command: "node",
-      args: ["scripts/check_quality_report.ts"],
-      enforcement: "advisory",
+      id: "quality-report", command: "node",
+      args: ["scripts/check_quality_report.ts"], enforcement: "advisory",
       advisory: { rule: "quality-report-freshness",
         path: "docs/quality-metrics.json", regenerate: "pnpm quality:generate" },
-      status: 1,
-      duration_ms: 4,
+      status: 1, duration_ms: 4,
       stderr: "token=advisory-secret\nStatus: stale\nRegenerate: pnpm quality:generate",
     }],
   })
@@ -76,7 +71,6 @@ test("quality report validity rejects malformed required evidence", () => {
     metrics: { handwritten_lines: 1 },
   })), /metric fields/)
 })
-
 test("validation receipt counts are recomputed", () => {
   const compact = buildCompactReceipt({
     kind: "validation",
@@ -87,7 +81,13 @@ test("validation receipt counts are recomputed", () => {
     commands: [...repositoryHardCheckIds.map((id) => ({
       id, command: "node", args: [], enforcement: "hard_stop" as const,
       status: 0, duration_ms: 1,
-    })), {
+    })), { id: "source-quality-soft-limit", command: "node", args: [],
+      enforcement: "advisory" as const, status: 1, duration_ms: 1,
+      advisory: { rule: "source-quality-soft-limit" as const,
+        path: "." as const, remediate:
+          "Refactor reported handwritten files to 120 lines or fewer" as const },
+      stderr: "notes/soft.md: 121 lines (soft limit 120)",
+    }, {
       id: "quality-report", command: "node", args: [], enforcement: "advisory",
       advisory: { rule: "quality-report-freshness",
         path: "docs/quality-metrics.json", regenerate: "pnpm quality:generate" },
@@ -108,9 +108,9 @@ test("validation receipt counts are recomputed", () => {
     commands: [{ ...receipt.commands[0], enforcement: "unknown" }],
   }), /Invalid authoritative validation receipt/)
   for (const [gate, id] of [
-    ["full", "full-repository:hard_stop,quality-report"],
+    ["full", "full-repository:hard_stop,source-quality-soft-limit,quality-report"],
     ["path_scoped", "focused-tests:hard_stop,source-quality:hard_stop," +
-      "quality-report-validity:hard_stop,quality-report"],
+      "quality-report-validity:hard_stop,source-quality-soft-limit,quality-report"],
   ] as const) assert.throws(() => validateValidationReceipt({
     ...receipt, gate, commands: [{ ...receipt.commands[1], id }],
     counts: { commands: 1, hard_passed: 0, hard_failed: 0,

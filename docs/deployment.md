@@ -18,15 +18,18 @@ and unknown impact receive the full gate. Docs, workflows, issue automation, and
 repository tooling receive the path-scoped gate.
 
 Every planned command declares `hard_stop` or `advisory` enforcement. Missing or
-unknown enforcement fails closed. Source-quality thresholds, quality-report JSON
-validity, catalog checks, tests, and all other safety and release rules remain
-hard. Only `quality-report-freshness` is advisory: its receipt always identifies
-`docs/quality-metrics.json` and the `pnpm quality:generate` repair command.
+unknown enforcement fails closed. Source-quality errors, including handwritten
+files above 140 lines, remain hard with quality-report JSON validity, catalog
+checks, tests, and all other safety and release rules. Handwritten non-SQL files
+from 121 through 140 lines produce `source-quality-soft-limit` advisory evidence.
+`quality-report-freshness` is also advisory and identifies
+`docs/quality-metrics.json` with the `pnpm quality:generate` repair command.
 
 An advisory finding is retained in the compact receipt and GitHub step summary,
 but cannot make the hard gate fail. The summary binds the exact base/head/tree,
-diff, impact, and plan identities. Run `pnpm quality:check` when freshness itself
-must be enforced, such as regenerating the committed trend snapshot.
+diff, impact, and plan identities. `pnpm quality:check` displays soft-limit
+findings without letting them determine its exit, while still enforcing hard
+source-quality errors and freshness when regenerating the committed snapshot.
 
 Iteration uses focused checks. The PR job `validate-final` runs exactly one
 authoritative final plan and uploads its compact receipt. Neither merge to `dev`

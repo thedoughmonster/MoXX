@@ -66,5 +66,5 @@ export async function findSourceQualityFindings(
     }
   }
 
-  return { warnings, violations }
+  return { warnings: warnings.sort(), violations: violations.sort() }
 }

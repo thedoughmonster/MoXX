@@ -40,7 +40,7 @@
     "test:legacy-recipe-postgres": "node tests/run_legacy_recipe_postgres_integration.ts",
     "test:toast-archive-postgres": "node --test tests/toast_archive_reconciliation_postgres.test.ts",
     "migration:check": "node scripts/check_migrations.ts",
-    "quality:check": "node scripts/check_source_quality.ts && node scripts/check_quality_report_validity.ts && node scripts/check_quality_report.ts",
+    "quality:check": "node scripts/check_source_quality_soft_limit.ts --nonblocking && node scripts/check_source_quality.ts && node scripts/check_quality_report_validity.ts && node scripts/check_quality_report.ts",
     "quality:generate": "node scripts/generate_quality_report.ts",
     "release": "node scripts/run_release.ts",
     "release:dev": "node scripts/run_release.ts --env dev",

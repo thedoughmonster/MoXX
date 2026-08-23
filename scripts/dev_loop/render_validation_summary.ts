@@ -17,12 +17,16 @@ export function renderValidationSummary(receipt: CompactReceipt): string {
   ]
   for (const command of receipt.commands) {
     if (command.enforcement !== "advisory" || !command.advisory) continue
+    const actionLabel = "regenerate" in command.advisory ? "Regenerate" : "Remediate"
+    const action = "regenerate" in command.advisory
+      ? command.advisory.regenerate
+      : command.advisory.remediate
     lines.push(
       "",
       `### Advisory: ${command.advisory.rule}`,
       `- Path: \`${command.advisory.path}\``,
       `- Status: ${command.status === 0 ? "current" : "finding"}`,
-      `- Regenerate: \`${command.advisory.regenerate}\``,
+      `- ${actionLabel}: \`${action}\``,
     )
   }
   return `${lines.join("\n")}\n`

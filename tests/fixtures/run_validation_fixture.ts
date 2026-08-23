@@ -14,7 +14,7 @@ if (mode === "multiple") checks.push({
   id: "fixture-missing", command: process.execPath,
   args: [child, "missing"], enforcement: "hard_stop",
 }, {
-  id: "fixture-advisory", command: process.execPath,
+  id: "quality-report", command: process.execPath,
   args: [child, "advisory"], enforcement: "advisory",
   advisory: { rule: "quality-report-freshness",
     path: "docs/quality-metrics.json", regenerate: "pnpm quality:generate" },

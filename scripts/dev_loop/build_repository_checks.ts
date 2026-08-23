@@ -18,6 +18,16 @@ export async function buildRepositoryChecks(
     enforcement: "hard_stop",
   })
   if (includeAdvisory) checks.push({
+    id: "source-quality-soft-limit",
+    command: process.execPath,
+    args: ["scripts/check_source_quality_soft_limit.ts"],
+    enforcement: "advisory",
+    advisory: {
+      rule: "source-quality-soft-limit",
+      path: ".",
+      remediate: "Refactor reported handwritten files to 120 lines or fewer",
+    },
+  }, {
     id: "quality-report",
     command: process.execPath,
     args: ["scripts/check_quality_report.ts"],

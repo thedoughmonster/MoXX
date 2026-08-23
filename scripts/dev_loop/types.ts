@@ -1,4 +1,4 @@
-import type { CheckCommand, CommandEvidence } from "./check_types.ts"
+import type { AdvisoryMetadata, CheckCommand, CommandEvidence } from "./check_types.ts"
 import type { DiagnosticSummary } from "./diagnostic_types.ts"
 export type { AdvisoryMetadata, CheckCommand, CommandEvidence } from "./check_types.ts"
 
@@ -74,11 +74,7 @@ export type CompactReceipt = {
   commands: Array<{
     id: string
     enforcement: "hard_stop" | "advisory"
-    advisory?: {
-      rule: "quality-report-freshness"
-      path: "docs/quality-metrics.json"
-      regenerate: "pnpm quality:generate"
-    }
+    advisory?: AdvisoryMetadata
     status: number
     duration_ms: number
     stdout_path?: string

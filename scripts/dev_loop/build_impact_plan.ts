@@ -3,10 +3,8 @@ import { classifyPath } from "./classify_path.ts"
 import { repositoryCheckScripts } from "./repository_validation_contract.ts"
 import { selectTestPaths } from "./select_test_paths.ts"
 import type { CheckCommand, ImpactClass, ImpactPlan } from "./types.ts"
-const classes: ImpactClass[] = [
-  "architecture", "docs", "issue_automation", "manifest", "migration",
-  "repository_tooling", "runtime", "unknown", "workflow",
-]
+const classes: ImpactClass[] = ["architecture", "docs", "issue_automation",
+  "manifest", "migration", "repository_tooling", "runtime", "unknown", "workflow"]
 export function buildImpactPlan(
   paths: string[],
   architecture: Architecture,
@@ -52,17 +50,16 @@ export function buildImpactPlan(
     args: ["--test", ...tests],
     enforcement: "hard_stop",
   }
-  const qualityReport: CheckCommand = {
-    id: "quality-report",
-    command: "node",
-    args: ["scripts/check_quality_report.ts"],
-    enforcement: "advisory",
-    advisory: {
-      rule: "quality-report-freshness",
-      path: "docs/quality-metrics.json",
-      regenerate: "pnpm quality:generate",
-    },
+  const sourceQualityAdvisory: CheckCommand = {
+    id: "source-quality-soft-limit", command: "node",
+    args: ["scripts/check_source_quality_soft_limit.ts"], enforcement: "advisory",
+    advisory: { rule: "source-quality-soft-limit", path: ".",
+      remediate: "Refactor reported handwritten files to 120 lines or fewer" },
   }
+  const qualityReport: CheckCommand = { id: "quality-report", command: "node",
+    args: ["scripts/check_quality_report.ts"], enforcement: "advisory",
+    advisory: { rule: "quality-report-freshness",
+      path: "docs/quality-metrics.json", regenerate: "pnpm quality:generate" } }
   return {
     schema_version: 1,
     classifications,
@@ -86,6 +83,7 @@ export function buildImpactPlan(
           { id: "tests", command: "node",
             args: ["scripts/run_discovered_tests.ts", "--service", "all"],
             enforcement: "hard_stop" },
+          sourceQualityAdvisory,
           qualityReport,
         ],
       }
@@ -106,6 +104,7 @@ export function buildImpactPlan(
             args: ["scripts/check_quality_report_validity.ts"],
             enforcement: "hard_stop",
           },
+          sourceQualityAdvisory,
           qualityReport,
         ],
       },

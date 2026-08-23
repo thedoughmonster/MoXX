@@ -8,7 +8,6 @@ import type { BoundPlan, ValidationReceipt } from "../scripts/dev_loop/types.ts"
 import { buildReleaseReceipt } from
   "../scripts/release/build_release_receipt.ts"
 import { requiredJobState } from "../scripts/release/required_job_state.ts"
-
 const architecture = {
   services: [
     { manifest: { service_key: "alpha" } },
@@ -29,7 +28,8 @@ test("repository-only plans use a path gate and deploy nothing", () => {
   assert.equal(plan.final_gate.kind, "path_scoped")
   assert.deepEqual(plan.final_gate.checks.map((item) => `${item.id}:${item.enforcement}`), [
     "focused-tests:hard_stop", "source-quality:hard_stop",
-    "quality-report-validity:hard_stop", "quality-report:advisory",
+    "quality-report-validity:hard_stop", "source-quality-soft-limit:advisory",
+    "quality-report:advisory",
   ])
   assert.equal(plan.release.database, "none")
   assert.deepEqual(plan.release.services, [])
@@ -42,11 +42,11 @@ test("runtime plans deploy only manifest-owned affected functions", () => {
     new Map(),
   )
   assert.equal(plan.final_gate.kind, "full")
+  assert.equal(plan.final_gate.checks.at(-2)?.id, "source-quality-soft-limit")
   assert.deepEqual(plan.release.services, ["alpha"])
   assert.deepEqual(plan.release.functions, ["alpha-v1"])
   assert.equal(plan.release.database, "none")
 })
-
 test("Supabase function registry changes are manifest impact", () => {
   const plan = buildImpactPlan(["supabase/config.toml"], architecture, new Map())
   assert.deepEqual(plan.classifications.manifest, ["supabase/config.toml"])

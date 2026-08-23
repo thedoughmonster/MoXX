@@ -67,6 +67,18 @@ test("advisory metadata remains actionable without changing exit disposition", (
   assert.match(summary, /Advisory: quality-report[\s\S]+remediate: pnpm quality:generate/u)
 })
 
+test("source-quality advisory metadata renders its bounded remediation", () => {
+  const receipt = buildCompactReceipt({ kind: "validation", commands: [{
+    id: "source-quality-soft-limit", enforcement: "advisory", status: 1,
+    duration_ms: 4, advisory: { rule: "source-quality-soft-limit", path: ".",
+      remediate: "Refactor reported handwritten files to 120 lines or fewer" },
+    stderr: "notes/soft.md: 121 lines (soft limit 120)",
+  }] })
+  const summary = renderAgentValidationSummary(receipt, ".momi/receipt.json")
+  assert.match(summary, /Advisory: source-quality-soft-limit/u)
+  assert.match(summary, /remediate: Refactor reported handwritten files/u)
+})
+
 test("canonical entry points use the shared compact runner", () => {
   for (const path of ["scripts/check.ts", "scripts/run_check.ts",
     "scripts/run_check_changed.ts", "scripts/run_tests.ts"]) {

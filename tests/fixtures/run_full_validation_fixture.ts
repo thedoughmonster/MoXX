@@ -12,6 +12,11 @@ const checks: CheckCommand[] = repositoryHardCheckIds.map((id) => ({
   enforcement: "hard_stop",
 }))
 checks.push({
+  id: "source-quality-soft-limit", command: process.execPath,
+  args: [child, "pass"], enforcement: "advisory",
+  advisory: { rule: "source-quality-soft-limit", path: ".",
+    remediate: "Refactor reported handwritten files to 120 lines or fewer" },
+}, {
   id: "quality-report", command: process.execPath,
   args: [child, "pass"], enforcement: "advisory",
   advisory: { rule: "quality-report-freshness",

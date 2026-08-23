@@ -5,10 +5,19 @@ import type { CompactReceipt, ReceiptInput } from "./types.ts"
 export function buildCompactReceipt(input: ReceiptInput): CompactReceipt {
   for (const command of input.commands) {
     const advisory = command.advisory
+    const advisoryKeys = Object.keys(advisory ?? {}).sort().join(",")
     const validAdvisory = command.enforcement === "advisory" &&
-      advisory?.rule === "quality-report-freshness" &&
-      advisory.path === "docs/quality-metrics.json" &&
-      advisory.regenerate === "pnpm quality:generate"
+      ((command.id === "quality-report" &&
+        advisoryKeys === "path,regenerate,rule" &&
+        advisory?.rule === "quality-report-freshness" &&
+        advisory.path === "docs/quality-metrics.json" &&
+        advisory.regenerate === "pnpm quality:generate") ||
+        (command.id === "source-quality-soft-limit" &&
+          advisoryKeys === "path,remediate,rule" &&
+          advisory?.rule === "source-quality-soft-limit" &&
+          advisory.path === "." &&
+          advisory.remediate ===
+            "Refactor reported handwritten files to 120 lines or fewer"))
     if (
       !command.id || !Number.isInteger(command.status) ||
       !Number.isInteger(command.duration_ms) || command.duration_ms < 0 ||

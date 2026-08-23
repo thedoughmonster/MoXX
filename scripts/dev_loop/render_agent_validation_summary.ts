@@ -37,7 +37,12 @@ export function renderAgentValidationSummary(
       const qualifier = command.additional_diagnostics_capped ? " or more" : ""
       lines.push(`  +${command.additional_diagnostics}${qualifier} additional distinct diagnostics in raw logs`)
     }
-    if (command.advisory) lines.push(`  remediate: ${command.advisory.regenerate}`)
+    if (command.advisory) {
+      const action = "regenerate" in command.advisory
+        ? command.advisory.regenerate
+        : command.advisory.remediate
+      lines.push(`  remediate: ${action}`)
+    }
     const paths = [command.stdout_path, command.stderr_path].filter(Boolean)
     if (paths.length > 0) lines.push(`  inspect: cat -- ${paths.join(" ")}`)
   }

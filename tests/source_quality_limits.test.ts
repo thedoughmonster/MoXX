@@ -15,10 +15,24 @@ test("source quality uses a 120-line soft limit and 140-line hard limit", async 
   assert.equal(workspace.policies.hard_max_handwritten_lines, 140)
 })
 
-test("the CI quality check reports warnings without turning them into failures", async () => {
-  const source = await readFile("scripts/check_source_quality.ts", "utf8")
-  assert.match(source, /console\.warn\(`Source quality warnings:/)
-  assert.match(source, /if \(violations\.length > 0\)/)
+test("CI separates soft-limit advisories from hard failures", async () => {
+  const hard = await readFile("scripts/check_source_quality.ts", "utf8")
+  const soft = await readFile("scripts/check_source_quality_soft_limit.ts", "utf8")
+  assert.match(soft, /Source quality soft-limit advisories:/)
+  assert.match(soft, /process\.exitCode = 1/)
+  assert.doesNotMatch(hard, /warnings/)
+  assert.match(hard, /if \(violations\.length > 0\)/)
+})
+
+test("the quality entry point keeps soft findings visible and nonblocking", async () => {
+  const packageJson = JSON.parse(await readFile("package.json", "utf8"))
+  assert.match(packageJson.scripts["quality:check"],
+    /^node scripts\/check_source_quality_soft_limit\.ts --nonblocking &&/)
+  const result = spawnSync(process.execPath,
+    ["scripts/check_source_quality_soft_limit.ts", "--nonblocking"],
+    { encoding: "utf8" })
+  assert.equal(result.status, 0)
+  assert.match(result.stderr, /Source quality soft-limit advisories:/)
 })
 
 test("the line-count boundaries are deterministic", () => {

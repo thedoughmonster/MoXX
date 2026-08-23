@@ -1,10 +1,16 @@
 export type CheckEnforcement = "hard_stop" | "advisory"
 
-export type AdvisoryMetadata = {
-  rule: "quality-report-freshness"
-  path: "docs/quality-metrics.json"
-  regenerate: "pnpm quality:generate"
-}
+export type AdvisoryMetadata =
+  | {
+    rule: "quality-report-freshness"
+    path: "docs/quality-metrics.json"
+    regenerate: "pnpm quality:generate"
+  }
+  | {
+    rule: "source-quality-soft-limit"
+    path: "."
+    remediate: "Refactor reported handwritten files to 120 lines or fewer"
+  }
 
 export type CheckCommand = {
   id: string

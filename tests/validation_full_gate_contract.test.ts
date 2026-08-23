@@ -16,7 +16,7 @@ test("authoritative full plans expose every repository check identity", () => {
   const plan = buildImpactPlan(["workspace.json"], architecture, new Map())
   assert.equal(plan.final_gate.kind, "full")
   assert.deepEqual(plan.final_gate.checks.map((item) => item.id), [
-    ...repositoryHardCheckIds, "quality-report",
+    ...repositoryHardCheckIds, "source-quality-soft-limit", "quality-report",
   ])
   assert.equal(plan.final_gate.checks.some((item) => item.id === "full-repository"), false)
   const tests = plan.final_gate.checks.find((item) => item.id === "tests")

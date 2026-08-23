@@ -9,10 +9,19 @@ import type { CheckCommand, CommandEvidence } from "./types.ts"
 export function executeChecks(checks: CheckCommand[]): CommandEvidence[] {
   for (const check of checks) {
     const advisory = check.advisory
+    const advisoryKeys = Object.keys(advisory ?? {}).sort().join(",")
     const validAdvisory = check.enforcement === "advisory" &&
-      advisory?.rule === "quality-report-freshness" &&
-      advisory.path === "docs/quality-metrics.json" &&
-      advisory.regenerate === "pnpm quality:generate"
+      ((check.id === "quality-report" &&
+        advisoryKeys === "path,regenerate,rule" &&
+        advisory?.rule === "quality-report-freshness" &&
+        advisory.path === "docs/quality-metrics.json" &&
+        advisory.regenerate === "pnpm quality:generate") ||
+        (check.id === "source-quality-soft-limit" &&
+          advisoryKeys === "path,remediate,rule" &&
+          advisory?.rule === "source-quality-soft-limit" &&
+          advisory.path === "." &&
+          advisory.remediate ===
+            "Refactor reported handwritten files to 120 lines or fewer"))
     if (
       !check.id || !check.command || !Array.isArray(check.args) ||
       check.args.some((item) => typeof item !== "string") ||
