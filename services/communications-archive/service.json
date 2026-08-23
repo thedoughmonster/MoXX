@@ -81,6 +81,7 @@
       {"contract": "momi.communications.get_gateway_exchange_receipt.v1", "routine": "momi_communications.get_gateway_exchange_receipt_v1"}
     ],
     "public_routine_commands": [
+      {"contract": "momi.communications.capture_operational_note.v1", "routine": "momi_communications.capture_operational_note_v1"},
       {"contract": "momi.communications.capture_gateway_exchange.v1", "routine": "momi_communications.capture_gateway_exchange_v1"},
       {"contract": "momi.communications.capture_human_message.v1", "routine": "momi_communications.capture_human_message_v1"},
       {"contract": "momi.raw_json.capture_evidence.v1", "routine": "momi_communications.capture_raw_json_evidence_v1"}
