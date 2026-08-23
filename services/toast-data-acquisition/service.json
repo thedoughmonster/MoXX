@@ -41,6 +41,7 @@
     "private_schema": "toast_acquisition",
     "private_relations": [
       "toast_acquisition.archive_acceptance_findings_v1",
+      "toast_acquisition.archive_finding_reconciliations",
       "toast_acquisition.archive_integrity_findings_v1",
       "toast_acquisition.archive_obligation_findings_v1",
       "toast_acquisition.archive_obligation_status_v1",
@@ -79,6 +80,7 @@
       "toast_acquisition.ordering_schedule_array", "toast_acquisition.ordering_schedule_scalar",
       "toast_acquisition.plan_backfill_after_first_business_date",
       "toast_acquisition.reconcile_stale_api_attempts", "toast_acquisition.reject_coverage_mutation",
+      "toast_acquisition.reject_archive_reconciliation_mutation",
       "toast_acquisition.require_repair_for_exact_resource",
       "toast_acquisition.restart_token_cursor_job", "toast_acquisition.resync_ordering_schedule_policy",
       "toast_acquisition.seed_restaurant_schedules", "toast_acquisition.sync_online_ordering_hours",
