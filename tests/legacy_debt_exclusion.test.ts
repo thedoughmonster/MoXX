@@ -3,9 +3,11 @@ import { createHash } from "node:crypto"
 import test from "node:test"
 import { validateExecutionAuthority } from "../scripts/architecture/validate_execution_authority.ts"
 import { canonicalJson } from "../scripts/dev_loop/canonical_json.ts"
+import { runGit } from "../scripts/dev_loop/run_git.ts"
 import { loadLegacyDebtExclusionCase } from "./legacy_debt_exclusion_test_support.ts"
 const subject = await loadLegacyDebtExclusionCase()
 test("legacy debt stays removal-only at the current authority boundary", async () => {
+  assert.notEqual(subject.fixture.source_revision.commit, runGit(["rev-parse", "HEAD"]))
   const valid = await subject.verify()
   assert.deepEqual(valid.diagnostics, [])
   assert.deepEqual(valid.authority, [])
@@ -13,15 +15,11 @@ test("legacy debt stays removal-only at the current authority boundary", async (
   assert.equal(valid.row.fingerprint, subject.expectedFingerprint)
   assert.deepEqual(valid.projection, subject.fixture.report.expected_projection)
   const positiveNamespaces = ["filesystem", "database", "contracts", "network",
-    "secrets", "packages", "external"].map((key) =>
-      canonicalJson((subject.control as any)[key]))
-  for (const material of [subject.expectedFingerprint,
-    subject.fixture.baseline.path, subject.fixture.report.path, subject.fixture.report.report_digest,
-    subject.fixture.report.findings_sha256, subject.fixture.baseline.sha256,
-    subject.fixture.baseline.git_blob, subject.fixture.report.expected_projection.subject,
-    subject.fixture.report.expected_projection.sql_source_hash,
-    canonicalJson(valid.projection), canonicalJson(valid.row),
-    "momi_alerting.order_alert_candidates"]) {
+    "secrets", "packages", "external"].map((key) => canonicalJson((subject.control as any)[key]))
+  for (const material of [subject.expectedFingerprint, subject.fixture.baseline.path,
+    subject.fixture.report.path, subject.fixture.report.report_digest, subject.fixture.report.findings_sha256,
+    subject.fixture.baseline.sha256, subject.fixture.baseline.git_blob, subject.fixture.report.expected_projection.subject,
+    subject.fixture.report.expected_projection.sql_source_hash, canonicalJson(valid.projection), canonicalJson(valid.row), "momi_alerting.order_alert_candidates"]) {
     assert.equal(positiveNamespaces.some((item) => item.includes(material)), false)
   }
   const negative = structuredClone(subject.control)
@@ -75,15 +73,17 @@ test("legacy debt stays removal-only at the current authority boundary", async (
     [item.field_path, item.code, item.target]), [[
       "/fixture_digest", "debt_exclusion_source_identity_mismatch", "fixture_digest",
     ]])
-  const sourceDrift = structuredClone(subject.fixture)
-  sourceDrift.source_revision.commit = "0000000000000000000000000000000000000000"
-  { const { fixture_digest: _digest, ...withoutDigest } = sourceDrift
+  for (const [field, length] of [["commit", 40], ["tree", 40]] as const) {
+    const sourceDrift = structuredClone(subject.fixture)
+    sourceDrift.source_revision[field] = "0".repeat(length)
+    const { fixture_digest: _digest, ...withoutDigest } = sourceDrift
     sourceDrift.fixture_digest = createHash("sha256").update(
-      canonicalJson(withoutDigest)).digest("hex") }
-  assert.deepEqual((await subject.verify(sourceDrift)).diagnostics, [{
-    fixture_id: subject.fixture.fixture_id, field_path: "/source_revision/commit",
-    code: "debt_exclusion_source_identity_mismatch", target: "source_revision.commit",
-  }])
+      canonicalJson(withoutDigest)).digest("hex")
+    assert.deepEqual((await subject.verify(sourceDrift)).diagnostics, [{
+      fixture_id: subject.fixture.fixture_id, field_path: `/source_revision/${field}`,
+      code: "debt_exclusion_source_identity_mismatch", target: `source_revision.${field}`,
+    }])
+  }
   const fingerprintDrift = structuredClone(subject.fixture)
   fingerprintDrift.baseline.finding_fingerprint =
     "sha256:0000000000000000000000000000000000000000000000000000000000000000"

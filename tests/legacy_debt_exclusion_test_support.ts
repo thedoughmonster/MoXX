@@ -20,8 +20,6 @@ export async function loadLegacyDebtExclusionCase() {
   const control = await readJson<ExecutionAuthority>(join(workspaceRoot, fixture.control_grant_path))
   const baseline = await readJson<Record<string, any>>(join(workspaceRoot, "docs/service-access-debt-baseline.json"))
   const baselineText = await readFile(join(workspaceRoot, "docs/service-access-debt-baseline.json"), "utf8")
-  const trustedCommit = runGit(["rev-parse", "origin/dev"])
-  const trustedTree = runGit(["rev-parse", "origin/dev^{tree}"])
   const report = await readJson<LegacyAccessGovernanceReport>(join(workspaceRoot, "docs/legacy-access-governance-report.json"))
   const sourceSchema = await readJson<object>(join(workspaceRoot, "schemas/service-access-debt-baseline-v1.schema.json"))
   const reportSchema = await readJson<object>(join(workspaceRoot, "schemas/legacy-access-governance-report-v1.schema.json"))
@@ -52,8 +50,6 @@ export async function loadLegacyDebtExclusionCase() {
       source: expected.source,
       findingsSha: expected.findings_sha256,
       reportDigest: expected.report_digest,
-      trustedCommit,
-      trustedTree,
       findingsValid: source.report.findings_sha256 === expected.findings_sha256,
       reportValid,
     }
@@ -94,10 +90,17 @@ export async function loadLegacyDebtExclusionCase() {
     const { fixture_digest: _digest, ...withoutDigest } = value
     if (value.fixture_digest !== createHash("sha256").update(canonicalJson(withoutDigest)).digest("hex")) diagnostics.push(diagnostic("/fixture_digest", "debt_exclusion_source_identity_mismatch", "fixture_digest"))
     if (diagnostics.length) return { diagnostics: sorted(), authority: [] }
+    let recordedTree: string | undefined
+    try {
+      if (!/^[0-9a-f]{40}$/.test(value.source_revision.commit)) throw new Error()
+      runGit(["cat-file", "-e", `${value.source_revision.commit}^{commit}`])
+      recordedTree = runGit(["rev-parse", `${value.source_revision.commit}^{tree}`])
+    } catch { diagnostics.push(diagnostic("/source_revision/commit", "debt_exclusion_source_identity_mismatch", "source_revision.commit")) }
+    if (recordedTree && value.source_revision.tree !== recordedTree) diagnostics.push(diagnostic("/source_revision/tree", "debt_exclusion_source_identity_mismatch", "source_revision.tree"))
     const actual = sourceIdentity(sources)
     if (!actual.findingsValid) diagnostics.push(diagnostic("/report/findings_sha256", "debt_exclusion_source_identity_mismatch", "report.findings_sha256"))
     if (!actual.reportValid) diagnostics.push(diagnostic("/report/report_digest", "debt_exclusion_source_identity_mismatch", "report.report_digest"))
-    const identity: Array<[string, string, string]> = [["/source_revision/commit", value.source_revision.commit, actual.trustedCommit], ["/source_revision/tree", value.source_revision.tree, actual.trustedTree], ["/baseline/git_blob", value.baseline.git_blob, actual.source.git_blob], ["/baseline/sha256", value.baseline.sha256, actual.source.sha256], ["/report/findings_sha256", value.report.findings_sha256, actual.findingsSha], ["/report/report_digest", value.report.report_digest, actual.reportDigest]]
+    const identity: Array<[string, string, string]> = [["/baseline/git_blob", value.baseline.git_blob, actual.source.git_blob], ["/baseline/sha256", value.baseline.sha256, actual.source.sha256], ["/report/findings_sha256", value.report.findings_sha256, actual.findingsSha], ["/report/report_digest", value.report.report_digest, actual.reportDigest]]
     diagnostics.push(...identity.filter(([, actual, expected]) => actual !== expected).map(([path]) => diagnostic(path, "debt_exclusion_source_identity_mismatch", path.slice(1).replaceAll("/", "."))))
     const selectedFingerprint = value.baseline.finding_fingerprint
     const findings = sources.baseline.findings.filter((item: any) =>

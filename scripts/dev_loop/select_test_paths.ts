@@ -15,6 +15,13 @@ export function selectTestPaths(
       if (path.startsWith("tests/") && path.endsWith(".test.ts")) selected.add(path)
     }
   }
+  const changedPaths = Object.values(classifications).flat()
+  if (changedPaths.some((path) =>
+    path.startsWith("tests/fixtures/legacy-debt-exclusion/") ||
+    path === "tests/legacy_debt_exclusion_test_support.ts" ||
+    path === "docs/service-access-debt-baseline.json" ||
+    path === "docs/legacy-access-governance-report.json"
+  )) selected.add("tests/legacy_debt_exclusion.test.ts")
   for (const service of affectedServices) {
     selected.add(`services/${service}/**/*.test.ts`)
   }
