@@ -1,5 +1,6 @@
 import assert from "node:assert/strict"
-import { mkdtemp, rmdir, unlink, writeFile } from "node:fs/promises"
+import { spawnSync } from "node:child_process"
+import { mkdtemp, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import test from "node:test"
@@ -104,13 +105,13 @@ test("preserves SQL and generated dependency exclusions", () => {
 
 test("the repository scan catches violations when changed-file inspection is bypassed", async () => {
   const root = await mkdtemp(join(tmpdir(), "momi-source-quality-"))
+  assert.equal(spawnSync("git", ["init", "-b", "dev"], { cwd: root }).status, 0)
   const path = join(root, "bypass.ts")
   await writeFile(path, "export function one() {}\nexport function two() {}\n")
   try {
     const findings = await findSourceQualityFindings(await loadWorkspace(), root)
     assert.deepEqual(findings.violations, ["bypass.ts: 2 top-level functions"])
   } finally {
-    await unlink(path)
-    await rmdir(root)
+    await rm(root, { recursive: true, force: true })
   }
 })
