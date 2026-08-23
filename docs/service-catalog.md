@@ -33,7 +33,7 @@ implementation status is rendered explicitly and is never inferred.
 | `toast-order-read-api` | retiring | implemented | not_asserted | `momi.toast_orders.get_by_id.v1` | `momi-toast-orders-get-by-id-v1` | none |
 | `toast-stock-ingest` | active | unclassified | not_asserted | `toast.stock.webhook_ingest.v1` | `toast-stock-webhook-ingest-v1` | none |
 | `toast-webhook-ingestion` | active | unclassified | not_asserted | `toast.webhooks.webhook_ingest.v1` | `toast-webhooks-ingest-v1` | none |
-| `trello-data-acquisition` | active | unclassified | not_asserted | `trello.data.acquisition.request.v1` | `trello-board-snapshot-v1`, `trello-webhook-inventory-v1` | none |
+| `trello-data-acquisition` | active | unclassified | not_asserted | `trello.data.acquisition.request.v1` | `trello-board-snapshot-v1`, `trello-webhook-inventory-v1` | `cron_job:momi-trello-board-snapshot-dispatch-recovery-v1` |
 | `trello-evidence-ingestion` | active | unclassified | not_asserted | `trello.evidence.capture.v1`, `trello.webhooks.ingest.v1` | `trello-webhooks-ingest-v1` | none |
 | `trello-task-delivery` | active | unclassified | not_asserted | `momi.trello.task_delivery.enqueue.v1` | `trello-create-list-v1`, `trello-move-card-v1`, `trello-register-webhook-v1` | none |
 | `warehouse-projection` | active | unclassified | not_asserted | `momi.warehouse.canonical_read_views.v1`, `momi.warehouse.toast_order_read_view.v1`, `momi.warehouse_projection.toast.consume.v1` | `momi-warehouse-projection-worker-v1` | `cron_job:momi-warehouse-projection-database-v1`, `cron_job:momi-warehouse-projection-wakeup-v1`, `database_processor:warehouse_projection.process_delivery_batch` |

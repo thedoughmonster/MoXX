@@ -15,7 +15,20 @@
   "network": { "outbound_hosts": ["api.trello.com"] },
   "secrets": ["SUPABASE_DB_URL", "TRELLO_API_KEY", "TRELLO_API_TOKEN"],
   "configuration": [],
-  "deployment": { "owns": [], "depends_on": [] },
+  "deployment": {
+    "owns": [
+      {
+        "kind": "cron_job",
+        "key": "momi-trello-board-snapshot-dispatch-recovery-v1"
+      }
+    ],
+    "depends_on": [
+      { "kind": "postgres_extension", "key": "pg_cron" },
+      { "kind": "postgres_extension", "key": "pg_net" },
+      { "kind": "vault_secret", "key": "momi_project_url" },
+      { "kind": "vault_secret", "key": "momi_publishable_key" }
+    ]
+  },
   "runtime_dependencies": [
     "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
     "npm:postgres@3.4.3"
@@ -33,6 +46,8 @@
       "trello_acquisition.claim_board_snapshot_v1",
       "trello_acquisition.enqueue_board_snapshot_v1",
       "trello_acquisition.finish_board_snapshot_v1",
+      "trello_acquisition.run_board_snapshot_dispatch_recovery_v1",
+      "trello_acquisition.wake_board_snapshot_dispatch",
       "trello_acquisition.claim_webhook_inventory_v1",
       "trello_acquisition.enqueue_webhook_inventory_v1",
       "trello_acquisition.finish_webhook_inventory_v1"

@@ -55,3 +55,24 @@ test("records a bounded network failure without throwing", async () => {
     errorCode: "trello_network_error",
   })
 })
+
+test("aborts a source request before its claim lease can expire", async () => {
+  const fetcher = ((_input: string | URL | Request, init?: RequestInit) =>
+    new Promise<Response>((_resolve, reject) => {
+      const signal = init?.signal
+      signal?.addEventListener("abort", () => reject(signal.reason), { once: true })
+    })) as typeof fetch
+  const result = await acquireBoardSnapshot({
+    jobId: "11111111-1111-4111-8111-111111111111",
+    capabilityToken: "fixture-capability",
+    boardLocator: "qdzZg93X",
+  }, "fixture-api-key", "fixture-api-token", fetcher, 10)
+
+  assert.deepEqual(result, {
+    httpStatus: null,
+    headers: {},
+    payload: null,
+    rawText: null,
+    errorCode: "trello_network_error",
+  })
+})

@@ -7,6 +7,7 @@ export async function acquireBoardSnapshot(
   apiKey: string,
   apiToken: string,
   fetcher: typeof fetch = fetch,
+  timeoutMs = 90_000,
 ): Promise<SourceResult> {
   const board = encodeURIComponent(job.boardLocator)
   const query = "fields=id,name,closed,url,shortLink&lists=open&list_fields=id,name,pos,closed&cards=open&card_fields=id,name,idList,closed"
@@ -14,6 +15,7 @@ export async function acquireBoardSnapshot(
     const response = await fetcher(`https://api.trello.com/1/boards/${board}?${query}`, {
       method: "GET",
       redirect: "manual",
+      signal: AbortSignal.timeout(timeoutMs),
       headers: {
         Accept: "application/json",
         Authorization: `OAuth oauth_consumer_key="${apiKey}", oauth_token="${apiToken}"`,
