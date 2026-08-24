@@ -50,8 +50,10 @@ with required entity identity and schema version 1 or 2. Exact replay returns
 the original event identity. Re-observing an unchanged canonical entity version
 also returns its first event while preserving the original occurrence and
 correlation metadata; this includes the pre-cutover type-specific `observed`
-name. Any change to its entity, source, schema, or stored reference raises a
-unique violation, as does every divergent non-entity-version replay.
+name and the staged-menu `warehouse.menu_entity.observed` name for `menu`,
+`menu_group`, `menu_item`, `modifier_group`, and `modifier_option`. Any change
+to its entity, source, schema, or stored reference raises a unique violation,
+as does every divergent non-entity-version replay.
 
 The database role model proves bounded DB-native capability execution. Shared
 project Edge credentials do not prove per-workload isolation; that is separate
