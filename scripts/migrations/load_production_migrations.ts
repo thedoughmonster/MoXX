@@ -15,6 +15,7 @@ export function loadProductionMigrations(
     ["ls-tree", "-r", "origin/prod", "--", migrationPath],
     { encoding: "utf8", maxBuffer: 8 * 1024 * 1024 },
   )
+  if (result.error) throw result.error
   if (result.status !== 0 || !result.stdout) {
     throw new Error("Unable to read the production migration baseline")
   }

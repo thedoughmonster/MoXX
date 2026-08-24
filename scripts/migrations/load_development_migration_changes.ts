@@ -12,6 +12,7 @@ export function loadDevelopmentMigrationChanges(
     "--format=commit:%H", "--raw", "--abbrev=40", "--no-renames",
     `origin/prod..${ref}`, "--", migrationPath,
   ], { encoding: "utf8", maxBuffer: 8 * 1024 * 1024 })
+  if (result.error) throw result.error
   if (result.status !== 0) {
     throw new Error("Unable to read development migration history")
   }

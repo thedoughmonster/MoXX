@@ -12,6 +12,7 @@ export function loadDevelopmentMigrations(
   }
   if (/^0+$/.test(ref)) throw new Error("MOMI_DEV_REF cannot be the zero SHA")
   const ancestry = spawnSync("git", ["merge-base", "--is-ancestor", ref, "HEAD"])
+  if (ancestry.error) throw ancestry.error
   if (ancestry.status !== 0) {
     throw new Error("MOMI_DEV_REF must be an ancestor of HEAD")
   }
@@ -20,6 +21,7 @@ export function loadDevelopmentMigrations(
     ["ls-tree", "-r", ref, "--", migrationPath],
     { encoding: "utf8", maxBuffer: 8 * 1024 * 1024 },
   )
+  if (result.error) throw result.error
   if (result.status !== 0 || !result.stdout) {
     throw new Error("Unable to read the development migration baseline")
   }

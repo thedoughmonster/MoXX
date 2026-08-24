@@ -21,6 +21,18 @@ export type PostWriteDiagnostic = {
 }
 
 export type CanonicalGenerator = FixId
+export type CanonicalArtifactGenerator = Extract<
+  CanonicalGenerator,
+  "catalog" | "quality"
+>
+
+export type CanonicalGeneratorIdentity = {
+  kind: CanonicalGenerator
+  script: string
+  command: string
+  path: string
+  validation_command: string
+}
 
 export type GeneratorResult = {
   changed: boolean

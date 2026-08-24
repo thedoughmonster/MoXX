@@ -26,6 +26,7 @@ export function loadTargetAuthoritySnapshot(): AuthoritySnapshot {
     ["ls-tree", "-r", "--name-only", ref, "--", "services"],
     { encoding: "utf8", maxBuffer: 1024 * 1024 },
   )
+  if (listing.error) throw listing.error
   if (listing.status !== 0) {
     throw new Error("Unable to list services on the trusted development ref")
   }
@@ -40,6 +41,7 @@ export function loadTargetAuthoritySnapshot(): AuthoritySnapshot {
       encoding: "utf8",
       maxBuffer: 1024 * 1024,
     })
+    if (result.error) throw result.error
     if (result.status !== 0) {
       throw new Error(`Unable to read ${path} on the trusted development ref`)
     }
