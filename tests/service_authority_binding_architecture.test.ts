@@ -23,7 +23,7 @@ test("indexes the bounded canonical corpus and preserves absent authority", asyn
     { grants: {} },
   )
   assert.equal(Object.keys(context.manifests).length, 29)
-  assert.equal(context.debt.findings.length, 97)
+  assert.equal(context.debt.findings.length, 87)
   assert.deepEqual(context.executions, {})
   assert.deepEqual(
     await findServiceAuthorityBindingViolations(architecture.services), [],

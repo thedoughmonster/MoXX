@@ -33,7 +33,7 @@ test("keeps the five authority layers disjoint and exact", () => {
   const exact = authority.runtime_compatibility.filter((item) =>
     item.scope.kind === "exact_object")
   assert.equal(broad.length, 82)
-  assert.equal(exact.length, 3)
+  assert.equal(exact.length, 4)
   assert(authority.objects.every((item) => item.identity.class !== "sequence"))
   assert(!authority.objects.some((item) =>
     item.identity.schema === "cron" && item.identity.name === "job_run_details"))

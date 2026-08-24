@@ -39,6 +39,12 @@ analysis relations even if model instructions or generated SQL are wrong.
 immutable canonical order-version UUID. Event consumers can therefore decide
 the exact observation that triggered them even if a newer version arrives.
 
+`momi.order_alert_delivery.v2` is the warehouse-owned command that binds one
+newly issued order-read capability to an exact Event Routing delivery tuple.
+The tuple stays private to this service. Both order readers consume only this
+local authorization state and the Event-owned live-delivery witness; their
+public v1 HTTP contracts and read-token meaning do not change.
+
 ## Version Selection
 
 `momi_api.warehouse_entities_by_id_v1` normally selects the newest observation,

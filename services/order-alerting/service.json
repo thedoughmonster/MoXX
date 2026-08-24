@@ -19,6 +19,7 @@
       { "service": "momi-event-routing", "contract": "momi.events.delivery_lifecycle.v1" },
       { "service": "momi-event-routing", "contract": "momi.events.delivery_reference.v1" },
       { "service": "momi-event-routing", "contract": "momi.events.delivery_witness.v1" },
+      { "service": "warehouse-read-api", "contract": "momi.order_alert_delivery.v2" },
       { "service": "warehouse-read-api", "contract": "momi.orders.get_by_id.v1" },
       { "service": "warehouse-read-api", "contract": "momi.orders.get_by_version.v1" }
     ]
@@ -71,7 +72,8 @@
     ],
     "private_routines": [
       "momi_alerting.claim_order_alert_candidates", "momi_alerting.is_doughnut_preorder",
-      "momi_alerting.issue_order_read_capability", "momi_alerting.match_canonical_order_alert_routes",
+      "momi_alerting.issue_order_read_capability", "momi_alerting.issue_order_read_capability_v2",
+      "momi_alerting.match_canonical_order_alert_routes",
       "momi_alerting.matches_canonical_condition", "momi_alerting.matches_source_value",
       "momi_alerting.prevent_cross_path_order_alert_duplicate",
       "momi_alerting.revoke_order_read_capability", "momi_alerting.stage_order_event_work",

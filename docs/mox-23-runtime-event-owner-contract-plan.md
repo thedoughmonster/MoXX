@@ -2,8 +2,8 @@
 
 ## Result
 
-This L2 repository slice implements 25 of the 35 private-access findings inventoried at
-base `45c91bc4ee06ab3c476d8251f6834699ccff8e6a`. The remaining 10 findings are recorded
+This L2 repository slice implements 27 of the 35 private-access findings inventoried at
+base `45c91bc4ee06ab3c476d8251f6834699ccff8e6a`. The remaining 8 findings are recorded
 exactly in `docs/mox-23-runtime-event-access-inventory.json` and remain removal-only debt.
 No provider, credential, hosted runtime, production, deployment, or external configuration
 was changed.
@@ -70,11 +70,10 @@ fingerprints out of the baseline.
 
 ## Deferred residuals
 
-The 10 residual findings are:
+The 8 residual findings are:
 
 - three order-alert staging/capability reads whose active definitions also contain
   unrelated cross-owner writes;
-- two warehouse-read capability rechecks that do not retain the delivery capability token;
 - one warehouse projector event read whose current signature lacks the delivery witness;
 - three warehouse event producer inserts awaiting bounded consumer cutovers to
   `momi.events.warehouse_append.v1`; and
