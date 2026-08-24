@@ -48,6 +48,8 @@ jobs:
       MOMI_DEV_REF: ${{ github.event.pull_request.base.sha || inputs.development_baseline_sha }}
       ORDER_ALERT_DELIVERY_CONCURRENCY_DATABASE_URL: >-
         postgresql://postgres:postgres@127.0.0.1:5432/momi_concurrency
+      WAREHOUSE_PROJECTION_SEARCH_PATH_DATABASE_URL: >-
+        postgresql://postgres:postgres@127.0.0.1:5432/momi_concurrency
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:

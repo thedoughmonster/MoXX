@@ -18,6 +18,7 @@ test("runs one exact path-derived final gate for pull requests", () => {
   assert.match(workflow, /validation-receipt\.json/)
   assert.match(workflow, /services:\n\s+postgres:\n\s+image: postgres:18-alpine/)
   assert.match(workflow, /ORDER_ALERT_DELIVERY_CONCURRENCY_DATABASE_URL:/)
+  assert.match(workflow, /WAREHOUSE_PROJECTION_SEARCH_PATH_DATABASE_URL:/)
   assert.match(workflow, /postgresql:\/\/postgres:postgres@127\.0\.0\.1:5432/)
 })
 
