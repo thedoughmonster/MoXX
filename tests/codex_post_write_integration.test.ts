@@ -54,6 +54,11 @@ test("reports a targeted service-manifest schema failure", async () => {
       diagnostics.find((item) => item.code === "MANIFEST_SCHEMA_INVALID")?.path,
       "services/demo/service.json",
     )
+    const manifest = diagnostics.find((item) =>
+      item.code === "MANIFEST_SCHEMA_INVALID")?.repository_diagnostic
+    assert.equal(manifest?.rule_id, "MANIFEST_SCHEMA_INVALID")
+    assert.match(manifest?.expected ?? "", /service_key demo/u)
+    assert.deepEqual(manifest?.repair, { kind: "none" })
   } finally {
     await rm(root, { recursive: true, force: true })
   }

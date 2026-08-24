@@ -4,6 +4,10 @@ import test from "node:test"
 
 import Ajv2020 from "ajv/dist/2020.js"
 
+import type { LoadedService } from "../scripts/architecture/types.ts"
+import type { ConstitutionFinding } from "../scripts/constitution/types.ts"
+import { constitutionDiagnostic } from
+  "../scripts/diagnostics/constitution_diagnostic.ts"
 import type { RepositoryDiagnosticV1 } from
   "../scripts/diagnostics/types.ts"
 
@@ -24,6 +28,28 @@ test("accepts the complete v1 deterministic diagnostic fixture", () => {
   assert.equal(diagnostics[0].repair.kind, "none")
   assert.equal(diagnostics[2].repair.kind, "none")
   assert.equal(diagnostics[3].repair.kind, "command")
+})
+
+test("constitution adapters emit only schema-valid bounded diagnostics", () => {
+  const services = [{
+    directory: "services/owner",
+    manifest: { service_key: "owner", contracts: { provides: [] } },
+  }] as LoadedService[]
+  const finding = {
+    rule_version: 1,
+    rule_id: "dataset_contract_not_provided",
+    subject: "services/owner/service.json",
+    evidence: { service_key: "owner", contract: "records.items.read.v1" },
+    summary: "The owned contract is absent from its manifest.",
+    fingerprint: "fixture-fingerprint",
+  } as ConstitutionFinding
+  const diagnostic = constitutionDiagnostic(finding, services)!
+  assert.equal(validate(diagnostic), true, JSON.stringify(validate.errors))
+  const oversized = {
+    ...finding,
+    evidence: { ...finding.evidence, contract: `${"a".repeat(550)}.v1` },
+  }
+  assert.equal(constitutionDiagnostic(oversized, services), null)
 })
 
 test("keeps deterministic command and no-fix repair states disjoint", () => {

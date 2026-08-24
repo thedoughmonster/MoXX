@@ -16,8 +16,11 @@ trust and specialized tool paths can bypass repository hooks, so
 
 The synchronous post-tool hook gives the active Codex turn immediate feedback
 after a supported file edit. It inspects only paths named by that event and
-returns compact developer `additionalContext` with a stable code, path,
-severity, evidence, and repair class.
+returns compact developer `additionalContext`. Applicable source and manifest
+findings are constructed as `RepositoryDiagnosticV1` and emitted through its
+concise renderer; raw inspector or generator failures remain under
+`unadapted_diagnostics` with their existing stable code, path, severity,
+evidence, and repair class.
 
 Incremental diagnostics cover the shared top-level-function and handwritten
 line-limit rules, TypeScript and JSON parse failures, targeted workspace/service/

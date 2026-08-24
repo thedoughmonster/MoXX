@@ -35,6 +35,11 @@ test("reports shared source diagnostics for only affected files", async () => {
     assert.equal(diagnostics[0].path, "scripts/two.ts")
     assert.equal(diagnostics[0].severity, "error")
     assert.equal(diagnostics[0].repair_class, "BOUNDED_REFACTOR")
+    assert.equal(
+      diagnostics[0].repository_diagnostic?.rule_id,
+      "SOURCE_MULTIPLE_TOP_LEVEL_FUNCTIONS",
+    )
+    assert.deepEqual(diagnostics[0].repository_diagnostic?.repair, { kind: "none" })
     assert.deepEqual(diagnostics[0].evidence.actual, 2)
     assert.deepEqual(generators, ["quality"])
   } finally {

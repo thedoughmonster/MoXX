@@ -4,6 +4,8 @@ import { extname, join } from "node:path"
 import { readJson } from "../architecture/read_json.ts"
 import { inspectSourceQualityFile } from "../inspect_source_quality_file.ts"
 import type { SourceQualityPolicies } from "../source_quality_types.ts"
+import { sourceQualityDiagnostic } from
+  "../diagnostics/source_quality_diagnostic.ts"
 import type { PostWriteDiagnostic } from "./types.ts"
 import { validateChangedManifest } from "./validate_changed_manifest.ts"
 
@@ -36,6 +38,7 @@ export async function inspectChangedFile(
       message: diagnostic.message,
     },
     repair_class: diagnostic.repair_class,
+    repository_diagnostic: sourceQualityDiagnostic(diagnostic),
   }))
   if (extname(path) !== ".json") return diagnostics
   let value: unknown

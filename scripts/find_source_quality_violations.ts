@@ -6,6 +6,7 @@ import type { WorkspaceConfig } from "./architecture/types.ts"
 import { workspaceRoot } from "./architecture/paths.ts"
 import { inspectSourceQualityFile } from "./inspect_source_quality_file.ts"
 import { isSourceQualityPath } from "./is_source_quality_path.ts"
+import type { SourceQualityDiagnostic } from "./source_quality_types.ts"
 
 const generatedPrefixes = [
   ".momi/",
@@ -15,7 +16,9 @@ const generatedPrefixes = [
 ]
 
 export type SourceQualityFindings = {
+  warningDiagnostics: SourceQualityDiagnostic[]
   warnings: string[]
+  violationDiagnostics: SourceQualityDiagnostic[]
   violations: string[]
 }
 
@@ -25,7 +28,9 @@ export async function findSourceQualityFindings(
 ): Promise<SourceQualityFindings> {
   const entries = await readdir(root, { recursive: true, withFileTypes: true })
   const candidates: Array<{ normalized: string; path: string }> = []
+  const warningDiagnostics: SourceQualityDiagnostic[] = []
   const warnings: string[] = []
+  const violationDiagnostics: SourceQualityDiagnostic[] = []
   const violations: string[] = []
 
   for (const entry of entries) {
@@ -61,10 +66,20 @@ export async function findSourceQualityFindings(
       source,
       workspace.policies,
     )) {
-      if (diagnostic.severity === "advisory") warnings.push(diagnostic.message)
-      else violations.push(diagnostic.message)
+      if (diagnostic.severity === "advisory") {
+        warningDiagnostics.push(diagnostic)
+        warnings.push(diagnostic.message)
+      } else {
+        violationDiagnostics.push(diagnostic)
+        violations.push(diagnostic.message)
+      }
     }
   }
 
-  return { warnings: warnings.sort(), violations: violations.sort() }
+  return {
+    warningDiagnostics,
+    warnings: warnings.sort(),
+    violationDiagnostics,
+    violations: violations.sort(),
+  }
 }

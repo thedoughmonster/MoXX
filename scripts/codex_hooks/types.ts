@@ -1,4 +1,5 @@
 import type { SourceQualityPolicies } from "../source_quality_types.ts"
+import type { RepositoryDiagnosticV1 } from "../diagnostics/types.ts"
 import type { FixId } from "../momi_fix/types.ts"
 
 export type HookEvent = {
@@ -16,6 +17,7 @@ export type PostWriteDiagnostic = {
   severity: "advisory" | "error"
   evidence: Record<string, unknown>
   repair_class: "AUTO_FIX" | "BOUNDED_REFACTOR" | "SEMANTIC_REPAIR"
+  repository_diagnostic?: RepositoryDiagnosticV1
 }
 
 export type CanonicalGenerator = FixId

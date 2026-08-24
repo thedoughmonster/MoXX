@@ -2,7 +2,6 @@ import { readFile } from "node:fs/promises"
 import { join } from "node:path"
 
 import { workspaceRoot } from "./architecture/paths.ts"
-import { validateArchitecture } from "./architecture/validate_architecture.ts"
 import { findBaselineViolations } from
   "./constitution/find_baseline_violations.ts"
 import { findServiceConstitutionFindings } from
@@ -40,8 +39,9 @@ import { replayRoutineInventory } from
 import { replayRoutineDefinitions } from
   "./constitution/replay_routine_definitions.ts"
 import { loadLocalMigrations } from "./migrations/load_local_migrations.ts"
-
-const architecture = await validateArchitecture()
+import { renderConstitutionViolationReport } from "./diagnostics/render_constitution_violation_report.ts"
+import { validateArchitectureWithDiagnostics } from "./diagnostics/validate_architecture_with_diagnostics.ts"
+const architecture = await validateArchitectureWithDiagnostics()
 const migrations = await loadLocalMigrations(join(
   workspaceRoot,
   architecture.workspace.paths.migrations,
@@ -101,9 +101,11 @@ const violations = [
   ...lifecycleViolations,
 ]
 
-if (violations.length > 0) {
-  throw new Error(`Service constitution violations:\n- ${violations.join("\n- ")}`)
-}
+if (violations.length > 0) throw new Error(
+  "Service constitution violations:\n" + renderConstitutionViolationReport(
+    violations, [...findings, ...accessFindings], architecture.services,
+  ),
+)
 
 console.log(
   `Service constitution declarations valid: ${findings.length} exact baselined findings.`,

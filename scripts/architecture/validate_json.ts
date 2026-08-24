@@ -1,5 +1,9 @@
 import Ajv2020 from "ajv/dist/2020.js"
 
+import { manifestDiagnostic } from "../diagnostics/manifest_diagnostic.ts"
+import { RepositoryDiagnosticError } from
+  "../diagnostics/repository_diagnostic_error.ts"
+
 export function validateJson(
   schema: object,
   value: unknown,
@@ -20,5 +24,10 @@ export function validateJson(
       : error.instancePath || "/"
     return `${instancePath} ${error.message}`
   }).join("; ")
-  throw new Error(`${label}: ${details ?? "schema validation failed"}`)
+  const message = `${label}: ${details ?? "schema validation failed"}`
+  const id = (schema as { $id?: unknown }).$id
+  const schemaName = typeof id === "string" ? id.split("/").at(-1)! : "manifest schema"
+  const diagnostic = manifestDiagnostic(label, schemaName, message)
+  if (diagnostic) throw new RepositoryDiagnosticError(message, [diagnostic])
+  throw new Error(message)
 }

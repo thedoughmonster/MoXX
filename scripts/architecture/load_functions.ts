@@ -61,7 +61,11 @@ export async function loadFunctions(
         )
       }
       const manifest = rawManifest as FunctionManifest
-      validateJson(schema, manifest, `${slug}/function.json`)
+      validateJson(
+        schema,
+        manifest,
+        `services/${service.manifest.service_key}/functions/${slug}/function.json`,
+      )
       if (manifest.owner_service !== service.manifest.service_key) {
         throw new Error(`${slug}: owner_service must be ${service.manifest.service_key}`)
       }

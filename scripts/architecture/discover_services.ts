@@ -27,7 +27,7 @@ export async function discoverServices(
     const manifest = await readJson<ServiceManifest>(
       join(directory, "service.json"),
     )
-    validateJson(schema, manifest, `${entry.name}/service.json`)
+    validateJson(schema, manifest, `${servicesPath}/${entry.name}/service.json`)
     if (manifest.service_key !== entry.name) {
       throw new Error(`${entry.name}: directory and service_key must match`)
     }

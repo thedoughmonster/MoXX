@@ -1,11 +1,12 @@
-import { validateArchitecture } from "./architecture/validate_architecture.ts"
 import { findDatabaseObjectAuthorityViolations } from
   "./architecture/find_database_object_authority_violations.ts"
 import { findBroadSchemaOverlapReportViolations } from
   "./architecture/find_broad_schema_overlap_report_violations.ts"
 import { workspaceRoot } from "./architecture/paths.ts"
+import { validateArchitectureWithDiagnostics } from
+  "./diagnostics/validate_architecture_with_diagnostics.ts"
 
-const architecture = await validateArchitecture()
+const architecture = await validateArchitectureWithDiagnostics()
 const databaseAuthorityViolations = await findDatabaseObjectAuthorityViolations(
   workspaceRoot,
 )
