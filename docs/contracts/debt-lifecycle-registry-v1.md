@@ -15,11 +15,11 @@ expires within 90 days. An overdue review or expiry fails local validation.
 Changing metadata requires a new dated review while preserving the complete
 trusted-development history.
 
-The initial ordered mapping is mechanically fixed: runtime-registry,
-event-router, and dynamic-event findings map to #196 (37); remaining alerting
-or Slack findings map to #195 (24); the three exact archive/evaluation
-fingerprints map to #572; and the remaining POS/warehouse findings map to #194
-(69). The order is significant and partitions all 133 findings exactly once.
+The current ordered mapping is mechanically fixed: residual runtime-registry
+and event-router findings map to #196 (10); remaining alerting or Slack
+findings map to #195 (23); the three exact archive/evaluation fingerprints map
+to #572; and the remaining POS/warehouse findings map to #194 (61). The order
+is significant and partitions all 97 findings exactly once.
 
 A remediation removes the exact baseline fingerprint and registry reference
 in the same change that proves the private access is gone. Neither validation

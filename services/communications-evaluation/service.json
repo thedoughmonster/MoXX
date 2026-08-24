@@ -15,6 +15,7 @@
       "momi.communications.get_evaluation_queue_status.v1"
     ],
     "consumes": [
+      {"service": "runtime-registry", "contract": "momi.runtime.active_trigger_resolution.v1"},
       {"service": "model-execution-gateway", "contract": "momi.model_execution.execute.v1"}
     ]
   },
@@ -43,6 +44,7 @@
   "approved_packages": [],
   "owned_dataset": {
     "dataset_key": "momi.communication_evaluation",
+    "db_role": "svc_communications_evaluation",
     "dataset_class": "domain",
     "private_relations": [
       "momi_communications.audit_events",

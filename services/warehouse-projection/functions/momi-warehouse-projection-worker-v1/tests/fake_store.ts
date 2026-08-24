@@ -59,7 +59,11 @@ export class FakeStore implements WorkerStore {
     return Promise.resolve(this.beginOutcomes.get(messageId) ?? true)
   }
 
-  readSourceEvent(targetEventId: string): Promise<SourceEvent | null> {
+  readSourceEvent(
+    targetEventId: string,
+    _messageId: string,
+    _capabilityToken: string,
+  ): Promise<SourceEvent | null> {
     this.calls.push(`source:${targetEventId}`)
     return Promise.resolve(this.sourceEvents.get(targetEventId) ?? null)
   }

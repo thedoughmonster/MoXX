@@ -27,8 +27,35 @@ failures are handled by the separate delivery lifecycle functions.
 `momi.events.delivery_lifecycle.v1` maps the exact private routing commands
 `momi_events.begin_delivery`, `ack_delivery`, and `fail_delivery`. Repository
 checks permit consumer source to call only those mapped routine names under the
-declared provider contract. Hosted role/grant isolation is still deferred;
-routing tables are private by declaration, not yet by runtime attestation.
+declared provider contract. These commands now execute as bounded
+`SECURITY DEFINER` capabilities, with direct execution granted only to declared
+service roles that exist in migration history. Schema `USAGE` remains withheld
+until the pre-existing shared `momi_events` schema authority declaration is
+reconciled; no broad schema grant is introduced by this slice.
+
+`momi.events.delivery_reference.v1` returns immutable, reference-only event
+fields for one exact live order-alert or warehouse-projection delivery. The
+matching `momi.events.delivery_witness.v1` routines lock and attest the same
+rotating delivery capability without exposing routing tables. The order-alert
+wake authorization is fixed to its active subscription and exact queued tuple.
+
+`momi.events.warehouse_delivery_reservation.v1` owns bounded projection claim
+and reservation state inside `momi_events`. Reservations rotate capabilities,
+expire after 5 to 120 seconds, and count with live deliveries against a caller
+supplied 1 to 32 worker limit. This additive owner path preserves the disabled
+Edge rollback route while database processing remains active.
+
+`momi.events.warehouse_append.v1` appends an immutable `warehouse.*` reference
+with required entity identity and schema version 1 or 2. Exact replay returns
+the original event identity. Re-observing an unchanged canonical entity version
+also returns its first event while preserving the original occurrence and
+correlation metadata; this includes the pre-cutover type-specific `observed`
+name. Any change to its entity, source, schema, or stored reference raises a
+unique violation, as does every divergent non-entity-version replay.
+
+The database role model proves bounded DB-native capability execution. Shared
+project Edge credentials do not prove per-workload isolation; that is separate
+follow-up hardening and is not claimed by these contracts.
 
 Canonical replay events with no matching active subscriber and no delivery are
 completed set-wise. Source events, subscribed events, and running leases always

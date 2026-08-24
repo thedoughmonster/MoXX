@@ -63,7 +63,11 @@ export type WorkerStore = {
     messageId: string,
     capabilityToken: string,
   ) => Promise<boolean>
-  readSourceEvent: (eventId: string) => Promise<SourceEvent | null>
+  readSourceEvent: (
+    eventId: string,
+    messageId: string,
+    capabilityToken: string,
+  ) => Promise<SourceEvent | null>
   projectAndAcknowledgeDelivery: (
     eventId: string,
     messageId: string,

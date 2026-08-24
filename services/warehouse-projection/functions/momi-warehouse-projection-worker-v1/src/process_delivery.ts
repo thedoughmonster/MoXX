@@ -17,7 +17,11 @@ export async function processDelivery(
       return { message_id: trigger.message_id, event_id: trigger.event_id,
         outcome: "duplicate" }
     }
-    const sourceEvent = await store.readSourceEvent(trigger.event_id)
+    const sourceEvent = await store.readSourceEvent(
+      trigger.event_id,
+      trigger.message_id,
+      trigger.capability_token,
+    )
     if (!sourceEvent) throw new Error("source_event_not_found")
     if (sourceEvent.event_id !== trigger.event_id ||
         sourceEvent.source_system !== "toast" ||

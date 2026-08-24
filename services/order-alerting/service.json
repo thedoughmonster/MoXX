@@ -14,8 +14,11 @@
       "toast.order.webhook_alert_work.v1"
     ],
     "consumes": [
+      { "service": "runtime-registry", "contract": "momi.runtime.active_trigger_resolution.v1" },
       { "service": "toast-order-read-api", "contract": "momi.toast_orders.get_by_id.v1" },
       { "service": "momi-event-routing", "contract": "momi.events.delivery_lifecycle.v1" },
+      { "service": "momi-event-routing", "contract": "momi.events.delivery_reference.v1" },
+      { "service": "momi-event-routing", "contract": "momi.events.delivery_witness.v1" },
       { "service": "warehouse-read-api", "contract": "momi.orders.get_by_id.v1" },
       { "service": "warehouse-read-api", "contract": "momi.orders.get_by_version.v1" }
     ]
@@ -51,6 +54,7 @@
   "approved_packages": [],
   "owned_dataset": {
     "dataset_key": "momi.order_alerting",
+    "db_role": "svc_order_alerting",
     "dataset_class": "domain",
     "private_relations": [
       "momi_alerting.alert_routes",
@@ -59,7 +63,6 @@
       "momi_alerting.order_alert_candidates",
       "momi_alerting.order_alert_route_conditions",
       "momi_alerting.order_event_bridges",
-      "momi_alerting.order_event_cutover_readiness_v1",
       "momi_alerting.order_read_capability_uses",
       "momi_alerting.order_source_mappings",
       "momi_alerting.preorder_policies",

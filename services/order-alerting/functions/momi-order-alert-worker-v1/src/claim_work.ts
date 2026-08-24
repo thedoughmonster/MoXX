@@ -1,6 +1,4 @@
 import { sql } from "./database.ts"
-import { exactOrderContractKey, functionKey, latestOrderContractKey,
-  legacyOrderContractKey } from "./types.ts"
 import type { WorkClaim, WorkTriggerInput } from "./types.ts"
 
 export async function claimWork(
@@ -10,37 +8,15 @@ export async function claimWork(
 ): Promise<WorkClaim> {
   const rows = await sql<WorkClaim[]>`
     with target as (
-      select work.*,
-        coalesce(worker.active, false) as worker_active,
-        coalesce(api.active and api.function_type = 'read', false) as api_active,
-        api.contract_version as api_contract_version,
-        route.route_count,
-        route.route_path as api_route_path
+      select work.*, reader.contract_version as api_contract_version,
+        reader.route_path as api_route_path
       from momi_orders.api_invocation_work as work
-      left join momi_runtime.function_registry as worker
-        on worker.function_key = ${functionKey}
-      left join momi_runtime.function_registry as api
-        on api.function_key = work.api_contract_key
-      cross join lateral (
-        select count(*)::integer as route_count,
-          min(trigger.route_path) as route_path
-        from momi_runtime.function_trigger_registry as trigger
-        where trigger.function_key = work.api_contract_key
-          and trigger.contract_version = api.contract_version
-          and trigger.active
-          and trigger.trigger_type = 'durable_http'
-          and upper(trigger.http_method) = 'POST'
-          and (
-            (work.api_contract_key in (
-                ${exactOrderContractKey}, ${latestOrderContractKey})
-              and trigger.authentication_policy_key =
-                'durable.read_capability.v1')
-            or (work.api_contract_key = ${legacyOrderContractKey}
-              and trigger.authentication_policy_key =
-                'durable.work_token.v1')
-          )
-          and nullif(trigger.route_path, '') is not null
-      ) as route
+      cross join lateral
+        momi_runtime.resolve_order_alert_worker_trigger_v1() as worker
+      cross join lateral
+        momi_runtime.resolve_order_alert_reader_trigger_v1(
+          work.api_contract_key
+        ) as reader
       where work.id = ${input.work_id}::bigint
         and work.trigger_token = ${input.trigger_token}::uuid
       for update of work
@@ -54,9 +30,6 @@ export async function claimWork(
           last_error = null
       from target
       where work.id = target.id
-        and target.worker_active
-        and target.api_active
-        and target.route_count = 1
         and left(target.api_route_path, 1) = '/'
         and left(target.api_route_path, 2) <> '//'
         and (

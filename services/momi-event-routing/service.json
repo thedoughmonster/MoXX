@@ -11,9 +11,18 @@
     "provides": [
       "momi.events.append.v1",
       "momi.events.route.v1",
-      "momi.events.delivery_lifecycle.v1"
+      "momi.events.delivery_lifecycle.v1",
+      "momi.events.delivery_reference.v1",
+      "momi.events.delivery_witness.v1",
+      "momi.events.warehouse_delivery_reservation.v1",
+      "momi.events.warehouse_append.v1"
     ],
-    "consumes": []
+    "consumes": [
+      {
+        "service": "runtime-registry",
+        "contract": "momi.runtime.active_trigger_resolution.v1"
+      }
+    ]
   },
   "database": {
     "read": ["momi_events", "pgmq"],
@@ -50,32 +59,54 @@
   "owned_dataset": {
     "dataset_key": "momi.event_routing",
     "dataset_class": "operational",
+    "db_role": "svc_momi_event_routing",
     "private_relations": [
       "momi_events.deliveries",
       "momi_events.events",
       "momi_events.routing_work",
-      "momi_events.subscriptions"
+      "momi_events.subscriptions",
+      "momi_events.warehouse_delivery_reservations"
     ],
     "private_routines": [
-      "momi_events.ack_delivery", "momi_events.append_event_v1", "momi_events.begin_delivery",
+      "momi_events.ack_delivery", "momi_events.acquire_order_alert_delivery_witness_v1",
+      "momi_events.acquire_warehouse_projection_delivery_witness_v1",
+      "momi_events.append_event_v1", "momi_events.append_warehouse_event_v1",
+      "momi_events.authorize_order_alert_delivery_wake_v1", "momi_events.begin_delivery",
+      "momi_events.begin_reserved_warehouse_projection_delivery_v1",
+      "momi_events.claim_warehouse_projection_delivery_v1",
       "momi_events.claim_routing_work", "momi_events.claim_routing_work_item",
       "momi_events.enqueue_due_delivery_retries", "momi_events.enqueue_routing_work",
       "momi_events.event_message", "momi_events.fail_delivery",
       "momi_events.fail_routing_work", "momi_events.reconcile_expired_deliveries",
       "momi_events.reject_event_mutation", "momi_events.route_event",
-      "momi_events.wake_event_router"
+      "momi_events.read_order_alert_delivery_reference_v1",
+      "momi_events.read_warehouse_projection_delivery_reference_v1",
+      "momi_events.reserve_warehouse_projection_delivery_v1", "momi_events.wake_event_router"
     ],
     "public_reads": [],
     "public_commands": [
       "momi.events.delivery_lifecycle.v1",
+      "momi.events.delivery_reference.v1",
+      "momi.events.delivery_witness.v1",
       "momi.events.append.v1",
+      "momi.events.warehouse_append.v1",
+      "momi.events.warehouse_delivery_reservation.v1",
       "momi.events.route.v1"
     ],
     "public_routine_commands": [
       { "contract": "momi.events.append.v1", "routine": "momi_events.append_event_v1" },
+      { "contract": "momi.events.warehouse_append.v1", "routine": "momi_events.append_warehouse_event_v1" },
       { "contract": "momi.events.delivery_lifecycle.v1", "routine": "momi_events.ack_delivery" },
       { "contract": "momi.events.delivery_lifecycle.v1", "routine": "momi_events.begin_delivery" },
       { "contract": "momi.events.delivery_lifecycle.v1", "routine": "momi_events.fail_delivery" },
+      { "contract": "momi.events.delivery_reference.v1", "routine": "momi_events.read_order_alert_delivery_reference_v1" },
+      { "contract": "momi.events.delivery_reference.v1", "routine": "momi_events.read_warehouse_projection_delivery_reference_v1" },
+      { "contract": "momi.events.delivery_witness.v1", "routine": "momi_events.acquire_order_alert_delivery_witness_v1" },
+      { "contract": "momi.events.delivery_witness.v1", "routine": "momi_events.acquire_warehouse_projection_delivery_witness_v1" },
+      { "contract": "momi.events.delivery_witness.v1", "routine": "momi_events.authorize_order_alert_delivery_wake_v1" },
+      { "contract": "momi.events.warehouse_delivery_reservation.v1", "routine": "momi_events.claim_warehouse_projection_delivery_v1" },
+      { "contract": "momi.events.warehouse_delivery_reservation.v1", "routine": "momi_events.begin_reserved_warehouse_projection_delivery_v1" },
+      { "contract": "momi.events.warehouse_delivery_reservation.v1", "routine": "momi_events.reserve_warehouse_projection_delivery_v1" },
       { "contract": "momi.events.route.v1", "routine": "momi_events.route_event" }
     ],
     "emitted_events": []

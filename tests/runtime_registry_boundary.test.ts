@@ -10,7 +10,7 @@ type DebtFinding = {
   subject: string
 }
 
-test("keeps Runtime Registry implemented, private, and fail-closed", async () => {
+test("keeps Runtime Registry relations private and resolvers fail-closed", async () => {
   const serviceRoot = join(workspaceRoot, "services", "runtime-registry")
   const manifest = JSON.parse(await readFile(join(serviceRoot, "service.json"), "utf8"))
   const rules = await readFile(join(serviceRoot, "AGENTS.md"), "utf8")
@@ -51,18 +51,28 @@ test("keeps Runtime Registry implemented, private, and fail-closed", async () =>
     runtimeDependencies: manifest.runtime_dependencies,
     approvedPackages: manifest.approved_packages,
   }, {
-    functions: [], provides: [], consumes: [], publicReads: [],
+    functions: [], provides: ["momi.runtime.active_trigger_resolution.v1"],
+    consumes: [], publicReads: ["momi.runtime.active_trigger_resolution.v1"],
     publicCommands: [], emittedEvents: [], outboundHosts: [], secrets: [],
     configuration: [], deploymentOwns: [], deploymentDependencies: [],
     runtimeDependencies: [], approvedPackages: [],
   })
   assert.deepEqual(manifest.database, { read: ["momi_runtime"], write: ["momi_runtime"] })
   assert.equal("db_role" in manifest.owned_dataset, false)
+  assert.equal(manifest.owned_dataset.private_routines.length, 6)
+  assert.equal(manifest.owned_dataset.public_routine_reads.length, 6)
+  assert(manifest.owned_dataset.public_routine_reads.every(
+    (entry: { contract: string }) =>
+      entry.contract === "momi.runtime.active_trigger_resolution.v1",
+  ))
 
-  assert.match(`${rules}\n${readme}`, /no current public contract/u)
+  assert.match(`${rules}\n${readme}`, /momi\.runtime\.active_trigger_resolution\.v1/u)
   assert.match(readme, /availability is `not_asserted`/u)
+  assert.match(`${rules}\n${readme}`, /private implementation details/u)
+  assert.match(rules, /exact consumer-role grants/u)
+  assert.match(rules, /Do not grant schema-wide access/u)
+  assert.match(`${rules}\n${readme}`, /shared (hosted|Edge project) credentials/u)
   assert.match(`${rules}\n${readme}`, /removal-only legacy debt/u)
-  assert.match(`${rules}\n${readme}`, /authorize no new reader/u)
   assert.match(`${rules}\n${readme}`, /separately accepted versioned owner contract/u)
   assert.match(`${rules}\n${readme}`, /caller compatibility and cutover/u)
   assert.match(`${rules}\n${readme}`, /failure semantics/u)
@@ -83,13 +93,5 @@ test("keeps Runtime Registry implemented, private, and fail-closed", async () =>
 
   const findings = debt.findings.filter((finding) =>
     finding.evidence.owner_service === "runtime-registry")
-  assert.equal(findings.length, 16)
-  assert.equal(new Set(findings.map((finding) => finding.subject)).size, 13)
-  assert.equal(new Set(findings.map((finding) =>
-    finding.evidence.consumer_service)).size, 7)
-  assert.deepEqual([...new Set(findings.map((finding) =>
-    finding.evidence.relation))].sort(), [
-    "momi_runtime.function_registry",
-    "momi_runtime.function_trigger_registry",
-  ])
+  assert.deepEqual(findings, [])
 })

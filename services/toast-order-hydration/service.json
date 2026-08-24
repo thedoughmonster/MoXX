@@ -12,7 +12,7 @@
     "consumes": []
   },
   "database": {
-    "read": ["toast_hydration", "momi_runtime"],
+    "read": ["toast_hydration"],
     "write": ["toast_hydration", "toast_raw", "momi_orders"]
   },
   "network": { "outbound_hosts": ["configured:toast.api_base_url"] },

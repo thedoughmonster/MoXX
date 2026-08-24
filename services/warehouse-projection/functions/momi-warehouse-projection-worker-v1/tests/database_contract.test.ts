@@ -19,6 +19,23 @@ test("uses one capability-bound event delivery lifecycle", () => {
   assert.match(failure, /momi_events\.fail_delivery/)
   assert.match(failure, /capabilityToken.*::uuid/s)
   assert.match(reserve, /warehouse_projection\.reserve_internal_delivery/)
+  const cutover = readFileSync(new URL(
+    "../../../../../supabase/migrations/20260817185934_route_warehouse_projection_trigger_adapters_through_owner_contracts.sql",
+    import.meta.url,
+  ), "utf8")
+  assert.match(cutover,
+    /momi_events\.begin_reserved_warehouse_projection_delivery_v1/)
+  assert.doesNotMatch(cutover,
+    /from warehouse_projection\.delivery_reservations as reservation/)
+  const sourceReads = readFileSync(new URL(
+    "../../../../../supabase/migrations/20260817194640_route_warehouse_projection_through_source_owner_reads.sql",
+    import.meta.url,
+  ), "utf8")
+  assert.match(sourceReads, /toast_raw\.read_order_webhook_projection_input_v1/)
+  assert.match(sourceReads, /toast_raw\.read_resource_projection_input_v1/)
+  assert.match(sourceReads, /toast_acquisition\.read_projection_job_mode_v1/)
+  assert.doesNotMatch(sourceReads,
+    /toast_raw\.(webhook_events|webhook_subscriptions|api_request_attempts|resource_observations|resource_versions)|toast_acquisition\.jobs/)
 })
 
 test("queries the source event and invokes only the database projector", () => {
@@ -31,7 +48,9 @@ test("queries the source event and invokes only the database projector", () => {
     process,
     readSource("handle_request.ts"),
   ].join("\n")
-  assert.match(sourceEvent, /momi_events\.events/)
+  assert.match(sourceEvent,
+    /momi_events\.read_warehouse_projection_delivery_reference_v1/)
+  assert.doesNotMatch(sourceEvent, /momi_events\.events/)
   assert.match(projector, /warehouse_projection\.project_and_ack_delivery/)
   assert.ok(process.indexOf("beginDelivery") <
     process.indexOf("readSourceEvent"))

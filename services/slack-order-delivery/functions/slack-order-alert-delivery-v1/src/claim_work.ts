@@ -1,6 +1,5 @@
 import { sql } from "./database.ts"
 import { readWorkState } from "./read_work_state.ts"
-import { functionKey } from "./types.ts"
 import type { ClaimWorkResult, ClaimedWork } from "./types.ts"
 
 export async function claimWork(
@@ -20,12 +19,6 @@ export async function claimWork(
           last_error = null
       where work.id = ${workId}::bigint
         and work.trigger_token = ${triggerToken}::uuid
-        and exists (
-          select 1
-          from momi_runtime.function_registry as registry
-          where registry.function_key = ${functionKey}
-            and registry.active
-        )
         and (
           (work.status in ('pending', 'failed') and work.not_before <= now())
           or (

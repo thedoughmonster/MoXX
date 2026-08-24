@@ -42,11 +42,11 @@ test("matches the exact removal-only runtime access baseline", async () => {
   )
   const baseline = structuredClone(accessBaseline)
   const target = loadTargetAccessBaselineFingerprints()
-  assert.equal(findings.length, 133)
+  assert.equal(findings.length, 97)
   assert.equal(
     findings.filter((item) => item.rule_id === "direct_private_relation_access")
       .length,
-    129,
+    95,
   )
   assert.equal(
     findings.filter((item) => item.rule_id === "direct_private_routine_call")
@@ -55,7 +55,7 @@ test("matches the exact removal-only runtime access baseline", async () => {
   )
   assert.equal(
     findings.filter((item) => item.rule_id === "dynamic_event_name").length,
-    2,
+    0,
   )
   assert.equal(
     findings.filter((item) => item.rule_id === "dynamic_relation_identifier")

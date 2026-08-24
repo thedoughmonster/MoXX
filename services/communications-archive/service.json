@@ -17,7 +17,8 @@
       "momi.communications.capture_gateway_exchange.v1",
       "momi.communications.capture_human_message.v1",
       "momi.communications.get_gateway_exchange_receipt.v1",
-      "momi.raw_json.capture_evidence.v1"
+      "momi.raw_json.capture_evidence.v1",
+      "toast.archive.warehouse_projection_input.v1"
     ],
     "consumes": [
       { "service": "momi-event-routing", "contract": "momi.events.append.v1" }
@@ -64,11 +65,14 @@
       "momi_communications.reject_archive_item_mutation",
       "momi_events.emit_toast_resource_observation",
       "momi_events.emit_toast_webhook_event",
+      "toast_raw.read_order_webhook_projection_input_v1",
+      "toast_raw.read_resource_projection_input_v1",
       "toast_raw.has_header", "toast_raw.reject_archive_mutation",
       "toast_raw.webhook_headers_are_safe"
     ],
     "public_reads": [
-      "momi.communications.get_gateway_exchange_receipt.v1"
+      "momi.communications.get_gateway_exchange_receipt.v1",
+      "toast.archive.warehouse_projection_input.v1"
     ],
     "public_commands": [
       "momi.communications.capture_openai_message.v1",
@@ -78,7 +82,9 @@
       "momi.raw_json.capture_evidence.v1"
     ],
     "public_routine_reads": [
-      {"contract": "momi.communications.get_gateway_exchange_receipt.v1", "routine": "momi_communications.get_gateway_exchange_receipt_v1"}
+      {"contract": "momi.communications.get_gateway_exchange_receipt.v1", "routine": "momi_communications.get_gateway_exchange_receipt_v1"},
+      {"contract": "toast.archive.warehouse_projection_input.v1", "routine": "toast_raw.read_order_webhook_projection_input_v1"},
+      {"contract": "toast.archive.warehouse_projection_input.v1", "routine": "toast_raw.read_resource_projection_input_v1"}
     ],
     "public_routine_commands": [
       {"contract": "momi.communications.capture_operational_note.v1", "routine": "momi_communications.capture_operational_note_v1"},

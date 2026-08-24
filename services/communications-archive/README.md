@@ -46,6 +46,12 @@ receive replay-safe capture through the archive owner's routine; conflicting
 content under one source idempotency key is rejected. Authorized dataset owners
 will use a purpose-bound read contract only from immutable archive references.
 
+Warehouse Projection consumes `toast.archive.warehouse_projection_input.v1`
+through two fixed reads for one order webhook or resource observation. The
+contract returns only projection input owned by this archive. Execution is
+bound to the exact routines; schema-wide access and hosted workload identity
+are not introduced by this repository slice.
+
 ## Evaluation Handoff
 
 Every original source item captured through an evaluation intake contract inserts one `pending` row in

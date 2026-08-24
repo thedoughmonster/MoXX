@@ -14,7 +14,14 @@
       "momi.warehouse_projection.toast.consume.v1"
     ],
     "consumes": [
-      { "service": "momi-event-routing", "contract": "momi.events.delivery_lifecycle.v1" }
+      { "service": "runtime-registry", "contract": "momi.runtime.active_trigger_resolution.v1" },
+      { "service": "communications-archive", "contract": "toast.archive.warehouse_projection_input.v1" },
+      { "service": "momi-event-routing", "contract": "momi.events.delivery_lifecycle.v1" },
+      { "service": "momi-event-routing", "contract": "momi.events.delivery_reference.v1" },
+      { "service": "momi-event-routing", "contract": "momi.events.delivery_witness.v1" },
+      { "service": "momi-event-routing", "contract": "momi.events.warehouse_append.v1" },
+      { "service": "momi-event-routing", "contract": "momi.events.warehouse_delivery_reservation.v1" },
+      { "service": "toast-data-acquisition", "contract": "toast.acquisition.projection_job_mode.v1" }
     ]
   },
   "database": {
@@ -50,6 +57,7 @@
   "approved_packages": [],
   "owned_dataset": {
     "dataset_key": "momi.canonical_warehouse",
+    "db_role": "svc_warehouse_projection",
     "dataset_class": "domain",
     "private_relations": [
       "momi_api.employees_by_id_v1", "momi_api.menu_entities_by_id_v1",
@@ -114,6 +122,7 @@
       "warehouse.order.archived",
       "warehouse.order.observed",
       "warehouse.order.reconciled",
+      "warehouse.entity.observed",
       "warehouse.menu_entity.observed", "warehouse.stock.observed", "warehouse.stock_snapshot.observed"
     ]
   }

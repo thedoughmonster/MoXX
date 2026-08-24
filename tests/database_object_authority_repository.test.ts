@@ -32,7 +32,7 @@ test("keeps the five authority layers disjoint and exact", () => {
     item.scope.kind === "historical_broad_migration_debt")
   const exact = authority.runtime_compatibility.filter((item) =>
     item.scope.kind === "exact_object")
-  assert.equal(broad.length, 83)
+  assert.equal(broad.length, 82)
   assert.equal(exact.length, 3)
   assert(authority.objects.every((item) => item.identity.class !== "sequence"))
   assert(!authority.objects.some((item) =>

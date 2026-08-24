@@ -33,7 +33,7 @@ test("covers every accepted fingerprint with the accepted issue partition", () =
       `#${record.remediation_issue}`,
       record.fingerprints.length,
     ])),
-    { "#194": 69, "#195": 24, "#196": 37, "#572": 3 },
+    { "#194": 61, "#195": 23, "#196": 10, "#572": 3 },
   )
 })
 

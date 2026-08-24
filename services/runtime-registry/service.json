@@ -8,7 +8,10 @@
   "lifecycle_status": "active",
   "implementation_status": "implemented",
   "functions": [],
-  "contracts": { "provides": [], "consumes": [] },
+  "contracts": {
+    "provides": ["momi.runtime.active_trigger_resolution.v1"],
+    "consumes": []
+  },
   "database": { "read": ["momi_runtime"], "write": ["momi_runtime"] },
   "network": { "outbound_hosts": [] },
   "secrets": [],
@@ -25,7 +28,23 @@
       "momi_runtime.function_registry",
       "momi_runtime.function_trigger_registry"
     ],
-    "public_reads": [],
+    "private_routines": [
+      "momi_runtime.resolve_communications_evaluation_trigger_v1",
+      "momi_runtime.resolve_event_router_trigger_v1",
+      "momi_runtime.resolve_order_alert_reader_trigger_v1",
+      "momi_runtime.resolve_order_alert_worker_trigger_v1",
+      "momi_runtime.resolve_slack_order_delivery_trigger_v1",
+      "momi_runtime.resolve_warehouse_projection_trigger_v1"
+    ],
+    "public_reads": ["momi.runtime.active_trigger_resolution.v1"],
+    "public_routine_reads": [
+      {"contract": "momi.runtime.active_trigger_resolution.v1", "routine": "momi_runtime.resolve_communications_evaluation_trigger_v1"},
+      {"contract": "momi.runtime.active_trigger_resolution.v1", "routine": "momi_runtime.resolve_event_router_trigger_v1"},
+      {"contract": "momi.runtime.active_trigger_resolution.v1", "routine": "momi_runtime.resolve_order_alert_reader_trigger_v1"},
+      {"contract": "momi.runtime.active_trigger_resolution.v1", "routine": "momi_runtime.resolve_order_alert_worker_trigger_v1"},
+      {"contract": "momi.runtime.active_trigger_resolution.v1", "routine": "momi_runtime.resolve_slack_order_delivery_trigger_v1"},
+      {"contract": "momi.runtime.active_trigger_resolution.v1", "routine": "momi_runtime.resolve_warehouse_projection_trigger_v1"}
+    ],
     "public_commands": [],
     "emitted_events": []
   }

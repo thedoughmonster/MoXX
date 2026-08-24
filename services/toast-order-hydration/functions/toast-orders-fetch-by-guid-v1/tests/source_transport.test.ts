@@ -76,8 +76,8 @@ test("uses source-neutral runtime and order work contracts", async () => {
     readFile(new URL("../src/persist_order_response.ts", import.meta.url), "utf8"),
   ])
 
-  assert.match(claimSource, /momi_runtime\.function_registry/)
-  assert.match(claimSource, /momi_runtime\.function_trigger_registry/)
+  assert.doesNotMatch(claimSource, /momi_runtime\.function_registry/)
+  assert.doesNotMatch(claimSource, /momi_runtime\.function_trigger_registry/)
   assert.doesNotMatch(claimSource, /toast_hydration\.function_registry/)
   assert.match(persistenceSource, /momi_orders\.api_invocation_work/)
 

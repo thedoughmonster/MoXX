@@ -25,7 +25,8 @@ retry, dead-letter, duplicate, or failed outcome.
 ## Durable Flow
 
 1. Claim the exact event/message/token with `momi_events.begin_delivery`.
-2. Re-read and validate the source event in `momi_events.events`.
+2. Re-read and validate the source event through the Event Routing owner
+   contract.
 3. Atomically project and acknowledge the locked delivery in the database.
 4. Accept projected, acquisition, menu-gate, and explicit `ignored_*` outcomes.
 5. Reserve at most one next exact delivery after acknowledgement.
@@ -66,6 +67,6 @@ delivery capability authenticates and scopes each wake.
 
 ## Tests
 
-Tests cover stale capabilities, exact delivery identity, projection success,
-explicit ignored outcomes, retry, and dead-letter results. Run
+Tests cover stale capabilities, exact delivery identity, source-system fencing,
+projection success, explicit ignored outcomes, retry, and dead-letter results. Run
 `npm run check -- --service warehouse-projection` from the repository root.

@@ -28,6 +28,11 @@ Each source request inserts its archive attempt before transport and may
 finalize that attempt exactly once. Completed attempts, resource versions, and
 observations remain immutable.
 
+Warehouse Projection consumes `toast.acquisition.projection_job_mode.v1` to
+read the mode for one exact acquisition job. The owner contract exposes no
+other job state and grants only exact routine execution; schema-wide access and
+hosted workload identity remain outside this repository slice.
+
 Recurring schedules initialize interval work as due immediately. Daily and
 monthly work initializes at its next configured wall-clock time in the row's
 time zone, so activation cannot release an accumulated startup backlog.

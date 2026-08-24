@@ -9,7 +9,9 @@
   "functions": ["slack-order-alert-delivery-v1"],
   "contracts": {
     "provides": ["momi.slack.order_alert.deliver.v1"],
-    "consumes": []
+    "consumes": [
+      { "service": "runtime-registry", "contract": "momi.runtime.active_trigger_resolution.v1" }
+    ]
   },
   "database": {
     "read": ["momi_runtime", "momi_alerting"],
@@ -33,6 +35,7 @@
   "approved_packages": [],
   "owned_dataset": {
     "dataset_key": "momi.slack_delivery",
+    "db_role": "svc_slack_order_delivery",
     "dataset_class": "operational",
     "private_relations": [
       "momi_alerting.slack_delivery_attempts",

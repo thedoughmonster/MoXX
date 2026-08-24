@@ -36,7 +36,7 @@ test("uses only source-neutral durable state namespaces", async () => {
 
   assert.doesNotMatch(combined, /toast_alerting|toast_hydration/)
   assert.match(combined, /momi_alerting\.slack_delivery_work/)
-  assert.match(combined, /momi_runtime\.function_registry/)
+  assert.doesNotMatch(combined, /momi_runtime\.function_registry/)
 })
 
 test("declares the source-neutral Slack delivery contract", async () => {

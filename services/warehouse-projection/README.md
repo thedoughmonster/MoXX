@@ -24,15 +24,16 @@ commits the 120-second lease. A run stops after six deliveries or 60 seconds.
 
 An `edge`/`database` processor fence prevents new Edge reservations during the
 cutover. The delivery trigger, Edge route, and HTTP recovery job are inactive;
-the deployed Edge function remains available for rollback. Toast webhook
+the deployed Edge function remains available for rollback after the setting is
+returned to `edge`. Toast webhook
 ingestion and Toast API acquisition keep their existing HTTP contracts.
 
 ## Delivery Lifecycle
 
 1. `begin_delivery` must match the exact event, message, and token. It increments
    the attempt count and starts the existing 120-second lease.
-2. After the claim commits, the procedure validates the source event;
-   `project_and_ack_delivery` locks the running delivery,
+2. After the claim commits, `project_and_ack_delivery` locks the running
+   delivery and atomically validates its Toast source reference,
    accepts only projected, acquisition, menu-gate, or explicit `ignored_*`
    outcomes, and atomically projects, deletes the queue message, and marks it
    delivered.
@@ -65,7 +66,9 @@ Menu `_reference` and `_multilocation` variants lose those source suffixes.
 Version provenance keeps the source content hash, immutable raw reference,
 observed time, and `projection_contract: canonical-resource-v2` outside the
 canonical document. These entity versions and emitted events use schema version
-2. Published menu projection remains the complete source for menu documents.
+2. Re-observation of unchanged content retains the first event occurrence and
+correlation metadata. Published menu projection remains the complete source for
+menu documents.
 
 ## Replay
 
