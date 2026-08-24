@@ -87,3 +87,12 @@ functions that declare them. Hosted values must never be committed.
 
 Run `pnpm check -- --service all` with Node.js 24. Archive verification also
 requires a checksum-valid clean restore using the pinned PostgreSQL 17 tools.
+
+## Deterministic Repairs
+
+Run an explicitly registered generator with `pnpm momi-fix run <fix-id>`.
+The closed IDs are `catalog`, `quality`, `debt-lifecycle`, and
+`legacy-access-report`. The command reports the delegated package script,
+separate validation command, and content-changed paths; it fails if the
+generator writes outside its declared output. Run the reported validation
+command afterward because generation is not validation evidence.

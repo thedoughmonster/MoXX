@@ -26,6 +26,7 @@
     "legacy-access-report:generate": "node scripts/generate_legacy_access_governance_report.ts",
     "legacy-access-report:check": "node scripts/check_legacy_access_governance_report.ts",
     "momi-check": "node scripts/run_check_changed.ts",
+    "momi-fix": "node scripts/run_momi_fix.ts",
     "momi-impact": "node scripts/run_impact_plan.ts",
     "momi-receipt": "node scripts/run_receipt_summarize.ts",
     "local:db-export": "node local-tools/postgres-nas-export/export.ts",

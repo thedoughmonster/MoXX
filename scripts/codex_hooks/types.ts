@@ -1,4 +1,5 @@
 import type { SourceQualityPolicies } from "../source_quality_types.ts"
+import type { FixId } from "../momi_fix/types.ts"
 
 export type HookEvent = {
   cwd?: unknown
@@ -17,7 +18,7 @@ export type PostWriteDiagnostic = {
   repair_class: "AUTO_FIX" | "BOUNDED_REFACTOR" | "SEMANTIC_REPAIR"
 }
 
-export type CanonicalGenerator = "catalog" | "quality"
+export type CanonicalGenerator = FixId
 
 export type GeneratorResult = {
   changed: boolean
