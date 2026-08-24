@@ -19,9 +19,9 @@ const architecture = {
   ],
 } as unknown as Architecture
 
-test("repository-only plans use a path gate and deploy nothing", () => {
+test("Dependabot configuration uses a path gate and deploys nothing", () => {
   const plan = buildImpactPlan(
-    ["docs/deployment.md", "scripts/dev_loop/hash_text.ts"],
+    [".github/dependabot.yml"],
     architecture,
     new Map(),
   )
@@ -63,9 +63,9 @@ test("migration plans select official DB flow then owner-only services", () => {
 })
 
 test("unknown impact fails closed into the full gate", () => {
-  const plan = buildImpactPlan(["unexpected.bin"], architecture, new Map())
+  const plan = buildImpactPlan([".github/unclassified.yml"], architecture, new Map())
   assert.equal(plan.final_gate.kind, "full")
-  assert.deepEqual(plan.classifications.unknown, ["unexpected.bin"])
+  assert.deepEqual(plan.classifications.unknown, [".github/unclassified.yml"])
 })
 
 test("required job success wins over benign aggregate lag", () => {

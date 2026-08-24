@@ -17,6 +17,13 @@ test("classifies OpenHands harness files as tooling impact", () => {
   )
 })
 
+test("classifies native Dependabot configuration as tooling impact", () => {
+  assert.equal(
+    classifyPath(".github/dependabot.yml"),
+    "repository_tooling",
+  )
+})
+
 test("classifies local operator tools as repository tooling", () => {
   assert.equal(
     classifyPath("local-tools/preorder-config/main.ts"),
