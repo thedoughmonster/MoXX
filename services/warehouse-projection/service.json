@@ -21,7 +21,8 @@
       { "service": "momi-event-routing", "contract": "momi.events.delivery_witness.v1" },
       { "service": "momi-event-routing", "contract": "momi.events.warehouse_append.v1" },
       { "service": "momi-event-routing", "contract": "momi.events.warehouse_delivery_reservation.v1" },
-      { "service": "toast-data-acquisition", "contract": "toast.acquisition.projection_job_mode.v1" }
+      { "service": "toast-data-acquisition", "contract": "toast.acquisition.projection_job_mode.v1" },
+      { "service": "toast-data-acquisition", "contract": "toast.acquisition.stock_snapshot_projection_job.v1" }
     ]
   },
   "database": {

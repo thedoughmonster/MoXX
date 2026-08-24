@@ -27,7 +27,7 @@ implementation status is rendered explicitly and is never inferred.
 | `slack-order-delivery` | active | unclassified | not_asserted | `momi.slack.order_alert.deliver.v1` | `slack-order-alert-delivery-v1` | none |
 | `square-payment-acquisition` | active | implemented | not_asserted | `square.payment.retrieve.v1`, `square.payment.webhook.authenticate.v1` | none | none |
 | `square-payment-delivery` | active | implemented | not_asserted | `square.payment.execute.v1`, `square.payment.refund.v1` | none | none |
-| `toast-data-acquisition` | active | unclassified | not_asserted | `toast.acquisition.projection_job_mode.v1`, `toast.data.acquisition.v1` | `toast-data-acquisition-v1` | `cron_job:momi-toast-acquisition-due-v1`, `cron_job:momi-toast-acquisition-wakeup-v1`, `cron_job:momi-toast-attempt-reconciliation-v1` |
+| `toast-data-acquisition` | active | unclassified | not_asserted | `toast.acquisition.projection_job_mode.v1`, `toast.acquisition.stock_snapshot_projection_job.v1`, `toast.data.acquisition.v1` | `toast-data-acquisition-v1` | `cron_job:momi-toast-acquisition-due-v1`, `cron_job:momi-toast-acquisition-wakeup-v1`, `cron_job:momi-toast-attempt-reconciliation-v1` |
 | `toast-order-hydration` | retiring | unclassified | not_asserted | `toast.orders.fetch_by_guid.v1` | `toast-orders-fetch-by-guid-v1` | none |
 | `toast-order-ingest` | active | unclassified | not_asserted | `toast.orders.webhook_ingest.v1` | `toast-orders-webhook-ingest-v1` | none |
 | `toast-order-read-api` | retiring | implemented | not_asserted | `momi.toast_orders.get_by_id.v1` | `momi-toast-orders-get-by-id-v1` | none |

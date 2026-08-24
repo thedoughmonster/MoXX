@@ -28,13 +28,19 @@ test("stock polling emits one source event per archived response job", () => {
 })
 
 test("one batch projection groups item observations and emits one DM event", () => {
-  const projection = readMigration("project_batched_stock_snapshots")
+  const foundation = readMigration("project_batched_stock_snapshots")
+  const projection = readMigration("cut_stock_snapshot_to_owner_contracts")
   const routing = readMigration("route_batched_stock_snapshots")
-  assert.match(projection, /add column snapshot_id uuid/)
+  assert.match(foundation, /add column snapshot_id uuid/)
   assert.match(projection,
-    /project_toast_stock_observation\([\s\S]*source_attempt\.job_id = p_job_id/)
+    /project_toast_stock_observation\([\s\S]*projection_eligible/)
+  assert.match(projection, /read_stock_snapshot_observations_v1/)
+  assert.match(projection, /read_stock_snapshot_projection_job_v1/)
+  assert.match(projection, /append_warehouse_event_v1/)
   assert.match(projection, /warehouse\.stock_snapshot\.observed/)
   assert.match(projection, /'snapshot_id', canonical_snapshot_id/)
+  assert.doesNotMatch(projection,
+    /toast_raw\.(api_request_attempts|resource_observations|resource_versions)|toast_acquisition\.jobs|momi_events\.events/)
   assert.match(routing, /project_toast_stock_snapshot/)
 })
 

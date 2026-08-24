@@ -23,7 +23,7 @@ test("indexes the bounded canonical corpus and preserves absent authority", asyn
     { grants: {} },
   )
   assert.equal(Object.keys(context.manifests).length, 29)
-  assert.equal(context.debt.findings.length, 87)
+  assert.equal(context.debt.findings.length, 82)
   assert.deepEqual(context.executions, {})
   assert.deepEqual(
     await findServiceAuthorityBindingViolations(architecture.services), [],
@@ -40,8 +40,8 @@ test("indexes the bounded canonical corpus and preserves absent authority", asyn
   } as unknown as ServiceAuthorityBinding
   const debt = findServiceAuthorityBindingDebtDiagnostics(binding, context)
   assert.equal(debt.filter((item) =>
-    item.code === "debt_reference_incomplete").length, 30)
-  assert(debt.some((item) => item.target ===
+    item.code === "debt_reference_incomplete").length, 25)
+  assert(!debt.some((item) => item.target ===
     "sha256:029e81ce343fd3419c41d992f0c9bd0bcf8f50e2e9659a18fba45787619db579"))
   assert(debt.some((item) => item.target ===
     "sha256:fc97a449e359076b996aa44c214287226cdafe3049c8a6eb39c2277dca97110a"))

@@ -47,10 +47,11 @@ content under one source idempotency key is rejected. Authorized dataset owners
 will use a purpose-bound read contract only from immutable archive references.
 
 Warehouse Projection consumes `toast.archive.warehouse_projection_input.v1`
-through two fixed reads for one order webhook or resource observation. The
-contract returns only projection input owned by this archive. Execution is
-bound to the exact routines; schema-wide access and hosted workload identity
-are not introduced by this repository slice.
+through fixed reads for one order webhook, resource observation, or stock
+snapshot job. Snapshot reads expose only the latest successful finished array
+attempt timing and the complete stock-observation identity set with projection
+eligibility and item identifiers. Execution is bound to the exact routines;
+schema-wide access and hosted workload identity are not introduced.
 
 ## Evaluation Handoff
 
