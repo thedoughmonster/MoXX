@@ -7,6 +7,10 @@ own hosted development migration and Edge Function deployment.
 ## Publish and validate
 
 1. Work in one isolated feature worktree from exact current `dev`.
+   Refresh the tracking ref with
+   `git fetch origin refs/heads/dev:refs/remotes/origin/dev`; a narrowed
+   `git fetch origin dev` updates `FETCH_HEAD` only and is not a freshness
+   precondition.
 2. Run `pnpm momi-check changed` while iterating.
 3. Commit, push, and open one draft PR to `dev` with exactly one owning issue and
    `Disposition: partial|complete`.
