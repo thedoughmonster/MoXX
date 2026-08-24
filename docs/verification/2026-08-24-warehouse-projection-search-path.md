@@ -45,6 +45,17 @@ delivery transaction boundaries, and projection/failure output stay unchanged.
 The executable test contract is
 `tests/warehouse_projection_search_path_postgres.test.ts`.
 
+## MOX-188 implementation contract
+
+Migration `20260824152706_pin_warehouse_projection_batch_search_path.sql`
+fails closed unless the prior source hash, null `proconfig`, postgres owner,
+owner-only ACL, and exact cron identity match. It preserves the row's current
+activation state, then replaces only the
+procedure body with the selected guard and verifies the new source hash plus
+the same protected metadata. The durable lint 0011 result remains the expected
+`proconfig`-only exception described above. Rollback restores the captured
+prior body with `CREATE OR REPLACE PROCEDURE`; no ACL or cron rollback is needed.
+
 ## Exact MOX-188 correction
 
 - Replace decision D-2 and AC-1's attached fixed-path requirement with the
