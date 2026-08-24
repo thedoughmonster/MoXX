@@ -41,7 +41,7 @@ const groups: Array<[string, string, string[]]> = [
   ["existing_public_contract", "momi.events.append.v1", ["sha256:599e583a358067a25d35cbb0d2a27faba1cb47796044e1f7e93789257582a44a"]],
   ["missing_owner_contract", "proposal:event_exact_delivery_lifecycle", ["sha256:51196ed750600fa97fbf6fbcd3f27c32d22da9f325a8c9da1c7c7b7298ddf8a9", "sha256:496e0e7dc9c46fe33eca0e88033c943c230e3d4b4dcc86ab1a6b1439215027d0"]],
   ["missing_owner_contract", "proposal:event_exact_delivery_reference_read", ["sha256:ccf7b66c847cfb2c7810ffd01d62dbd2048ce09c33afae1617c73cae43b71b88", "sha256:4333db468efbb05539a0aa2cc793257acc6b5623f6e70fc8389ebd8828ddf426"]],
-  ["missing_owner_contract", "proposal:event_exact_warehouse_append", ["sha256:4b0241d8f448da563a65e347b8eb5ade29ecc2745b5017b9efa4ad4b1a1c1c91", "sha256:3e000bd8611227c83d9c9739d3ebab48bc514d8f9027eebd800ba18bc4c99f33", "sha256:d32c2a4199b3b32d392a48de659b6f6220c149287e02648e3bcd982192119403"]],
+  ["missing_owner_contract", "proposal:event_exact_warehouse_append", ["sha256:4b0241d8f448da563a65e347b8eb5ade29ecc2745b5017b9efa4ad4b1a1c1c91", "sha256:d32c2a4199b3b32d392a48de659b6f6220c149287e02648e3bcd982192119403"]],
 ]
 const expected = new Map(groups.flatMap(([disposition, proposed_target, fingerprints]) =>
   fingerprints.map((fingerprint) => [fingerprint, { disposition, proposed_target }])))
@@ -80,17 +80,17 @@ const checks = {
     assert.deepEqual([candidate.document_status, candidate.issue, candidate.base_sha,
       candidate.source, candidate.scope_note], ["implemented_partial", "MOX-23",
       "45c91bc4ee06ab3c476d8251f6834699ccff8e6a",
-      "docs/service-access-debt-baseline.json", "Implemented 27 of the original 35 private-access removals; the remaining 8 are intentionally deferred to separately owned follow-up work. Shared Edge credentials remain a known hardening dependency and do not prove per-service workload isolation."])
+      "docs/service-access-debt-baseline.json", "Implemented 28 of the original 35 private-access removals; the remaining 7 are intentionally deferred to separately owned follow-up work. Shared Edge credentials remain a known hardening dependency and do not prove per-service workload isolation."])
     assert.deepEqual([candidate.implemented_fingerprints,
-      candidate.remaining_fingerprints], [27, 8])
-    assert.equal(rows.length, 8)
-    assert.equal(new Set(rows.map((row) => row.fingerprint)).size, 8)
-    assert.deepEqual(groups.map((group) => group[2].length), [1, 2, 2, 3])
-    assert.equal(expected.size, 8)
+      candidate.remaining_fingerprints], [28, 7])
+    assert.equal(rows.length, 7)
+    assert.equal(new Set(rows.map((row) => row.fingerprint)).size, 7)
+    assert.deepEqual(groups.map((group) => group[2].length), [1, 2, 2, 2])
+    assert.equal(expected.size, 7)
     for (const row of rows) assert.deepEqual(
       { disposition: row.disposition, proposed_target: row.proposed_target },
       expected.get(row.fingerprint), row.fingerprint)
-    assert.deepEqual(candidate.summary, { fingerprints: 8, virtual_subjects:
+    assert.deepEqual(candidate.summary, { fingerprints: 7, virtual_subjects:
       new Set(rows.map((row) => row.subject)).size, physical_sources:
       new Set(rows.map((row) => row.physical_source)).size, consumers:
       new Set(rows.map((row) => row.consumer_service)).size,
@@ -115,7 +115,7 @@ test("regenerates exact evidence and validates active origins", () => {
       Number(finding.evidence.reference_count)])
   }
   checks.assertOrigins(inventory.findings, origins)
-  assert.equal(baseline.findings.length, 87)
+  assert.equal(baseline.findings.length, 82)
 })
 test("rejects duplicate rows and arbitrary targets", () => {
   checks.assertInventory(inventory)

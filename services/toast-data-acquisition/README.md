@@ -33,6 +33,11 @@ read the mode for one exact acquisition job. The owner contract exposes no
 other job state and grants only exact routine execution; schema-wide access and
 hosted workload identity remain outside this repository slice.
 
+Stock-snapshot projection consumes the separate
+`toast.acquisition.stock_snapshot_projection_job.v1` read. It returns exactly
+the job ID, operation key, status, mode, and restaurant GUID needed to enforce
+the projection boundary without exposing the private jobs relation.
+
 Recurring schedules initialize interval work as due immediately. Daily and
 monthly work initializes at its next configured wall-clock time in the row's
 time zone, so activation cannot release an accumulated startup backlog.

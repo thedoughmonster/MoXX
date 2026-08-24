@@ -6,6 +6,10 @@ const migration = await readFile(new URL(
   "../../../../../supabase/migrations/20260817185245_add_momi_event_owner_contracts.sql",
   import.meta.url,
 ), "utf8")
+const replayCompatibility = await readFile(new URL(
+  "../../../../../supabase/migrations/20260824153734_accept_legacy_staged_menu_warehouse_append_replay.sql",
+  import.meta.url,
+), "utf8")
 const manifest = JSON.parse(await readFile(new URL(
   "../../../service.json",
   import.meta.url,
@@ -92,6 +96,10 @@ test("warehouse append has bounded identity and replay", () => {
   assert.match(migration, /'warehouse\.' \|\| p_entity_type \|\| '\.observed'/)
   assert.match(migration, /warehouse event append replay conflicts/)
   assert.match(migration, /errcode = '23505'/)
+  assert.match(replayCompatibility, /warehouse\.menu_entity\.observed/)
+  for (const type of ["menu", "menu_group", "menu_item", "modifier_group",
+    "modifier_option"]) assert.match(replayCompatibility, new RegExp(`'${type}'`))
+  assert.doesNotMatch(replayCompatibility, /grant\s/i)
 })
 
 test("lifecycle and new contracts use bounded definer grants", () => {

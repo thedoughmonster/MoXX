@@ -67,6 +67,8 @@
       "momi_events.emit_toast_webhook_event",
       "toast_raw.read_order_webhook_projection_input_v1",
       "toast_raw.read_resource_projection_input_v1",
+      "toast_raw.read_stock_snapshot_attempt_v1",
+      "toast_raw.read_stock_snapshot_observations_v1",
       "toast_raw.has_header", "toast_raw.reject_archive_mutation",
       "toast_raw.webhook_headers_are_safe"
     ],
@@ -84,7 +86,9 @@
     "public_routine_reads": [
       {"contract": "momi.communications.get_gateway_exchange_receipt.v1", "routine": "momi_communications.get_gateway_exchange_receipt_v1"},
       {"contract": "toast.archive.warehouse_projection_input.v1", "routine": "toast_raw.read_order_webhook_projection_input_v1"},
-      {"contract": "toast.archive.warehouse_projection_input.v1", "routine": "toast_raw.read_resource_projection_input_v1"}
+      {"contract": "toast.archive.warehouse_projection_input.v1", "routine": "toast_raw.read_resource_projection_input_v1"},
+      {"contract": "toast.archive.warehouse_projection_input.v1", "routine": "toast_raw.read_stock_snapshot_attempt_v1"},
+      {"contract": "toast.archive.warehouse_projection_input.v1", "routine": "toast_raw.read_stock_snapshot_observations_v1"}
     ],
     "public_routine_commands": [
       {"contract": "momi.communications.capture_operational_note.v1", "routine": "momi_communications.capture_operational_note_v1"},

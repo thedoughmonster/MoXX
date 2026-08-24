@@ -15,13 +15,13 @@ test("projects the accepted current dev service graph exactly", async () => {
     (service) => service.manifest.contracts.provides,
   )
   assert.equal(graph.nodes.length, 29)
-  assert.equal(graph.edges.length, 42)
-  assert.equal(new Set(provided).size, 75)
-  assert.equal(provided.length, 75)
+  assert.equal(graph.edges.length, 43)
+  assert.equal(new Set(provided).size, 76)
+  assert.equal(provided.length, 76)
   assert.equal(new Set(graph.nodes.map((node) => node.service_key)).size, 29)
   assert.equal(new Set(graph.edges.map((edge) => canonicalJson([
     edge.provider, edge.consumer, edge.contract,
-  ]))).size, 42)
+  ]))).size, 43)
   for (const edge of graph.edges) {
     const consumer = architecture.services.find(
       (service) => service.manifest.service_key === edge.consumer,

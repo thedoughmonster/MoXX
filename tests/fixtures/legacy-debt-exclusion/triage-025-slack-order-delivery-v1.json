@@ -9,15 +9,15 @@
   "baseline": {
     "path": "docs/service-access-debt-baseline.json",
     "schema_version": "service-access-debt-baseline/v1",
-    "git_blob": "e18216dd44e5b82781c7cf1a0a7cbc6782d48e1d",
-    "sha256": "8831b74260af4662894984648dcd3e0b0599a299d3f82a7484e2ee6110f5fb14",
+    "git_blob": "c0db86de330cae544f8ab66f063cc7f2e24d13a9",
+    "sha256": "f08e391db08bca99e7492b3e9833a9be301cfd777a38afda619291c81c5924b4",
     "finding_fingerprint": "sha256:e8f2b38c88970a40a8e77dd0b9e053f365714a04093c6fae53f826a11211d0d2"
   },
   "report": {
     "path": "docs/legacy-access-governance-report.json",
     "schema_version": "legacy-access-governance-report/v1",
-    "findings_sha256": "c248a8e5e647a050eaff2a5ee51c1f0a2e5bb49c9c269044e28786d282d1c799",
-    "report_digest": "8fc4b3d5017e4c306f465514731ffaacb240528af1045967ed71864105e70ec4",
+    "findings_sha256": "e3bb14592df86dcc5fc83aa6656e51516d8a8acd06c2089754e8e3535d2c1cf0",
+    "report_digest": "bbccba1704d94392aac0886a0ec896883397cec8452c02fc0d1ca5f6cc5d22ae",
     "expected_projection": {
       "fingerprint": "sha256:e8f2b38c88970a40a8e77dd0b9e053f365714a04093c6fae53f826a11211d0d2",
       "rule_version": 1,
@@ -35,5 +35,5 @@
   "positive_control_pointer": "/database/read/0",
   "negative_debt_pointer": "/database/read/0",
   "negative_control_pointer": "/database/read/1",
-  "fixture_digest": "9f2b93e14e3a77b5a329e6288891abb137355fc9e657a48672b1229d8f74558f"
+  "fixture_digest": "68f4369b50757320179587dd6d519c6ddb11debee9279e4b388ee56d1198a989"
 }

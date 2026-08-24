@@ -91,6 +91,11 @@ Its current direct read of the event router's private event relation remains
 fingerprinted transition debt. Removing that read requires an owner-provided
 event contract; the manifest does not convert the private table into one.
 
+Stock-snapshot projection uses exact Communications Archive and Toast Data
+Acquisition reads, then appends its single batch event through
+`momi.events.warehouse_append.v1`. It does not read those owners' private
+relations or write the Event Routing table directly.
+
 ## Legacy Recipe Staging
 
 `legacy-recipe-transform` owns the private `legacy_recipe_staging` preservation
