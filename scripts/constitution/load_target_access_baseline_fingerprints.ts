@@ -7,8 +7,9 @@ import { accessBootstrapFingerprints } from
 
 const baselinePath = "docs/service-access-debt-baseline.json"
 const bootstrapBase = "fafe25dfac85e2d119dcb641821e59913558070d"
-export function loadTargetAccessBaselineFingerprints(): Set<string> {
-  const ref = process.env.MOMI_DEV_REF ?? "origin/dev"
+export function loadTargetAccessBaselineFingerprints(
+  ref = process.env.MOMI_DEV_REF ?? "origin/dev",
+): Set<string> {
   if (ref !== "origin/dev" && !/^[0-9a-f]{40}$/.test(ref)) {
     throw new Error("MOMI_DEV_REF must be origin/dev or a full commit SHA")
   }

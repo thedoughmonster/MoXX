@@ -22,12 +22,16 @@ import { workspaceRoot } from "../scripts/architecture/paths.ts"
 import { loadTargetAccessBaselineFingerprints } from
   "../scripts/constitution/load_target_access_baseline_fingerprints.ts"
 
-const revision = "ff54beed51df9c75e25ec7eb8b5484fcb35e0769"
+const fixture = await readJson<{
+  revision: string; trusted_baseline_revision: string
+}>(join(workspaceRoot, "tests", "fixtures", "broad-schema-overlap-report",
+  "accepted-revision.json"))
+const revision = fixture.revision
 
 test("generation cannot alter database object authority", async () => {
   const before = buildDatabaseObjectAuthority(workspaceRoot, revision)
   const report = await buildCurrentBroadSchemaOverlapReport(
-    workspaceRoot, revision,
+    workspaceRoot, revision, fixture.trusted_baseline_revision,
   )
   const after = buildDatabaseObjectAuthority(workspaceRoot, revision)
   assert.deepEqual(after, before)
@@ -51,8 +55,10 @@ test("forged authority digest and null concrete kind cannot publish", async () =
   result.authority.authority_digest = "0".repeat(64)
   assert.throws(() => buildBroadSchemaOverlapReport(result.authority,
     authoritySchema, source.legacy_debt.source, baselineSchema,
-    loadTargetAccessBaselineFingerprints()), /source_digest_drift/)
-  const report = await buildCurrentBroadSchemaOverlapReport(workspaceRoot, revision)
+    loadTargetAccessBaselineFingerprints(fixture.trusted_baseline_revision)),
+  /source_digest_drift/)
+  const report = await buildCurrentBroadSchemaOverlapReport(
+    workspaceRoot, revision, fixture.trusted_baseline_revision)
   const index = report.rows.findIndex((row) => row.exact_relation !== null)
   report.rows[index]!.relation_kind = null
   report.report_digest = calculateBroadSchemaOverlapReportDigest(report)
@@ -68,7 +74,7 @@ test("forged authority digest and null concrete kind cannot publish", async () =
 
 test("strict Execution Authority schemas reject reports", async () => {
   const report = await buildCurrentBroadSchemaOverlapReport(
-    workspaceRoot, revision,
+    workspaceRoot, revision, fixture.trusted_baseline_revision,
   )
   for (const name of ["execution-authority-v1.schema.json",
     "execution-authority-v2.schema.json"]) {

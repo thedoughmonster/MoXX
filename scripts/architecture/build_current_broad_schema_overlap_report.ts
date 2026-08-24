@@ -15,6 +15,7 @@ import { readJson } from "./read_json.ts"
 export async function buildCurrentBroadSchemaOverlapReport(
   root: string,
   revision = "HEAD",
+  trustedBaselineRevision?: string,
 ): Promise<BroadSchemaOverlapReport> {
   const result = buildDatabaseObjectAuthority(root, revision)
   if (result.diagnostics.length > 0) {
@@ -29,5 +30,5 @@ export async function buildCurrentBroadSchemaOverlapReport(
   ))
   return buildBroadSchemaOverlapReport(result.authority, authoritySchema,
     source.legacy_debt.source, baselineSchema,
-    loadTargetAccessBaselineFingerprints())
+    loadTargetAccessBaselineFingerprints(trustedBaselineRevision))
 }

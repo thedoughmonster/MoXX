@@ -1,5 +1,6 @@
 {
   "revision": "ff54beed51df9c75e25ec7eb8b5484fcb35e0769",
+  "trusted_baseline_revision": "ff54beed51df9c75e25ec7eb8b5484fcb35e0769",
   "counts": {
     "broad_declarations": 83,
     "rows": 635,

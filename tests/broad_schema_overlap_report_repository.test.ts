@@ -21,7 +21,8 @@ import { workspaceRoot } from "../scripts/architecture/paths.ts"
 import { canonicalJson } from "../scripts/dev_loop/canonical_json.ts"
 import { loadTargetAccessBaselineFingerprints } from
   "../scripts/constitution/load_target_access_baseline_fingerprints.ts"
-const fixture = await readJson<{ revision: string; counts: Record<string, number>;
+const fixture = await readJson<{ revision: string; trusted_baseline_revision: string;
+  counts: Record<string, number>;
   input_digest: string; report_digest: string; sentinels: string[][] }>(join(
     workspaceRoot, "tests", "fixtures", "broad-schema-overlap-report",
     "accepted-revision.json",
@@ -37,9 +38,9 @@ const authoritySchema = await readJson<object>(join(
 ))
 test("reproduces the accepted 83 declaration and 635 row projection", async () => {
   const first = await buildCurrentBroadSchemaOverlapReport(workspaceRoot,
-    fixture.revision)
+    fixture.revision, fixture.trusted_baseline_revision)
   const second = await buildCurrentBroadSchemaOverlapReport(workspaceRoot,
-    `${fixture.revision}^{commit}`)
+    `${fixture.revision}^{commit}`, fixture.trusted_baseline_revision)
   assert.deepEqual(first.counts, fixture.counts)
   assert.equal(first.input_digest, fixture.input_digest)
   assert.equal(first.report_digest, fixture.report_digest)
@@ -67,16 +68,17 @@ test("fails stale and invalid baseline inputs without a report", () => {
   )
   assert.throws(() => buildBroadSchemaOverlapReport(
     result.authority, authoritySchema, `${source.legacy_debt.source}\n`, baselineSchema,
-    loadTargetAccessBaselineFingerprints()),
+    loadTargetAccessBaselineFingerprints(fixture.trusted_baseline_revision)),
   /broad_overlap_debt_reference_mismatch/)
   assert.throws(() => buildBroadSchemaOverlapReport(result.authority,
     authoritySchema,
-    "{", baselineSchema, loadTargetAccessBaselineFingerprints()),
+    "{", baselineSchema,
+    loadTargetAccessBaselineFingerprints(fixture.trusted_baseline_revision)),
   /legacy_report_source_json_invalid/)
 })
 test("detects unsupported shape, identity, count, order, and digest drift", async () => {
   const report = await buildCurrentBroadSchemaOverlapReport(
-    workspaceRoot, fixture.revision,
+    workspaceRoot, fixture.revision, fixture.trusted_baseline_revision,
   )
   const version = structuredClone(report) as unknown as Record<string, unknown>
   version.schema_version = "broad-schema-overlap-report/v2"
