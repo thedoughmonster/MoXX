@@ -99,7 +99,7 @@ capabilities. Modules remain separated by business capability.
 - Do not add relationship columns solely to make joins easier.
 - Build joins and projections as explicitly named, versioned database views.
 - Treat the Toast event GUID as the delivery idempotency key.
-- Store runtime secrets in Supabase, deployment secrets in GitHub, and local CLI credentials in the approved release host's credential store.
+- Store runtime secrets in Supabase, deployment secrets in GitHub, and local CLI credentials in the approved release host's credential store; use the [branch-scoped Edge Function secret guide](docs/supabase-edge-function-secrets.md) for target selection, names-only placement, and content-free verification.
 - Authenticate the pinned Supabase CLI by OAuth/PAT; let the CLI mint its own
   short-lived database login role, and never reuse the account token as a
   Postgres password.

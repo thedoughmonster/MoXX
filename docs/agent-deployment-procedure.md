@@ -65,7 +65,8 @@ Supabase plugin, CLI, dashboard, or local code.
   as a database password; the CLI creates and uses its short-lived database login.
 - Repository children strip `SUPABASE_DB_PASSWORD` and `PGPASSWORD`.
 - GitHub deployment tokens remain protected environment secrets.
-- Runtime/API secrets remain Supabase Edge Function secrets.
+- Runtime/API secrets remain Supabase Edge Function secrets and follow the
+  [branch-scoped placement and verification guide](supabase-edge-function-secrets.md).
 - No credential value enters a command, URL, log, commit, packet, or receipt.
 
 Only `scripts/release/apply_migrations.ts` may call `db push`. Development calls

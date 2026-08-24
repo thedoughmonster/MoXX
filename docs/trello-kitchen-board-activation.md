@@ -23,6 +23,10 @@ the development Supabase Edge Function Secrets UI under these opaque names:
 - `TRELLO_API_TOKEN`
 - `TRELLO_WEBHOOK_SECRET`
 
+Use the canonical [branch-scoped placement and names-only verification
+guide](supabase-edge-function-secrets.md) to confirm the development target
+before entry and to verify presence without handling a value.
+
 Set non-secret `TRELLO_CLIENT_IDENTIFIER_PREFIX` to `momi:kitchen` and set
 `TRELLO_WEBHOOK_CALLBACK_URL` to the exact deployed webhook URL. Never place a
 value in Git, logs, issue text, task prompts, or chat.

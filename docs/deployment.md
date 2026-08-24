@@ -3,6 +3,9 @@
 GitHub Actions is the sole hosted development and Edge Function deployment
 authority. The local Node 24 coordinator is the sole release orchestrator.
 Supabase Git deployment remains disabled. ADRs `0006` and `0008` govern this.
+Runtime-secret target selection and names-only verification follow the
+[branch-scoped Edge Function secret guide](supabase-edge-function-secrets.md);
+they do not create another deployment authority.
 
 ## Deterministic plan and validation
 

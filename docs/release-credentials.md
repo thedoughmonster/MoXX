@@ -12,7 +12,7 @@ chat, commands, `.env`, repository content, packets, logs, or receipts.
 | Production Supabase OAuth/PAT | authenticated release-host CLI profile |
 | CLI database login | short-lived and internal to the CLI |
 | GitHub deployment token | protected GitHub environment secret |
-| Runtime/API secret | Supabase Edge Function Secret |
+| Runtime/API secret | Supabase Edge Function Secret; use the [branch-scoped names-only guide](supabase-edge-function-secrets.md) |
 
 Verify GitHub with `gh auth status`. The development workflow validates its own
 Supabase access without exposing it. Never read or export credential files. The
