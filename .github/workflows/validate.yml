@@ -30,11 +30,24 @@ jobs:
     name: validate-final
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: momi_concurrency
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d momi_concurrency"
+          --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       MOMI_BASE_REF: ${{ github.event.pull_request.base.sha || inputs.base_sha }}
       MOMI_HEAD_REF: ${{ github.event.pull_request.head.sha || inputs.head_sha }}
       MOMI_PROD_REF: origin/prod
       MOMI_DEV_REF: ${{ github.event.pull_request.base.sha || inputs.development_baseline_sha }}
+      ORDER_ALERT_DELIVERY_CONCURRENCY_DATABASE_URL: >-
+        postgresql://postgres:postgres@127.0.0.1:5432/momi_concurrency
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:

@@ -19,6 +19,7 @@
     "provides": [
       "momi.orders.get_by_id.v1",
       "momi.orders.get_by_version.v1",
+      "momi.order_alert_delivery.v2",
       "momi.payments.get_by_id.v1",
       "momi.menu_entities.get_by_id.v1",
       "momi.employees.get_by_id.v1",
@@ -34,7 +35,10 @@
   },
   "database": {
     "read": ["momi_api", "momi_warehouse"],
-    "write": ["momi_api.read_capabilities"]
+    "write": [
+      "momi_api.order_alert_delivery_bindings_v2",
+      "momi_api.read_capabilities"
+    ]
   },
   "network": { "outbound_hosts": [] },
   "secrets": ["SUPABASE_DB_URL"],
@@ -60,17 +64,20 @@
       "momi_analysis.time_entries_v1",
       "momi_api.beta_analysis_catalog",
       "momi_api.beta_analysis_scopes",
+      "momi_api.beta_query_capabilities",
+      "momi_api.order_alert_delivery_bindings_v2",
       "momi_api.read_capabilities",
-      "momi_api.read_view_registry",
-      "momi_api.beta_query_capabilities"
+      "momi_api.read_view_registry"
     ],
     "private_routines": [
       "momi_analysis.execute_query_v1",
       "momi_api.analysis_source_entities_v1",
+      "momi_api.bind_order_alert_delivery_v2",
       "momi_api.consume_read_capability",
       "momi_api.consume_versioned_read_capability",
       "momi_api.issue_beta_query_capability_v1",
-      "momi_api.consume_beta_query_capability_v1"
+      "momi_api.consume_beta_query_capability_v1",
+      "momi_api.redact_order_alert_delivery_binding_v2"
     ],
     "public_reads": [
       "momi.canonical_beta_query.v1",
@@ -86,7 +93,10 @@
       {"contract": "momi.shop_analysis_query.v1", "relation": "momi_analysis.scopes_v1"},
       {"contract": "momi.shop_analysis_query.v1", "relation": "momi_analysis.time_entries_v1"}
     ],
-    "public_commands": ["momi.canonical_beta_query.v1"],
+    "public_commands": [
+      "momi.canonical_beta_query.v1",
+      "momi.order_alert_delivery.v2"
+    ],
     "public_routine_reads": [
       {"contract": "momi.canonical_beta_query.v1", "routine": "momi_api.consume_beta_query_capability_v1"},
       {"contract": "momi.shop_analysis_query.v1", "routine": "momi_analysis.execute_query_v1"}
@@ -99,7 +109,8 @@
       "schema": "momi_analysis"
     }],
     "public_routine_commands": [
-      {"contract": "momi.canonical_beta_query.v1", "routine": "momi_api.issue_beta_query_capability_v1"}
+      {"contract": "momi.canonical_beta_query.v1", "routine": "momi_api.issue_beta_query_capability_v1"},
+      {"contract": "momi.order_alert_delivery.v2", "routine": "momi_api.bind_order_alert_delivery_v2"}
     ],
     "emitted_events": []
   }

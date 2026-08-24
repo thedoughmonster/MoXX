@@ -7,10 +7,11 @@ const root = new URL("../../../../..", import.meta.url)
 const read = (path: string) => readFile(new URL(path, root), "utf8")
 
 test("canonical reads use one attempt-bound short-lived capability", async () => {
-  const [migration, consumption, issueAdapter, revokeAdapter, execution, claim] =
+  const [migration, consumption, wrapper, issueAdapter, revokeAdapter, execution, claim] =
     await Promise.all([
       read("supabase/migrations/20260715055644_issue_order_alert_read_capabilities.sql"),
       read("supabase/migrations/20260715064305_consume_order_read_capabilities.sql"),
+      read("supabase/migrations/20260824141122_issue_order_alert_delivery_v2_bindings.sql"),
       read("services/order-alerting/functions/momi-order-alert-worker-v1/src/issue_order_read_capability.ts"),
       read("services/order-alerting/functions/momi-order-alert-worker-v1/src/revoke_order_read_capability.ts"),
       read("services/order-alerting/functions/momi-order-alert-worker-v1/src/execute_work.ts"),
@@ -37,7 +38,9 @@ test("canonical reads use one attempt-bound short-lived capability", async () =>
   assert.match(consumption, /binding\.queue_message_id/)
   assert.match(consumption, /delivery\.status = 'running'/)
   assert.match(consumption, /attempt\.outcome = 'running'/)
-  assert.match(issueAdapter, /issue_order_read_capability/)
+  assert.match(wrapper, /from momi_alerting\.issue_order_read_capability\(/)
+  assert.match(wrapper, /momi_api\.bind_order_alert_delivery_v2\(/)
+  assert.match(issueAdapter, /issue_order_read_capability_v2/)
   assert.match(revokeAdapter, /revoke_order_read_capability/)
   assert.match(execution, /issueOrderReadCapability/)
   assert.match(execution, /finally \{/)

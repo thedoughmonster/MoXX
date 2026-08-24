@@ -8,7 +8,7 @@ const capabilityUrl = new URL(
   import.meta.url,
 )
 const consumptionUrl = new URL(
-  "../../../supabase/migrations/20260715064305_consume_order_read_capabilities.sql",
+  "../../../supabase/migrations/20260824141129_route_order_reads_through_delivery_v2.sql",
   import.meta.url,
 )
 const registrationUrl = new URL(
@@ -38,7 +38,9 @@ test("read capabilities are private, scoped, and expiring", async () => {
   assert.match(source, /enable row level security/)
   assert.match(source, /from public, anon, authenticated/)
   assert.match(consumption, /consume_read_capability/)
-  assert.match(consumption, /queue_message_id = binding\.queue_message_id/)
+  assert.match(consumption, /order_alert_delivery_bindings_v2/)
+  assert.match(consumption, /acquire_order_alert_delivery_witness_v1/)
+  assert.doesNotMatch(consumption, /momi_alerting\.|momi_events\.deliveries/)
 })
 
 test("registrations match every manifest hash and route", async () => {

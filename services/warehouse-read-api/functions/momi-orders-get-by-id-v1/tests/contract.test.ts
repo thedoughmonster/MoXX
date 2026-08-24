@@ -16,6 +16,9 @@ test("requires canonical UUIDs and a durable token", () => {
     trigger_token: id }), null)
   assert.equal(parseOrderRead({ work_id: "1", order_id: id,
     capability_token: id, trigger_token: id }), null)
+  assert.equal(parseOrderRead({ work_id: "1", order_id: id,
+    capability_token: id, event_id: id, message_id: "1",
+    delivery_token: id }), null)
 })
 
 test("canonical output contract requires no source DTO", async () => {
@@ -32,7 +35,7 @@ test("reader atomically consumes its scoped capability", async () => {
       "../../../../../supabase/migrations/20260714174941_register_warehouse_reader_contracts.sql",
       import.meta.url), "utf8"),
     readFile(new URL(
-      "../../../../../supabase/migrations/20260715064305_consume_order_read_capabilities.sql",
+      "../../../../../supabase/migrations/20260824141129_route_order_reads_through_delivery_v2.sql",
       import.meta.url), "utf8"),
   ])
   const manifest = JSON.parse(manifestText) as {
@@ -44,9 +47,9 @@ test("reader atomically consumes its scoped capability", async () => {
   assert.match(registration, new RegExp(hash))
   assert.match(registration, /durable\.read_capability\.v1/)
   assert.match(reader, /momi_api\.consume_read_capability/)
-  assert.match(consumption, /set consumed_at = now\(\)/)
+  assert.match(consumption, /set consumed_at = statement_timestamp\(\)/)
   assert.match(consumption, /capability\.subject_entity_id = p_subject_entity_id/)
-  assert.match(consumption, /delivery\.status = 'running'/)
-  assert.match(consumption, /attempt\.outcome = 'running'/)
+  assert.match(consumption, /momi\.order_alert_delivery\.v2/)
+  assert.match(consumption, /acquire_order_alert_delivery_witness_v1/)
   assert.doesNotMatch(reader, /momi_orders|trigger_token/)
 })

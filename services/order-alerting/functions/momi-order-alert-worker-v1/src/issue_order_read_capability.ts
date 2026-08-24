@@ -15,7 +15,7 @@ export async function issueOrderReadCapability(
   }
   const rows = await sql<IssuedReadCapability[]>`
     select read_work_id as work_id, capability_token::text
-    from momi_alerting.issue_order_read_capability(
+    from momi_alerting.issue_order_read_capability_v2(
       ${job.work_id}::bigint,
       ${job.attempt_id}::bigint,
       ${job.invocation_id}::uuid,

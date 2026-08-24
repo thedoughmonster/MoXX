@@ -21,10 +21,16 @@ Each canonical attempt mints a short-lived capability scoped to that order and
 revokes it before evaluating the response; delivery and alert work tokens are
 never forwarded as canonical reader authority.
 
+New canonical attempts wrap the unchanged legacy issuer with the
+warehouse-owned `momi.order_alert_delivery.v2` binding command in the same
+transaction. The wrapper passes the exact issued read identity and delivery
+tuple once, while warehouse-read owns tuple authorization and cleanup.
+
 ## Contracts
 
 The active business path consumes the event delivery lifecycle and exact
-`momi.orders.get_by_version.v1`. `order-alerting` is the only permitted current
+`momi.orders.get_by_version.v1`, plus the private
+`momi.order_alert_delivery.v2` binding command. `order-alerting` is the only permitted current
 consumer of the retiring `momi.toast_orders.get_by_id.v1` contract. That branch
 is limited to already-created legacy invocation work and bounded repair or
 rollback compatibility; it is not a normal path and cannot admit a new service

@@ -22,6 +22,8 @@ test("requires exactly the version-scoped canonical input", () => {
   assert.equal(parseOrderVersionRead({ ...validInput,
     capability_token: "token" }), null)
   assert.equal(parseOrderVersionRead({ ...validInput, work_id: "0" }), null)
+  assert.equal(parseOrderVersionRead({ ...validInput,
+    event_id: orderId, message_id: "1", delivery_token: tokenId }), null)
 })
 
 test("contracts expose the exact version without a source DTO", async () => {
@@ -68,9 +70,12 @@ test("contracts expose the exact version without a source DTO", async () => {
 })
 
 test("reader consumes and resolves one exact order version", async () => {
-  const [reader, handler] = await Promise.all([
+  const [reader, handler, consumption] = await Promise.all([
     readFile(new URL("../src/read_order.ts", import.meta.url), "utf8"),
     readFile(new URL("../src/handle_request.ts", import.meta.url), "utf8"),
+    readFile(new URL(
+      "../../../../../supabase/migrations/20260824141129_route_order_reads_through_delivery_v2.sql",
+      import.meta.url), "utf8"),
   ])
   const capabilityCall = new RegExp([
     "momi_api\\.consume_versioned_read_capability\\(\\s*",
@@ -91,5 +96,8 @@ test("reader consumes and resolves one exact order version", async () => {
   assert.match(reader,
     /order_record\.order_version_id = \$\{input\.order_version_id\}::uuid/)
   assert.match(handler, /order_version_id: row\.order_version_id/)
+  assert.match(consumption, /momi\.order_alert_delivery\.v2/)
+  assert.match(consumption, /acquire_order_alert_delivery_witness_v1/)
+  assert.doesNotMatch(consumption, /momi_alerting\.|momi_events\.deliveries/)
   assert.doesNotMatch(reader, /toast|trigger_token/i)
 })
