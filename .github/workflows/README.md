@@ -10,7 +10,7 @@ Backend deployment apply remains limited to `deploy-dev.yml` and
 Secret values are never stored here: workflows reference repository or
 environment secrets by name.
 `cloudflare-credential-preflight.yml` and
-`supabase-credential-preflight.yml` are read-only provider inventory checks.
+`supabase-credential-preflight.yml` are read-only provider metadata checks.
 They validate credential authority without invoking deployment, database access
 renewal, or provider mutation.
 
