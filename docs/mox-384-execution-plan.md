@@ -36,6 +36,12 @@ Linear umbrella: [MOX-384](https://linear.app/moxx-workboard/issue/MOX-384)
   repository root, product checks retain separate toolchains, deployment paths
   and artifacts are product-prefixed, and cross-product changes require an
   explicit interface statement.
+- MOX-389 layout adaptations are committed at
+  `f3870d1ea5e026c5b7622e90e15dee644f19c6a2`. Offline tree, migration,
+  catalog, routing, UI build, and Cloudflare dry-run equivalence pass, but the
+  issue remains In Progress because sandbox loopback denial blocks Playwright
+  and restricted network access blocks an uncached Deno JSR manifest. The exact
+  partial evidence is in `mox-389-validation-receipt.md`.
 - The local watchdog foundation exists at `/home/ubuntu/symphony-watchdog` and
   passes its typecheck, fixtures, lease, and loopback health smoke tests.
 - The original MoMi and MoXi repositories have not been modified.
@@ -64,9 +70,10 @@ MOX-384
 MOX-392 + MOX-395 + MOX-401 → MOX-394 integrated canary
 ```
 
-MOX-391, MOX-388, MOX-393, and MOX-397 are Done. Remaining implementation
-leaves are in Todo, and native blockers prevent later leaves from being
-mistaken for ready work. None has `ready-package`.
+MOX-391, MOX-388, MOX-393, and MOX-397 are Done. MOX-389 is In Progress and
+blocked on validation access; remaining implementation leaves are in Todo, and
+native blockers prevent later leaves from being mistaken for ready work. None
+has `ready-package`.
 
 ## Workstream A: MoXX monorepo
 
@@ -80,8 +87,11 @@ Parent: [MOX-386](https://linear.app/moxx-workboard/issue/MOX-386)
    commit `4399b13003b55a9879f4b39359bb8503e789a7fb`. Verified evidence includes
    14 active root workflows, YAML/JSON parsing, static authority validation,
    product-routing fixtures, and monorepo-aware hook fixtures.
-3. [MOX-389](https://linear.app/moxx-workboard/issue/MOX-389) runs both
-   authoritative product validations and deployment dry-runs.
+3. [MOX-389](https://linear.app/moxx-workboard/issue/MOX-389) is In Progress.
+   Layout adaptations are committed at `f3870d1ea5e026c5b7622e90e15dee644f19c6a2`;
+   offline validations and deployment dry-runs pass, while the authoritative
+   Playwright and Edge Function checks remain access-blocked. See
+   `mox-389-validation-receipt.md`.
 4. [MOX-392](https://linear.app/moxx-workboard/issue/MOX-392) creates the
    private remote, protects `dev` and `prod`, fixes host Git transport outside
    application code, and updates repository mappings while Symphony is stopped.
