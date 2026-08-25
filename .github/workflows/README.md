@@ -9,6 +9,10 @@ Backend deployment apply remains limited to `deploy-dev.yml` and
 `deploy-prod.yml`; UI deployment remains limited to the two Cloudflare workflows.
 Secret values are never stored here: workflows reference repository or
 environment secrets by name.
+`cloudflare-credential-preflight.yml` and
+`supabase-credential-preflight.yml` are read-only provider inventory checks.
+They validate credential authority without invoking deployment, database access
+renewal, or provider mutation.
 
 Linear is the sole work-item authority. Root workflows neither ingest nor
 mutate GitHub Issues, and no GitHub issue state is a planning or completion
