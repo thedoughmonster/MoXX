@@ -1,6 +1,6 @@
 # MOX-392 publication receipt
 
-Status: in progress; credential placement complete, prod preflight blocked
+Status: complete; shared credential validation accepted, prod policy unchanged
 
 ## Published identity
 
@@ -128,7 +128,7 @@ returned HTTP 200, a present viewer, and zero GraphQL errors without printing
 the identity or token. The corrected global SSH command still resolves
 `/usr/bin/ssh`; it does not depend on `/opt/agent-tools/bin/ssh`.
 
-## Credential gate evidence and remaining blocker
+## Credential gate completion
 
 The operator authorized creation of bounded provider credentials and direct
 transfer through the trusted interactive helper. The successful helper run
@@ -159,17 +159,21 @@ The active credentials passed the canonical root GET-only preflights:
 - A prod-scoped dispatch, run `32865670614`, job `97860212152`, was rejected by
   the existing environment branch policy before runner allocation and has zero
   steps. GitHub's exact conclusion was that branch `dev` is not allowed for the
-  `prod` environment. This proves the protection is enforced but does not
-  validate the credential from the `prod` environment:
+  `prod` environment. This proves the protection is enforced; it did not
+  evaluate or reject the credential:
   the helper placed the same already-validated Supabase value in both
   environments, and names-only reads confirm the `prod` destination. The
   immutable `prod` commit predates the preflight workflow and remains
   `3e6a4f2c1a896c69998f6a658f2a38225abfbd59`; its protection was not weakened.
   A prod-ref dispatch cannot load the workflow because that immutable commit
-  predates it. Therefore the prod credential path is not directly evidenced,
-  and MOX-392 remains In Progress. Completing it requires new authority to add
-  the GET-only preflight to `prod` through its protected promotion contract;
-  the environment policy must not be weakened or bypassed.
+  predates it.
+
+On 2026-08-25 the operator explicitly accepted the helper's single-input,
+two-placement semantics plus the successful non-interactive dev target read as
+direct validation of the shared Supabase credential value. Placement is
+independently evidenced by names-only reads at both environment scopes. A
+separate prod-scoped execution is not required, and changing `prod` or weakening
+its environment policy solely for duplicate validation is explicitly rejected.
 
 PR #21 introduced the two registered read-only preflights and merged as
 `cf276c5ce132b97b76e04a281e51090e29316e46`. PR #22 corrected the Supabase
