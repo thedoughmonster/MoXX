@@ -15,8 +15,8 @@ Work the assigned Linear issue using the MoMi execution workflow.
   exposes integrations, hosts the coding agent, and applies the Stop hook.
 - The coding agent implements one bounded issue, tests it, diagnoses failures,
   resolves review feedback, and owns its validated merge to `dev`.
-- GitHub owns branches, commits, PRs, authoritative CI, review history,
-  and the linked open owning issue required by the delivery ledger.
+- GitHub owns branches, commits, PRs, authoritative CI, review history, and
+  deployments. Linear remains the sole work-item and lifecycle authority.
 - Repository manifests, ADRs, `AGENTS.md`, impact tooling, validators, and CI are
   the technical authority.
 - Humans retain planning, material architecture decisions, production mutation,
@@ -31,7 +31,7 @@ Work the assigned Linear issue using the MoMi execution workflow.
 2. The `momi-execution` skill resolves the assigned Linear issue and reads its
    complete project, parent, dependency, priority, assignment, and status
    context. It must not infer an exhaustive queue from a capped issue search.
-3. The agent verifies readiness, the linked open GitHub owning issue, applicable
+3. The agent verifies readiness, the owning Linear issue, applicable
    repository governance, expected impact, acceptance, exclusions, current
    `origin/dev`, and an isolated feature branch.
 4. Linear moves to In Progress only when the issue is selected, eligible, and
@@ -51,9 +51,9 @@ Before completion it must:
 2. perform one final principal-level diff review and commit it;
 3. run `pnpm momi-check changed` on that exact commit, then push the clean
    feature branch;
-4. publish one draft PR to `dev` with exactly one `Owning issue: #<number>` and
-   one `Disposition: partial|complete` line;
-5. wait for `validate-final` and issue-ledger validation to succeed;
+4. publish one draft PR to `dev` with exactly one
+   `Owning Linear issue: MOX-<number>` line matching the head branch;
+5. wait for `validate-final` and Linear issue-mapping validation to succeed;
 6. associate the PR with Linear and sweep all PR feedback;
 7. when no blocking feedback remains, move Linear to Merging, mark the PR ready,
    merge it to `dev`, and verify the merge commit is present on `origin/dev`;

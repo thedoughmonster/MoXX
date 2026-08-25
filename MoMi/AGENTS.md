@@ -116,12 +116,12 @@ capabilities. Modules remain separated by business capability.
 - Publish one PR with owning-issue disposition.
 - Verify changed hosted behavior with one controlled acceptance event.
 ## Backend Release Rules
-- For hosted backend changes, release the exact PR validation receipt to
-  development, then promote only that exact development receipt.
+- For hosted backend changes, release the exact PR validation receipt to development, then promote only that exact development receipt.
 ## OpenHands Execution and Planning
 - In OpenHands, use the `momi-execution` skill for an assigned Linear issue.
 - OpenHands is the execution harness; Linear owns planning and execution state.
-- GitHub owns branches, PRs, CI, review history, and the linked open GitHub issue required by the delivery ledger.
+- Linear is the sole planning/work authority. GitHub owns branches, PRs, CI,
+  review, and deployments; PR metadata names one matching Linear issue.
 - The coding agent owns one bounded issue through review, validated merge, development release, and controlled acceptance. Humans retain planning, material architecture decisions, and production authority.
 - After required checks pass, perform one final review and feedback sweep. With no
   blocking feedback, merge to `dev`, release required hosted changes,

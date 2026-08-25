@@ -45,7 +45,10 @@ test("requires the body issue to match the sole branch issue", () => {
 })
 
 test("workflow validates a fail-closed Linear issue mapping", async () => {
-  const workflow = await readFile(".github/workflows/issue-ledger.yml", "utf8")
+  const workflow = await readFile(
+    "../.github/workflows/linear-issue-mapping.yml",
+    "utf8",
+  )
   assert.match(workflow, /check_pull_request_issue_tracking\.ts/)
   assert.match(workflow, /ref: \$\{\{ github\.event\.pull_request\.head\.sha \}\}/)
   assert.match(workflow, /MOXX_HEAD_REF: \$\{\{ github\.head_ref \}\}/)

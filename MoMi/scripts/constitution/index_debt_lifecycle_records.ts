@@ -7,11 +7,11 @@ export function indexDebtLifecycleRecords(
   registry: DebtLifecycleRegistry,
 ): Map<string, DebtLifecycleRecord> {
   const result = new Map<string, DebtLifecycleRecord>()
-  const issues = new Set<number>()
+  const issues = new Set<string>()
   for (const record of registry.records) {
     if (issues.has(record.remediation_issue)) {
       throw new Error(
-        `duplicate remediation issue #${record.remediation_issue} in lifecycle registry`,
+        `duplicate remediation issue ${record.remediation_issue} in lifecycle registry`,
       )
     }
     issues.add(record.remediation_issue)

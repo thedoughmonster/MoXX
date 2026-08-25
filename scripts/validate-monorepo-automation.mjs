@@ -8,11 +8,9 @@ const expectedWorkflows = [
   "cloudflare-preview.yml",
   "cloudflare-production.yml",
   "codeql.yml",
-  "debt-lifecycle-issues.yml",
   "deploy-dev.yml",
   "deploy-prod.yml",
-  "issue-ledger.yml",
-  "issue-triage.yml",
+  "linear-issue-mapping.yml",
   "monorepo-routing.yml",
   "promote-prod.yml",
   "renew-database-access.yml",
@@ -57,8 +55,7 @@ for (const [name, source] of workflows) {
 for (const name of [
   "deploy-dev.yml",
   "deploy-prod.yml",
-  "issue-ledger.yml",
-  "issue-triage.yml",
+  "linear-issue-mapping.yml",
   "renew-database-access.yml",
   "validate.yml",
 ]) {
@@ -128,6 +125,32 @@ assert.doesNotMatch(hookSource, /\/scripts\/run_codex_migration_guard\.ts/)
 const authority = read(`${workflowRoot}/README.md`)
 assert.match(authority, /imported[\s\S]*retained[\s\S]*not execution authorities/i)
 assert.match(authority, /deploy-dev\.yml[\s\S]*deploy-prod\.yml/)
+assert.match(authority, /Linear[\s\S]*sole work-item authority/i)
+
+for (const [name, source] of workflows) {
+  assert.doesNotMatch(
+    source,
+    /^\s+issues:\s*(?:$|read\s*$|write\s*$)/m,
+    `${name} must not use GitHub Issues as an active authority`,
+  )
+  assert.doesNotMatch(source, /github\.rest\.issues/)
+  assert.doesNotMatch(source, /MOMI_MODEL_EXECUTION_GATEWAY_URL/)
+  assert.doesNotMatch(source, /MOMI_MODEL_GATEWAY_TRIAGE_SECRET/)
+}
+
+const linearMapping = workflows.get("linear-issue-mapping.yml")
+assert.match(linearMapping, /name:\s*Enforce Linear issue mapping/)
+assert.match(linearMapping, /check_pull_request_issue_tracking\.ts/)
+assert.doesNotMatch(linearMapping, /pull_request_target:/)
+
+const credentialHelper = read("scripts/provision-mox-392-credentials.sh")
+assert.doesNotMatch(credentialHelper, /MOMI_MODEL_EXECUTION_GATEWAY_URL/)
+assert.doesNotMatch(credentialHelper, /MOMI_MODEL_GATEWAY_TRIAGE_SECRET/)
+assert.match(credentialHelper, /require_secret "CLOUDFLARE_ACCOUNT_ID"/)
+assert.equal(
+  (credentialHelper.match(/require_secret "SUPABASE_ACCESS_TOKEN"/g) ?? []).length,
+  2,
+)
 
 const template = read(".github/pull_request_template.md")
 assert.match(template, /^Owning Linear issue:\s*MOX-$/m)

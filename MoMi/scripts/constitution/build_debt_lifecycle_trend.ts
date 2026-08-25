@@ -27,7 +27,7 @@ export function buildDebtLifecycleTrend(
   )) {
     const lifecycle = records.get(finding.fingerprint)
     if (!lifecycle) throw new Error(`Missing lifecycle for ${finding.fingerprint}`)
-    increment(byIssue, `#${lifecycle.remediation_issue}`)
+    increment(byIssue, lifecycle.remediation_issue)
     increment(byOwner, lifecycle.accountable_owner)
     increment(byRisk, lifecycle.risk)
     increment(byRule, finding.rule_id)

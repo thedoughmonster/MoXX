@@ -15,7 +15,7 @@ const constitution = await loadConstitutionBaseline()
 const findings = [...constitution.findings, ...access.findings]
 const accepted = await loadDebtLifecycleRegistry()
 const schema = JSON.parse(await readFile(
-  "schemas/debt-lifecycle-registry-v1.schema.json",
+  "schemas/debt-lifecycle-registry-v2.schema.json",
   "utf8",
 ))
 
@@ -24,16 +24,17 @@ function copy(): DebtLifecycleRegistry {
 }
 
 test("covers every accepted fingerprint with the accepted issue partition", () => {
+  assert.equal(accepted.authority.work_authority, "linear")
   assert.deepEqual(
-    findDebtLifecycleViolations(findings, accepted, undefined, "2026-08-18"),
+    findDebtLifecycleViolations(findings, accepted, undefined, "2026-08-25"),
     [],
   )
   assert.deepEqual(
     Object.fromEntries(accepted.records.map((record) => [
-      `#${record.remediation_issue}`,
+      record.remediation_issue,
       record.fingerprints.length,
     ])),
-    { "#194": 57, "#195": 15, "#196": 7, "#572": 3 },
+    { "MOX-20": 57, "MOX-22": 15, "MOX-23": 7, "MOX-406": 3 },
   )
 })
 
@@ -41,7 +42,7 @@ test("rejects missing, duplicate, ownerless, overdue, and expired metadata", () 
   const missing = copy()
   missing.records[0].fingerprints.pop()
   assert.match(
-    findDebtLifecycleViolations(findings, missing, undefined, "2026-08-18").join("\n"),
+    findDebtLifecycleViolations(findings, missing, undefined, "2026-08-25").join("\n"),
     /missing lifecycle metadata/,
   )
   const duplicate = copy()
@@ -63,9 +64,15 @@ test("rejects missing, duplicate, ownerless, overdue, and expired metadata", () 
   wrongIssue.records[1].fingerprints.push(moved)
   wrongIssue.records[1].fingerprints.sort()
   assert.match(
-    findDebtLifecycleViolations(findings, wrongIssue, undefined, "2026-08-18")
+    findDebtLifecycleViolations(findings, wrongIssue, undefined, "2026-08-25")
       .join("\n"),
     /maps to the wrong remediation issue/,
+  )
+  const githubIssue = copy()
+  githubIssue.records[0].remediation_issue = "194"
+  assert.throws(
+    () => validateJson(schema, githubIssue, "fixture"),
+    /must match pattern/,
   )
 })
 
@@ -78,7 +85,7 @@ test("requires append-only review history for lifecycle changes", () => {
       findings,
       rewritten,
       accepted,
-      "2026-08-18",
+      "2026-08-25",
     ).join("\n"),
     /rewrites accepted review history/,
   )
@@ -86,7 +93,7 @@ test("requires append-only review history for lifecycle changes", () => {
   silent.records[0].temporary_reason =
     "A materially different temporary reason without a new review artifact."
   assert.match(
-    findDebtLifecycleViolations(findings, silent, accepted, "2026-08-18")
+    findDebtLifecycleViolations(findings, silent, accepted, "2026-08-25")
       .join("\n"),
     /changes lifecycle metadata without renewal/,
   )
@@ -112,7 +119,7 @@ test("accepts explicit renewal and same-change removal evidence", () => {
   const fingerprint = removed.records[0].fingerprints.shift()!
   const remaining = findings.filter((finding) => finding.fingerprint !== fingerprint)
   assert.deepEqual(
-    findDebtLifecycleViolations(remaining, removed, accepted, "2026-08-18"),
+    findDebtLifecycleViolations(remaining, removed, accepted, "2026-08-25"),
     [],
   )
 })

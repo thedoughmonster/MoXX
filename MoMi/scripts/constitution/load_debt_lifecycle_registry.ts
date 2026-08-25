@@ -14,7 +14,7 @@ export async function loadDebtLifecycleRegistry(): Promise<DebtLifecycleRegistry
   const schema = await readJson<object>(join(
     workspaceRoot,
     "schemas",
-    "debt-lifecycle-registry-v1.schema.json",
+    "debt-lifecycle-registry-v2.schema.json",
   ))
   validateJson(schema, registry, "docs/debt-lifecycle-registry.json")
   return registry

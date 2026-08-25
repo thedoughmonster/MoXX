@@ -6,16 +6,16 @@ const archiveEvaluationFingerprints = new Set([
   "sha256:f86d4d30f02e1792fb5a40ce8eedd0c0ea657f028c55a055604b2270bb61498e",
 ])
 
-export function selectDebtRemediationIssue(finding: ConstitutionFinding): number {
+export function selectDebtRemediationIssue(finding: ConstitutionFinding): string {
   const evidence = finding.evidence
   if (
     evidence.owner_service === "runtime-registry" ||
     evidence.owner_service === "momi-event-routing" ||
     finding.rule_id === "dynamic_event_name"
-  ) return 196
+  ) return "MOX-23"
   if ([evidence.owner_service, evidence.consumer_service].some((service) =>
     service === "order-alerting" || service === "slack-order-delivery"
-  )) return 195
-  if (archiveEvaluationFingerprints.has(finding.fingerprint)) return 572
-  return 194
+  )) return "MOX-22"
+  if (archiveEvaluationFingerprints.has(finding.fingerprint)) return "MOX-406"
+  return "MOX-20"
 }

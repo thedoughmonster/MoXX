@@ -1,14 +1,14 @@
 {
   "generated": true,
-  "as_of": "2026-08-18",
+  "as_of": "2026-08-25",
   "purpose": "Review signal only; lower debt counts do not prove correct ownership.",
   "total": 82,
-  "oldest_age_days": 31,
+  "oldest_age_days": 38,
   "by_issue": {
-    "#194": 57,
-    "#195": 15,
-    "#196": 7,
-    "#572": 3
+    "MOX-20": 57,
+    "MOX-22": 15,
+    "MOX-23": 7,
+    "MOX-406": 3
   },
   "by_owner": {
     "Zac": 82
