@@ -8,8 +8,7 @@
 
 ## Issue tracking
 
-Owning issue: #REPLACE
-Disposition: REPLACE_WITH_partial_OR_complete
+Owning Linear issue: MOX-REPLACE
 
-Use `partial` when accepted issue scope remains after this PR. Use `complete`
-only when this PR satisfies the issue's remaining acceptance criteria.
+The Linear issue identifier must match the sole `MOX-…` identifier in the PR
+head branch.

@@ -2,8 +2,7 @@
 
 Describe the bounded change and its owner.
 
-Owning issue: #
-Disposition: partial
+Owning Linear issue: MOX-
 
 ## Product scope
 

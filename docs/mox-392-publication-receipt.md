@@ -54,6 +54,10 @@ no tracked credential or private-key file. No history rewrite was required.
   vulnerability reporting are enabled.
 - The `dev`, `prod`, and `prod-promotion` environments match the source branch
   policies: `dev`, `prod`, and `dev`, respectively.
+- Pull requests name exactly one authoritative `MOX-…` Linear issue, and that
+  identifier must equal the sole Linear identifier in the head branch. Missing,
+  mismatched, or ambiguous mappings fail closed without duplicating work into a
+  GitHub issue ledger.
 - Root CODEOWNERS, Dependabot, workflows, and path-routing configuration are
   present in the published tree.
 
@@ -71,6 +75,8 @@ no tracked credential or private-key file. No history rewrite was required.
 - Neither protection probe changed a remote ref.
 - Root automation validation still discovers all 14 workflows, and both root
   routing/static-config tests pass after the history join.
+- The focused issue-mapping validation passes positive, missing, mismatched, and
+  ambiguous branch cases. PR `#16` is linked directly on Linear MOX-392.
 
 ## Repository mapping and credentials
 
@@ -106,6 +112,8 @@ credential-path criteria are directly verified.
 ## Preservation
 
 - Source MoMi and MoXi repositories and all their settings are unchanged.
+- The temporary GitHub mirror issue created while diagnosing the inherited
+  ledger was closed as not planned; Linear MOX-392 remains the sole authority.
 - Source repositories remain authoritative until MOX-390 performs the
   separately governed cutover and reversible tombstoning work.
 - No deployment or provider configuration changed.

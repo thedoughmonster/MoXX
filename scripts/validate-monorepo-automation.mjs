@@ -120,6 +120,8 @@ assert.match(authority, /imported[\s\S]*retained[\s\S]*not execution authorities
 assert.match(authority, /deploy-dev\.yml[\s\S]*deploy-prod\.yml/)
 
 const template = read(".github/pull_request_template.md")
+assert.match(template, /^Owning Linear issue:\s*MOX-$/m)
+assert.doesNotMatch(template, /^Owning issue:\s*#/m)
 assert.match(template, /^Interface impact:\s*none$/m)
 assert.match(template, /touches both `MoMi\/` and `MoXi\/`/)
 
