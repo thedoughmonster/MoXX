@@ -1,0 +1,38 @@
+name: Validate monorepo routing
+
+on:
+  pull_request:
+    branches: [dev, prod]
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+
+permissions:
+  contents: read
+
+jobs:
+  routing:
+    name: monorepo-routing
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - name: Select product validation and enforce interface evidence
+        env:
+          MOXX_PR_BODY: ${{ github.event.pull_request.body }}
+          MOXX_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          MOXX_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: >-
+          node scripts/monorepo-routing.mjs
+          --base "$MOXX_BASE_SHA"
+          --head "$MOXX_HEAD_SHA"
+
+  static-config:
+    name: monorepo-static-config
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - run: node scripts/validate-monorepo-automation.mjs
+      - run: node --test tests/*.test.mjs

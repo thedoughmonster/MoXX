@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /MoMi
+    schedule:
+      interval: weekly
+    target-branch: dev
+    open-pull-requests-limit: 5
+  - package-ecosystem: npm
+    directory: /MoXi
+    schedule:
+      interval: weekly
+    target-branch: dev
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    target-branch: dev
+    open-pull-requests-limit: 5

@@ -1,0 +1,93 @@
+name: Deploy UI production
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Production operation
+        required: true
+        type: choice
+        default: deploy
+        options: [deploy, rollback]
+      confirmation:
+        description: Type preorder.dough.monster to authorize production
+        required: true
+        type: string
+      version_id:
+        description: Exact production Worker version for rollback
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: moxi-web-preorder-production
+  cancel-in-progress: false
+
+jobs:
+  production:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        shell: bash
+        working-directory: MoXi
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      VITE_APP_STAGE: production
+      VITE_PREORDER_API_ORIGIN: https://xtbraqnlskmqxinjxxdn.supabase.co
+      VITE_PREORDER_API_VERSION: v1
+      VITE_PREORDER_DATA_MODE: live
+      VITE_PREORDER_EXPERIENCE_MODE: toast_handoff
+      VITE_PREORDER_CHECKOUT_URL: https://www.toasttab.com/local/order/dough-monster
+      VITE_RELEASE_ID: ${{ github.sha }}
+    steps:
+      - name: Validate production authorization
+        env:
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: test "$CONFIRMATION" = 'preorder.dough.monster'
+      - name: Checkout production release
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: prod
+      - name: Setup pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+        with:
+          version: 10.0.0
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "24"
+          cache: pnpm
+          cache-dependency-path: MoXi/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - if: inputs.operation == 'deploy'
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Validate production release
+        if: inputs.operation == 'deploy'
+        run: pnpm check && pnpm run test:e2e:handoff
+      - name: Deploy exact production release
+        if: inputs.operation == 'deploy'
+        run: >-
+          pnpm exec wrangler deploy --env production --minify --strict
+          --message "production ${{ github.sha }}"
+      - name: Validate rollback target
+        if: inputs.operation == 'rollback'
+        env:
+          VERSION_ID: ${{ inputs.version_id }}
+        run: |
+          if [[ ! "$VERSION_ID" =~ ^[0-9a-f-]{36}$ ]]; then
+            echo "version_id must be an exact Cloudflare version UUID" >&2
+            exit 1
+          fi
+      - name: Roll back production Worker
+        if: inputs.operation == 'rollback'
+        env:
+          VERSION_ID: ${{ inputs.version_id }}
+        run: >-
+          pnpm exec wrangler rollback "$VERSION_ID" --env production --yes
+          --message "production rollback requested by GitHub Actions run ${{ github.run_id }}"
+      - name: Report production versions
+        run: pnpm exec wrangler versions list --env production --json

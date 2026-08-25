@@ -1,0 +1,108 @@
+name: Deploy backend development
+run-name: deploy-dev ${{ inputs.expected_sha }} ${{ inputs.release_identity }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Exact validated dev commit to release
+        required: true
+        type: string
+      base_sha:
+        description: Exact validated diff base
+        required: true
+        type: string
+      services:
+        description: Comma-separated affected services; empty for inventory-only
+        required: false
+        default: ""
+        type: string
+      plan_sha256:
+        description: Exact release plan digest
+        required: true
+        type: string
+      release_identity:
+        description: Exact plan and retirement selection identity
+        required: true
+        type: string
+      validated_tree:
+        description: Exact validated Git tree
+        required: true
+        type: string
+      retire_functions:
+        description: Explicit caller-verified expired development functions to remove
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-backend-dev
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: dev
+    defaults:
+      run:
+        shell: bash
+        working-directory: MoMi
+    env:
+      MOMI_PROD_REF: origin/prod
+      MOMI_EXPECTED_SHA: ${{ inputs.expected_sha }}
+      MOMI_PLAN_SHA256: ${{ inputs.plan_sha256 }}
+      MOMI_VALIDATED_TREE: ${{ inputs.validated_tree }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: dev
+          fetch-depth: 0
+      - name: Verify exact development commit
+        run: |
+          test "$MOMI_EXPECTED_SHA" = "$GITHUB_SHA"
+          test "$MOMI_EXPECTED_SHA" = "$(git rev-parse HEAD)"
+      - run: git fetch origin prod:refs/remotes/origin/prod
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
+        with:
+          version: 11.7.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: MoMi/.node-version
+          cache: pnpm
+          cache-dependency-path: MoMi/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - name: Recompute and verify affected deployment plan
+        env:
+          MOMI_SERVICES: ${{ inputs.services }}
+        run: |
+          pnpm momi-impact plan --base "${{ inputs.base_sha }}" \
+            --head "$MOMI_EXPECTED_SHA" --output .momi/release-plan.json
+          args=( \
+            --plan .momi/release-plan.json \
+            --digest "$MOMI_PLAN_SHA256" \
+            --head "$MOMI_EXPECTED_SHA" \
+            --tree "$MOMI_VALIDATED_TREE" \
+          )
+          if test -n "$MOMI_SERVICES"; then args+=(--services "$MOMI_SERVICES"); fi
+          node scripts/assert_bound_deployment_plan.ts "${args[@]}"
+      - name: Apply migrations, prove parity, and deploy affected functions
+        run: |
+          args=(--env dev)
+          if test -n "$MOMI_SERVICES"; then args+=(--services "$MOMI_SERVICES"); fi
+          if test -n "$MOMI_RETIRE_FUNCTIONS"; then
+            args+=(--retire-functions "$MOMI_RETIRE_FUNCTIONS")
+          fi
+          pnpm run deploy:apply -- "${args[@]}"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          MOMI_SERVICES: ${{ inputs.services }}
+          MOMI_RETIRE_FUNCTIONS: ${{ inputs.retire_functions }}
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: dev-release-${{ github.sha }}
+          path: MoMi/.momi/releases/*.json
+          if-no-files-found: error

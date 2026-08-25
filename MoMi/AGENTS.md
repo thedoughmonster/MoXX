@@ -52,8 +52,9 @@ capabilities. Modules remain separated by business capability.
 - Do not build, host, deploy, or change the retired services; see `docs/agent-control-relocation.md`.
 - GitHub Actions is the sole authority for repository code and Edge Function deployments. Local apply, Supabase Git deployment, and second deployers are forbidden by ADR `0006`.
 - Run focused changed-path checks, then one authoritative gate for the committed tree.
-- Only `.github/workflows/deploy-dev.yml` and `deploy-prod.yml` may invoke the
-  deployment apply command.
+- Only the MoXX repository-root `.github/workflows/deploy-dev.yml` and
+  `deploy-prod.yml` may invoke the deployment apply command. Imported workflows
+  under `MoMi/.github/workflows/` preserve history but are not active authority.
 - The Node 24 release coordinator is the sole normal release orchestrator.
   Development migrations run inside `deploy-dev.yml` through its pinned
   Supabase CLI, exact-project `--linked` transport, and short-lived login role.

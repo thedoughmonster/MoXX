@@ -18,3 +18,5 @@ recorded. Do not deploy from this repository before that cutover.
 
 The durable migration and control-plane plan is in
 [`docs/mox-384-execution-plan.md`](docs/mox-384-execution-plan.md).
+Root workflow and path-selection behavior is documented in
+[`docs/monorepo-automation.md`](docs/monorepo-automation.md).
