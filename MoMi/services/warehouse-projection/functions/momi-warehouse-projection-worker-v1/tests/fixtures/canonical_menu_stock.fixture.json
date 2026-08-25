@@ -1,0 +1,55 @@
+{
+  "menu": {
+    "restaurantGuid": "10000000-0000-4000-8000-000000000001",
+    "lastUpdated": "2026-07-14T16:00:00Z",
+    "menus": [
+      {
+        "guid": "20000000-0000-4000-8000-000000000001",
+        "name": "Dinner",
+        "visibility": ["POS", "ORDERING_PARTNERS"],
+        "menuGroups": [
+          {
+            "guid": "30000000-0000-4000-8000-000000000001",
+            "name": "Pizza",
+            "menuGroups": [],
+            "menuItems": [
+              {
+                "guid": "40000000-0000-4000-8000-000000000001",
+                "multiLocationId": "dm-cheese-pizza",
+                "name": "Cheese Pizza",
+                "price": 18,
+                "modifierGroupReferences": [10]
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "modifierGroupReferences": {
+      "10": {
+        "referenceId": 10,
+        "guid": "50000000-0000-4000-8000-000000000001",
+        "name": "Toppings",
+        "modifierOptionReferences": [20]
+      }
+    },
+    "modifierOptionReferences": {
+      "20": {
+        "referenceId": 20,
+        "guid": "40000000-0000-4000-8000-000000000002",
+        "multiLocationId": "dm-mushroom",
+        "name": "Mushroom",
+        "price": 2,
+        "modifierGroupReferences": []
+      }
+    }
+  },
+  "stock_exceptions": [
+    {
+      "guid": "40000000-0000-4000-8000-000000000001",
+      "itemGuidValidity": "VALID",
+      "status": "OUT_OF_STOCK"
+    }
+  ],
+  "expected_inferred_item_guid": "40000000-0000-4000-8000-000000000002"
+}

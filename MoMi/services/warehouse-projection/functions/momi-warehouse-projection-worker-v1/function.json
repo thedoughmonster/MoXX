@@ -1,0 +1,29 @@
+{
+  "function_key": "momi.warehouse_projection.toast.consume.v1",
+  "contract_version": 1,
+  "purpose": "Claim one capability-bound Toast event delivery and project its referenced source record.",
+  "owner_service": "warehouse-projection",
+  "function_type": "coordinator",
+  "capability": "ingest",
+  "boundary": "momi_internal",
+  "runtime": "supabase_edge",
+  "route_path": "/functions/v1/momi-warehouse-projection-worker-v1",
+  "authentication_policy_key": "durable.work_token.v1",
+  "entrypoint": "index.ts",
+  "input_schema": "contracts/input.schema.json",
+  "output_schema": "contracts/output.schema.json",
+  "retry_policy_key": "momi.event.delivery.retry.v1",
+  "idempotency_policy_key": "momi.event.delivery.v1",
+  "required_capabilities": [
+    "database_read",
+    "database_write"
+  ],
+  "declared_side_effects": [
+    "begins_event_delivery",
+    "projects_toast_event",
+    "acknowledges_event_delivery",
+    "reserves_next_event_delivery",
+    "schedules_delivery_retry",
+    "dead_letters_delivery"
+  ]
+}

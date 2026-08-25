@@ -1,0 +1,41 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "communications-operations",
+  "purpose": "Own append-only curated shop logs selected by authenticated users.",
+  "kind": "core_capability",
+  "service_type": "dataset_owner",
+  "lifecycle_status": "active",
+  "functions": [],
+  "contracts": {
+    "provides": ["momi.communications.create_user_flagged_shop_log.v1"],
+    "consumes": [
+      {"service": "communications-archive", "contract": "momi.communications.get_gateway_exchange_receipt.v1"}
+    ]
+  },
+  "database": {"read": ["momi_communications_operations"], "write": ["momi_communications_operations"]},
+  "network": {"outbound_hosts": []},
+  "secrets": [],
+  "configuration": [],
+  "deployment": {"owns": [], "depends_on": []},
+  "runtime_dependencies": [],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "momi.communications_operations",
+    "dataset_class": "domain",
+    "private_schema": "momi_communications_operations",
+    "private_relations": [
+      "momi_communications_operations.audit_events",
+      "momi_communications_operations.log_corrections",
+      "momi_communications_operations.shop_logs",
+      "momi_communications_operations.user_flag_selections"
+    ],
+    "private_routines": ["momi_communications_operations.create_user_flagged_shop_log_v1"],
+    "public_reads": [],
+    "public_commands": ["momi.communications.create_user_flagged_shop_log.v1"],
+    "public_routine_commands": [
+      {"contract": "momi.communications.create_user_flagged_shop_log.v1", "routine": "momi_communications_operations.create_user_flagged_shop_log_v1"}
+    ],
+    "emitted_events": []
+  }
+}

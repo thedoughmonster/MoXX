@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://momi.events.route.v1/output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ok", "function_key", "event_id", "disposition"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "function_key": { "const": "momi.events.route.v1" },
+    "event_id": { "type": "string" },
+    "disposition": {
+      "enum": ["healthy", "duplicate", "routed", "retrying", "invalid_request"]
+    },
+    "delivery_count": { "type": "integer", "minimum": 0 }
+  }
+}

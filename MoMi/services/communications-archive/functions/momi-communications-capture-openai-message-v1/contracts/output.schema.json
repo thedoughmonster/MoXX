@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://communications.capture_openai_message.v1/output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ok", "disposition", "archive_item_id", "evaluation_job_id"],
+  "properties": {
+    "ok": { "const": true },
+    "disposition": { "enum": ["stored", "duplicate"] },
+    "archive_item_id": { "type": "string", "format": "uuid" },
+    "evaluation_job_id": { "type": "string", "pattern": "^[0-9]+$" }
+  }
+}

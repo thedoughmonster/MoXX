@@ -1,0 +1,24 @@
+{
+  "function_key": "momi.model_execution.execute.v1",
+  "contract_version": 1,
+  "purpose": "Execute and retrieve one bounded provider response for an authenticated MoMi caller.",
+  "owner_service": "model-execution-gateway",
+  "function_type": "coordinator",
+  "capability": "decide",
+  "boundary": "momi_internal",
+  "runtime": "supabase_edge",
+  "route_path": "/functions/v1/momi-model-execution-gateway-v1",
+  "authentication_policy_key": "momi.model_execution.purpose_bound_caller.v1",
+  "entrypoint": "index.ts",
+  "input_schema": "contracts/input.schema.json",
+  "output_schema": "contracts/output.schema.json",
+  "timeout_policy_key": "momi.model_execution.profile_timeout.v1",
+  "retry_policy_key": "momi.model_execution.no_ambiguous_paid_retry.v1",
+  "idempotency_policy_key": "momi.model_execution.caller_key.v1",
+  "required_capabilities": ["database_read", "database_write", "model_inference"],
+  "declared_side_effects": [
+    "admits_model_call",
+    "calls_openai_responses_api",
+    "records_content_free_provider_metadata"
+  ]
+}

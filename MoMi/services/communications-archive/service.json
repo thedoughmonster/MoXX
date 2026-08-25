@@ -1,0 +1,86 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "communications-archive",
+  "purpose": "Preserve immutable generic JSON evidence and its source provenance.",
+  "kind": "core_capability",
+  "service_type": "raw_evidence_archive",
+  "lifecycle_status": "active",
+  "functions": [
+    "momi-communications-capture-human-message-v1",
+    "momi-communications-capture-openai-message-v1"
+  ],
+  "contracts": {
+    "provides": [
+      "momi.communications.capture_openai_message.v1",
+      "momi.communications.capture_operational_note.v1",
+      "momi.communications.capture_gateway_exchange.v1",
+      "momi.communications.capture_human_message.v1",
+      "momi.communications.get_gateway_exchange_receipt.v1"
+    ],
+    "consumes": [
+      { "service": "momi-event-routing", "contract": "momi.events.append.v1" }
+    ]
+  },
+  "database": {
+    "read": ["momi_communications", "toast_raw"],
+    "write": ["momi_communications", "toast_raw"]
+  },
+  "network": { "outbound_hosts": [] },
+  "secrets": ["SUPABASE_DB_URL", "MOMI_HUMAN_RELAY_SECRET"],
+  "configuration": [],
+  "deployment": { "owns": [], "depends_on": [] },
+  "runtime_dependencies": [
+    "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
+    "npm:postgres@3.4.3"
+  ],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "momi.raw_json_evidence",
+    "dataset_class": "raw_evidence",
+    "private_schemas": ["toast_raw"],
+    "private_relations": [
+      "momi_communications.archive_items",
+      "momi_communications.source_accounts",
+      "momi_communications.source_types",
+      "toast_raw.api_request_attempts",
+      "toast_raw.order_webhook_events",
+      "toast_raw.orders",
+      "toast_raw.resource_observations",
+      "toast_raw.resource_versions",
+      "toast_raw.stock_webhook_events",
+      "toast_raw.webhook_event_types",
+      "toast_raw.webhook_events",
+      "toast_raw.webhook_subscriptions"
+    ],
+    "private_routines": [
+      "momi_communications.capture_openai_message_v1",
+      "momi_communications.capture_operational_note_v1",
+      "momi_communications.capture_gateway_exchange_v1",
+      "momi_communications.capture_human_message_v1",
+      "momi_communications.get_gateway_exchange_receipt_v1",
+      "momi_communications.reject_archive_item_mutation",
+      "momi_events.emit_toast_resource_observation",
+      "momi_events.emit_toast_webhook_event",
+      "toast_raw.has_header", "toast_raw.reject_archive_mutation",
+      "toast_raw.webhook_headers_are_safe"
+    ],
+    "public_reads": [
+      "momi.communications.get_gateway_exchange_receipt.v1"
+    ],
+    "public_commands": [
+      "momi.communications.capture_openai_message.v1",
+      "momi.communications.capture_operational_note.v1",
+      "momi.communications.capture_gateway_exchange.v1",
+      "momi.communications.capture_human_message.v1"
+    ],
+    "public_routine_reads": [
+      {"contract": "momi.communications.get_gateway_exchange_receipt.v1", "routine": "momi_communications.get_gateway_exchange_receipt_v1"}
+    ],
+    "public_routine_commands": [
+      {"contract": "momi.communications.capture_gateway_exchange.v1", "routine": "momi_communications.capture_gateway_exchange_v1"},
+      {"contract": "momi.communications.capture_human_message.v1", "routine": "momi_communications.capture_human_message_v1"}
+    ],
+    "emitted_events": []
+  }
+}

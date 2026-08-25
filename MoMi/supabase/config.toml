@@ -1,0 +1,98 @@
+project_id = "momi-backend"
+
+[remotes.dev]
+project_id = "xtbraqnlskmqxinjxxdn"
+
+[api]
+enabled = true
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+major_version = 17
+
+[db.migrations]
+enabled = true
+schema_paths = []
+
+[db.seed]
+enabled = false
+sql_paths = []
+
+[edge_runtime]
+enabled = true
+policy = "per_worker"
+deno_version = 2
+
+[functions.toast-orders-webhook-ingest-v1]
+verify_jwt = false
+
+[functions.toast-orders-fetch-by-guid-v1]
+verify_jwt = false
+
+[functions.momi-toast-orders-get-by-id-v1]
+verify_jwt = false
+
+[functions.momi-order-alert-worker-v1]
+verify_jwt = false
+
+[functions.slack-order-alert-delivery-v1]
+verify_jwt = false
+
+[functions.toast-stock-webhook-ingest-v1]
+verify_jwt = false
+
+[functions.toast-webhooks-ingest-v1]
+verify_jwt = false
+
+[functions.toast-data-acquisition-v1]
+verify_jwt = false
+
+[functions.momi-event-router-v1]
+verify_jwt = false
+
+[functions.momi-warehouse-projection-worker-v1]
+verify_jwt = false
+
+[functions.momi-orders-get-by-id-v1]
+verify_jwt = false
+
+[functions.momi-orders-get-by-version-v1]
+verify_jwt = false
+
+[functions.momi-warehouse-payments-get-by-id-v1]
+verify_jwt = false
+
+[functions.momi-warehouse-menu-entities-get-by-id-v1]
+verify_jwt = false
+
+[functions.momi-warehouse-employees-get-by-id-v1]
+verify_jwt = false
+
+[functions.momi-warehouse-schedules-get-by-id-v1]
+verify_jwt = false
+
+[functions.momi-warehouse-stock-observations-get-by-id-v1]
+verify_jwt = false
+
+[functions.momi-communications-capture-openai-message-v1]
+verify_jwt = true
+
+[functions.momi-communications-evaluate-item-v1]
+verify_jwt = false
+
+[functions.momi-communications-gateway-v1]
+verify_jwt = false
+
+[functions.momi-communications-capture-human-message-v1]
+verify_jwt = false
+
+[functions.momi-model-execution-gateway-v1]
+verify_jwt = false
+
+[functions.momi-model-execution-webhook-v1]
+verify_jwt = false
+
+[functions.momi-model-execution-completion-worker-v1]
+verify_jwt = false

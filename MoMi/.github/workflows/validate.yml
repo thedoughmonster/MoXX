@@ -1,0 +1,66 @@
+name: Validate backend
+
+on:
+  pull_request:
+    branches: [dev, prod]
+  workflow_dispatch:
+    inputs:
+      base_sha:
+        description: Exact accepted base commit
+        required: true
+        type: string
+      head_sha:
+        description: Exact candidate commit
+        required: true
+        type: string
+      development_baseline_sha:
+        description: Exact trusted dev commit for migration immutability checks
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.event.pull_request.number || inputs.head_sha }}
+  cancel-in-progress: true
+
+jobs:
+  validate-final:
+    name: validate-final
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      MOMI_BASE_REF: ${{ github.event.pull_request.base.sha || inputs.base_sha }}
+      MOMI_HEAD_REF: ${{ github.event.pull_request.head.sha || inputs.head_sha }}
+      MOMI_PROD_REF: origin/prod
+      MOMI_DEV_REF: ${{ github.event.pull_request.base.sha || inputs.development_baseline_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.MOMI_HEAD_REF }}
+          fetch-depth: 0
+      - run: git fetch origin dev:refs/remotes/origin/dev prod:refs/remotes/origin/prod
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Explain exact final validation plan
+        run: >-
+          pnpm momi-impact plan --base "$MOMI_BASE_REF" --head "$MOMI_HEAD_REF"
+          --output .momi/impact-plan.json
+      - name: Run the one final gate
+        run: >-
+          pnpm momi-check changed --final --base "$MOMI_BASE_REF"
+          --head "$MOMI_HEAD_REF" --receipt .momi/validation-receipt.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: validation-${{ env.MOMI_HEAD_REF }}
+          path: |
+            .momi/impact-plan.json
+            .momi/validation-receipt.json
+          if-no-files-found: error

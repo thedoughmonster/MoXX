@@ -1,0 +1,18 @@
+{
+  "function_key": "toast.webhooks.webhook_ingest.v1",
+  "contract_version": 1,
+  "purpose": "Authenticate and preserve one registered Toast webhook event.",
+  "owner_service": "toast-webhook-ingestion",
+  "function_type": "ingest",
+  "capability": "ingest",
+  "boundary": "toast_inbound",
+  "runtime": "supabase_edge",
+  "route_path": "/functions/v1/toast-webhooks-ingest-v1",
+  "authentication_policy_key": "toast.webhooks.subscription_signature.v1",
+  "entrypoint": "index.ts",
+  "input_schema": "contracts/input.schema.json",
+  "output_schema": "contracts/output.schema.json",
+  "idempotency_policy_key": "toast.webhook.event_guid.v1",
+  "required_capabilities": ["database_write"],
+  "declared_side_effects": ["stores_raw_webhook_event"]
+}

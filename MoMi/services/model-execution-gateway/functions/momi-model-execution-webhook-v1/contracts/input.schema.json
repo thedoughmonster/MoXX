@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://model-execution/openai-webhook-v1/input",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["id", "type", "created_at", "data"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1, "maxLength": 240},
+    "type": {"enum": ["response.completed", "response.failed", "response.incomplete", "response.cancelled"]},
+    "created_at": {"type": "integer", "minimum": 1},
+    "data": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["id"],
+      "properties": {"id": {"type": "string", "minLength": 1, "maxLength": 240}}
+    }
+  }
+}

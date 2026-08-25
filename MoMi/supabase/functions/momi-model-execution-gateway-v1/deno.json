@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "edge-runtime": "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
+    "openai": "npm:openai@6.35.0",
+    "postgres": "npm:postgres@3.4.3"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://momi.orders.alert.evaluate.v1/input",
+  "title": "MoMi order alert worker trigger v1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["work_id", "trigger_token"],
+      "properties": {
+        "work_id": {
+          "oneOf": [
+            { "type": "string", "pattern": "^[1-9][0-9]*$" },
+            { "type": "integer", "minimum": 1, "maximum": 9007199254740991 }
+          ]
+        },
+        "trigger_token": { "type": "string", "format": "uuid" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_id", "message_id", "capability_token"],
+      "properties": {
+        "event_id": { "type": "string", "format": "uuid" },
+        "message_id": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+        "capability_token": { "type": "string", "format": "uuid" }
+      }
+    }
+  ]
+}

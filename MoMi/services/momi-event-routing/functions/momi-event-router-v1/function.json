@@ -1,0 +1,22 @@
+{
+  "function_key": "momi.events.route.v1",
+  "contract_version": 1,
+  "purpose": "Route one durable event reference to configured subscriber queues.",
+  "owner_service": "momi-event-routing",
+  "function_type": "coordinator",
+  "capability": "deliver",
+  "boundary": "momi_internal",
+  "runtime": "supabase_edge",
+  "route_path": "/functions/v1/momi-event-router-v1",
+  "authentication_policy_key": "durable.work_token.v1",
+  "entrypoint": "index.ts",
+  "input_schema": "contracts/input.schema.json",
+  "output_schema": "contracts/output.schema.json",
+  "idempotency_policy_key": "momi.event.delivery.v1",
+  "required_capabilities": ["database_read", "database_write"],
+  "declared_side_effects": [
+    "claims_event_routing_lease",
+    "queues_reference_only_subscriber_messages",
+    "records_delivery_state"
+  ]
+}

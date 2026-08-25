@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://toast.stock.webhook_ingest.v1/input",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["guid", "timestamp", "eventCategory", "eventType", "details"],
+  "properties": {
+    "guid": {
+      "type": "string",
+      "pattern": "\\S"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "eventCategory": { "const": "stock" },
+    "eventType": {
+      "enum": ["in_stock", "low_quantity", "out_of_stock"]
+    },
+    "details": {
+      "type": "object",
+      "additionalProperties": true
+    }
+  }
+}

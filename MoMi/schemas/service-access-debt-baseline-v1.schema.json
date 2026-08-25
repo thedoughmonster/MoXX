@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://momi.local/schemas/service-access-debt-baseline-v1.schema.json",
+  "type": "object", "additionalProperties": false,
+  "required": ["$schema", "schema_version", "generated_from", "notes", "findings"],
+  "properties": {
+    "$schema": {
+      "const": "https://momi.local/schemas/service-access-debt-baseline-v1.schema.json"
+    },
+    "schema_version": { "const": 1 },
+    "generated_from": { "const": "dev@fafe25d" },
+    "notes": { "type": "array", "minItems": 1,
+      "items": { "type": "string", "minLength": 20 } },
+    "findings": { "type": "array", "maxItems": 137,
+      "items": { "$ref": "#/$defs/finding" } }
+  },
+  "$defs": {
+    "finding": { "type": "object", "additionalProperties": false,
+      "required": ["rule_version", "rule_id", "subject", "evidence",
+        "fingerprint", "summary"],
+      "properties": {
+        "rule_version": { "const": 1 },
+        "rule_id": { "enum": ["direct_private_relation_access",
+          "direct_private_routine_call", "dynamic_event_name",
+          "dynamic_relation_identifier"] },
+        "subject": { "$ref": "#/$defs/source_path" },
+        "evidence": { "type": "object", "minProperties": 2,
+          "additionalProperties": { "type": "string", "minLength": 1 } },
+        "fingerprint": { "$ref": "#/$defs/fingerprint" },
+        "summary": { "type": "string", "minLength": 20 }
+      }
+    },
+    "source_path": { "type": "string", "pattern":
+      "^(services/[a-z][a-z0-9-]+/.+\\.ts|database/views/[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*\\.sql|database/routines/[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*--[0-9a-f]{12}\\.sql)$" },
+    "fingerprint": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+  }
+}

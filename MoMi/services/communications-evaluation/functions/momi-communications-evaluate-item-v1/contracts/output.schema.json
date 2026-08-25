@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ok", "function_key", "evaluation_job_id", "disposition"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "function_key": { "const": "momi.communications.evaluate_item.v1" },
+    "evaluation_job_id": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$"
+    },
+    "disposition": {
+      "enum": ["healthy", "invalid_request", "duplicate", "evaluated", "retrying"]
+    },
+    "evaluation_id": {
+      "type": "string",
+      "pattern": "^[1-9][0-9]*$"
+    },
+    "derived_count": { "type": "integer", "minimum": 0 }
+  }
+}

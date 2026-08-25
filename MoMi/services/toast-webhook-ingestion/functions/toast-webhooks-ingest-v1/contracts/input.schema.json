@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://toast.webhooks.webhook_ingest.v1/input",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["guid", "timestamp", "eventCategory", "eventType", "details"],
+  "properties": {
+    "guid": { "type": "string", "pattern": "\\S" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "eventCategory": { "type": "string" },
+    "eventType": { "type": "string" },
+    "details": { "type": "object", "additionalProperties": true }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "eventCategory": { "const": "menus" },
+        "eventType": { "const": "menus_updated" }
+      }
+    },
+    {
+      "properties": {
+        "eventCategory": { "enum": ["packaging", "partner"] },
+        "eventType": { "const": "packaging_updated" }
+      }
+    },
+    {
+      "properties": {
+        "eventCategory": { "const": "restaurant_availability" },
+        "eventType": {
+          "enum": ["availability_online", "availability_offline"]
+        }
+      }
+    },
+    {
+      "properties": {
+        "eventCategory": { "const": "restaurant_availability_toggle" },
+        "eventType": {
+          "enum": [
+            "toggle_availability_online",
+            "toggle_availability_offline"
+          ]
+        }
+      }
+    },
+    {
+      "properties": {
+        "eventCategory": { "const": "ordering_schedule" },
+        "eventType": { "const": "ordering_schedule_updated" }
+      }
+    }
+  ]
+}

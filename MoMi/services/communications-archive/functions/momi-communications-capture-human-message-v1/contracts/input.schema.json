@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source_account_key", "source_user_key", "source_conversation_key", "source_message_key", "sender_role", "content", "source_metadata", "idempotency_key", "occurred_at"],
+  "properties": {
+    "source_account_key": {"type": "string", "minLength": 1, "maxLength": 256},
+    "source_user_key": {"type": "string", "minLength": 1, "maxLength": 256},
+    "source_conversation_key": {"type": "string", "minLength": 1, "maxLength": 256},
+    "source_message_key": {"type": "string", "minLength": 1, "maxLength": 256},
+    "source_parent_message_key": {"type": ["string", "null"], "maxLength": 256},
+    "sender_role": {"enum": ["user", "assistant"]},
+    "content": {"type": "string", "maxLength": 240000},
+    "source_metadata": {"type": "object"},
+    "idempotency_key": {"type": "string", "minLength": 1, "maxLength": 512},
+    "occurred_at": {"type": "string", "format": "date-time"}
+  }
+}

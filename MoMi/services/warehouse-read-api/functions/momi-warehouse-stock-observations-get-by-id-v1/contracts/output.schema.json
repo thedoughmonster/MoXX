@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://momi.stock_observations.get_latest.v1/output",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "contract_key", "contract_version", "trace_id",
+        "work_id", "item_id", "location_id", "schema_version", "document",
+        "provenance", "freshness"],
+      "properties": {
+        "ok": { "const": true },
+        "contract_key": { "const": "momi.stock_observations.get_latest.v1" },
+        "contract_version": { "const": 1 },
+        "trace_id": { "type": "string", "format": "uuid" },
+        "work_id": { "type": "string" },
+        "item_id": { "type": "string", "format": "uuid" },
+        "location_id": { "type": "string", "format": "uuid" },
+        "schema_version": { "const": 1 },
+        "document": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["item_id", "location_id", "observed_at",
+            "stock_state", "quantity"],
+          "properties": {
+            "item_id": { "type": "string", "format": "uuid" },
+            "location_id": { "type": "string", "format": "uuid" },
+            "observed_at": { "type": "string", "format": "date-time" },
+            "stock_state": { "enum": ["IN_STOCK", "LOW_QUANTITY",
+              "OUT_OF_STOCK", "UNKNOWN"] },
+            "quantity": { "type": ["string", "null"] }
+          }
+        },
+        "provenance": { "type": "object" },
+        "freshness": { "type": "object" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "contract_key", "contract_version", "trace_id", "error"],
+      "properties": {
+        "ok": { "const": false },
+        "contract_key": { "const": "momi.stock_observations.get_latest.v1" },
+        "contract_version": { "const": 1 },
+        "trace_id": { "type": "string", "format": "uuid" },
+        "work_id": { "type": "string" },
+        "error": { "enum": ["invalid_request", "forbidden",
+          "contract_inactive", "observation_not_found", "read_failed"] }
+      }
+    }
+  ]
+}

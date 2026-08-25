@@ -1,0 +1,31 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "runtime-registry",
+  "purpose": "Own function, parameter, and trigger registration state.",
+  "kind": "core_capability",
+  "service_type": "dataset_owner",
+  "lifecycle_status": "active",
+  "functions": [],
+  "contracts": { "provides": [], "consumes": [] },
+  "database": { "read": ["momi_runtime"], "write": ["momi_runtime"] },
+  "network": { "outbound_hosts": [] },
+  "secrets": [],
+  "configuration": [],
+  "deployment": { "owns": [], "depends_on": [] },
+  "runtime_dependencies": [],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "momi.runtime_registry",
+    "dataset_class": "operational",
+    "private_schema": "momi_runtime",
+    "private_relations": [
+      "momi_runtime.function_parameter_map",
+      "momi_runtime.function_registry",
+      "momi_runtime.function_trigger_registry"
+    ],
+    "public_reads": [],
+    "public_commands": [],
+    "emitted_events": []
+  }
+}

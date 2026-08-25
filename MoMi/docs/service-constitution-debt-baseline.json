@@ -1,0 +1,9 @@
+{
+  "$schema": "https://momi.local/schemas/service-constitution-debt-baseline-v1.schema.json",
+  "schema_version": 1,
+  "generated_from": "dev@e53afcf",
+  "notes": [
+    "The historical declaration bootstrap is complete; no constitution finding is exempt."
+  ],
+  "findings": []
+}

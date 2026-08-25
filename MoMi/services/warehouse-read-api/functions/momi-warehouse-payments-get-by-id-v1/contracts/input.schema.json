@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://momi.payments.get_by_id.v1/input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["work_id", "entity_id", "capability_token"],
+  "properties": {
+    "work_id": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+    "entity_id": { "type": "string", "format": "uuid" },
+    "capability_token": { "type": "string", "format": "uuid" }
+  }
+}

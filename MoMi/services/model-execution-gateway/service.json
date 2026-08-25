@@ -1,0 +1,80 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "model-execution-gateway",
+  "purpose": "Execute bounded model-provider calls and record content-free operational metadata.",
+  "kind": "source_adapter",
+  "service_type": "procurement_adapter",
+  "lifecycle_status": "active",
+  "functions": [
+    "momi-model-execution-completion-worker-v1",
+    "momi-model-execution-gateway-v1",
+    "momi-model-execution-webhook-v1"
+  ],
+  "contracts": {
+    "provides": [
+      "momi.model_execution.complete_background.v1",
+      "momi.model_execution.execute.v1",
+      "momi.model_execution.openai_webhook.v1",
+      "momi.model_execution.retrieve.v1"
+    ],
+    "consumes": []
+  },
+  "database": {
+    "read": ["momi_model_execution"],
+    "write": ["momi_model_execution"]
+  },
+  "network": {"outbound_hosts": ["api.openai.com"]},
+  "secrets": [
+    "SUPABASE_DB_URL",
+    "OPENAI_API_KEY",
+    "OPENAI_WEBHOOK_SECRET",
+    "MOMI_MODEL_COMPLETION_CALLBACK_SECRET",
+    "MOMI_MODEL_GATEWAY_COMMUNICATIONS_SECRET",
+    "MOMI_MODEL_GATEWAY_EVALUATION_SECRET",
+    "MOMI_MODEL_GATEWAY_TRIAGE_SECRET"
+  ],
+  "configuration": ["DENO_DEPLOYMENT_ID", "MOMI_COMMUNICATIONS_COMPLETION_URL"],
+  "deployment": {
+    "owns": [
+      {"kind": "cron_job", "key": "momi-model-completion-recovery-v1"}
+    ],
+    "depends_on": [
+      {"kind": "vault_secret", "key": "momi_project_url"},
+      {"kind": "vault_secret", "key": "momi_publishable_key"}
+    ]
+  },
+  "runtime_dependencies": [
+    "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
+    "npm:openai@6.35.0",
+    "npm:postgres@3.4.3"
+  ],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "momi.model_execution",
+    "dataset_class": "operational",
+    "db_role": "svc_model_execution_gateway",
+    "private_schema": "momi_model_execution",
+    "private_relations": [
+      "momi_model_execution.calls",
+      "momi_model_execution.completion_work",
+      "momi_model_execution.http_exchanges",
+      "momi_model_execution.profiles",
+      "momi_model_execution.webhook_receipts"
+    ],
+    "private_routines": [
+      "momi_model_execution.admit_call_v1",
+      "momi_model_execution.accept_openai_webhook_v1",
+      "momi_model_execution.claim_completion_work_v1",
+      "momi_model_execution.complete_call_v1",
+      "momi_model_execution.complete_completion_work_v1",
+      "momi_model_execution.get_call_v1",
+      "momi_model_execution.retry_completion_work_v1",
+      "momi_model_execution.run_completion_recovery_v1",
+      "momi_model_execution.wake_completion_worker"
+    ],
+    "public_reads": [],
+    "public_commands": [],
+    "emitted_events": []
+  }
+}

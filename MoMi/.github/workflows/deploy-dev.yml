@@ -1,0 +1,81 @@
+name: Deploy development
+run-name: deploy-dev ${{ inputs.expected_sha }} ${{ inputs.plan_sha256 }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: Exact dev commit whose migrations are already applied
+        required: true
+        type: string
+      base_sha:
+        description: Exact validated diff base
+        required: true
+        type: string
+      services:
+        description: Comma-separated manifest-owned affected services
+        required: true
+        type: string
+      plan_sha256:
+        description: Exact release plan digest
+        required: true
+        type: string
+      validated_tree:
+        description: Exact validated Git tree
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: dev
+    env:
+      MOMI_PROD_REF: origin/prod
+      MOMI_EXPECTED_SHA: ${{ inputs.expected_sha }}
+      MOMI_PLAN_SHA256: ${{ inputs.plan_sha256 }}
+      MOMI_VALIDATED_TREE: ${{ inputs.validated_tree }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+      - name: Verify exact development commit
+        shell: bash
+        run: |
+          test "$MOMI_EXPECTED_SHA" = "$GITHUB_SHA"
+          test "$MOMI_EXPECTED_SHA" = "$(git rev-parse HEAD)"
+      - run: git fetch origin prod:refs/remotes/origin/prod
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.7.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Recompute and verify affected deployment plan
+        run: |
+          pnpm momi-impact plan --base "${{ inputs.base_sha }}" \
+            --head "$MOMI_EXPECTED_SHA" --output .momi/release-plan.json
+          node scripts/assert_bound_deployment_plan.ts \
+            --plan .momi/release-plan.json \
+            --digest "$MOMI_PLAN_SHA256" \
+            --head "$MOMI_EXPECTED_SHA" \
+            --tree "$MOMI_VALIDATED_TREE" \
+            --services "${{ inputs.services }}"
+      - run: pnpm run deploy:apply -- --env dev --services "${{ inputs.services }}"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dev-release-${{ github.sha }}
+          path: .momi/releases/*.json
+          if-no-files-found: error

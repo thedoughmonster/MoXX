@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://communications.capture_operational_note.v1/input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["source_account_key", "source_user_key", "note_type", "summary"],
+  "properties": {
+    "source_account_key": { "type": "string", "minLength": 1 },
+    "source_user_key": { "type": "string", "minLength": 1 },
+    "note_type": {
+      "enum": [
+        "decision", "task", "question", "fact", "idea", "risk",
+        "preference", "correction", "outcome", "other"
+      ]
+    },
+    "summary": { "type": "string", "minLength": 1 },
+    "supporting_context": { "type": ["string", "null"] },
+    "open_questions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "actors": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    },
+    "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+    "source_surface": { "type": "string", "minLength": 1, "default": "chatgpt" },
+    "source_conversation_key": { "type": ["string", "null"] },
+    "conversation_hint": { "type": ["string", "null"] },
+    "occurred_at": { "type": ["string", "null"], "format": "date-time" },
+    "idempotency_key": { "type": ["string", "null"] },
+    "capture_actor": { "type": ["string", "null"] },
+    "tool_version": { "type": ["string", "null"] },
+    "model_version": { "type": ["string", "null"] },
+    "prompt_version": { "type": ["string", "null"] }
+  }
+}

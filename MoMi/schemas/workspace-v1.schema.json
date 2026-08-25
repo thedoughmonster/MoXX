@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://momi.local/schemas/workspace-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "layout",
+    "paths",
+    "toolchain",
+    "environments",
+    "database_schemas",
+    "policies"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": 1 },
+    "layout": { "enum": ["transition", "service_workspaces"] },
+    "paths": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["services", "function_adapters", "migrations", "retirements"],
+      "properties": {
+        "services": { "const": "services" },
+        "function_adapters": { "const": "supabase/functions" },
+        "migrations": { "const": "supabase/migrations" },
+        "retirements": { "const": "retirements" }
+      }
+    },
+    "toolchain": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["node", "pnpm", "supabase_cli", "deno"],
+      "properties": {
+        "node": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "pnpm": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "supabase_cli": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "deno": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" }
+      }
+    },
+    "environments": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dev", "prod"],
+      "properties": {
+        "dev": { "$ref": "#/$defs/environment" },
+        "prod": { "$ref": "#/$defs/environment" }
+      }
+    },
+    "database_schemas": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }
+    },
+    "policies": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_handwritten_lines",
+        "hard_max_handwritten_lines",
+        "minimum_shared_consumers"
+      ],
+      "properties": {
+        "max_handwritten_lines": { "type": "integer", "minimum": 1 },
+        "hard_max_handwritten_lines": { "type": "integer", "minimum": 1 },
+        "minimum_shared_consumers": { "type": "integer", "minimum": 2 }
+      }
+    }
+  },
+  "$defs": {
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["branch", "project_ref"],
+      "properties": {
+        "branch": { "type": "string", "minLength": 1 },
+        "project_ref": { "type": "string", "pattern": "^[a-z]{20}$" }
+      }
+    }
+  }
+}

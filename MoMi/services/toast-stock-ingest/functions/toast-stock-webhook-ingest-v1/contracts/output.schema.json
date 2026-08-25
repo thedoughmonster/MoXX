@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://toast.stock.webhook_ingest.v1/output",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok"],
+      "properties": {
+        "ok": { "const": true }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ok", "disposition"],
+      "properties": {
+        "ok": { "const": true },
+        "disposition": {
+          "enum": ["stored", "duplicate"]
+        }
+      }
+    }
+  ]
+}

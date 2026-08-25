@@ -1,0 +1,45 @@
+{
+  "name": "momi-backend",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": "24.14.x",
+    "pnpm": "11.7.x"
+  },
+  "scripts": {
+    "architecture:check": "node scripts/check_architecture.ts",
+    "catalog:generate": "node scripts/generate_function_catalog.ts",
+    "catalog:check": "node scripts/check_catalog.ts",
+    "check": "node scripts/check.ts",
+    "dev:guard": "node scripts/check_dev_branch_clean.ts",
+    "constitution:check": "node scripts/check_service_constitution.ts",
+    "database-access:renew": "node scripts/run_renew_database_access.ts",
+    "deploy:apply": "node scripts/run_deploy_apply.ts",
+    "deploy:plan": "node scripts/run_impact_plan.ts plan",
+    "edge:check": "node scripts/check_edge_functions.ts",
+    "inventory": "node scripts/run_inventory.ts",
+    "momi-check": "node scripts/run_check_changed.ts",
+    "momi-impact": "node scripts/run_impact_plan.ts",
+    "momi-receipt": "node scripts/run_receipt_summarize.ts",
+    "local:db-export": "node local-tools/postgres-nas-export/export.ts",
+    "local:db-restore-drill": "node local-tools/postgres-nas-export/restore_drill.ts",
+    "local:db-verify": "node local-tools/postgres-nas-export/verify.ts",
+    "local:legacy-recipe-import": "node local-tools/legacy-recipe-import/main.ts",
+    "test:legacy-recipe-postgres": "node tests/run_legacy_recipe_postgres_integration.ts",
+    "migration:check": "node scripts/check_migrations.ts",
+    "quality:check": "node scripts/check_source_quality.ts && node scripts/check_quality_report.ts",
+    "quality:generate": "node scripts/generate_quality_report.ts",
+    "release": "node scripts/run_release.ts",
+    "release:dev": "node scripts/run_release.ts --env dev",
+    "release:prod": "node scripts/run_release.ts --env prod",
+    "test": "node scripts/run_tests.ts"
+  },
+  "devDependencies": {
+    "ajv": "8.20.0",
+    "deno": "2.9.2",
+    "pgsql-ast-parser": "12.0.2",
+    "supabase": "2.109.1",
+    "typescript": "6.0.3"
+  }
+}
