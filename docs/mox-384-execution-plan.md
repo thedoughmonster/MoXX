@@ -31,6 +31,11 @@ Linear umbrella: [MOX-384](https://linear.app/moxx-workboard/issue/MOX-384)
 - The dirty Elixir rollback is incomplete and is not a buildable source state.
 - A local MoXX draft exists at `/home/ubuntu/MoXX`.
 - Full source histories have been imported without squashing.
+- Root monorepo governance and automation are complete at commit
+  `4399b13003b55a9879f4b39359bb8503e789a7fb`: active workflows now live at the
+  repository root, product checks retain separate toolchains, deployment paths
+  and artifacts are product-prefixed, and cross-product changes require an
+  explicit interface statement.
 - The local watchdog foundation exists at `/home/ubuntu/symphony-watchdog` and
   passes its typecheck, fixtures, lease, and loopback health smoke tests.
 - The original MoMi and MoXi repositories have not been modified.
@@ -59,9 +64,9 @@ MOX-384
 MOX-392 + MOX-395 + MOX-401 → MOX-394 integrated canary
 ```
 
-MOX-391, MOX-393, and MOX-397 are Done. Remaining implementation leaves are in
-Todo, and native blockers prevent later leaves from being mistaken for ready
-work. None has `ready-package`.
+MOX-391, MOX-388, MOX-393, and MOX-397 are Done. Remaining implementation
+leaves are in Todo, and native blockers prevent later leaves from being
+mistaken for ready work. None has `ready-package`.
 
 ## Workstream A: MoXX monorepo
 
@@ -70,8 +75,11 @@ Parent: [MOX-386](https://linear.app/moxx-workboard/issue/MOX-386)
 1. [MOX-391](https://linear.app/moxx-workboard/issue/MOX-391) imports and
    verifies full source histories. The local import and tree verification are
    already complete; its manifest is in `repository-migration-manifest.md`.
-2. [MOX-388](https://linear.app/moxx-workboard/issue/MOX-388) makes root CI,
-   hooks, Dependabot, governance, and deployment path routing monorepo-aware.
+2. [MOX-388](https://linear.app/moxx-workboard/issue/MOX-388) made root CI,
+   hooks, Dependabot, governance, and deployment path routing monorepo-aware at
+   commit `4399b13003b55a9879f4b39359bb8503e789a7fb`. Verified evidence includes
+   14 active root workflows, YAML/JSON parsing, static authority validation,
+   product-routing fixtures, and monorepo-aware hook fixtures.
 3. [MOX-389](https://linear.app/moxx-workboard/issue/MOX-389) runs both
    authoritative product validations and deployment dry-runs.
 4. [MOX-392](https://linear.app/moxx-workboard/issue/MOX-392) creates the
