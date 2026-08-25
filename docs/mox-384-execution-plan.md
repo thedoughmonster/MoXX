@@ -70,11 +70,13 @@ Linear umbrella: [MOX-384](https://linear.app/moxx-workboard/issue/MOX-384)
   disabled in MoXX, active GitHub-Issues workflows are removed, and the debt
   registry keys accepted findings to Linear issues including new MOX-406 for
   the former #572 remediation scope. This authority transition landed through
-  PR #19 as `0985a25a7c97ac2d50163602a976cb566f5404d8`. MOX-392 is complete:
-  all four write-only provider secret placements are present by name, the
-  shared Supabase value and Cloudflare credentials passed canonical GET-only
-  preflights, repository variables remain empty, and no active value was
-  exposed. Exact evidence is in `mox-392-publication-receipt.md`.
+  PR #19 as `0985a25a7c97ac2d50163602a976cb566f5404d8`. MOX-392 remains In
+  Progress: all four placements are present by name and the Cloudflare and dev
+  Supabase GET-only preflights passed, but the protected `prod` environment
+  rejected the dev-ref run before steps. The immutable `prod` ref predates the
+  preflight workflow, so its credential path is not directly evidenced. No
+  active value was exposed; repository variables remain empty. Exact evidence
+  is in `mox-392-publication-receipt.md`.
 
 ## Native dependency graph
 
@@ -95,10 +97,11 @@ MOX-392 + MOX-395 + MOX-401 → MOX-394 integrated canary
 ```
 
 MOX-391, MOX-388, MOX-389, MOX-393, MOX-396, MOX-395, and MOX-397 are Done.
-MOX-392 is also Done. Publication, mapping, Linear authority, four names-only
-credential placements, and non-interactive provider validation are complete.
-MOX-390 is now the next product-chain leaf, subject to its live Linear state and
-operator acceptance of the integrated evidence.
+MOX-392 remains the active product-chain leaf. Publication, mapping, Linear
+authority, and all four names-only placements are complete, but direct prod
+credential validation is blocked by the protected immutable prod ref.
+MOX-390 remains blocked by MOX-392. MOX-405 is the next executable leaf in the
+overall native dependency graph because its sole blocker, MOX-397, is Done.
 Remaining implementation leaves are in Todo, and native blockers prevent later
 leaves from being mistaken for ready work. None has `ready-package`.
 
@@ -129,10 +132,11 @@ Parent: [MOX-386](https://linear.app/moxx-workboard/issue/MOX-386)
    PR #19 landed that transition at
    `0985a25a7c97ac2d50163602a976cb566f5404d8` with authoritative backend,
    CodeQL, Linear-mapping, and monorepo checks.
-   It is Done. Repository secrets `CLOUDFLARE_ACCOUNT_ID` and
+   It remains In Progress. Repository secrets `CLOUDFLARE_ACCOUNT_ID` and
    `CLOUDFLARE_API_TOKEN` and environment secret `SUPABASE_ACCESS_TOKEN` in
-   both `dev` and `prod` are present by name. Canonical GET-only Cloudflare and
-   Supabase preflights passed without deployment or provider mutation; see
+   both `dev` and `prod` are present by name. The GET-only Cloudflare and dev
+   Supabase preflights passed, but the prod environment rejected the dev-ref
+   run before steps and its immutable ref lacks the preflight workflow; see
    `mox-392-publication-receipt.md`.
 5. [MOX-390](https://linear.app/moxx-workboard/issue/MOX-390) inventories and
    dispositions active source-repository work before adding reversible
