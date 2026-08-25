@@ -55,10 +55,14 @@ Linear umbrella: [MOX-384](https://linear.app/moxx-workboard/issue/MOX-384)
 - GitHub SSH access works. MOX-395 replaced the stale global Git SSH executable
   path with `/usr/bin/ssh`, preserved its options and file mode, and retained a
   hash-addressed backup of the prior configuration.
-- GitHub CLI authentication is invalid and must be renewed before remote
-  creation or repository-setting changes. This was rechecked after MOX-389
-  completed: the active `thedoughmonster` token remains invalid, MoXX still has
-  no remote, and MOX-392 was not started.
+- GitHub CLI authentication is valid as `thedoughmonster` after a device-flow
+  renewal, and the host uses SSH Git transport. GitHub's current account plan
+  cannot protect a private repository, so the operator explicitly authorized a
+  public MoXX repository. A redacted full-history audit classified every scanner
+  candidate as a synthetic test marker, digest, identifier, or fixture value;
+  no credential or sensitive tracked filename was found. MOX-392 is In Progress
+  and MoXX still has no remote. Exact evidence is in
+  `mox-392-publication-receipt.md`.
 
 ## Native dependency graph
 
@@ -79,8 +83,10 @@ MOX-392 + MOX-395 + MOX-401 → MOX-394 integrated canary
 ```
 
 MOX-391, MOX-388, MOX-389, MOX-393, MOX-396, MOX-395, and MOX-397 are Done.
-MOX-392 is the next leaf in the product dependency chain, but its explicit
-GitHub authentication and remote-authority precondition is unavailable.
+MOX-392 is the active leaf in the product dependency chain. Authentication is
+valid, the operator authorized public visibility to make native protections
+available, and the full-history disclosure gate is complete. Publication and
+mapping verification remain in progress.
 Remaining implementation leaves are in Todo, and native blockers prevent later
 leaves from being mistaken for ready work. None has `ready-package`.
 
