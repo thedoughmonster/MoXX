@@ -34,6 +34,13 @@ const workflows = new Map(
 )
 
 for (const [name, source] of workflows) {
+  for (const match of source.matchAll(/uses:\s+([^\s#]+)/g)) {
+    assert.match(
+      match[1],
+      /@[0-9a-f]{40}$/,
+      `${name} must pin every action to an immutable commit SHA`,
+    )
+  }
   for (const match of source.matchAll(/secrets\.([A-Za-z0-9_]+)/g)) {
     assert.match(match[1], /^[A-Z][A-Z0-9_]*$/, `${name} has an invalid secret name`)
   }
@@ -120,6 +127,8 @@ assert.match(authority, /imported[\s\S]*retained[\s\S]*not execution authorities
 assert.match(authority, /deploy-dev\.yml[\s\S]*deploy-prod\.yml/)
 
 const template = read(".github/pull_request_template.md")
+assert.match(template, /^Owning Linear issue:\s*MOX-$/m)
+assert.doesNotMatch(template, /^Owning issue:\s*#/m)
 assert.match(template, /^Interface impact:\s*none$/m)
 assert.match(template, /touches both `MoMi\/` and `MoXi\/`/)
 

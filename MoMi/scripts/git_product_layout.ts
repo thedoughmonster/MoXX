@@ -42,6 +42,28 @@ class GitProductLayout {
     )
     if (directWorkspace.status === 0) return commit
     const productRoot = this.productPrefix.replace(/\/$/, "")
+    const firstParentHistory = this.git([
+      "rev-list", "--first-parent", commit,
+    ]).split("\n")
+    for (const candidate of firstParentHistory) {
+      const productTree = spawnSync(
+        "git", ["rev-parse", `${candidate}:${productRoot}`],
+        { encoding: "utf8" },
+      )
+      if (productTree.status !== 0) continue
+      const [, , ...importParents] = this.git([
+        "rev-list", "--parents", "-n", "1", candidate,
+      ]).split(" ")
+      for (const parent of importParents) {
+        const workspace = spawnSync(
+          "git", ["cat-file", "-e", `${parent}:workspace.json`],
+          { encoding: "utf8" },
+        )
+        if (workspace.status !== 0) continue
+        const parentTree = this.git(["rev-parse", `${parent}^{tree}`])
+        if (parentTree === productTree.stdout.trim()) return parent
+      }
+    }
     const tree = this.git(["rev-parse", `${commit}:${productRoot}`])
     const rows = this.git(["log", "--all", "--format=%H%x09%T"]).split("\n")
     for (const row of rows) {

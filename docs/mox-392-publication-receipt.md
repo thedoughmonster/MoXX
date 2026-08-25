@@ -1,79 +1,125 @@
 # MOX-392 publication receipt
 
-Status: in progress; public publication authorized
+Status: in progress; publication and mapping complete, provider credential gate open
 
-## Identity
+## Published identity
 
-- Execution branch: `mox-392-publish-remote`
-- Accepted monorepo tip: `4ada2c9b2d4d19aa2627165cc5c6f1277e5284d9`
-- Accepted production import: `3e6a4f2c1a896c69998f6a658f2a38225abfbd59`
-- Accepted MOX-348 branch: `508b7fb663579f9257295581c56b2b7735602f6c`
-- Linear blocker MOX-389: Done
+- Repository: `https://github.com/thedoughmonster/MoXX`
+- Visibility: public, by explicit operator amendment to MOX-392
+- Default branch: `dev`
+- Initial development publication tip: `8543422081f2268dd46d349e1f58c4522ca2ec20`
+- Published production tip: `3e6a4f2c1a896c69998f6a658f2a38225abfbd59`
+- Published MOX-348 branch: `508b7fb663579f9257295581c56b2b7735602f6c`
+- Accepted development tree: `30412b2d6d1c733fd75549b419a622310caf753d`
+- Accepted production tree: `07cb28ab15aa0d3bd1e0fe3ee8988aa6afe4a820`
 
-## Verified preconditions
+The history-only merge `8543422081f2268dd46d349e1f58c4522ca2ec20`
+joins the accepted production import into development ancestry. Its tree is
+exactly the accepted development tree, so no product file changed and imported
+history was not rewritten. There were no accepted tags to publish.
 
-- GitHub CLI authentication was renewed through GitHub's device flow without
-  printing or copying the credential into the repository, receipt, or Linear.
-- `gh auth status` verifies the active `thedoughmonster` account, SSH Git
-  protocol, and `repo` plus `read:org` scopes.
-- `thedoughmonster/MoXX` does not exist. The local MoXX repository has no
-  remote, so repository creation would not overwrite competing history.
-- Source repositories are private. Their settings, branches, credentials, and
-  contents were inspected read-only and were not changed.
-- The required environment and credential names were inventoried without
-  reading credential values.
+## Authorization and disclosure gate
 
-## Visibility authorization
+The GitHub account cannot enable native protection for a private repository on
+its current plan. The operator explicitly authorized public visibility for
+`thedoughmonster/MoXX` only; neither source repository was made public or
+otherwise changed.
 
-MOX-392 requires protected `dev` and `prod` branches and direct evidence that
-unauthorized pushes fail. The current GitHub account cannot enable either
-native protection mechanism for a private repository:
+Before publication, official Gitleaks `8.30.1` scanned all reachable history.
+The redacted scan covered 438 commits and classified 80 candidates as synthetic
+test markers, digests, internal identifiers, cron keys, or test UUIDs. Neither
+malformed PEM test marker parsed as a private key, no candidate matched a known
+provider-token prefix or JWT shape, and a history-wide filename inventory found
+no tracked credential or private-key file. No history rewrite was required.
 
-- Classic branch-protection reads on the existing private MoMi `dev` and
-  `prod` branches and MoXi `main` branch return HTTP 403:
-  `Upgrade to GitHub Pro or make this repository public to enable this feature.`
-- Repository-ruleset reads on both existing private source repositories return
-  the same HTTP 403 and upgrade requirement.
-- The authenticated account belongs to no organization whose plan could own
-  the repository with different private-repository governance capability.
+## Repository governance
 
-The operator then explicitly authorized making `thedoughmonster/MoXX` public
-if that enables the required native protections. This amends MOX-392's original
-private-visibility constraint for this repository only; it does not authorize
-changing either source repository's visibility or settings.
+- Repository settings retain merge, squash, and rebase merges, disable
+  auto-merge and automatic branch deletion, enable issues and projects, and
+  disable wiki and discussions.
+- `dev` is protected by repository ruleset `21423436` (`Protect dev`). Changes
+  require a pull request, resolved review conversations, and both universal
+  GitHub Actions checks. The sole owner is not deadlocked by a mandatory
+  self-review.
+- `prod` is protected by repository ruleset `21423602` (`Protect prod`). Only
+  fast-forward commits carrying both universal checks can advance it. This
+  retains the exact-commit `dev` to `prod` promotion contract without granting
+  a direct-push bypass.
+- Both rulesets prohibit deletion and force pushes, require
+  `monorepo-routing` and `monorepo-static-config` from GitHub Actions integration
+  `15368`, and report `current_user_can_bypass: never`.
+- Third-party Actions must be pinned by immutable SHA. Default workflow-token
+  permissions are read-only and cannot approve pull requests. The first live
+  CodeQL run exposed two inherited mutable `@v4` references; both are now pinned
+  to the verified CodeQL `v4.37.8` commit, and root validation rejects any future
+  unpinned active action.
+- Dependabot vulnerability alerts, automated security fixes, and private
+  vulnerability reporting are enabled.
+- The `dev`, `prod`, and `prod-promotion` environments match the source branch
+  policies: `dev`, `prod`, and `dev`, respectively.
+- Pull requests name exactly one authoritative `MOX-…` Linear issue, and that
+  identifier must equal the sole Linear identifier in the head branch. Missing,
+  mismatched, or ambiguous mappings fail closed without duplicating work into a
+  GitHub issue ledger.
+- Root CODEOWNERS, Dependabot, workflows, and path-routing configuration are
+  present in the published tree.
 
-## Public-disclosure audit
+## Direct verification
 
-- Official Gitleaks `8.30.1` was downloaded from `gitleaks/gitleaks`; its Linux
-  x64 archive matched the publisher's checksum before execution.
-- A redacted scan covered all reachable refs and reported 80 candidates across
-  438 commits and approximately 8.91 MB of patches.
-- All candidates were classified without publishing their values: 2 are
-  deliberately malformed PEM markers in a credential-redaction test, 2 are
-  64-character `manifest_sha256` digests, and the remaining candidates are
-  internal function/policy identifiers, cron keys, or test UUIDs.
-- Neither malformed PEM marker parses as a private key. No candidate matches a
-  known provider-token prefix or JWT shape.
-- A history-wide sensitive-filename inventory found only `.env.example` files;
-  no tracked `.env`, private key, certificate, keystore, credential, or secret
-  data file was found.
-- The public-disclosure audit therefore found no credential requiring history
-  rewrite or rotation before publication. Imported history remains unchanged.
+- Before the governance pull request, a fresh `dev` clone resolved remote `dev`
+  to `8543422081...` and tree
+  `30412b2d...`.
+- A separate fresh `prod` clone resolved to `3e6a4f2c...` and tree
+  `07cb28ab...`.
+- Remote `mox-348-centralize-ui-readiness` resolved to `508b7fb6...`.
+- An isolated empty commit pushed directly to `dev` was rejected with GH013:
+  a pull request and two required checks were missing.
+- The same unvalidated fast-forward pushed directly to `prod` was rejected with
+  GH013 because both required checks were missing.
+- Neither protection probe changed a remote ref.
+- Root automation validation still discovers all 14 workflows, and both root
+  routing/static-config tests pass after the history join.
+- The focused issue-mapping validation passes positive, missing, mismatched, and
+  ambiguous branch cases. PR `#16` is linked directly on Linear MOX-392.
 
-## Mutations and non-mutations
+## Repository mapping and credentials
 
-- Renewed the existing host GitHub CLI authentication as `thedoughmonster`.
-- Created only the local execution branch `mox-392-publish-remote`.
-- Did not create `thedoughmonster/MoXX`.
-- Did not add a Git remote or push any branch or tag.
-- Did not move local `dev`, `prod`, or the ported MOX-348 branch.
-- Did not create environments, variables, secrets, rules, or branch settings.
-- Did not change either source repository or any provider.
-- Did not change Symphony repository mappings or restart Symphony.
+Symphony remains stopped and disabled. Only the existing dirty deployment
+workflow's repository-routing fields changed:
 
-## Next publication actions
+- Linear routing label: `moxx` (a unique team label created for the monorepo)
+- Repository context: `thedoughmonster/MoXX`
+- Clone target: SSH, depth one, explicit `dev`
 
-Join the accepted production import into the development publication ancestry
-without changing the accepted dev or prod product trees, create the public
-repository without initialization, publish only the authorized refs, then
-enable and directly verify native branch protections before any mapping cutover.
+The workflow parses successfully in a transient unit using the exact stopped
+service identity, environment file, `HOME`, `PATH`, and isolated `CODEX_HOME`.
+That boundary cloned `dev` non-interactively. One bounded Linear viewer query
+returned HTTP 200, a present viewer, and zero GraphQL errors without printing
+the identity or token. The corrected global SSH command still resolves
+`/usr/bin/ssh`; it does not depend on `/opt/agent-tools/bin/ssh`.
+
+## Remaining external gate
+
+The public repository has no provider secret values and no copied provider
+variable values. A proposed direct transfer of values from the private source
+was rejected before execution because repository variables in a public target
+may themselves disclose sensitive configuration. Existing GitHub secret values
+cannot be read back for safe copying. No empty, placeholder, or fabricated
+credential was created.
+
+MOX-392 therefore remains In Progress until an operator explicitly approves
+each non-secret value for the public destination and securely re-enters the
+required secret values. The required names are inventoried without their values
+in the Linear workpad. All other publication, protection, mapping, clone, and
+credential-path criteria are directly verified.
+
+## Preservation
+
+- Source MoMi and MoXi repositories and all their settings are unchanged.
+- The temporary GitHub mirror issue created while diagnosing the inherited
+  ledger was closed as not planned; Linear MOX-392 remains the sole authority.
+- Source repositories remain authoritative until MOX-390 performs the
+  separately governed cutover and reversible tombstoning work.
+- No deployment or provider configuration changed.
+- Symphony was not installed, enabled, started, or restarted.
+- The stock `symphony/elixir/` tree and all recovery packages remain untouched.
