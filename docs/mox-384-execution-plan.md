@@ -97,6 +97,7 @@ Parent: [MOX-385](https://linear.app/moxx-workboard/issue/MOX-385)
    hash-verified, secret-free recovery package for the dirty Elixir tree.
 2. [MOX-396](https://linear.app/moxx-workboard/issue/MOX-396) restores only
    `elixir/` from committed stock and proves non-Elixir files are unchanged.
+   It requires explicit operator authorization even though MOX-393 is Done.
 3. [MOX-395](https://linear.app/moxx-workboard/issue/MOX-395) builds and tests
    stock Elixir and verifies the VPS service boundary while the service remains
    stopped.
@@ -153,7 +154,7 @@ Run independently:
 ### Wave 2: local implementation
 
 - MOX-388 after MOX-391
-- MOX-396 after MOX-393
+- MOX-396 after MOX-393 and explicit operator authorization
 - MOX-405 after MOX-397
 
 ### Wave 3: policy and validation
