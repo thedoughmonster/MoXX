@@ -46,7 +46,8 @@ Linear umbrella: [MOX-384](https://linear.app/moxx-workboard/issue/MOX-384)
   passes lint, types, 29 unit tests, 20 Playwright tests, its build, and both
   Cloudflare dry-runs. MoMi passes all nine hard-stop checks, all Edge Functions,
   and 1,422 tests against the exact local dev/prod histories. Exact evidence is
-  in `mox-389-validation-receipt.md`.
+  in `mox-389-validation-receipt.md`; the completion evidence is committed at
+  `78a8769ac78c0c889d3c1621a0e1fde1f557b4f6`, and the issue is Done.
 - The local watchdog foundation exists at `/home/ubuntu/symphony-watchdog` and
   passes its typecheck, fixtures, lease, and loopback health smoke tests.
 - The original MoMi and MoXi repositories have not been modified.
@@ -55,7 +56,9 @@ Linear umbrella: [MOX-384](https://linear.app/moxx-workboard/issue/MOX-384)
   path with `/usr/bin/ssh`, preserved its options and file mode, and retained a
   hash-addressed backup of the prior configuration.
 - GitHub CLI authentication is invalid and must be renewed before remote
-  creation or repository-setting changes.
+  creation or repository-setting changes. This was rechecked after MOX-389
+  completed: the active `thedoughmonster` token remains invalid, MoXX still has
+  no remote, and MOX-392 was not started.
 
 ## Native dependency graph
 
@@ -75,11 +78,11 @@ MOX-384
 MOX-392 + MOX-395 + MOX-401 → MOX-394 integrated canary
 ```
 
-MOX-391, MOX-388, MOX-393, MOX-396, MOX-395, and MOX-397 are Done. MOX-389's
-implementation and every acceptance validation are complete locally; its final
-evidence/status update follows the completion commit. Remaining implementation
-leaves are in Todo, and native blockers prevent later leaves from being mistaken
-for ready work. None has `ready-package`.
+MOX-391, MOX-388, MOX-389, MOX-393, MOX-396, MOX-395, and MOX-397 are Done.
+MOX-392 is the next leaf in the product dependency chain, but its explicit
+GitHub authentication and remote-authority precondition is unavailable.
+Remaining implementation leaves are in Todo, and native blockers prevent later
+leaves from being mistaken for ready work. None has `ready-package`.
 
 ## Workstream A: MoXX monorepo
 
@@ -93,11 +96,13 @@ Parent: [MOX-386](https://linear.app/moxx-workboard/issue/MOX-386)
    commit `4399b13003b55a9879f4b39359bb8503e789a7fb`. Verified evidence includes
    14 active root workflows, YAML/JSON parsing, static authority validation,
    product-routing fixtures, and monorepo-aware hook fixtures.
-3. [MOX-389](https://linear.app/moxx-workboard/issue/MOX-389) is complete locally.
+3. [MOX-389](https://linear.app/moxx-workboard/issue/MOX-389) is Done.
    Layout adaptations are committed at `f3870d1ea5e026c5b7622e90e15dee644f19c6a2`;
    both full product contracts, dev/prod identity checks, root routing, migration
    order, backend impact planning, UI build equivalence, and provider dry-runs
-   pass. See `mox-389-validation-receipt.md`.
+   pass. Completion evidence is committed at
+   `78a8769ac78c0c889d3c1621a0e1fde1f557b4f6`; see
+   `mox-389-validation-receipt.md`.
 4. [MOX-392](https://linear.app/moxx-workboard/issue/MOX-392) creates the
    private remote, protects `dev` and `prod`, fixes host Git transport outside
    application code, and updates repository mappings while Symphony is stopped.
