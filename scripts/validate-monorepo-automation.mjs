@@ -127,7 +127,12 @@ assert.match(
   supabaseCredentialPreflight,
   /environment:\s*\$\{\{ inputs\.environment \}\}/,
 )
-assert.match(supabaseCredentialPreflight, /api\.supabase\.com\/v1\/projects/)
+assert.match(supabaseCredentialPreflight, /\/v1\/projects\/\$\{targetProjectRef\}/)
+assert.match(supabaseCredentialPreflight, /\/v1\/branches\/\$\{targetProjectRef\}/)
+assert.doesNotMatch(
+  supabaseCredentialPreflight,
+  /method:\s*["'](?:POST|PUT|PATCH|DELETE)["']/i,
+)
 assert.doesNotMatch(
   supabaseCredentialPreflight,
   /deploy:apply|database-access:renew|supabase(?:\.cmd)?\s+(?:db|functions)/,
