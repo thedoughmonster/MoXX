@@ -1,0 +1,63 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    name: lint-typecheck-test-build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium for interaction tests
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Deterministic check
+        env:
+          VITE_APP_STAGE: preview
+          VITE_PREORDER_API_ORIGIN: https://preorder-api.invalid
+          VITE_PREORDER_API_VERSION: v1
+          VITE_PREORDER_DATA_MODE: fixture
+          VITE_RELEASE_ID: ${{ github.sha }}
+        run: pnpm run check
+
+      - name: Verify exact worker custom domain
+        run: |
+          if ! grep -F '"pattern": "preorder.dough.monster"' wrangler.jsonc; then
+            echo "wrangler.jsonc must include the exact production hostname preorder.dough.monster" >&2
+            exit 1
+          fi
+
+      - name: Verify static smoke and health assets
+        run: |
+          if [ ! -f dist/health.json ] || [ ! -f dist/smoke.json ]; then
+            echo "health.json and smoke.json must be emitted in build output" >&2
+            exit 1
+          fi
+
+          node -e 'const fs=require("node:fs"); for (const f of ["dist/smoke.json","dist/health.json"]) JSON.parse(fs.readFileSync(f,"utf8"));'

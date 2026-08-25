@@ -1,0 +1,95 @@
+name: cloudflare-preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Preview-only operation
+        required: true
+        type: choice
+        default: deploy
+        options:
+          - deploy
+          - rollback
+      version_id:
+        description: Exact preview Worker version for rollback
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: moxi-web-preorder-preview
+  cancel-in-progress: false
+
+jobs:
+  preview:
+    name: ${{ inputs.operation || 'deploy' }}-preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      VITE_APP_STAGE: preview
+      VITE_PREORDER_API_ORIGIN: https://xtbraqnlskmqxinjxxdn.supabase.co
+      VITE_PREORDER_API_VERSION: v1
+      VITE_PREORDER_DATA_MODE: live
+      VITE_SQUARE_SANDBOX_APPLICATION_ID: sandbox-sq0idb-5fqqJ2x3hNzSvwaLcIOq9A
+      VITE_SQUARE_SANDBOX_LOCATION_ID: LN73GYJ0P4PY1
+      VITE_RELEASE_ID: ${{ github.sha }}
+    steps:
+      - name: Checkout exact release
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Chromium for interaction tests
+        if: inputs.operation == 'deploy'
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Validate preview release
+        if: inputs.operation == 'deploy'
+        run: pnpm check
+
+      - name: Deploy bounded preview Worker
+        if: inputs.operation == 'deploy'
+        run: >-
+          pnpm exec wrangler deploy
+          --env preview
+          --minify
+          --strict
+          --message "preview ${{ github.sha }}"
+
+      - name: Validate rollback target
+        if: inputs.operation == 'rollback'
+        env:
+          VERSION_ID: ${{ inputs.version_id }}
+        run: |
+          if [[ ! "$VERSION_ID" =~ ^[0-9a-f-]{36}$ ]]; then
+            echo "version_id must be an exact Cloudflare version UUID" >&2
+            exit 1
+          fi
+
+      - name: Roll back bounded preview Worker
+        if: inputs.operation == 'rollback'
+        env:
+          VERSION_ID: ${{ inputs.version_id }}
+        run: >-
+          pnpm exec wrangler rollback "$VERSION_ID"
+          --env preview
+          --yes
+          --message "preview rollback requested by GitHub Actions run ${{ github.run_id }}"
+
+      - name: Report preview versions
+        run: pnpm exec wrangler versions list --env preview --json
