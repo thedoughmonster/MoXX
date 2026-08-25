@@ -107,6 +107,14 @@ may themselves disclose sensitive configuration. Existing GitHub secret values
 cannot be read back for safe copying. No empty, placeholder, or fabricated
 credential was created.
 
+Run `scripts/provision-mox-392-credentials.sh` from a trusted interactive
+terminal to finish this gate. The helper requires an explicit public-target
+confirmation, copies only the required non-secret gateway variable, prompts
+invisibly for each write-only secret, pipes it directly to GitHub CLI at its
+repository or environment scope, and verifies names without reading values
+back. It rejects empty input and never writes a secret value to disk or prints
+one.
+
 MOX-392 therefore remains In Progress until an operator explicitly approves
 each non-secret value for the public destination and securely re-enters the
 required secret values. The required names are inventoried without their values
