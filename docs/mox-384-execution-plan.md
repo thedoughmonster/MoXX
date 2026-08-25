@@ -31,6 +31,8 @@ Linear umbrella: [MOX-384](https://linear.app/moxx-workboard/issue/MOX-384)
 - The dirty Elixir rollback is incomplete and is not a buildable source state.
 - A local MoXX draft exists at `/home/ubuntu/MoXX`.
 - Full source histories have been imported without squashing.
+- The local watchdog foundation exists at `/home/ubuntu/symphony-watchdog` and
+  passes its typecheck, fixtures, lease, and loopback health smoke tests.
 - The original MoMi and MoXi repositories have not been modified.
 - The MoXX GitHub repository does not yet exist.
 - GitHub SSH access works when the real host SSH client is selected explicitly.
@@ -48,17 +50,18 @@ MOX-384
 ├── MOX-385  Stock Symphony Elixir
 │   └── MOX-393 → MOX-396 → MOX-395 ───────────────┐
 └── MOX-387  External watchdog                     │
-    ├── MOX-397 → MOX-403 → MOX-398 ─┐             │
-    └── MOX-397 → MOX-402 → MOX-399 ─┼→ MOX-400   │
-                              MOX-402 ┘      │       │
-                         MOX-403 ────────────┼→ MOX-404
-                                            └────────→ MOX-401
+    └── MOX-397 → MOX-405 ┬→ MOX-403 → MOX-398 ─┐ │
+                           └→ MOX-402 → MOX-399 ─┼→ MOX-400
+                                             MOX-402 ┘      │
+                                        MOX-403 ────────────┼→ MOX-404
+                                                           └→ MOX-401
 
 MOX-392 + MOX-395 + MOX-401 → MOX-394 integrated canary
 ```
 
-All implementation leaves are in Todo. Native blockers prevent later leaves
-from being mistaken for ready work. None has `ready-package`.
+MOX-391, MOX-393, and MOX-397 are Done. Remaining implementation leaves are in
+Todo, and native blockers prevent later leaves from being mistaken for ready
+work. None has `ready-package`.
 
 ## Workstream A: MoXX monorepo
 
@@ -110,22 +113,26 @@ external monitor stay outside the Elixir restoration.
 Parent: [MOX-387](https://linear.app/moxx-workboard/issue/MOX-387)
 
 1. [MOX-397](https://linear.app/moxx-workboard/issue/MOX-397) creates the Node
-   24/TypeScript runtime and transactional SQLite ledger.
-2. [MOX-403](https://linear.app/moxx-workboard/issue/MOX-403) ingests only the
+   24/TypeScript runtime and transactional SQLite ledger. The clean local
+   foundation is complete at commit `916eb91`.
+2. [MOX-405](https://linear.app/moxx-workboard/issue/MOX-405) publishes that
+   exact foundation to a private, protected remote and adds required CI. It
+   does not install or activate the runtime.
+3. [MOX-403](https://linear.app/moxx-workboard/issue/MOX-403) ingests only the
    isolated Symphony Codex JSONL and calculates cumulative usage and velocity.
-3. [MOX-398](https://linear.app/moxx-workboard/issue/MOX-398) evaluates token
+4. [MOX-398](https://linear.app/moxx-workboard/issue/MOX-398) evaluates token
    and turn budgets and authorized `/budget` overrides without resetting usage.
-4. [MOX-402](https://linear.app/moxx-workboard/issue/MOX-402) receives verified
+5. [MOX-402](https://linear.app/moxx-workboard/issue/MOX-402) receives verified
    Linear webhooks and owns the crash-safe mutation outbox.
-5. [MOX-399](https://linear.app/moxx-workboard/issue/MOX-399) implements the
+6. [MOX-399](https://linear.app/moxx-workboard/issue/MOX-399) implements the
    one-minute quota circuit, GraphQL `RATELIMITED` handling, and least-privilege
    graceful stop of only `openai-symphony.service`.
-6. [MOX-400](https://linear.app/moxx-workboard/issue/MOX-400) adds Parked and
+7. [MOX-400](https://linear.app/moxx-workboard/issue/MOX-400) adds Parked and
    Blocked transitions plus the fail-closed local admission hook.
-7. [MOX-404](https://linear.app/moxx-workboard/issue/MOX-404) moves worker,
+8. [MOX-404](https://linear.app/moxx-workboard/issue/MOX-404) moves worker,
    model, reasoning, token, turn, hierarchy, review, and circuit events into the
    actual dashboard issue rows through a watchdog WebSocket.
-8. [MOX-401](https://linear.app/moxx-workboard/issue/MOX-401) proves all
+9. [MOX-401](https://linear.app/moxx-workboard/issue/MOX-401) proves all
    control paths with fixtures and a contained watchdog canary without starting
    Symphony.
 
@@ -147,12 +154,13 @@ Run independently:
 
 - MOX-388 after MOX-391
 - MOX-396 after MOX-393
-- MOX-403 and MOX-402 after MOX-397
+- MOX-405 after MOX-397
 
 ### Wave 3: policy and validation
 
 - MOX-389 after MOX-388
 - MOX-395 after MOX-396
+- MOX-403 and MOX-402 after MOX-405
 - MOX-398 after MOX-403
 - MOX-399 after MOX-402
 
@@ -196,4 +204,3 @@ secrets, or tombstone repositories from a neighboring issue.
 - Linear outages close local admission first. If Linear cannot accept Parked or
   Blocked changes, the quota circuit stops Symphony gracefully.
 - Authentication failures never trigger automatic restart.
-
