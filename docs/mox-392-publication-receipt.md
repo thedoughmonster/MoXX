@@ -49,7 +49,10 @@ no tracked credential or private-key file. No history rewrite was required.
   `monorepo-routing` and `monorepo-static-config` from GitHub Actions integration
   `15368`, and report `current_user_can_bypass: never`.
 - Third-party Actions must be pinned by immutable SHA. Default workflow-token
-  permissions are read-only and cannot approve pull requests.
+  permissions are read-only and cannot approve pull requests. The first live
+  CodeQL run exposed two inherited mutable `@v4` references; both are now pinned
+  to the verified CodeQL `v4.37.8` commit, and root validation rejects any future
+  unpinned active action.
 - Dependabot vulnerability alerts, automated security fixes, and private
   vulnerability reporting are enabled.
 - The `dev`, `prod`, and `prod-promotion` environments match the source branch
