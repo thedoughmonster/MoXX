@@ -1,6 +1,6 @@
 # MOX-392 publication receipt
 
-Status: in progress; publication and mapping complete, provider credential gate open
+Status: complete; publication, mapping, and provider credential gate verified
 
 ## Published identity
 
@@ -87,7 +87,7 @@ no tracked credential or private-key file. No history rewrite was required.
 - The same unvalidated fast-forward pushed directly to `prod` was rejected with
   GH013 because both required checks were missing.
 - Neither protection probe changed a remote ref.
-- Root automation validation discovers the 12 active workflows after retiring
+- Root automation validation discovers the 13 governed workflow files after retiring
   the two GitHub-Issues authorities, and both root routing/static-config tests
   pass.
 - The focused issue-mapping validation passes positive, missing, mismatched, and
@@ -95,8 +95,13 @@ no tracked credential or private-key file. No history rewrite was required.
 - A live settings read reports `hasIssuesEnabled: false`, public visibility,
   and default branch `dev`. A names-only repository-variable read is empty
   after removing the retired model-gateway triage variable.
-- Names-only reads of repository secrets and both `dev` and `prod` environment
-  secrets are empty; no value was requested or exposed during verification.
+- Names-only reads report repository secrets `CLOUDFLARE_ACCOUNT_ID` and
+  `CLOUDFLARE_API_TOKEN`, `SUPABASE_ACCESS_TOKEN` in `dev`, and
+  `SUPABASE_ACCESS_TOKEN` in `prod`. Repository variables remain empty.
+  Neither `MOMI_MODEL_EXECUTION_GATEWAY_URL` nor
+  `MOMI_MODEL_GATEWAY_TRIAGE_SECRET` was restored for GitHub Actions.
+- No active credential value was printed, persisted, or included in GitHub or
+  Linear evidence.
 - PR #19 head `d6fd995b57819562f01a963d7427791954c23d8a` passed the
   Linear-mapping check, CodeQL, both monorepo checks, and the 5m38s authoritative
   backend final gate. It squash-merged as
@@ -123,30 +128,56 @@ returned HTTP 200, a present viewer, and zero GraphQL errors without printing
 the identity or token. The corrected global SSH command still resolves
 `/usr/bin/ssh`; it does not depend on `/opt/agent-tools/bin/ssh`.
 
-## Remaining external gate
+## Credential gate completion
 
-The public repository has no provider secret values. Existing GitHub secret
-values cannot be read back for safe copying, so no empty, placeholder, or
-fabricated credential was created. The former model-gateway repository variable
-and triage secret are not required: they served only the retired active GitHub
-Issues triage workflow. The same gateway URL name remains valid Supabase runtime
-configuration for communications services and is outside this GitHub Actions
-credential gate.
+The operator authorized creation of bounded provider credentials and direct
+transfer through the trusted interactive helper. The successful helper run
+accepted the exact `MOX-392 SECRETS` confirmation, disabled terminal echo before
+each value, and completed all four write-only placements:
 
-Run `scripts/provision-mox-392-credentials.sh` from a trusted interactive
-terminal to finish this gate. The helper prompts invisibly for four write-only
-placements, pipes each value directly to GitHub CLI at its repository or
-environment scope, and verifies names without reading values back. It rejects
-empty input and never writes a secret value to disk or prints one:
-
-- repository secrets `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`;
+- repository secret `CLOUDFLARE_ACCOUNT_ID`;
+- repository secret `CLOUDFLARE_API_TOKEN`;
 - environment secret `SUPABASE_ACCESS_TOKEN` in `dev`; and
 - environment secret `SUPABASE_ACCESS_TOKEN` in `prod`.
 
-MOX-392 therefore remains In Progress until an operator securely re-enters the
-four required secret placements. The required names are inventoried without
-their values in the Linear workpad. All other publication, protection, mapping,
-clone, and credential-path criteria are directly verified.
+Both environment placements received the same single Supabase token input.
+Names-only GitHub API reads confirm all four destinations and an empty
+repository-variable inventory without attempting to read a value back.
+
+The active credentials passed the canonical root GET-only preflights:
+
+- Cloudflare workflow `Verify Cloudflare credential scope`, run
+  `32864808511`, job `97857332581` (`verify-read-authority`), completed
+  successfully at `cf276c5ce132b97b76e04a281e51090e29316e46`. Its bounded
+  token, Worker-script, account, zone, route, and DNS inventory reads all
+  succeeded; no deploy or provider mutation ran.
+- Supabase workflow `Verify Supabase credential scope`, run `32865650852`, job
+  `97860152707` (`verify-read-authority-dev`), completed successfully at
+  `7dd43968859548d464a8cb1c3c40d8d2e136145f`. The token authenticated and
+  read the exact configured target metadata by project/branch reference; no
+  database, function, deployment, or provider mutation ran.
+- A prod-scoped dispatch, run `32865670614`, job `97860212152`, was rejected by
+  the existing environment branch policy before runner allocation and has zero
+  steps. GitHub's exact conclusion was that branch `dev` is not allowed for the
+  `prod` environment. This is protection evidence, not a credential failure:
+  the helper placed the same already-validated Supabase value in both
+  environments, and names-only reads confirm the `prod` destination. The
+  immutable `prod` commit predates the preflight workflow and remains
+  `3e6a4f2c1a896c69998f6a658f2a38225abfbd59`; its protection was not weakened.
+
+PR #21 introduced the two registered read-only preflights and merged as
+`cf276c5ce132b97b76e04a281e51090e29316e46`. PR #22 corrected the Supabase
+project-reference field and merged as
+`0887cecd42cb27665f6ee8cf01930795dcd01170`. PR #23 replaced list inventory
+with the exact-target GET-only read and merged as
+`7dd43968859548d464a8cb1c3c40d8d2e136145f`. All three passed the Linear
+ownership and monorepo routing/static-config gates before merge.
+
+Two earlier generated credential attempts were revoked before final placement
+after local handling failures. Provider inventory confirmed their revocation.
+The fresh active replacements used for the successful helper run and
+preflights were not exposed. No value appears in this receipt, GitHub output,
+or the Linear workpad.
 
 ## Preservation
 
