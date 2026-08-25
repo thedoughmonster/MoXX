@@ -16,3 +16,5 @@ This repository is being assembled non-destructively from
 repositories remain authoritative until the monorepo cutover is verified and
 recorded. Do not deploy from this repository before that cutover.
 
+The durable migration and control-plane plan is in
+[`docs/mox-384-execution-plan.md`](docs/mox-384-execution-plan.md).
