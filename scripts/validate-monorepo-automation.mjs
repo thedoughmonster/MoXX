@@ -14,6 +14,7 @@ const expectedWorkflows = [
   "monorepo-routing.yml",
   "promote-prod.yml",
   "renew-database-access.yml",
+  "supabase-credential-preflight.yml",
   "validate-ui.yml",
   "validate.yml",
 ]
@@ -110,6 +111,27 @@ assert.deepEqual(workerMutationCallers, [
 ])
 assert.match(workflows.get("cloudflare-preview.yml"), /ref:\s*dev/)
 assert.match(workflows.get("cloudflare-production.yml"), /ref:\s*prod/)
+
+const cloudflareCredentialPreflight = workflows.get(
+  "cloudflare-credential-preflight.yml",
+)
+assert.match(cloudflareCredentialPreflight, /workflow_dispatch:/)
+assert.match(cloudflareCredentialPreflight, /workers\/scripts/)
+assert.doesNotMatch(cloudflareCredentialPreflight, /wrangler (?:deploy|rollback)/)
+
+const supabaseCredentialPreflight = workflows.get(
+  "supabase-credential-preflight.yml",
+)
+assert.match(supabaseCredentialPreflight, /workflow_dispatch:/)
+assert.match(
+  supabaseCredentialPreflight,
+  /environment:\s*\$\{\{ inputs\.environment \}\}/,
+)
+assert.match(supabaseCredentialPreflight, /api\.supabase\.com\/v1\/projects/)
+assert.doesNotMatch(
+  supabaseCredentialPreflight,
+  /deploy:apply|database-access:renew|supabase(?:\.cmd)?\s+(?:db|functions)/,
+)
 
 const dependabot = read(".github/dependabot.yml")
 assert.match(dependabot, /directory:\s*\/MoMi/)
