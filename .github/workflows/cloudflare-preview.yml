@@ -1,3 +1,4 @@
+# MOX-390 registration touch: mutation remains workflow_dispatch-only.
 name: Deploy UI preview
 
 on:

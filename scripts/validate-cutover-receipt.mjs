@@ -1,0 +1,19 @@
+import assert from "node:assert/strict"
+import { readFileSync } from "node:fs"
+
+const receipt = readFileSync("docs/mox-390-cutover-receipt.md", "utf8")
+const readme = readFileSync("README.md", "utf8")
+const workflowReadme = readFileSync(".github/workflows/README.md", "utf8")
+
+assert.match(readme, /MoXX is the sole active product repository/)
+assert.match(receipt, /\| Remote branches \| 230 \(217 MoMi, 13 MoXi\) \|/)
+assert.match(receipt, /\| Open pull requests \| 15 \(11 MoMi, 4 MoXi\) \|/)
+assert.match(receipt, /\| Workflows \| 12 \(7 MoMi, 5 MoXi\) \|/)
+assert.match(receipt, /\| Local source workspaces \| 23 \|/)
+assert.match(receipt, /\| GitHub issues \| 429 \|/)
+assert.match(receipt, /\| Deployments \| 176 \|/)
+assert.match(receipt, /Each inventory row appears in exactly one class/)
+assert.match(receipt, /never rewrites history/)
+assert.match(workflowReadme, /not execution authorities/)
+
+process.stdout.write("Validated MOX-390 cutover receipt and authority mapping.\n")

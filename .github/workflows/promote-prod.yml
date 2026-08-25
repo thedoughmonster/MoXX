@@ -1,3 +1,4 @@
+# MOX-390 registration touch: mutation remains workflow_dispatch-only.
 name: Promote development to production
 run-name: promote-prod ${{ inputs.expected_sha }} ${{ inputs.dev_receipt_sha256 }}
 
