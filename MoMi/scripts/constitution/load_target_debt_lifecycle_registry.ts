@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process"
 
 import type { DebtLifecycleRegistry } from "./debt_lifecycle_types.ts"
+import { productPathAtRef } from "../git_product_layout.ts"
 
 const path = "docs/debt-lifecycle-registry.json"
 const introductionBase = "7fde8a558e18970f2061ab314165bd41b86b3dd0"
@@ -10,7 +11,7 @@ export function loadTargetDebtLifecycleRegistry(): DebtLifecycleRegistry | undef
   if (ref !== "origin/dev" && !/^[0-9a-f]{40}$/.test(ref)) {
     throw new Error("MOMI_DEV_REF must be origin/dev or a full commit SHA")
   }
-  const result = spawnSync("git", ["show", `${ref}:${path}`], {
+  const result = spawnSync("git", ["show", `${ref}:${productPathAtRef(ref, path)}`], {
     encoding: "utf8",
     maxBuffer: 1024 * 1024,
   })

@@ -1,5 +1,11 @@
 import { spawnSync } from "node:child_process"
 
+import {
+  gitRepositoryRoot,
+  productPathAtRef,
+  stripProductPrefix,
+} from "../git_product_layout.ts"
+
 export type AuthoritySnapshot = {
   relationOwners: Map<string, string>
   routineOwners: Map<string, string>
@@ -23,27 +29,27 @@ export function loadTargetAuthoritySnapshot(): AuthoritySnapshot {
   }
   const listing = spawnSync(
     "git",
-    ["ls-tree", "-r", "--name-only", ref, "--", "services"],
-    { encoding: "utf8", maxBuffer: 1024 * 1024 },
+    ["ls-tree", "-r", "--name-only", ref, "--", productPathAtRef(ref, "services")],
+    { cwd: gitRepositoryRoot, encoding: "utf8", maxBuffer: 1024 * 1024 },
   )
-  if (listing.error) throw listing.error
   if (listing.status !== 0) {
-    throw new Error("Unable to list services on the trusted development ref")
+    throw listing.error ??
+      new Error("Unable to list services on the trusted development ref")
   }
   const relationOwners = new Map<string, string>()
   const routineOwners = new Map<string, string>()
   const schemaOwners = new Map<string, Set<string>>()
-  const paths = listing.stdout.split("\n").filter((path) =>
+  const paths = listing.stdout.split("\n").map(stripProductPrefix).filter((path) =>
     /^services\/[a-z][a-z0-9-]+\/service\.json$/.test(path)
   )
   for (const path of paths) {
-    const result = spawnSync("git", ["show", `${ref}:${path}`], {
+    const result = spawnSync("git", ["show", `${ref}:${productPathAtRef(ref, path)}`], {
       encoding: "utf8",
       maxBuffer: 1024 * 1024,
     })
-    if (result.error) throw result.error
     if (result.status !== 0) {
-      throw new Error(`Unable to read ${path} on the trusted development ref`)
+      throw result.error ??
+        new Error(`Unable to read ${path} on the trusted development ref`)
     }
     let manifest: SnapshotManifest
     try {

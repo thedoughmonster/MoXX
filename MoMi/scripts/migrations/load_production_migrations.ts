@@ -2,6 +2,8 @@ import { spawnSync } from "node:child_process"
 
 import { parseProductionMigrationTree } from
   "./parse_production_migration_tree.ts"
+import { gitRepositoryRoot, productPathAtRef } from
+  "../git_product_layout.ts"
 
 export function loadProductionMigrations(
   migrationPath: string,
@@ -10,14 +12,14 @@ export function loadProductionMigrations(
   if (requested && requested !== "origin/prod") {
     throw new Error("MOMI_PROD_REF must be origin/prod")
   }
+  const repositoryPath = productPathAtRef("origin/prod", migrationPath)
   const result = spawnSync(
     "git",
-    ["ls-tree", "-r", "origin/prod", "--", migrationPath],
-    { encoding: "utf8", maxBuffer: 8 * 1024 * 1024 },
+    ["ls-tree", "-r", "origin/prod", "--", repositoryPath],
+    { cwd: gitRepositoryRoot, encoding: "utf8", maxBuffer: 8 * 1024 * 1024 },
   )
-  if (result.error) throw result.error
   if (result.status !== 0 || !result.stdout) {
-    throw new Error("Unable to read the production migration baseline")
+    throw result.error ?? new Error("Unable to read the production migration baseline")
   }
-  return parseProductionMigrationTree(result.stdout, migrationPath)
+  return parseProductionMigrationTree(result.stdout, repositoryPath)
 }

@@ -2,6 +2,8 @@ import { spawnSync } from "node:child_process"
 
 import { parseProductionMigrationTree } from
   "./parse_production_migration_tree.ts"
+import { gitRepositoryRoot, productPathAtRef } from
+  "../git_product_layout.ts"
 
 export function loadDevelopmentMigrations(
   migrationPath: string,
@@ -12,18 +14,17 @@ export function loadDevelopmentMigrations(
   }
   if (/^0+$/.test(ref)) throw new Error("MOMI_DEV_REF cannot be the zero SHA")
   const ancestry = spawnSync("git", ["merge-base", "--is-ancestor", ref, "HEAD"])
-  if (ancestry.error) throw ancestry.error
   if (ancestry.status !== 0) {
-    throw new Error("MOMI_DEV_REF must be an ancestor of HEAD")
+    throw ancestry.error ?? new Error("MOMI_DEV_REF must be an ancestor of HEAD")
   }
+  const repositoryPath = productPathAtRef(ref, migrationPath)
   const result = spawnSync(
     "git",
-    ["ls-tree", "-r", ref, "--", migrationPath],
-    { encoding: "utf8", maxBuffer: 8 * 1024 * 1024 },
+    ["ls-tree", "-r", ref, "--", repositoryPath],
+    { cwd: gitRepositoryRoot, encoding: "utf8", maxBuffer: 8 * 1024 * 1024 },
   )
-  if (result.error) throw result.error
   if (result.status !== 0 || !result.stdout) {
-    throw new Error("Unable to read the development migration baseline")
+    throw result.error ?? new Error("Unable to read the development migration baseline")
   }
-  return parseProductionMigrationTree(result.stdout, migrationPath)
+  return parseProductionMigrationTree(result.stdout, repositoryPath)
 }

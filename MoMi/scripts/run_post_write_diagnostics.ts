@@ -32,14 +32,10 @@ export async function runPostWriteHook(source: string): Promise<string | undefin
   return output === null ? undefined : JSON.stringify(output)
 }
 
-async function main() {
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   let source = ""
   process.stdin.setEncoding("utf8")
   for await (const chunk of process.stdin) source += chunk
   const output = await runPostWriteHook(source)
   if (output) process.stdout.write(output)
-}
-
-if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
-  await main()
 }

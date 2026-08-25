@@ -4,6 +4,7 @@ import { fingerprintFinding } from "./fingerprint_finding.ts"
 import type { ConstitutionFinding } from "./types.ts"
 import { accessBootstrapFingerprints } from
   "./access_bootstrap_fingerprints.ts"
+import { productPathAtRef } from "../git_product_layout.ts"
 
 const baselinePath = "docs/service-access-debt-baseline.json"
 const bootstrapBase = "fafe25dfac85e2d119dcb641821e59913558070d"
@@ -13,7 +14,8 @@ export function loadTargetAccessBaselineFingerprints(
   if (ref !== "origin/dev" && !/^[0-9a-f]{40}$/.test(ref)) {
     throw new Error("MOMI_DEV_REF must be origin/dev or a full commit SHA")
   }
-  const result = spawnSync("git", ["show", `${ref}:${baselinePath}`], {
+  const result = spawnSync(
+    "git", ["show", `${ref}:${productPathAtRef(ref, baselinePath)}`], {
     encoding: "utf8",
     maxBuffer: 1024 * 1024,
   })

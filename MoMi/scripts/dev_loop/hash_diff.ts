@@ -8,14 +8,16 @@ import { runGit } from "./run_git.ts"
 
 export function hashDiff(baseSha: string, headSha: string): string {
   let patch = runGit([
-    "diff", "--binary", "--no-ext-diff", "--no-renames",
-    `${baseSha}...${headSha}`, "--",
+    "diff", "--relative", "--binary", "--no-ext-diff", "--no-renames",
+    `${baseSha}...${headSha}`, "--", ".",
   ])
   if (
     runGit(["rev-parse", "HEAD"]) === headSha &&
-    runGit(["status", "--porcelain=v1", "--untracked-files=all"], false)
+    runGit(["status", "--short", "--untracked-files=all", "--", "."], false)
   ) {
-    patch += `\n${runGit(["diff", "--binary", "--no-ext-diff", headSha, "--"])}`
+    patch += `\n${runGit([
+      "diff", "--relative", "--binary", "--no-ext-diff", headSha, "--", ".",
+    ])}`
     for (const path of listChangedPaths(baseSha, headSha)) {
       const fullPath = join(workspaceRoot, path)
       if (existsSync(fullPath)) {

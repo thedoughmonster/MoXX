@@ -1,6 +1,11 @@
 import { spawnSync } from "node:child_process"
 
 import { canonicalJson } from "../dev_loop/canonical_json.ts"
+import {
+  gitRepositoryRoot,
+  productPathAtRef,
+  stripProductPrefix,
+} from "../git_product_layout.ts"
 import { compareUtf16 } from "./compare_utf16.ts"
 import type {
   AuthoritySourceDescriptor,
@@ -13,7 +18,11 @@ export function loadDatabaseObjectAuthorityRevision(
   revision: string,
 ): DatabaseObjectAuthorityRevision {
   const git = (args: string[], input?: string) => {
-    const result = spawnSync("git", args, { cwd: root, encoding: "utf8", input })
+    const result = spawnSync("git", args, {
+      cwd: gitRepositoryRoot,
+      encoding: "utf8",
+      input,
+    })
     if (result.status !== 0) {
       throw new Error((result.stderr || `git ${args[0]} failed`).trim())
     }
@@ -22,12 +31,17 @@ export function loadDatabaseObjectAuthorityRevision(
   const commit = git(["rev-parse", "--verify", `${revision}^{commit}`]).trim()
   const tree = git([
     "ls-tree", "-r", "-z", "--format=%(objectname)%x09%(path)", commit, "--",
-    "services", "supabase/migrations", "docs/decisions",
-    "docs/service-access-debt-baseline.json",
+    ...[
+      "services", "supabase/migrations", "docs/decisions",
+      "docs/service-access-debt-baseline.json",
+    ].map((path) => productPathAtRef(commit, path)),
   ])
   const entries = tree.split("\0").filter(Boolean).map((row) => {
     const [blob_id, ...pathParts] = row.split("\t")
-    return { blob_id: blob_id!, path: pathParts.join("\t") }
+    return {
+      blob_id: blob_id!,
+      path: stripProductPrefix(pathParts.join("\t")),
+    }
   }).filter(({ path }) =>
     /^services\/[^/]+\/service\.json$/u.test(path) ||
     /^supabase\/migrations\/[^/]+\.sql$/u.test(path) ||
