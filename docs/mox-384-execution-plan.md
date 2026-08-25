@@ -25,10 +25,14 @@ Linear umbrella: [MOX-384](https://linear.app/moxx-workboard/issue/MOX-384)
 ## Current state
 
 - `openai-symphony.service` is intentionally inactive. Do not restart it before
-  MOX-394.
-- The committed Symphony Elixir tree is identical to upstream. Only the dirty
-  working tree contains application customizations.
-- The dirty Elixir rollback is incomplete and is not a buildable source state.
+  MOX-394. It is also disabled, and the completed MOX-395 validation left it
+  stopped with no Beam, Elixir, Mix, or Symphony process.
+- MOX-396 restored only `symphony/elixir/` to the exact committed stock tree
+  after explicit operator authorization. The verified MOX-393 recovery package
+  remains untouched; non-Elixir working-tree customizations remain preserved.
+- MOX-395 passed the stock scheduler build, test, lint, static-analysis, release
+  artifact, service-identity SSH clone, and one-query Linear smoke contracts
+  without starting Symphony.
 - A local MoXX draft exists at `/home/ubuntu/MoXX`.
 - Full source histories have been imported without squashing.
 - Root monorepo governance and automation are complete at commit
@@ -37,18 +41,19 @@ Linear umbrella: [MOX-384](https://linear.app/moxx-workboard/issue/MOX-384)
   and artifacts are product-prefixed, and cross-product changes require an
   explicit interface statement.
 - MOX-389 layout adaptations are committed at
-  `f3870d1ea5e026c5b7622e90e15dee644f19c6a2`. Offline tree, migration,
-  catalog, routing, UI build, and Cloudflare dry-run equivalence pass, but the
-  issue remains In Progress because sandbox loopback denial blocks Playwright
-  and restricted network access blocks an uncached Deno JSR manifest. The exact
-  partial evidence is in `mox-389-validation-receipt.md`.
+  `f3870d1ea5e026c5b7622e90e15dee644f19c6a2`. After explicit loopback and
+  dependency-access authorization, both product contracts pass in full. MoXi
+  passes lint, types, 29 unit tests, 20 Playwright tests, its build, and both
+  Cloudflare dry-runs. MoMi passes all nine hard-stop checks, all Edge Functions,
+  and 1,422 tests against the exact local dev/prod histories. Exact evidence is
+  in `mox-389-validation-receipt.md`.
 - The local watchdog foundation exists at `/home/ubuntu/symphony-watchdog` and
   passes its typecheck, fixtures, lease, and loopback health smoke tests.
 - The original MoMi and MoXi repositories have not been modified.
 - The MoXX GitHub repository does not yet exist.
-- GitHub SSH access works when the real host SSH client is selected explicitly.
-  The global Git setting still points to the absent
-  `/opt/agent-tools/bin/ssh`.
+- GitHub SSH access works. MOX-395 replaced the stale global Git SSH executable
+  path with `/usr/bin/ssh`, preserved its options and file mode, and retained a
+  hash-addressed backup of the prior configuration.
 - GitHub CLI authentication is invalid and must be renewed before remote
   creation or repository-setting changes.
 
@@ -70,10 +75,11 @@ MOX-384
 MOX-392 + MOX-395 + MOX-401 → MOX-394 integrated canary
 ```
 
-MOX-391, MOX-388, MOX-393, and MOX-397 are Done. MOX-389 is In Progress and
-blocked on validation access; remaining implementation leaves are in Todo, and
-native blockers prevent later leaves from being mistaken for ready work. None
-has `ready-package`.
+MOX-391, MOX-388, MOX-393, MOX-396, MOX-395, and MOX-397 are Done. MOX-389's
+implementation and every acceptance validation are complete locally; its final
+evidence/status update follows the completion commit. Remaining implementation
+leaves are in Todo, and native blockers prevent later leaves from being mistaken
+for ready work. None has `ready-package`.
 
 ## Workstream A: MoXX monorepo
 
@@ -87,11 +93,11 @@ Parent: [MOX-386](https://linear.app/moxx-workboard/issue/MOX-386)
    commit `4399b13003b55a9879f4b39359bb8503e789a7fb`. Verified evidence includes
    14 active root workflows, YAML/JSON parsing, static authority validation,
    product-routing fixtures, and monorepo-aware hook fixtures.
-3. [MOX-389](https://linear.app/moxx-workboard/issue/MOX-389) is In Progress.
+3. [MOX-389](https://linear.app/moxx-workboard/issue/MOX-389) is complete locally.
    Layout adaptations are committed at `f3870d1ea5e026c5b7622e90e15dee644f19c6a2`;
-   offline validations and deployment dry-runs pass, while the authoritative
-   Playwright and Edge Function checks remain access-blocked. See
-   `mox-389-validation-receipt.md`.
+   both full product contracts, dev/prod identity checks, root routing, migration
+   order, backend impact planning, UI build equivalence, and provider dry-runs
+   pass. See `mox-389-validation-receipt.md`.
 4. [MOX-392](https://linear.app/moxx-workboard/issue/MOX-392) creates the
    private remote, protects `dev` and `prod`, fixes host Git transport outside
    application code, and updates repository mappings while Symphony is stopped.
@@ -115,10 +121,12 @@ Parent: [MOX-385](https://linear.app/moxx-workboard/issue/MOX-385)
    hash-verified, secret-free recovery package for the dirty Elixir tree.
 2. [MOX-396](https://linear.app/moxx-workboard/issue/MOX-396) restores only
    `elixir/` from committed stock and proves non-Elixir files are unchanged.
-   It requires explicit operator authorization even though MOX-393 is Done.
+   This completed after explicit operator authorization; the recovery package
+   and non-Elixir customizations remain preserved.
 3. [MOX-395](https://linear.app/moxx-workboard/issue/MOX-395) builds and tests
    stock Elixir and verifies the VPS service boundary while the service remains
-   stopped.
+   stopped. It is Done; `make all` passed 296 tests with 0 failures, and the
+   release/SSH/Linear smoke evidence was recorded without a restart.
 4. [MOX-394](https://linear.app/moxx-workboard/issue/MOX-394) is the only leaf
    allowed to restart Symphony. It joins stock Elixir, MoXX mapping, and the
    proven watchdog in one controlled canary.
