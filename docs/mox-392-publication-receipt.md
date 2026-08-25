@@ -7,7 +7,7 @@ Status: in progress; publication and mapping complete, provider credential gate 
 - Repository: `https://github.com/thedoughmonster/MoXX`
 - Visibility: public, by explicit operator amendment to MOX-392
 - Default branch: `dev`
-- Published development tip: `8543422081f2268dd46d349e1f58c4522ca2ec20`
+- Initial development publication tip: `8543422081f2268dd46d349e1f58c4522ca2ec20`
 - Published production tip: `3e6a4f2c1a896c69998f6a658f2a38225abfbd59`
 - Published MOX-348 branch: `508b7fb663579f9257295581c56b2b7735602f6c`
 - Accepted development tree: `30412b2d6d1c733fd75549b419a622310caf753d`
@@ -66,7 +66,8 @@ no tracked credential or private-key file. No history rewrite was required.
 
 ## Direct verification
 
-- A fresh `dev` clone resolved remote `dev` to `8543422081...` and tree
+- Before the governance pull request, a fresh `dev` clone resolved remote `dev`
+  to `8543422081...` and tree
   `30412b2d...`.
 - A separate fresh `prod` clone resolved to `3e6a4f2c...` and tree
   `07cb28ab...`.
