@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["id", "object", "model"],
+  "properties": {
+    "id": {"type": "string"},
+    "object": {"enum": ["chat.completion", "momi.execution", "momi.log"]},
+    "model": {"const": "momi-assistant"}
+  }
+}

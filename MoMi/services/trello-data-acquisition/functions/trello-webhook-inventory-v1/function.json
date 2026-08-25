@@ -1,0 +1,22 @@
+{
+  "function_key": "trello.webhooks.inventory_acquisition.v1",
+  "contract_version": 1,
+  "purpose": "Acquire and preserve one complete Trello token webhook inventory.",
+  "owner_service": "trello-data-acquisition",
+  "function_type": "primitive_source",
+  "capability": "hydrate",
+  "boundary": "trello_outbound",
+  "runtime": "supabase_edge",
+  "route_path": "/functions/v1/trello-webhook-inventory-v1",
+  "authentication_policy_key": "momi.work_capability.v1",
+  "entrypoint": "index.ts",
+  "input_schema": "contracts/input.schema.json",
+  "output_schema": "contracts/output.schema.json",
+  "probe": {
+    "method": "GET",
+    "acceptable_statuses": [405]
+  },
+  "idempotency_policy_key": "trello.webhook_inventory.job_id.v1",
+  "required_capabilities": ["database_write", "external_http"],
+  "declared_side_effects": ["captures_source_response"]
+}

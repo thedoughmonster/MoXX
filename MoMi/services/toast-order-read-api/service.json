@@ -1,0 +1,30 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "toast-order-read-api",
+  "purpose": "Serve the retiring source-specific Toast order read facade.",
+  "kind": "core_capability",
+  "service_type": "read_facade",
+  "lifecycle_status": "retiring",
+  "implementation_status": "implemented",
+  "functions": ["momi-toast-orders-get-by-id-v1"],
+  "contracts": {
+    "provides": ["momi.toast_orders.get_by_id.v1"],
+    "consumes": [
+      { "service": "warehouse-projection", "contract": "momi.warehouse.toast_order_read_view.v1" }
+    ]
+  },
+  "database": {
+    "read": ["momi_orders", "momi_api"],
+    "write": []
+  },
+  "network": { "outbound_hosts": [] },
+  "secrets": ["SUPABASE_DB_URL"],
+  "configuration": [],
+  "deployment": { "owns": [], "depends_on": [] },
+  "runtime_dependencies": [
+    "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
+    "npm:postgres@3.4.3"
+  ],
+  "approved_packages": []
+}

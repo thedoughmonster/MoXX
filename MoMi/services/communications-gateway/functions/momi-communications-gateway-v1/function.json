@@ -1,0 +1,40 @@
+{
+  "function_key": "momi.communications.chat_completions.v1",
+  "contract_version": 1,
+  "purpose": "Serve bounded provider-neutral MoMi assistant and explicit logging routes.",
+  "owner_service": "communications-gateway",
+  "function_type": "coordinator",
+  "capability": "decide",
+  "boundary": "momi_internal",
+  "runtime": "supabase_edge",
+  "route_path": "/functions/v1/momi-communications-gateway-v1",
+  "authentication_policy_key": "momi.openwebui.gateway_credential.v1",
+  "entrypoint": "index.ts",
+  "input_schema": "contracts/input.schema.json",
+  "output_schema": "contracts/output.schema.json",
+  "timeout_policy_key": "momi.communications.user_timeout.v1",
+  "retry_policy_key": "momi.communications.no_ambiguous_paid_retry.v1",
+  "idempotency_policy_key": "momi.communications.user_turn.v1",
+  "capability_model": {
+    "schema_version": 1,
+    "called_contracts": [
+      {
+        "service": "model-execution-gateway",
+        "contract": "momi.model_execution.execute.v1"
+      },
+      {
+        "service": "model-execution-gateway",
+        "contract": "momi.model_execution.retrieve.v1"
+      }
+    ]
+  },
+  "required_capabilities": ["database_read", "database_write"],
+  "declared_side_effects": [
+    "admits_gateway_invocation",
+    "archives_model_boundary_evidence",
+    "creates_explicit_user_flagged_log",
+    "calls_configured_provider",
+    "calls_allowlisted_owner_tools",
+    "stores_terminal_execution_state"
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ok", "disposition", "archive_item_id", "content_hash"],
+  "properties": {
+    "ok": {"const": true},
+    "disposition": {"enum": ["stored", "duplicate"]},
+    "archive_item_id": {"type": "string", "format": "uuid"},
+    "content_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

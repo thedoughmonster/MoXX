@@ -1,0 +1,10 @@
+{
+  "$schema": "../schemas/retirement-manifest-v1.schema.json",
+  "schema_version": 1,
+  "function_slug": "toast-orders-probe",
+  "owner_service": "toast-order-ingest",
+  "reason": "Legacy production-only probe retained while caller absence is verified.",
+  "replacement": "toast-orders-webhook-ingest-v1 GET probe",
+  "environments": ["prod"],
+  "remove_after": "2026-07-27"
+}

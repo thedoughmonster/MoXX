@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://momi.local/schemas/database-object-authority-v1.schema.json",
+  "title": "Database Object Authority v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "repository", "revision", "source_digest", "authority_digest", "objects", "runtime_compatibility", "migration_ownership", "public_mappings", "legacy_debt_reference"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": "database-object-authority/v1" },
+    "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+    "revision": { "$ref": "#/$defs/git_revision" },
+    "source_digest": { "$ref": "#/$defs/sha256" },
+    "authority_digest": { "$ref": "#/$defs/sha256" },
+    "objects": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/object" } },
+    "runtime_compatibility": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/runtime" } },
+    "migration_ownership": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/migration" } },
+    "public_mappings": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/mapping" } },
+    "legacy_debt_reference": { "$ref": "#/$defs/debt" }
+  },
+  "$defs": {
+    "identifier": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "service": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
+    "path": { "type": "string", "minLength": 1 },
+    "git_revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "git_blob": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "relation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["class", "schema", "name"],
+      "properties": { "class": { "const": "relation" }, "schema": { "$ref": "#/$defs/identifier" }, "name": { "$ref": "#/$defs/identifier" } }
+    },
+    "routine": {
+      "type": "object", "additionalProperties": false,
+      "required": ["class", "schema", "name", "arguments"],
+      "properties": { "class": { "const": "routine" }, "schema": { "$ref": "#/$defs/identifier" }, "name": { "$ref": "#/$defs/identifier" }, "arguments": { "type": "array", "items": { "type": "string", "minLength": 1 } } }
+    },
+    "sequence": {
+      "type": "object", "additionalProperties": false,
+      "required": ["class", "schema", "name"],
+      "properties": { "class": { "const": "sequence" }, "schema": { "$ref": "#/$defs/identifier" }, "name": { "$ref": "#/$defs/identifier" } }
+    },
+    "identity": { "oneOf": [{ "$ref": "#/$defs/relation" }, { "$ref": "#/$defs/routine" }, { "$ref": "#/$defs/sequence" }] },
+    "object": {
+      "type": "object", "additionalProperties": false,
+      "required": ["identity", "owner_service", "source_path", "json_pointer", "replay_identity"],
+      "properties": {
+        "identity": { "$ref": "#/$defs/identity" }, "owner_service": { "$ref": "#/$defs/service" },
+        "relation_kind": { "enum": ["table", "view", "materialized view"] },
+        "source_path": { "$ref": "#/$defs/path" }, "json_pointer": { "type": "string" }, "replay_identity": { "type": "string", "minLength": 1 }
+      }
+    },
+    "broad_scope": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "schema"],
+      "properties": { "kind": { "const": "historical_broad_migration_debt" }, "schema": { "$ref": "#/$defs/identifier" } }
+    },
+    "exact_scope": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "object"],
+      "properties": { "kind": { "const": "exact_object" }, "object": { "$ref": "#/$defs/identity" } }
+    },
+    "runtime": {
+      "type": "object", "additionalProperties": false,
+      "required": ["service", "source_mode", "source_path", "json_pointer", "scope"],
+      "properties": {
+        "service": { "$ref": "#/$defs/service" }, "source_mode": { "enum": ["database.read", "database.write"] },
+        "source_path": { "$ref": "#/$defs/path" }, "json_pointer": { "type": "string" },
+        "scope": { "oneOf": [{ "$ref": "#/$defs/broad_scope" }, { "$ref": "#/$defs/exact_scope" }] }
+      }
+    },
+    "migration": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "blob_id", "owner_service", "mode"],
+      "properties": { "path": { "$ref": "#/$defs/path" }, "blob_id": { "$ref": "#/$defs/git_blob" }, "owner_service": { "$ref": "#/$defs/service" }, "mode": { "const": "migration.own" } }
+    },
+    "mapping": {
+      "type": "object", "additionalProperties": false,
+      "required": ["provider_service", "contract", "mapping_kind", "object", "capability", "source_path", "json_pointer"],
+      "properties": {
+        "provider_service": { "$ref": "#/$defs/service" }, "contract": { "type": "string", "minLength": 1 },
+        "mapping_kind": { "enum": ["public_relation_reads", "public_routine_reads", "public_routine_commands", "dynamic_read_routines"] },
+        "object": { "$ref": "#/$defs/identity" }, "capability": { "enum": ["relation.read", "routine.call"] },
+        "source_path": { "$ref": "#/$defs/path" }, "json_pointer": { "type": "string" },
+        "consumer_service": { "$ref": "#/$defs/service" }, "role": { "type": "string", "minLength": 1 }, "allowed_schema": { "$ref": "#/$defs/identifier" }
+      }
+    },
+    "debt": {
+      "type": "object", "additionalProperties": false, "required": ["path", "schema_version", "digest"],
+      "properties": { "path": { "$ref": "#/$defs/path" }, "schema_version": { "type": "string", "minLength": 1 }, "digest": { "$ref": "#/$defs/sha256" } }
+    }
+  }
+}

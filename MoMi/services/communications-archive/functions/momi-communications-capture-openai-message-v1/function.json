@@ -1,0 +1,18 @@
+{
+  "function_key": "momi.communications.capture_openai_message.v1",
+  "contract_version": 1,
+  "purpose": "Capture one OpenAI or ChatGPT source message into the immutable communications archive.",
+  "owner_service": "communications-archive",
+  "function_type": "ingest",
+  "capability": "ingest",
+  "boundary": "momi_internal",
+  "runtime": "supabase_edge",
+  "route_path": "/functions/v1/momi-communications-capture-openai-message-v1",
+  "authentication_policy_key": "momi.internal.capture_agent.v1",
+  "entrypoint": "index.ts",
+  "input_schema": "contracts/input.schema.json",
+  "output_schema": "contracts/output.schema.json",
+  "idempotency_policy_key": "momi.communications.source_identity.v1",
+  "required_capabilities": ["database_write"],
+  "declared_side_effects": ["stores_archive_item", "queues_evaluation_job"]
+}

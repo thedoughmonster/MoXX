@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["ok", "status", "source_response"],
+  "properties": {
+    "ok": { "const": true },
+    "status": { "enum": ["succeeded", "failed"] },
+    "source_response": {
+      "type": "object",
+      "required": ["http_status", "headers", "payload", "raw_text", "error_code"],
+      "properties": {
+        "http_status": { "type": ["integer", "null"] },
+        "headers": { "type": "object", "additionalProperties": { "type": "string" } },
+        "payload": {},
+        "raw_text": { "type": ["string", "null"] },
+        "error_code": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

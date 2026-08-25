@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://momi.local/schemas/external-function-authority-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "function_slug", "owner_repository", "owner_service",
+    "lifecycle_status", "environments", "deployment_workflow", "adapter_path",
+    "verify_jwt", "source_revision", "verified_at", "valid_until", "caller"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": 1 },
+    "function_slug": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
+    "owner_repository": {
+      "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+    },
+    "owner_service": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
+    "lifecycle_status": { "const": "active" },
+    "environments": {
+      "type": "array", "minItems": 1, "maxItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["name", "project_ref"],
+        "properties": {
+          "name": { "const": "dev" },
+          "project_ref": { "type": "string", "pattern": "^[a-z]{20}$" }
+        }
+      }
+    },
+    "deployment_workflow": { "const": ".github/workflows/deploy-dev.yml" },
+    "adapter_path": {
+      "type": "string", "pattern": "^supabase/functions/[a-z][a-z0-9-]+/index\\.ts$"
+    },
+    "verify_jwt": { "type": "boolean" },
+    "source_revision": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "verified_at": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "valid_until": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "caller": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "state", "evidence_url"],
+      "properties": {
+        "kind": {
+          "enum": ["database_trigger", "external_webhook", "edge_function"]
+        },
+        "state": { "enum": ["active", "policy_disabled"] },
+        "evidence_url": { "type": "string", "pattern": "^https://" }
+      }
+    }
+  }
+}

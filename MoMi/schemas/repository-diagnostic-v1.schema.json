@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://momi.local/schemas/repository-diagnostic-v1.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "rule_id", "enforcement", "violated_rule", "expected",
+    "repair", "validation_command", "fingerprint"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "rule_id": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "enforcement": { "enum": ["hard_stop", "advisory"] },
+    "location": { "$ref": "#/$defs/location" },
+    "violated_rule": { "type": "string", "minLength": 1, "maxLength": 500 },
+    "rationale": { "type": "string", "minLength": 1, "maxLength": 500 },
+    "expected": { "type": "string", "minLength": 1, "maxLength": 500 },
+    "repair": {
+      "oneOf": [
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind", "command"],
+          "properties": {
+            "kind": { "const": "command" },
+            "command": { "$ref": "#/$defs/command" }
+          }
+        },
+        {
+          "type": "object", "additionalProperties": false,
+          "required": ["kind"],
+          "properties": { "kind": { "const": "none" } }
+        }
+      ]
+    },
+    "validation_command": { "$ref": "#/$defs/command" },
+    "fingerprint": {
+      "type": "object", "additionalProperties": false,
+      "required": ["group", "instance"],
+      "properties": {
+        "group": { "$ref": "#/$defs/fingerprint_fields" },
+        "instance": { "$ref": "#/$defs/fingerprint_fields" }
+      }
+    }
+  },
+  "$defs": {
+    "command": {
+      "type": "string", "minLength": 1, "maxLength": 1000,
+      "not": { "pattern": "[\\u0000-\\u001f\\u007f-\\u009f\\u2028\\u2029]|\\p{Default_Ignorable_Code_Point}" }
+    },
+    "fingerprint_fields": {
+      "type": "object", "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z][a-z0-9_]*$" },
+      "additionalProperties": {
+        "type": ["string", "number", "boolean"]
+      }
+    },
+    "location": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path"],
+      "dependentRequired": { "column": ["line"] },
+      "properties": {
+        "path": { "type": "string", "minLength": 1 },
+        "line": { "type": "integer", "minimum": 1 },
+        "column": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

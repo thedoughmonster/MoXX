@@ -1,0 +1,50 @@
+{
+  "$schema": "./schemas/workspace-v1.schema.json",
+  "schema_version": 1,
+  "layout": "service_workspaces",
+  "paths": {
+    "services": "services",
+    "function_adapters": "supabase/functions",
+    "migrations": "supabase/migrations",
+    "retirements": "retirements",
+    "external_function_authorities": "external-functions"
+  },
+  "toolchain": {
+    "node": "24.14.0",
+    "pnpm": "11.7.0",
+    "supabase_cli": "2.109.1",
+    "deno": "2.9.2"
+  },
+  "environments": {
+    "dev": {
+      "branch": "dev",
+      "project_ref": "xtbraqnlskmqxinjxxdn"
+    },
+    "prod": {
+      "branch": "prod",
+      "project_ref": "viodfldzuoypnpqaagag"
+    }
+  },
+  "database_schemas": [
+    "toast_raw",
+    "toast_hydration",
+    "toast_acquisition",
+    "momi_runtime",
+    "momi_orders",
+    "momi_api",
+    "momi_alerting",
+    "momi_events",
+    "momi_warehouse",
+    "warehouse_projection",
+    "legacy_recipe_staging",
+    "momi_archive",
+    "momi_communications",
+    "momi_agent_ops",
+    "momi_governance"
+  ],
+  "policies": {
+    "max_handwritten_lines": 120,
+    "hard_max_handwritten_lines": 140,
+    "minimum_shared_consumers": 3
+  }
+}

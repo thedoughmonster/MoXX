@@ -1,0 +1,139 @@
+{ "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://momi.local/schemas/service-manifest-v1.schema.json", "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "service_key", "purpose", "kind", "service_type",
+    "lifecycle_status", "functions", "contracts", "database", "network",
+    "secrets", "runtime_dependencies", "approved_packages"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": 1 },
+    "service_key": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
+    "purpose": { "type": "string", "minLength": 20 },
+    "kind": { "enum": ["source_adapter", "core_capability", "destination_adapter"] },
+    "service_type": { "enum": [
+      "procurement_adapter", "transform", "raw_evidence_archive",
+      "event_router", "dataset_owner", "read_facade", "destination_adapter"
+    ] },
+    "owned_dataset": {
+      "type": "object", "additionalProperties": false,
+      "required": ["dataset_key", "dataset_class", "private_relations"],
+      "properties": {
+        "dataset_key": { "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$" },
+        "dataset_class": { "enum": ["domain", "operational", "raw_evidence"] },
+        "private_schema": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" }, "private_schemas": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" } },
+        "private_relations": { "$ref": "#/$defs/qualified_relation_set" },
+        "private_routines": { "$ref": "#/$defs/qualified_relation_set" },
+        "public_reads": { "$ref": "#/$defs/versioned_contract_set" },
+        "public_relation_reads": { "$ref": "#/$defs/public_relation_read_set" },
+        "public_commands": { "$ref": "#/$defs/versioned_contract_set" },
+        "public_routine_reads": { "$ref": "#/$defs/public_routine_command_set" }, "public_routine_commands": { "$ref": "#/$defs/public_routine_command_set" },
+        "dynamic_read_routines": { "$ref": "#/$defs/dynamic_read_routine_set" },
+        "emitted_events": { "$ref": "#/$defs/event_key_set" },
+        "db_role": { "type": "string", "pattern": "^svc_[a-z][a-z0-9_]*$" }
+      }
+    },
+    "lifecycle_status": { "enum": ["active", "retiring", "retired"] }, "implementation_status": { "enum": ["declared", "implemented", "hosted_inactive", "operational"] },
+    "functions": {
+      "type": "array", "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]+-v[0-9]+$" }
+    },
+    "contracts": {
+      "type": "object", "additionalProperties": false,
+      "required": ["provides", "consumes"],
+      "properties": {
+        "provides": { "$ref": "#/$defs/versioned_contract_set" },
+        "consumes": {
+          "type": "array", "uniqueItems": true,
+          "items": { "$ref": "#/$defs/consumed_contract" }
+        }
+      }
+    },
+    "database": {
+      "type": "object", "additionalProperties": false,
+      "required": ["read", "write"],
+      "properties": {
+        "read": { "$ref": "#/$defs/string_set" },
+        "write": { "$ref": "#/$defs/string_set" }
+      }
+    },
+    "network": { "type": "object", "additionalProperties": false,
+      "required": ["outbound_hosts"],
+      "properties": { "outbound_hosts": { "$ref": "#/$defs/string_set" } }
+    },
+    "secrets": { "$ref": "#/$defs/string_set" },
+    "configuration": { "$ref": "#/$defs/string_set" },
+    "deployment": { "$ref": "#/$defs/deployment" },
+    "test_impact": { "$ref": "#/$defs/test_impact" },
+    "runtime_dependencies": { "$ref": "#/$defs/string_set" },
+    "approved_packages": { "$ref": "#/$defs/string_set" }
+  },
+  "$defs": {
+    "string_set": { "type": "array", "uniqueItems": true,
+      "items": { "type": "string", "minLength": 1 } },
+    "qualified_relation_set": { "type": "array", "uniqueItems": true,
+      "items": { "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$" } },
+    "event_key_set": { "type": "array", "uniqueItems": true,
+      "items": { "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$" } },
+    "versioned_contract_set": { "type": "array", "uniqueItems": true,
+      "items": { "$ref": "#/$defs/versioned_contract" } },
+    "versioned_contract": { "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*\\.v[1-9][0-9]*$" },
+    "public_relation_read_set": { "type": "array", "uniqueItems": true,
+      "items": { "type": "object", "additionalProperties": false,
+        "required": ["contract", "relation"], "properties": {
+          "contract": { "$ref": "#/$defs/versioned_contract" },
+          "relation": { "type": "string", "pattern":
+            "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$" }
+        } } },
+    "public_routine_command_set": { "type": "array", "uniqueItems": true,
+      "items": { "type": "object", "additionalProperties": false,
+        "required": ["contract", "routine"], "properties": {
+          "contract": { "$ref": "#/$defs/versioned_contract" },
+          "routine": { "type": "string", "pattern":
+            "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$" }
+        } } },
+    "dynamic_read_routine_set": { "type": "array", "uniqueItems": true,
+      "items": { "type": "object", "additionalProperties": false,
+        "required": ["contract", "routine", "consumer_service", "role", "schema"],
+        "properties": { "contract": { "$ref": "#/$defs/versioned_contract" },
+          "routine": { "type": "string", "pattern": "^[a-z][a-z0-9_]*\\.[a-z][a-z0-9_]*$" },
+          "consumer_service": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
+          "role": { "type": "string", "pattern": "^svc_[a-z][a-z0-9_]*$" },
+          "schema": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" } } } },
+    "deployment": { "type": "object", "additionalProperties": false,
+      "required": ["owns", "depends_on"], "properties": {
+        "owns": { "$ref": "#/$defs/typed_unit_set" },
+        "depends_on": { "$ref": "#/$defs/typed_unit_set" } } },
+    "typed_unit_set": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/typed_unit" } },
+    "typed_unit": { "type": "object", "additionalProperties": false,
+      "required": ["kind", "key"], "properties": {
+        "kind": { "enum": ["database_processor", "cron_job", "queue",
+          "event_subscription", "postgres_extension", "vault_secret"] },
+        "key": { "type": "string", "pattern": "^[a-z][a-z0-9_.:-]+$" } } },
+    "test_impact": { "type": "object", "additionalProperties": false, "required": ["schema_version", "owner_service", "categories"], "properties": {
+      "schema_version": { "const": 1 }, "owner_service": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" }, "categories": { "$ref": "#/$defs/test_impact_categories" } } },
+    "test_impact_categories": { "type": "object", "additionalProperties": false,
+      "required": ["local_unit", "local_integration", "provider_contract", "consumer_contract", "cross_service_integration", "mandatory_global", "risk_triggered"], "properties": {
+        "local_unit": { "$ref": "#/$defs/test_impact_selectors" }, "local_integration": { "$ref": "#/$defs/test_impact_selectors" },
+        "provider_contract": { "$ref": "#/$defs/test_impact_selectors" }, "consumer_contract": { "$ref": "#/$defs/test_impact_selectors" },
+        "cross_service_integration": { "$ref": "#/$defs/test_impact_selectors" }, "mandatory_global": { "$ref": "#/$defs/test_impact_selectors" },
+        "risk_triggered": { "$ref": "#/$defs/test_impact_selectors" } } },
+    "test_impact_selectors": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/test_impact_selector" } },
+    "test_impact_selector": { "type": "object", "additionalProperties": false,
+      "required": ["id", "test", "reason", "services", "contracts", "triggers"], "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]+:(local_unit|local_integration|provider_contract|consumer_contract|cross_service_integration|mandatory_global|risk_triggered):[a-z0-9][a-z0-9-]*:v[1-9][0-9]*$" },
+        "test": { "type": "string", "minLength": 1 }, "reason": { "type": "string", "pattern": "\\S" },
+        "services": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" } },
+        "contracts": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/test_impact_contract" } },
+        "triggers": { "type": "array", "uniqueItems": true, "items": { "enum": ["architecture", "docs", "issue_automation", "manifest", "migration", "repository_tooling", "runtime", "unknown", "workflow"] } } } },
+    "test_impact_contract": { "type": "object", "additionalProperties": false, "required": ["provider_service", "contract"], "properties": {
+      "provider_service": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" }, "contract": { "$ref": "#/$defs/versioned_contract" } } },
+    "consumed_contract": { "type": "object", "additionalProperties": false,
+      "required": ["service", "contract"], "properties": {
+        "service": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
+        "contract": { "$ref": "#/$defs/versioned_contract" } } }
+  }
+}

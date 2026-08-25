@@ -1,0 +1,23 @@
+{
+  "revision": "ff54beed51df9c75e25ec7eb8b5484fcb35e0769",
+  "trusted_baseline_revision": "ff54beed51df9c75e25ec7eb8b5484fcb35e0769",
+  "counts": {
+    "broad_declarations": 83,
+    "rows": 635,
+    "same_owner": 300,
+    "cross_owner": 283,
+    "known_direct_debt": 45,
+    "undiscoverable": 7
+  },
+  "input_digest": "c190bd7583987d6242f51e7b4f02a78ab73fbda9e3b80ad38bba97f6b4b94bc5",
+  "report_digest": "f99e19aed21a69d4bd7b58be62d1fb21d7609f2049fdf1d390569b64698c9487",
+  "sentinels": [
+    ["cron-history-governance", "database.read", "pgmq"],
+    ["kitchen-task-management", "database.read", "momi_kitchen_tasks"],
+    ["kitchen-task-management", "database.write", "momi_kitchen_tasks"],
+    ["momi-event-routing", "database.read", "pgmq"],
+    ["momi-event-routing", "database.write", "pgmq"],
+    ["trello-evidence-ingestion", "database.read", "trello_evidence_ingestion"],
+    ["trello-evidence-ingestion", "database.write", "trello_evidence_ingestion"]
+  ]
+}

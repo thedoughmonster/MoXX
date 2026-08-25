@@ -1,0 +1,32 @@
+{
+  "description": "MoMi repository edit guards and diagnostics.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^(apply_patch|Edit|Write)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/scripts/run_codex_migration_guard.ts\"",
+            "timeout": 5,
+            "statusMessage": "Checking trusted production migration history"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^(apply_patch|Edit|Write)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$(git rev-parse --show-toplevel)/scripts/run_post_write_diagnostics.ts\"",
+            "timeout": 20,
+            "statusMessage": "Inspecting changed files",
+            "additionalContextLimit": 4000
+          }
+        ]
+      }
+    ]
+  }
+}

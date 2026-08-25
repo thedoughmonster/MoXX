@@ -1,0 +1,58 @@
+[
+  {
+    "schema_version": 1,
+    "rule_id": "SOURCE_HANDWRITTEN_LINE_LIMIT",
+    "enforcement": "hard_stop",
+    "location": { "path": "services/zeta/src/large.ts", "line": 133, "column": 1 },
+    "violated_rule": "Handwritten TypeScript files must remain within the configured line limit.",
+    "expected": "Split the file by capability until each file is at or below 120 lines.",
+    "repair": { "kind": "none" },
+    "validation_command": "pnpm quality:check",
+    "fingerprint": {
+      "group": { "rule_id": "SOURCE_HANDWRITTEN_LINE_LIMIT", "limit": 120 },
+      "instance": { "path": "services/zeta/src/large.ts" }
+    }
+  },
+  {
+    "schema_version": 1,
+    "rule_id": "SOURCE_HANDWRITTEN_LINE_LIMIT",
+    "enforcement": "hard_stop",
+    "location": { "path": "services/alpha/src/large.ts" },
+    "violated_rule": "Handwritten TypeScript files must remain within the configured line limit.",
+    "expected": "Split the file by capability until each file is at or below 120 lines.",
+    "repair": { "kind": "none" },
+    "validation_command": "pnpm quality:check",
+    "fingerprint": {
+      "group": { "limit": 120, "rule_id": "SOURCE_HANDWRITTEN_LINE_LIMIT" },
+      "instance": { "path": "services/alpha/src/large.ts" }
+    }
+  },
+  {
+    "schema_version": 1,
+    "rule_id": "ARCHITECTURE_OWNER_BOUNDARY",
+    "enforcement": "hard_stop",
+    "location": { "path": "services/consumer/src/read_private.ts", "line": 18 },
+    "violated_rule": "A service may consume an owner's public contract, never its implementation.",
+    "rationale": "The rejected evidence included token=fixture-secret-value-1234567890.",
+    "expected": "Move the read behind the owning service's declared versioned contract.",
+    "repair": { "kind": "none" },
+    "validation_command": "pnpm architecture:check",
+    "fingerprint": {
+      "group": { "owner": "warehouse-read-api", "rule_id": "ARCHITECTURE_OWNER_BOUNDARY" },
+      "instance": { "consumer": "fixture-consumer", "path": "services/consumer/src/read_private.ts" }
+    }
+  },
+  {
+    "schema_version": 1,
+    "rule_id": "QUALITY_REPORT_FRESHNESS",
+    "enforcement": "advisory",
+    "violated_rule": "The generated quality report should match current source metrics.",
+    "expected": "Regenerate the quality report from current repository sources.",
+    "repair": { "kind": "command", "command": "pnpm quality:generate" },
+    "validation_command": "pnpm quality:check",
+    "fingerprint": {
+      "group": { "rule_id": "QUALITY_REPORT_FRESHNESS" },
+      "instance": { "artifact": "docs/quality-metrics.json", "token_hint": "token=fixture-fingerprint-secret-1234567890" }
+    }
+  }
+]

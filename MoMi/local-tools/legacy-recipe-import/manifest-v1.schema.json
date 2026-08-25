@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://momi.local/legacy-recipe-preservation-manifest-v1.schema.json",
+  "type": "object",
+  "required": [
+    "format_version", "generated_at_utc", "source_database",
+    "table_export_count", "tables", "repair_findings"
+  ],
+  "properties": {
+    "format_version": { "const": 1 },
+    "generated_at_utc": { "type": "string", "format": "date-time" },
+    "source_database": { "$ref": "#/$defs/source_database" },
+    "table_export_count": { "type": "integer", "minimum": 1 },
+    "tables": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/table_export" }
+    },
+    "repair_findings": { "$ref": "#/$defs/repair_findings" }
+  },
+  "$defs": {
+    "source_database": {
+      "type": "object",
+      "required": ["relative_path", "sha256", "verification"],
+      "properties": {
+        "relative_path": { "type": "string" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "verification": {
+          "type": "object",
+          "required": ["integrity_check", "foreign_key_check_rows"],
+          "properties": {
+            "integrity_check": { "const": "ok" },
+            "foreign_key_check_rows": { "const": 0 }
+          }
+        }
+      }
+    },
+    "table_export": {
+      "type": "object",
+      "required": [
+        "table", "relative_path", "format", "encoding", "order_by",
+        "sqlite_row_count", "reread_json_row_count", "bytes", "sha256"
+      ],
+      "properties": {
+        "table": { "type": "string", "minLength": 1 },
+        "relative_path": { "type": "string", "pattern": "^portable/" },
+        "format": { "const": "json_array_of_objects" },
+        "encoding": { "const": "UTF-8" },
+        "order_by": { "type": "array", "items": { "type": "string" } },
+        "sqlite_row_count": { "type": "integer", "minimum": 0 },
+        "reread_json_row_count": { "type": "integer", "minimum": 0 },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "repair_findings": {
+      "type": "object",
+      "required": [
+        "relative_path", "format", "encoding", "finding_count",
+        "reread_finding_count", "reconciliation_passed", "bytes", "sha256"
+      ],
+      "properties": {
+        "relative_path": { "const": "repair_findings.json" },
+        "format": { "const": "json_object_with_findings_array" },
+        "encoding": { "const": "UTF-8" },
+        "finding_count": { "type": "integer", "minimum": 0 },
+        "reread_finding_count": { "type": "integer", "minimum": 0 },
+        "reconciliation_passed": { "const": true },
+        "bytes": { "type": "integer", "minimum": 0 },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}

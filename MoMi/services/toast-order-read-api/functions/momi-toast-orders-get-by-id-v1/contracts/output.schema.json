@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://momi.toast_orders.get_by_id.v1/output",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "contract_key",
+        "contract_version",
+        "trace_id",
+        "work_id",
+        "work_source_version_id",
+        "source_system",
+        "source_version_id",
+        "order_id",
+        "location_id",
+        "retrieved_at",
+        "content_hash",
+        "payload",
+        "order_presentation"
+      ],
+      "properties": {
+        "ok": { "const": true },
+        "contract_key": { "const": "momi.toast_orders.get_by_id.v1" },
+        "contract_version": { "const": 1 },
+        "trace_id": { "type": "string", "format": "uuid" },
+        "work_id": { "type": "string" },
+        "work_source_version_id": { "type": "string" },
+        "source_system": { "const": "toast" },
+        "source_version_id": { "type": "string" },
+        "order_id": { "type": "string" },
+        "location_id": { "type": "string" },
+        "retrieved_at": { "type": "string", "format": "date-time" },
+        "content_hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "payload": { "type": "object" },
+        "order_presentation": { "$ref": "#/$defs/orderPresentation" }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "contract_key",
+        "contract_version",
+        "trace_id",
+        "error"
+      ],
+      "properties": {
+        "ok": { "const": false },
+        "contract_key": { "const": "momi.toast_orders.get_by_id.v1" },
+        "contract_version": { "const": 1 },
+        "trace_id": { "type": "string", "format": "uuid" },
+        "work_id": { "type": "string" },
+        "error": {
+          "enum": [
+            "invalid_request",
+            "forbidden",
+            "contract_inactive",
+            "order_not_found",
+            "read_failed"
+          ]
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "modifier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "quantity", "depth"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "quantity": { "type": "number", "minimum": 0 },
+        "depth": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "quantity", "modifiers"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "quantity": { "type": "number", "minimum": 0 },
+        "modifiers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/modifier" }
+        }
+      }
+    },
+    "orderPresentation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["presentation_version", "display_number",
+        "fulfillment_at", "fulfillment_epoch", "item_count",
+        "total_amount", "items"],
+      "properties": {
+        "presentation_version": { "const": 1 },
+        "display_number": { "type": "string", "minLength": 1 },
+        "customer_label": { "type": ["string", "null"],
+          "minLength": 1, "maxLength": 200 },
+        "fulfillment_at": { "type": ["string", "null"] },
+        "fulfillment_epoch": {
+          "type": ["integer", "null"]
+        },
+        "item_count": { "type": "number", "minimum": 0 },
+        "total_amount": { "type": ["number", "null"], "minimum": 0 },
+        "items": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/item" }
+        }
+      }
+    }
+  }
+}

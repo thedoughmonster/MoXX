@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["job_id", "capability_token"],
+  "properties": {
+    "job_id": { "type": "string", "format": "uuid" },
+    "capability_token": { "type": "string", "minLength": 1, "maxLength": 512 }
+  },
+  "additionalProperties": false
+}

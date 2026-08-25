@@ -1,0 +1,109 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "toast-data-acquisition",
+  "purpose": "Acquire allowlisted Toast resources and own durable acquisition control.",
+  "kind": "source_adapter",
+  "service_type": "procurement_adapter",
+  "lifecycle_status": "active",
+  "functions": ["toast-data-acquisition-v1"],
+  "contracts": {
+    "provides": [
+      "toast.acquisition.projection_job_mode.v1",
+      "toast.acquisition.stock_snapshot_projection_job.v1",
+      "toast.data.acquisition.v1"
+    ],
+    "consumes": []
+  },
+  "database": {
+    "read": ["toast_acquisition"],
+    "write": ["toast_acquisition", "toast_raw"]
+  },
+  "network": {
+    "outbound_hosts": ["configured:toast_acquisition.sources.api_base_url"]
+  },
+  "secrets": ["SUPABASE_DB_URL", "TOAST_CLIENT_ID", "TOAST_CLIENT_SECRET"],
+  "configuration": [],
+  "deployment": {
+    "owns": [
+      { "kind": "cron_job", "key": "momi-toast-acquisition-due-v1" },
+      { "kind": "cron_job", "key": "momi-toast-acquisition-wakeup-v1" },
+      { "kind": "cron_job", "key": "momi-toast-attempt-reconciliation-v1" }
+    ],
+    "depends_on": [
+      { "kind": "postgres_extension", "key": "pg_cron" },
+      { "kind": "postgres_extension", "key": "pg_net" },
+      { "kind": "vault_secret", "key": "momi_project_url" },
+      { "kind": "vault_secret", "key": "momi_publishable_key" }
+    ]
+  },
+  "runtime_dependencies": [
+    "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
+    "npm:postgres@3.4.3"
+  ],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "toast.acquisition_control",
+    "dataset_class": "operational",
+    "private_schema": "toast_acquisition",
+    "private_relations": [
+      "toast_acquisition.archive_acceptance_findings_v1",
+      "toast_acquisition.archive_finding_reconciliations",
+      "toast_acquisition.archive_integrity_findings_v1",
+      "toast_acquisition.archive_obligation_findings_v1",
+      "toast_acquisition.archive_obligation_status_v1",
+      "toast_acquisition.capture_window_policies",
+      "toast_acquisition.capture_windows",
+      "toast_acquisition.coverage_ledger_v1",
+      "toast_acquisition.coverage_policy_versions",
+      "toast_acquisition.coverage_windows",
+      "toast_acquisition.expected_archive_obligations_v1",
+      "toast_acquisition.historical_coverage_bounds",
+      "toast_acquisition.jobs",
+      "toast_acquisition.menu_publication_state",
+      "toast_acquisition.operation_coverage_dimensions",
+      "toast_acquisition.operation_coverage_policies",
+      "toast_acquisition.operation_coverage_v1",
+      "toast_acquisition.operation_parameters",
+      "toast_acquisition.operations",
+      "toast_acquisition.raw_processing_failures",
+      "toast_acquisition.restaurants",
+      "toast_acquisition.schedules",
+      "toast_acquisition.source_exclusions",
+      "toast_acquisition.sources"
+    ],
+    "private_routines": [
+      "toast_acquisition.assert_capture_window_schedule_ready",
+      "toast_acquisition.capture_first_business_date", "toast_acquisition.capture_window_is_open",
+      "toast_acquisition.capture_window_policy_ready", "toast_acquisition.claim_job",
+      "toast_acquisition.complete_job", "toast_acquisition.complete_job_and_claim_next",
+      "toast_acquisition.continue_job", "toast_acquisition.enqueue_due_schedules",
+      "toast_acquisition.enqueue_historical_backfill",
+      "toast_acquisition.enqueue_management_group_discovery",
+      "toast_acquisition.enqueue_menu_metadata_refresh", "toast_acquisition.enqueue_menu_publication",
+      "toast_acquisition.enqueue_payment_detail_jobs",
+      "toast_acquisition.expand_management_group_restaurant", "toast_acquisition.fail_job",
+      "warehouse_projection.emit_daily_stock_snapshot_event",
+      "toast_acquisition.ordering_schedule_array", "toast_acquisition.ordering_schedule_scalar",
+      "toast_acquisition.plan_backfill_after_first_business_date",
+      "toast_acquisition.read_projection_job_mode_v1",
+      "toast_acquisition.read_stock_snapshot_projection_job_v1",
+      "toast_acquisition.reconcile_stale_api_attempts", "toast_acquisition.reject_coverage_mutation",
+      "toast_acquisition.reject_archive_reconciliation_mutation",
+      "toast_acquisition.require_repair_for_exact_resource",
+      "toast_acquisition.restart_token_cursor_job", "toast_acquisition.resync_ordering_schedule_policy",
+      "toast_acquisition.seed_restaurant_schedules", "toast_acquisition.sync_online_ordering_hours",
+      "toast_acquisition.sync_ordering_schedule_raw_row", "toast_acquisition.wake_acquisition_worker"
+    ],
+    "public_reads": [
+      "toast.acquisition.projection_job_mode.v1",
+      "toast.acquisition.stock_snapshot_projection_job.v1"
+    ],
+    "public_routine_reads": [
+      {"contract": "toast.acquisition.projection_job_mode.v1", "routine": "toast_acquisition.read_projection_job_mode_v1"},
+      {"contract": "toast.acquisition.stock_snapshot_projection_job.v1", "routine": "toast_acquisition.read_stock_snapshot_projection_job_v1"}
+    ],
+    "public_commands": ["toast.data.acquisition.v1"],
+    "emitted_events": ["source.toast.resource.stock_snapshot.completed"]
+  }
+}

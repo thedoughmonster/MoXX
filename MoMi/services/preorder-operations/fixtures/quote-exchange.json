@@ -1,0 +1,87 @@
+{
+  "request": {
+    "command_id": "20000000-0000-4000-8000-000000000001",
+    "surface_id": "10000000-0000-4000-8000-000000000002",
+    "fulfillment_window_id": "10000000-0000-4000-8000-000000000004",
+    "versions": {
+      "surface_version": 1,
+      "catalog_version": 1,
+      "policy_version": 1,
+      "mapping_version": 1
+    },
+    "cart_version": 1,
+    "avoided_allergens": [],
+    "lines": [
+      {
+        "line_id": "20000000-0000-4000-8000-000000000002",
+        "item_id": "10000000-0000-4000-8000-000000000005",
+        "item_version": 1,
+        "quantity": 1,
+        "choice_ids": []
+      }
+    ]
+  },
+  "response": {
+    "meta": {
+      "contract_key": "momi.preorder.quote.create.v1",
+      "request_id": "20000000-0000-4000-8000-000000000003",
+      "generated_at": "2026-07-28T12:00:01Z"
+    },
+    "outcome": "accepted",
+    "quote": {
+      "quote_id": "20000000-0000-4000-8000-000000000004",
+      "quote_version": 1,
+      "fulfillment_window_id": "10000000-0000-4000-8000-000000000004",
+      "line_subtotal": {
+        "currency": "USD",
+        "amount_minor": 2400
+      },
+      "quantity_savings": {
+        "currency": "USD",
+        "amount_minor": 0
+      },
+      "notice_savings": {
+        "currency": "USD",
+        "amount_minor": 0
+      },
+      "fees": {
+        "currency": "USD",
+        "amount_minor": 0
+      },
+      "tax": {
+        "currency": "USD",
+        "amount_minor": 0
+      },
+      "total": {
+        "currency": "USD",
+        "amount_minor": 2400
+      },
+      "shop_comparison_total": {
+        "currency": "USD",
+        "amount_minor": 2500
+      },
+      "preorder_savings_total": {
+        "currency": "USD",
+        "amount_minor": 100
+      },
+      "quantity_progress": {
+        "current_level": "Base",
+        "current_threshold": 0,
+        "current_discount_bps": 0,
+        "next_level": "Level 1",
+        "next_threshold": 6,
+        "quantity_needed": 5
+      },
+      "advance_discount_bps": 0,
+      "capacity_result": "available",
+      "versions": {
+        "surface_version": 1,
+        "catalog_version": 1,
+        "policy_version": 1,
+        "mapping_version": 1
+      },
+      "expires_at": "2026-07-28T12:05:00Z",
+      "revalidation_token": "synthetic-revalidation-token-not-a-credential"
+    }
+  }
+}

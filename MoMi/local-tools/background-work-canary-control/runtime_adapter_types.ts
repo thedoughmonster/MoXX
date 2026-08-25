@@ -1,0 +1,119 @@
+import type { BoundedChildRequest, BoundedChildResult, CanaryControlLock } from "./process_types.ts"
+import type { RepositoryPreflight } from "./repository_preflight_types.ts"
+import type {
+  FlockCapabilityEvidence,
+  LinkageEvidence,
+  SetupBinding,
+  SetupReceipt,
+} from "./setup_preflight_types.ts"
+import type { CliOptions } from "./types.ts"
+import type { ProviderParseDiagnostic } from "./provider_parse_diagnostic.ts"
+import type { ProviderStderrCode } from "./provider_stderr_codes.ts"
+
+export type BoundedChildRunner = (
+  request: BoundedChildRequest,
+) => Promise<BoundedChildResult>
+
+export type HeldProviderStatus = "active" | "closed" | "held" | "lost"
+
+export type HeldProvider = Readonly<{
+  runQuery: (request: {
+    repositoryRoot: string
+    sqlPath: string
+    signal?: AbortSignal
+    outputLimitBytes?: number
+  }) => Promise<BoundedChildResult>
+  status: () => HeldProviderStatus
+  close: () => Promise<void>
+}>
+
+export type HeldProviderFactory = (
+  repositoryRoot: string,
+  environment: NodeJS.ProcessEnv,
+  runner: BoundedChildRunner,
+) => Promise<HeldProvider>
+
+export type PreflightExecutables = {
+  gitExecutable: string
+  pnpmExecutable: string
+  flockExecutable: string
+}
+
+export type ReleasedRuntime = {
+  options: CliOptions
+  repository: RepositoryPreflight
+  executables: PreflightExecutables
+  provider: HeldProvider
+  lock: CanaryControlLock
+  setupReceipt: SetupReceipt
+}
+
+export type RuntimePreparationDependencies = {
+  environment: NodeJS.ProcessEnv
+  nodeVersion: string
+  runChild: BoundedChildRunner
+  resolveExecutables: (environment: NodeJS.ProcessEnv) => Promise<PreflightExecutables>
+  collectEvidence: (
+    root: string,
+    executables: PreflightExecutables,
+    runner: BoundedChildRunner,
+    nodeVersion: string,
+    environment: NodeJS.ProcessEnv,
+    requireLinkedProject?: boolean,
+  ) => Promise<RepositoryPreflight>
+  createProvider: HeldProviderFactory
+  acquireLock: (environment: NodeJS.ProcessEnv) => Promise<CanaryControlLock>
+  testFlock: (path: string) => Promise<FlockCapabilityEvidence>
+  validateLinkage: (root: string) => Promise<LinkageEvidence>
+  prepareReceiptRoot: () => Promise<string>
+  claimReceipt: (root: string, binding: SetupBinding, nowMs: number) => Promise<SetupReceipt>
+  nowMs: () => number
+}
+
+export type InternalProviderSqlKind =
+  | "cleanup"
+  | "deadman_reconciliation"
+  | "fast_sample"
+  | "guard_bootstrap"
+  | "guard_heartbeat_fast"
+  | "guard_heartbeat_resource"
+  | "recovery_activation"
+  | "recovery_final"
+  | "recovery_observation"
+  | "recovery_preflight"
+  | "resource_sample"
+  | "rollback"
+
+export type InternalProviderSql = Readonly<{
+  kind: InternalProviderSqlKind
+  sql: string
+  sha256: string
+}>
+
+export type ProviderQueryFailureReason =
+  | "adapter_failure"
+  | "cancelled"
+  | "exit_failure"
+  | "output_limit"
+  | "schema_failure"
+  | "signalled"
+  | "timed_out"
+
+export type ProviderQueryResult<T> =
+  | { status: "success"; value: T }
+  | { status: "failure"; reason: ProviderQueryFailureReason;
+      schemaDiagnostic?: ProviderParseDiagnostic; childExitCode?: number;
+      providerCode?: ProviderStderrCode }
+
+export type ProviderQueryRequest<T> = {
+  repositoryRoot: string
+  provider: HeldProvider
+  sql: InternalProviderSql
+  parser: (stdout: Uint8Array) => T
+  signal?: AbortSignal
+  outputLimitBytes?: number
+}
+
+export type ProviderQueryDependencies = {
+  temporaryRoot: string
+}

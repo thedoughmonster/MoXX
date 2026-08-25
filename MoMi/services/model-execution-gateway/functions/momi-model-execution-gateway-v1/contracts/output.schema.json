@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ok", "ambiguous", "status", "body", "duration_ms", "call_id", "provider_model"],
+  "properties": {
+    "ok": {"type": "boolean"},
+    "ambiguous": {"type": "boolean"},
+    "status": {"type": "integer", "minimum": 0, "maximum": 599},
+    "body": {"type": "object"},
+    "duration_ms": {"type": "integer", "minimum": 0},
+    "call_id": {"type": "string", "format": "uuid"},
+    "provider_model": {"type": "string", "minLength": 1, "maxLength": 200}
+  }
+}

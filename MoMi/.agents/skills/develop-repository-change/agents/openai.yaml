@@ -1,0 +1,4 @@
+interface:
+  display_name: "Develop Repository Change"
+  short_description: "Implement, test, review, and ship repo changes"
+  default_prompt: "Use $develop-repository-change to implement this repository change through focused tests and one final review."

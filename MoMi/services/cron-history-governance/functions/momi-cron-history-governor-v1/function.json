@@ -1,0 +1,32 @@
+{
+  "function_key": "momi.cron_history.governor.v1",
+  "contract_version": 1,
+  "purpose": "Collect same-project provider health and run one authorized bounded cron-history step.",
+  "owner_service": "cron-history-governance",
+  "function_type": "coordinator",
+  "capability": "decide",
+  "boundary": "momi_internal",
+  "runtime": "supabase_edge",
+  "route_path": "/functions/v1/momi-cron-history-governor-v1",
+  "authentication_policy_key": "durable.work_token.v1",
+  "entrypoint": "index.ts",
+  "input_schema": "contracts/input.schema.json",
+  "output_schema": "contracts/output.schema.json",
+  "probe": {
+    "method": "OPTIONS",
+    "acceptable_statuses": [204]
+  },
+  "timeout_policy_key": "momi.cron_history.three_second_batch.v1",
+  "retry_policy_key": "momi.cron_history.no_catch_up.v1",
+  "idempotency_policy_key": "momi.cron_history.tick.v1",
+  "required_capabilities": [
+    "database_read",
+    "database_write",
+    "network_request"
+  ],
+  "declared_side_effects": [
+    "scrapes_same_project_metrics",
+    "records_sanitized_health",
+    "runs_at_most_one_bounded_cleanup_batch"
+  ]
+}

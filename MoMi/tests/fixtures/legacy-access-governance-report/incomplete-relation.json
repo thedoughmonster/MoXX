@@ -1,0 +1,14 @@
+{
+  "$schema": "https://momi.local/schemas/service-access-debt-baseline-v1.schema.json",
+  "schema_version": 1,
+  "generated_from": "dev@fafe25d",
+  "notes": ["Incomplete known relation fixture."],
+  "findings": [{
+    "rule_version": 1,
+    "rule_id": "direct_private_relation_access",
+    "subject": "database/routines/momi_a.incomplete--bbbbbbbbbbbb.sql",
+    "evidence": { "access": "read", "relation": "fixture_private.records" },
+    "fingerprint": "sha256:5a321f055971f29456acfbdceed3a70fd638674bd015736a03d2e808ad63675a",
+    "summary": "Fixture incomplete relation finding."
+  }]
+}

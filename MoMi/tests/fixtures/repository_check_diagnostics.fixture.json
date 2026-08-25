@@ -1,0 +1,118 @@
+{
+  "migration": {
+    "path": "supabase/migrations",
+    "violations": [
+      "20260823000000_first.sql: missing service-owner header",
+      "20260823000001_second.sql: missing service-owner header",
+      "20260823000002_third.sql:12: unsupported persistent relation DDL",
+      "unexpected.txt: unexpected migration inventory entry"
+    ],
+    "classification_cases": [
+      {
+        "violation": "20260823000003_index.sql: unsupported index drop target idx",
+        "rule_id": "MIGRATION_SUPPORTED_PERSISTENT_DDL",
+        "path": "supabase/migrations/20260823000003_index.sql"
+      },
+      {
+        "violation": "20260823000004_relation.sql: unsupported relation drop target orders",
+        "rule_id": "MIGRATION_SUPPORTED_PERSISTENT_DDL",
+        "path": "supabase/migrations/20260823000004_relation.sql"
+      },
+      {
+        "violation": "Unable to list services on the trusted development ref",
+        "rule_id": "MIGRATION_TRUSTED_AUTHORITY_SNAPSHOT"
+      },
+      {
+        "violation": "services/demo/service.json has invalid relations",
+        "rule_id": "MIGRATION_TRUSTED_AUTHORITY_SNAPSHOT",
+        "path": "services/demo/service.json"
+      },
+      {
+        "violation": "services/demo/service.json has invalid routines",
+        "rule_id": "MIGRATION_TRUSTED_AUTHORITY_SNAPSHOT",
+        "path": "services/demo/service.json"
+      },
+      {
+        "violation": "Invalid migration correction: 20260823000005_fix.sql",
+        "rule_id": "MIGRATION_CORRECTION_LEDGER",
+        "path": "docs/verification/development-migration-corrections.json"
+      },
+      {
+        "violation": "20260823000007_fix.sql: development migration replacement does not match correction",
+        "rule_id": "MIGRATION_CORRECTION_LEDGER",
+        "path": "docs/verification/development-migration-corrections.json"
+      },
+      {
+        "violation": "20260823000008_fix.sql: duplicate development migration replacement 20260823000007_fix.sql",
+        "rule_id": "MIGRATION_CORRECTION_LEDGER",
+        "path": "docs/verification/development-migration-corrections.json"
+      },
+      {
+        "violation": "20260823000009_index.sql: index authority is unknown for app.orders_idx",
+        "rule_id": "MIGRATION_INDEX_INVENTORY",
+        "path": "supabase/migrations/20260823000009_index.sql"
+      },
+      {
+        "violation": "20260823000006_transfer.sql: demo cannot mutate app.orders while ownership transfers from old to demo",
+        "rule_id": "MIGRATION_OWNERSHIP_TRANSFER_SEQUENCE",
+        "path": "supabase/migrations/20260823000006_transfer.sql"
+      },
+      {
+        "violation": "20260823000010_owner.sql: unknown service owner missing-service",
+        "rule_id": "MIGRATION_SERVICE_OWNER_HEADER",
+        "path": "supabase/migrations/20260823000010_owner.sql"
+      },
+      {
+        "violation": "20260823000011_routine.sql: known routine app.recalculate must be schema-qualified",
+        "rule_id": "MIGRATION_REFERENCE_QUALIFICATION",
+        "path": "supabase/migrations/20260823000011_routine.sql"
+      },
+      {
+        "violation": "MOMI_DEV_REF must be origin/dev or a full commit SHA",
+        "rule_id": "MIGRATION_VALIDATION_INPUT"
+      },
+      {
+        "violation": "Production migration baseline has an invalid tree entry",
+        "phase": "production_baseline",
+        "rule_id": "MIGRATION_VALIDATION_INPUT"
+      },
+      {
+        "violation": "Unclassified validator failure",
+        "rule_id": "MIGRATION_VALIDATION_FAILURE"
+      },
+      {
+        "violation": "Unexpected token in JSON",
+        "phase": "correction_ledger",
+        "rule_id": "MIGRATION_VALIDATION_FAILURE"
+      },
+      {
+        "violation": "spawn git ENOENT",
+        "phase": "authority_snapshot",
+        "rule_id": "MIGRATION_VALIDATION_FAILURE"
+      }
+    ]
+  },
+  "edge": {
+    "adapter_directory": "supabase/functions/fixture-edge-v1",
+    "source_directory": "services/fixture-owner/functions/fixture-edge-v1",
+    "function_key": "fixture.edge.v1",
+    "owner_service": "fixture-owner"
+  },
+  "artifacts": [
+    { "kind": "catalog", "condition": "freshness", "enforcement": "hard_stop" },
+    {
+      "kind": "quality",
+      "condition": "validity",
+      "enforcement": "hard_stop",
+      "detail": "Quality trend report must be valid JSON"
+    },
+    { "kind": "quality", "condition": "freshness", "enforcement": "advisory" },
+    {
+      "kind": "catalog",
+      "condition": "validity",
+      "enforcement": "hard_stop",
+      "detail": "EACCES while reading the artifact",
+      "safe_repair": false
+    }
+  ]
+}

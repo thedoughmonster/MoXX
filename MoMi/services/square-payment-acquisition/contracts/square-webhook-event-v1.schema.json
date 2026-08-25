@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://square.payment.webhook.authenticate.v1/event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["eventId", "eventType", "kind", "providerPaymentId", "providerUpdatedAt", "providerStatus", "orderId", "amountMinor", "currency", "locationId"],
+  "properties": {
+    "eventId": { "type": "string", "minLength": 1, "maxLength": 192 },
+    "eventType": { "enum": ["payment.created", "payment.updated", "refund.created", "refund.updated"] },
+    "kind": { "enum": ["payment", "refund"] },
+    "providerPaymentId": { "type": "string", "minLength": 1, "maxLength": 192 },
+    "providerUpdatedAt": { "type": "string", "format": "date-time" },
+    "providerStatus": { "type": "string", "minLength": 1, "maxLength": 50 },
+    "orderId": { "type": ["string", "null"], "format": "uuid" },
+    "amountMinor": { "type": "integer", "minimum": 1 },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "locationId": { "type": "string", "minLength": 1, "maxLength": 64 }
+  }
+}

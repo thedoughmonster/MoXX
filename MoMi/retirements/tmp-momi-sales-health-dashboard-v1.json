@@ -1,0 +1,15 @@
+{
+  "$schema": "../schemas/retirement-manifest-v1.schema.json",
+  "schema_version": 1,
+  "function_slug": "tmp-momi-sales-health-dashboard-v1",
+  "owner_service": "warehouse-read-api",
+  "reason": "The temporary owner-only Sites preview is the sole audited caller; no official MoMi workflow depends on this function.",
+  "replacement": "No direct replacement; remove the Sites preview, dev function, Vault secret, and expiring read-only role after the preview is retired.",
+  "environments": ["dev"],
+  "remove_after": "2026-08-08",
+  "removal_evidence": {
+    "issue_url": "https://linear.app/moxx-workboard/issue/MOX-151/bootstrap-linear-execute-run-for-codexsymphony",
+    "verified_at": "2026-08-14",
+    "summary": "The owner confirmed the temporary preview is deprecated and approved its explicit development removal. Recent development logs show no caller after 2026-08-13T22:28:57Z."
+  }
+}

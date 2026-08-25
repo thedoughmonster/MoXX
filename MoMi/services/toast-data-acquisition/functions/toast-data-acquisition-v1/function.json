@@ -1,0 +1,27 @@
+{
+  "function_key": "toast.data.acquisition.v1",
+  "contract_version": 1,
+  "purpose": "Fetch one page for a claimed allowlisted Toast acquisition job and preserve its complete response.",
+  "owner_service": "toast-data-acquisition",
+  "function_type": "primitive_source",
+  "capability": "hydrate",
+  "boundary": "toast_outbound",
+  "runtime": "supabase_edge",
+  "route_path": "/functions/v1/toast-data-acquisition-v1",
+  "authentication_policy_key": "durable.capability_token.v1",
+  "entrypoint": "index.ts",
+  "input_schema": "contracts/input.schema.json",
+  "output_schema": "contracts/output.schema.json",
+  "timeout_policy_key": "toast.registered_source.timeout.v1",
+  "retry_policy_key": "toast.acquisition.job_backoff.v1",
+  "idempotency_policy_key": "toast.resource_content_hash.v1",
+  "required_capabilities": ["database_read", "database_write", "toast_http"],
+  "declared_side_effects": [
+    "records_api_request_attempt",
+    "stores_toast_resource_version",
+    "records_resource_observation",
+    "records_acquisition_coverage",
+    "enqueues_payment_detail_acquisition",
+    "advances_acquisition_job"
+  ]
+}

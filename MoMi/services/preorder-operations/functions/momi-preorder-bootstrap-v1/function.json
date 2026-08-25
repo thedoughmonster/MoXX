@@ -1,0 +1,22 @@
+{
+  "$schema": "../../../../schemas/function-manifest-v1.schema.json",
+  "function_key": "momi.preorder.bootstrap.read.v1",
+  "contract_version": 1,
+  "purpose": "Read the current customer-safe preorder surface, catalog, policy, and fulfillment windows.",
+  "owner_service": "preorder-operations",
+  "function_type": "read",
+  "capability": "read",
+  "boundary": "momi_public",
+  "runtime": "supabase_edge",
+  "route_path": "/functions/v1/momi-preorder-bootstrap-v1",
+  "authentication_policy_key": "anonymous.bounded.preorder.read.v1",
+  "entrypoint": "index.ts",
+  "input_schema": "contracts/input.schema.json",
+  "output_schema": "contracts/output.schema.json",
+  "probe": {
+    "method": "OPTIONS",
+    "acceptable_statuses": [204]
+  },
+  "required_capabilities": ["database_read", "database_write"],
+  "declared_side_effects": ["records_rate_limit_bucket"]
+}

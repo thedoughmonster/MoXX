@@ -1,0 +1,102 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "order-alerting",
+  "purpose": "Own source-neutral order alert decisions and presentation snapshots.",
+  "kind": "core_capability",
+  "service_type": "dataset_owner",
+  "lifecycle_status": "active",
+  "functions": ["momi-order-alert-worker-v1"],
+  "contracts": {
+    "provides": [
+      "momi.order_api.invocation_work.v1",
+      "momi.orders.alert.evaluate.v1",
+      "toast.order.webhook_alert_work.v1"
+    ],
+    "consumes": [
+      { "service": "runtime-registry", "contract": "momi.runtime.active_trigger_resolution.v1" },
+      { "service": "toast-order-read-api", "contract": "momi.toast_orders.get_by_id.v1" },
+      { "service": "momi-event-routing", "contract": "momi.events.delivery_lifecycle.v1" },
+      { "service": "momi-event-routing", "contract": "momi.events.delivery_reference.v1" },
+      { "service": "momi-event-routing", "contract": "momi.events.delivery_witness.v1" },
+      { "service": "warehouse-read-api", "contract": "momi.order_alert_delivery.v2" },
+      { "service": "warehouse-read-api", "contract": "momi.orders.get_by_id.v1" },
+      { "service": "warehouse-read-api", "contract": "momi.orders.get_by_version.v1" }
+    ]
+  },
+  "database": {
+    "read": [
+      "momi_runtime", "momi_orders", "momi_alerting", "momi_events",
+      "momi_api", "momi_warehouse"
+    ],
+    "write": ["momi_orders", "momi_alerting", "momi_events", "momi_api"]
+  },
+  "network": { "outbound_hosts": ["same-origin:supabase-edge-functions"] },
+  "secrets": ["SUPABASE_DB_URL"],
+  "configuration": [
+    "SUPABASE_URL", "SUPABASE_PUBLISHABLE_KEYS", "MOMI_CODE_COMMIT_SHA",
+    "DENO_DEPLOYMENT_ID"
+  ],
+  "deployment": {
+    "owns": [
+      { "kind": "cron_job", "key": "momi-order-alert-event-wakeup-v1" }
+    ],
+    "depends_on": [
+      { "kind": "postgres_extension", "key": "pg_cron" },
+      { "kind": "postgres_extension", "key": "pg_net" },
+      { "kind": "vault_secret", "key": "momi_project_url" },
+      { "kind": "vault_secret", "key": "momi_publishable_key" }
+    ]
+  },
+  "runtime_dependencies": [
+    "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
+    "npm:postgres@3.4.3"
+  ],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "momi.order_alerting",
+    "db_role": "svc_order_alerting",
+    "dataset_class": "domain",
+    "private_relations": [
+      "momi_alerting.alert_routes",
+      "momi_alerting.alert_rule_conditions",
+      "momi_alerting.alert_rules",
+      "momi_alerting.order_alert_candidates",
+      "momi_alerting.order_alert_route_conditions",
+      "momi_alerting.order_event_bridges",
+      "momi_alerting.order_read_capability_uses",
+      "momi_alerting.order_source_mappings",
+      "momi_alerting.preorder_policies",
+      "momi_orders.api_invocation_attempts",
+      "momi_orders.api_invocation_work"
+    ],
+    "private_routines": [
+      "momi_alerting.claim_order_alert_candidates", "momi_alerting.is_doughnut_preorder",
+      "momi_alerting.issue_order_read_capability", "momi_alerting.issue_order_read_capability_v2",
+      "momi_alerting.match_canonical_order_alert_routes",
+      "momi_alerting.matches_canonical_condition", "momi_alerting.matches_source_value",
+      "momi_alerting.prevent_cross_path_order_alert_duplicate",
+      "momi_alerting.revoke_order_read_capability", "momi_alerting.stage_order_event_work",
+      "momi_alerting.try_timestamptz", "momi_alerting.wake_order_event_worker",
+      "momi_orders.enqueue_toast_webhook_order_alert_work",
+      "momi_orders.wake_order_alert_worker"
+    ],
+    "public_reads": [],
+    "public_commands": [
+      "momi.order_api.invocation_work.v1",
+      "momi.orders.alert.evaluate.v1",
+      "toast.order.webhook_alert_work.v1"
+    ],
+    "public_routine_commands": [
+      {
+        "contract": "momi.order_api.invocation_work.v1",
+        "routine": "momi_alerting.stage_order_event_work"
+      },
+      {
+        "contract": "toast.order.webhook_alert_work.v1",
+        "routine": "momi_orders.enqueue_toast_webhook_order_alert_work"
+      }
+    ],
+    "emitted_events": []
+  }
+}

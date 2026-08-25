@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://square.payment.refund.v1/input",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["refund_attempt_id", "provider_payment_id", "owner_order_id", "amount_minor", "currency", "location_id"],
+  "properties": {
+    "refund_attempt_id": { "type": "string", "format": "uuid", "maxLength": 45 },
+    "provider_payment_id": { "type": "string", "minLength": 1, "maxLength": 192 },
+    "owner_order_id": { "type": "string", "format": "uuid", "maxLength": 40 },
+    "amount_minor": { "type": "integer", "minimum": 1 },
+    "currency": { "const": "USD" },
+    "location_id": { "type": "string", "minLength": 1, "maxLength": 64 }
+  }
+}

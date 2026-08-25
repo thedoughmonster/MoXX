@@ -1,0 +1,11 @@
+export const RECOVERY_PREFLIGHT_MARKER = "momi.background-work-recovery.preflight"
+export const RECOVERY_ACTIVATION_MARKER = "momi.background-work-recovery.activation"
+export const RECOVERY_OBSERVATION_MARKER = "momi.background-work-recovery.observation"
+export const RECOVERY_FINAL_MARKER = "momi.background-work-recovery.final"
+export const RECOVERY_SNAPSHOT_OUTPUT_LIMIT_BYTES = 2 * 1024 * 1024
+export const RECOVERY_PROVIDER_SQL_LIMIT_BYTES = 4 * 1024 * 1024
+export const FAST_INTERVAL_MS = 15_000
+export const RESOURCE_INTERVAL_MS = 60_000
+export const PROGRESS_LIMIT_MS = 120_000
+export const DRAIN_LIMIT_MS = 60 * 60_000
+export const HARD_LIMIT_MS = 69 * 60_000

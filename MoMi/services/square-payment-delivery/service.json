@@ -1,0 +1,22 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "square-payment-delivery",
+  "purpose": "Execute Square online payments and refunds from durable commands owned by governed ordering services.",
+  "kind": "destination_adapter",
+  "service_type": "destination_adapter",
+  "lifecycle_status": "active",
+  "implementation_status": "implemented",
+  "functions": [],
+  "contracts": {
+    "provides": ["square.payment.execute.v1", "square.payment.refund.v1"],
+    "consumes": []
+  },
+  "database": { "read": [], "write": [] },
+  "network": { "outbound_hosts": ["connect.squareupsandbox.com"] },
+  "secrets": ["SQUARE_SANDBOX_ACCESS_TOKEN"],
+  "configuration": ["SQUARE_API_VERSION", "SQUARE_SANDBOX_LOCATION_ID"],
+  "deployment": { "owns": [], "depends_on": [] },
+  "runtime_dependencies": [],
+  "approved_packages": []
+}

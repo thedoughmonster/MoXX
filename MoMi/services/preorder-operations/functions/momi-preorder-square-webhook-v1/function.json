@@ -1,0 +1,34 @@
+{
+  "$schema": "../../../../schemas/function-manifest-v1.schema.json",
+  "function_key": "momi.preorder.square_webhook.process.v1",
+  "contract_version": 1,
+  "purpose": "Authenticate, archive, resolve, and project Square payment webhooks.",
+  "owner_service": "preorder-operations",
+  "function_type": "coordinator",
+  "capability": "decide",
+  "boundary": "momi_public",
+  "runtime": "supabase_edge",
+  "route_path": "/functions/v1/momi-preorder-square-webhook-v1",
+  "authentication_policy_key": "square.webhook.hmac_sha256.exact_bytes.v1",
+  "entrypoint": "index.ts",
+  "input_schema": "contracts/input.schema.json",
+  "output_schema": "contracts/output.schema.json",
+  "probe": { "method": "GET", "acceptable_statuses": [405] },
+  "timeout_policy_key": "square.webhook.processing.bounded.v1",
+  "idempotency_policy_key": "square.webhook.evidence_id.v1",
+  "capability_model": {
+    "schema_version": 1,
+    "called_contracts": [
+      {
+        "service": "communications-archive",
+        "contract": "momi.raw_json.capture_evidence.v1"
+      },
+      {
+        "service": "square-payment-acquisition",
+        "contract": "square.payment.webhook.authenticate.v1"
+      }
+    ]
+  },
+  "required_capabilities": ["database_read", "database_write"],
+  "declared_side_effects": ["captures_raw_json_evidence", "resolves_payment_attempt", "projects_payment_evidence"]
+}

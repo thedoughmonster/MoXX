@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://model-execution/complete-background-v1/output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ok", "disposition"],
+  "properties": {
+    "ok": {"type": "boolean"},
+    "disposition": {"enum": ["completed", "retrying", "duplicate"]}
+  }
+}

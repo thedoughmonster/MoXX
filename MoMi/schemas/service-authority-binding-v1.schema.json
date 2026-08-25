@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://momi.local/schemas/service-authority-binding-v1.schema.json",
+  "title": "Service Authority Binding v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "repository", "revision", "service", "binding_digest",
+    "target_authority", "runtime_compatibility", "legacy_debt",
+    "execution_authority"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schema_version": { "const": "service-authority-binding/v1" },
+    "repository": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+    },
+    "revision": { "$ref": "#/$defs/git_revision" },
+    "service": { "$ref": "#/$defs/service" },
+    "binding_digest": { "$ref": "#/$defs/sha256" },
+    "target_authority": {
+      "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/manifest_reference" }]
+    },
+    "runtime_compatibility": { "$ref": "#/$defs/manifest_reference" },
+    "legacy_debt": { "$ref": "#/$defs/debt_reference" },
+    "execution_authority": {
+      "anyOf": [{ "type": "null" }, { "$ref": "#/$defs/execution_reference" }]
+    }
+  },
+  "$defs": {
+    "service": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]+$"
+    },
+    "source_path": {
+      "type": "string",
+      "pattern": "^(services/[a-z][a-z0-9-]+/service\\.json|docs/service-access-debt-baseline\\.json)$"
+    },
+    "manifest_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_path", "json_pointer", "source_schema_version", "value_digest"
+      ],
+      "properties": {
+        "source_path": { "$ref": "#/$defs/source_path" },
+        "json_pointer": {
+          "type": "string",
+          "pattern": "^/[a-z][a-z_]*$"
+        },
+        "source_schema_version": { "const": "service-manifest/v1" },
+        "value_digest": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "debt_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_path", "source_schema_id", "source_schema_version",
+        "source_digest", "finding_fingerprints"
+      ],
+      "properties": {
+        "source_path": { "$ref": "#/$defs/source_path" },
+        "source_schema_id": {
+          "const": "https://momi.local/schemas/service-access-debt-baseline-v1.schema.json"
+        },
+        "source_schema_version": {
+          "const": "service-access-debt-baseline/v1"
+        },
+        "source_digest": { "$ref": "#/$defs/sha256" },
+        "finding_fingerprints": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "execution_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "work_item", "grant_id", "base_revision", "source_digest",
+        "declaration_digest"
+      ],
+      "properties": {
+        "work_item": {
+          "type": "string",
+          "pattern": "^MOX-[1-9][0-9]*$"
+        },
+        "grant_id": {
+          "type": "string",
+          "pattern": "^ea-[a-z0-9][a-z0-9-]*$"
+        },
+        "base_revision": { "$ref": "#/$defs/git_revision" },
+        "source_digest": { "$ref": "#/$defs/sha256" },
+        "declaration_digest": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "git_revision": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

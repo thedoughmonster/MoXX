@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://square.payment.retrieve.v1/output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["disposition", "providerPaymentId", "providerUpdatedAt", "providerStatus", "providerRequestId", "paymentStatus", "orderId", "amountMinor", "currency", "locationId", "errorCode"],
+  "properties": {
+    "disposition": { "enum": ["matched", "mismatch", "missing", "indeterminate"] },
+    "providerPaymentId": { "type": "string", "minLength": 1, "maxLength": 192 },
+    "providerUpdatedAt": { "type": ["string", "null"], "format": "date-time" },
+    "providerStatus": { "type": ["string", "null"], "maxLength": 50 },
+    "providerRequestId": { "type": ["string", "null"], "maxLength": 192 },
+    "paymentStatus": { "enum": ["pending", "authorized", "paid", "declined", "canceled", "refund_pending", "refunded", "indeterminate"] },
+    "orderId": { "type": "string", "format": "uuid" },
+    "amountMinor": { "type": "integer", "minimum": 1 },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "locationId": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "errorCode": { "type": ["string", "null"], "maxLength": 64 }
+  }
+}

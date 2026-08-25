@@ -1,0 +1,139 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "preorder-operations",
+  "purpose": "Own the versioned public preorder business lifecycle and customer-safe contracts.",
+  "kind": "core_capability",
+  "service_type": "dataset_owner",
+  "lifecycle_status": "active",
+  "functions": [
+    "momi-preorder-bootstrap-v1",
+    "momi-preorder-checkout-hold-v1",
+    "momi-preorder-order-intent-v1",
+    "momi-preorder-order-status-v1",
+    "momi-preorder-payment-initiate-v1",
+    "momi-preorder-payment-reconcile-v1",
+    "momi-preorder-square-webhook-v1",
+    "momi-preorder-quote-v1"
+  ],
+  "contracts": {
+    "provides": [
+      "momi.preorder.bootstrap.read.v1",
+      "momi.preorder.checkout_hold.manage.v1",
+      "momi.preorder.order_intent.create.v1",
+      "momi.preorder.order_status.read.v1",
+      "momi.preorder.payment.initiate.v1",
+      "momi.preorder.payment.reconcile.v1",
+      "momi.preorder.quote.create.v1"
+    ],
+    "consumes": [
+      { "service": "communications-archive", "contract": "momi.raw_json.capture_evidence.v1" },
+      { "service": "square-payment-delivery", "contract": "square.payment.execute.v1" },
+      { "service": "square-payment-acquisition", "contract": "square.payment.retrieve.v1" },
+      { "service": "square-payment-acquisition", "contract": "square.payment.webhook.authenticate.v1" }
+    ]
+  },
+  "database": {
+    "read": ["momi_preorder"],
+    "write": ["momi_communications", "momi_preorder"]
+  },
+  "network": {
+    "outbound_hosts": []
+  },
+  "secrets": ["SUPABASE_DB_URL"], "configuration": ["SQUARE_SANDBOX_LOCATION_ID"],
+  "deployment": {
+    "owns": [],
+    "depends_on": []
+  }, "test_impact": {"schema_version":1,"owner_service":"preorder-operations","categories":{"local_unit":[{"id":"preorder-operations:local_unit:bootstrap:v1","test":"services/preorder-operations/functions/momi-preorder-bootstrap-v1/tests/bootstrap.test.ts","reason":"Strict bootstrap, safe output/failure/CORS, private rate-bounded storage.","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:local_unit:checkout-hold:v1","test":"services/preorder-operations/functions/momi-preorder-checkout-hold-v1/tests/hold.test.ts","reason":"Hold commands, authority-safe responses, conflicts, limits, origins.","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:local_unit:order-intent:v1","test":"services/preorder-operations/functions/momi-preorder-order-intent-v1/tests/order_intent.test.ts","reason":"Intent input, durable unpaid order, recovery, conflicts, limits.","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:local_unit:order-status:v1","test":"services/preorder-operations/functions/momi-preorder-order-status-v1/tests/order_status.test.ts","reason":"Customer-safe durable status and safe indistinguishable failures.","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:local_unit:payment-initiate:v1","test":"services/preorder-operations/functions/momi-preorder-payment-initiate-v1/tests/initiate.test.ts","reason":"Token handling, claim-before-delivery, replay, limits, ambiguity.","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:local_unit:payment-reconcile:v1","test":"services/preorder-operations/functions/momi-preorder-payment-reconcile-v1/tests/reconcile.test.ts","reason":"Recovery input, claim-before-retrieval, evidence, terminal/indeterminate states.","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:local_unit:quote-failures:v1","test":"services/preorder-operations/functions/momi-preorder-quote-v1/tests/quote_failures.test.ts","reason":"Safe conflicts, rejection, and rate-limit mappings.","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:local_unit:quote:v1","test":"services/preorder-operations/functions/momi-preorder-quote-v1/tests/quote.test.ts","reason":"Frozen quote command, authoritative envelope, preflight/methods.","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:local_unit:square-webhook:v1","test":"services/preorder-operations/functions/momi-preorder-square-webhook-v1/tests/webhook.test.ts","reason":"Exact-byte authentication, archive/resolve/projection, replay and limits.","services":["preorder-operations"],"contracts":[],"triggers":[]}],"local_integration":[{"id":"preorder-operations:local_integration:configuration-publication:v1","test":"services/preorder-operations/tests/config_publication.test.ts","reason":"Private idempotent publication and bootstrap projection.","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:local_integration:launch-policy-v3:v1","test":"services/preorder-operations/tests/launch_policy_v3.test.ts","reason":"Versioned schedules and fail-closed allergen policy.","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:local_integration:lifecycle-migration:v1","test":"services/preorder-operations/functions/momi-preorder-order-intent-v1/tests/lifecycle_migration.test.ts","reason":"Lifecycle migration idempotence, privacy, recovery, avoidance.","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:local_integration:payment-contract:v1","test":"services/preorder-operations/tests/payment_contract.test.ts","reason":"Payment lifecycle and internal integration contracts.","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:local_integration:payment-status-contract:v1","test":"services/preorder-operations/tests/payment_status_contract.test.ts","reason":"Durable payment-attempt backing for reconciliation status.","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:local_integration:pricing-eligibility-policy:v1","test":"services/preorder-operations/tests/pricing_eligibility_policy.test.ts","reason":"Versioned pricing and fail-closed eligibility.","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:local_integration:public-origin:v1","test":"services/preorder-operations/tests/public_origin.test.ts","reason":"Exact browser origins and safe non-browser CORS.","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:local_integration:quote-migration:v1","test":"services/preorder-operations/functions/momi-preorder-quote-v1/tests/quote_migration.test.ts","reason":"Migration-pinned quote authority and launch boundaries.","services":["preorder-operations"],"contracts":[],"triggers":[]}],"provider_contract":[{"id":"preorder-operations:provider_contract:public-preorder:v1","test":"services/preorder-operations/tests/public_contract.test.ts","reason":"manifest/OpenAPI/authority/safe-fixture alignment","services":["preorder-operations"],"contracts":[{"provider_service":"preorder-operations","contract":"momi.preorder.bootstrap.read.v1"},{"provider_service":"preorder-operations","contract":"momi.preorder.checkout_hold.manage.v1"},{"provider_service":"preorder-operations","contract":"momi.preorder.order_intent.create.v1"},{"provider_service":"preorder-operations","contract":"momi.preorder.order_status.read.v1"},{"provider_service":"preorder-operations","contract":"momi.preorder.payment.initiate.v1"},{"provider_service":"preorder-operations","contract":"momi.preorder.payment.reconcile.v1"},{"provider_service":"preorder-operations","contract":"momi.preorder.quote.create.v1"}],"triggers":[]}],"consumer_contract":[{"id":"preorder-operations:consumer_contract:square-payment-handlers:v1","test":"services/preorder-operations/tests/payment_handler_contract.test.ts","reason":"three handlers compose only through declared Square contracts and preserve safe evidence","services":["preorder-operations","square-payment-acquisition","square-payment-delivery"],"contracts":[{"provider_service":"square-payment-acquisition","contract":"square.payment.retrieve.v1"},{"provider_service":"square-payment-acquisition","contract":"square.payment.webhook.authenticate.v1"},{"provider_service":"square-payment-delivery","contract":"square.payment.execute.v1"}],"triggers":[]}],"cross_service_integration":[{"id":"preorder-operations:cross_service_integration:square-payment-lifecycle:v1","test":"services/preorder-operations/tests/preorder_payment_postgres.test.ts","reason":"critical durable payment claim, Square-shaped delivery/webhook projection, reconciliation, recovery, contracts, and security","services":["preorder-operations","square-payment-acquisition","square-payment-delivery"],"contracts":[{"provider_service":"square-payment-acquisition","contract":"square.payment.retrieve.v1"},{"provider_service":"square-payment-acquisition","contract":"square.payment.webhook.authenticate.v1"},{"provider_service":"square-payment-delivery","contract":"square.payment.execute.v1"}],"triggers":[]}],"mandatory_global":[{"id":"preorder-operations:mandatory_global:dev-loop-determinism:v1","test":"tests/dev_loop_determinism.test.ts","reason":"deterministic plans and evidence redaction","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:mandatory_global:dev-loop-release-plan:v1","test":"tests/dev_loop_release_plan.test.ts","reason":"impact-to-gate/release-plan behavior","services":["preorder-operations"],"contracts":[],"triggers":[]},{"id":"preorder-operations:mandatory_global:retired-development-protocol:v1","test":"tests/retired_development_protocol.test.ts","reason":"shared default loop and no retired orchestration","services":["preorder-operations"],"contracts":[],"triggers":[]}],"risk_triggered":[{"id":"preorder-operations:risk_triggered:preorder-lifecycle-postgres:v1","test":"services/preorder-operations/tests/preorder_lifecycle_postgres.test.ts","reason":"broader state, recovery, security, pricing, launch-policy, and contract proof when migrations change persistence","services":["preorder-operations"],"contracts":[],"triggers":["migration"]}]}},
+  "runtime_dependencies": [
+    "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
+    "npm:ajv@8.20.0",
+    "npm:postgres@3.4.3"
+  ],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "momi.preorder_operations",
+    "dataset_class": "domain",
+    "db_role": "svc_preorder_operations",
+    "private_schema": "momi_preorder",
+    "private_relations": [
+      "momi_preorder.catalog_items",
+      "momi_preorder.checkout_holds",
+      "momi_preorder.commands",
+      "momi_preorder.configuration_item_policies",
+      "momi_preorder.configuration_pickup_schedule_days",
+      "momi_preorder.configuration_price_classes",
+      "momi_preorder.configuration_publications",
+      "momi_preorder.fulfillment_windows",
+      "momi_preorder.orders",
+      "momi_preorder.payment_attempts",
+      "momi_preorder.payment_evidence",
+      "momi_preorder.public_read_rate_buckets",
+      "momi_preorder.public_request_rate_buckets",
+      "momi_preorder.quotes",
+      "momi_preorder.surfaces"
+    ],
+    "private_routines": [
+      "momi_preorder.admit_public_read_v1",
+      "momi_preorder.admit_public_request_v1",
+      "momi_preorder.apply_catalog_item_policy_v2", "momi_preorder.authority_hash_v1", "momi_preorder.capture_configuration_authoring_v2",
+      "momi_preorder.create_order_intent_v1",
+      "momi_preorder.create_quote_v1",
+      "momi_preorder.claim_payment_attempt_v1", "momi_preorder.claim_payment_reconciliation_v1",
+      "momi_preorder.ensure_fulfillment_windows_v1",
+      "momi_preorder.expire_checkout_holds_v1",
+      "momi_preorder.item_eligible_on_v1", "momi_preorder.lifecycle_failure_v1",
+      "momi_preorder.manage_checkout_hold_v1",
+      "momi_preorder.payment_claim_envelope_v1",
+      "momi_preorder.payment_next_actions_v1",
+      "momi_preorder.payment_receipt_v1",
+      "momi_preorder.payment_transition_allowed_v1",
+      "momi_preorder.publish_configuration_v1",
+      "momi_preorder.project_payment_evidence_v1",
+      "momi_preorder.quote_failure_v1",
+      "momi_preorder.read_bootstrap_v1",
+      "momi_preorder.read_payment_attempt_v1",
+      "momi_preorder.read_order_status_v1",
+      "momi_preorder.recovery_authority_v1",
+      "momi_preorder.resolve_payment_attempt_v1",
+      "momi_preorder.request_digest_v1",
+      "momi_preorder.refresh_fulfillment_windows_on_surface_v1",
+      "momi_preorder.refresh_fulfillment_windows_v1",
+      "momi_preorder.validate_active_savings_policy_v1"
+    ],
+    "public_reads": [
+      "momi.preorder.bootstrap.read.v1",
+      "momi.preorder.order_status.read.v1"
+    ],
+    "public_commands": [
+      "momi.preorder.checkout_hold.manage.v1",
+      "momi.preorder.order_intent.create.v1",
+      "momi.preorder.quote.create.v1"
+    ],
+    "public_routine_reads": [
+      {
+        "contract": "momi.preorder.bootstrap.read.v1",
+        "routine": "momi_preorder.read_bootstrap_v1"
+      },
+      {
+        "contract": "momi.preorder.order_status.read.v1",
+        "routine": "momi_preorder.read_order_status_v1"
+      }
+    ],
+    "public_routine_commands": [
+      {
+        "contract": "momi.preorder.checkout_hold.manage.v1",
+        "routine": "momi_preorder.manage_checkout_hold_v1"
+      },
+      {
+        "contract": "momi.preorder.order_intent.create.v1",
+        "routine": "momi_preorder.create_order_intent_v1"
+      },
+      {
+        "contract": "momi.preorder.quote.create.v1",
+        "routine": "momi_preorder.create_quote_v1"
+      }
+    ],
+    "emitted_events": []
+  }
+}

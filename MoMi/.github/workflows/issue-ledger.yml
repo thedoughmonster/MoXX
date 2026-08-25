@@ -1,0 +1,91 @@
+name: Enforce issue ledger
+
+on:
+  pull_request:
+    branches: [dev]
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+  pull_request_target:
+    branches: [dev]
+    types: [closed]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+jobs:
+  validate:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 1
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .node-version
+      - name: Verify owning issue and disposition
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MOMI_PR_BODY: ${{ github.event.pull_request.body }}
+        shell: bash
+        run: |
+          if ! grep -Eiq '^Owning issue: #[1-9][0-9]*$' <<<"$MOMI_PR_BODY"; then
+            MOMI_PR_BODY="$(git log -1 --format=%B)"
+            export MOMI_PR_BODY
+          fi
+          node scripts/check_pull_request_issue_tracking.ts
+
+  reconcile:
+    if: >-
+      github.event_name == 'pull_request_target' &&
+      github.event.pull_request.merged == true
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            let source = context.payload.pull_request.body || ""
+            if (!/^Owning issue: #[1-9][0-9]*$/im.test(source)) {
+              const commit = await github.rest.repos.getCommit({
+                ...context.repo,
+                ref: context.payload.pull_request.head.sha,
+              })
+              source = commit.data.commit.message
+            }
+            const issues = [...source.matchAll(/^Owning issue:\s*#([1-9][0-9]*)\s*$/gim)]
+            const states = [...source.matchAll(/^Disposition:\s*(partial|complete)\s*$/gim)]
+            if (issues.length !== 1 || states.length !== 1) {
+              core.setFailed("Merged PR has invalid issue tracking metadata")
+              return
+            }
+            const issue_number = Number(issues[0][1])
+            const disposition = states[0][1].toLowerCase()
+            const marker = "<!-- momi-issue-ledger:v1 pr=" + context.issue.number + " -->"
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { ...context.repo, issue_number, per_page: 100 },
+            )
+            if (!comments.some((comment) => comment.body?.includes(marker))) {
+              const result = "issue remains open; closure is a deliberate owner action"
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number,
+                body: [
+                  marker,
+                  "## Delivery update",
+                  "",
+                  "- Merged PR: #" + context.issue.number,
+                  "- Merge commit: " + context.payload.pull_request.merge_commit_sha,
+                  "- Disposition: **" + disposition.toUpperCase() + "**",
+                  "- Result: " + result,
+                ].join("\n"),
+              })
+            }

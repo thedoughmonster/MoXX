@@ -1,0 +1,38 @@
+{
+  "generated": true,
+  "as_of": "2026-08-18",
+  "purpose": "Review signal only; lower debt counts do not prove correct ownership.",
+  "total": 82,
+  "oldest_age_days": 31,
+  "by_issue": {
+    "#194": 57,
+    "#195": 15,
+    "#196": 7,
+    "#572": 3
+  },
+  "by_owner": {
+    "Zac": 82
+  },
+  "by_risk": {
+    "high": 82
+  },
+  "by_rule": {
+    "direct_private_relation_access": 80,
+    "direct_private_routine_call": 1,
+    "dynamic_relation_identifier": 1
+  },
+  "by_consumer_service": {
+    "communications-archive": 2,
+    "communications-evaluation": 1,
+    "order-alerting": 15,
+    "slack-order-delivery": 1,
+    "toast-data-acquisition": 28,
+    "toast-order-hydration": 2,
+    "toast-order-ingest": 2,
+    "toast-order-read-api": 2,
+    "toast-stock-ingest": 2,
+    "toast-webhook-ingestion": 1,
+    "warehouse-projection": 25,
+    "warehouse-read-api": 1
+  }
+}

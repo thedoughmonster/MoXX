@@ -1,0 +1,40 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "trello-evidence-ingestion",
+  "purpose": "Authenticate Trello webhooks and coordinate complete evidence admission.",
+  "kind": "core_capability",
+  "service_type": "transform",
+  "lifecycle_status": "active",
+  "functions": ["trello-webhooks-ingest-v1"],
+  "contracts": {
+    "provides": ["trello.evidence.capture.v1", "trello.webhooks.ingest.v1"],
+    "consumes": [
+      { "service": "communications-archive", "contract": "momi.raw_json.capture_evidence.v1" },
+      { "service": "trello-data-acquisition", "contract": "trello.data.acquisition.request.v1" }
+    ]
+  },
+  "database": {
+    "read": ["trello_evidence_ingestion"],
+    "write": ["momi_communications", "trello_evidence_ingestion"]
+  },
+  "network": { "outbound_hosts": ["same-origin:supabase-edge-functions"] },
+  "secrets": ["SUPABASE_DB_URL", "TRELLO_WEBHOOK_SECRET"],
+  "configuration": ["TRELLO_WEBHOOK_CALLBACK_URL"],
+  "deployment": { "owns": [], "depends_on": [] },
+  "runtime_dependencies": [
+    "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
+    "npm:postgres@3.4.3"
+  ],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "trello.evidence_ingestion_control",
+    "dataset_class": "operational",
+    "private_schema": "trello_evidence_ingestion",
+    "private_relations": [],
+    "private_routines": [],
+    "public_reads": [],
+    "public_commands": ["trello.evidence.capture.v1", "trello.webhooks.ingest.v1"],
+    "emitted_events": []
+  }
+}

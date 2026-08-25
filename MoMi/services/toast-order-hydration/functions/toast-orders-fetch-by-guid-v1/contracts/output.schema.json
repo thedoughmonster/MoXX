@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://toast.orders.fetch_by_guid.v1/output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["ok", "disposition", "job_id"],
+  "properties": {
+    "ok": { "type": "boolean" },
+    "disposition": {
+      "enum": [
+        "stored",
+        "duplicate",
+        "already_succeeded",
+        "unavailable",
+        "not_found",
+        "failed"
+      ]
+    },
+    "job_id": { "type": "string" },
+    "attempt_id": { "type": "string" },
+    "invocation_id": { "type": "string" },
+    "order_version_id": { "type": "string" },
+    "error": { "type": "string" }
+  }
+}

@@ -1,0 +1,51 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "runtime-registry",
+  "purpose": "Own function, parameter, and trigger registration state.",
+  "kind": "core_capability",
+  "service_type": "dataset_owner",
+  "lifecycle_status": "active",
+  "implementation_status": "implemented",
+  "functions": [],
+  "contracts": {
+    "provides": ["momi.runtime.active_trigger_resolution.v1"],
+    "consumes": []
+  },
+  "database": { "read": ["momi_runtime"], "write": ["momi_runtime"] },
+  "network": { "outbound_hosts": [] },
+  "secrets": [],
+  "configuration": [],
+  "deployment": { "owns": [], "depends_on": [] },
+  "runtime_dependencies": [],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "momi.runtime_registry",
+    "dataset_class": "operational",
+    "private_schema": "momi_runtime",
+    "private_relations": [
+      "momi_runtime.function_parameter_map",
+      "momi_runtime.function_registry",
+      "momi_runtime.function_trigger_registry"
+    ],
+    "private_routines": [
+      "momi_runtime.resolve_communications_evaluation_trigger_v1",
+      "momi_runtime.resolve_event_router_trigger_v1",
+      "momi_runtime.resolve_order_alert_reader_trigger_v1",
+      "momi_runtime.resolve_order_alert_worker_trigger_v1",
+      "momi_runtime.resolve_slack_order_delivery_trigger_v1",
+      "momi_runtime.resolve_warehouse_projection_trigger_v1"
+    ],
+    "public_reads": ["momi.runtime.active_trigger_resolution.v1"],
+    "public_routine_reads": [
+      {"contract": "momi.runtime.active_trigger_resolution.v1", "routine": "momi_runtime.resolve_communications_evaluation_trigger_v1"},
+      {"contract": "momi.runtime.active_trigger_resolution.v1", "routine": "momi_runtime.resolve_event_router_trigger_v1"},
+      {"contract": "momi.runtime.active_trigger_resolution.v1", "routine": "momi_runtime.resolve_order_alert_reader_trigger_v1"},
+      {"contract": "momi.runtime.active_trigger_resolution.v1", "routine": "momi_runtime.resolve_order_alert_worker_trigger_v1"},
+      {"contract": "momi.runtime.active_trigger_resolution.v1", "routine": "momi_runtime.resolve_slack_order_delivery_trigger_v1"},
+      {"contract": "momi.runtime.active_trigger_resolution.v1", "routine": "momi_runtime.resolve_warehouse_projection_trigger_v1"}
+    ],
+    "public_commands": [],
+    "emitted_events": []
+  }
+}

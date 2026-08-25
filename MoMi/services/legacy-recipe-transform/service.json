@@ -1,0 +1,43 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "legacy-recipe-transform",
+  "purpose": "Own the bounded legacy recipe import and reconciliation operation.",
+  "kind": "core_capability",
+  "service_type": "transform",
+  "lifecycle_status": "retiring",
+  "functions": [],
+  "contracts": { "provides": [], "consumes": [] },
+  "database": {
+    "read": ["legacy_recipe_staging"],
+    "write": ["legacy_recipe_staging"]
+  },
+  "network": { "outbound_hosts": [] },
+  "secrets": [],
+  "configuration": [],
+  "deployment": { "owns": [], "depends_on": [] },
+  "runtime_dependencies": [],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "legacy.recipe_transform_operations",
+    "dataset_class": "operational",
+    "private_schema": "legacy_recipe_staging",
+    "private_relations": [
+      "legacy_recipe_staging.import_batches",
+      "legacy_recipe_staging.import_runs",
+      "legacy_recipe_staging.reconciliation_results",
+      "legacy_recipe_staging.repair_findings",
+      "legacy_recipe_staging.source_files",
+      "legacy_recipe_staging.source_rows",
+      "legacy_recipe_staging.source_tables"
+    ],
+    "private_routines": [
+      "legacy_recipe_staging.guard_import_batch_update",
+      "legacy_recipe_staging.guard_import_run_update",
+      "legacy_recipe_staging.reject_immutable_change"
+    ],
+    "public_reads": [],
+    "public_commands": [],
+    "emitted_events": []
+  }
+}

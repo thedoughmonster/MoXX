@@ -1,0 +1,61 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "trello-task-delivery",
+  "purpose": "Deliver prepared kitchen task mutations and own Trello delivery operations.",
+  "kind": "destination_adapter",
+  "service_type": "destination_adapter",
+  "lifecycle_status": "active",
+  "functions": [
+    "trello-create-list-v1",
+    "trello-move-card-v1",
+    "trello-register-webhook-v1"
+  ],
+  "contracts": {
+    "provides": ["momi.trello.task_delivery.enqueue.v1"],
+    "consumes": [{ "service": "momi-event-routing", "contract": "momi.events.append.v1" }]
+  },
+  "database": { "read": ["momi_trello_delivery"], "write": ["momi_trello_delivery"] },
+  "network": { "outbound_hosts": ["api.trello.com"] },
+  "secrets": ["SUPABASE_DB_URL", "TRELLO_API_KEY", "TRELLO_API_TOKEN"],
+  "configuration": ["TRELLO_CLIENT_IDENTIFIER_PREFIX"],
+  "deployment": { "owns": [], "depends_on": [] },
+  "runtime_dependencies": [
+    "jsr:@supabase/functions-js@2.110.2/edge-runtime.d.ts",
+    "npm:postgres@3.4.3"
+  ],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "momi.trello_task_delivery",
+    "dataset_class": "operational",
+    "private_schema": "momi_trello_delivery",
+    "private_relations": ["momi_trello_delivery.operations"],
+    "private_routines": [
+      "momi_trello_delivery.claim_operation_v1",
+      "momi_trello_delivery.claim_move_card_v1",
+      "momi_trello_delivery.claim_register_webhook_v1",
+      "momi_trello_delivery.enqueue_create_list_v1",
+      "momi_trello_delivery.enqueue_move_card_v1",
+      "momi_trello_delivery.enqueue_register_webhook_v1",
+      "momi_trello_delivery.finish_operation_v1",
+      "momi_trello_delivery.finish_operation_status_v1"
+    ],
+    "public_reads": [],
+    "public_commands": ["momi.trello.task_delivery.enqueue.v1"],
+    "public_routine_commands": [
+      {
+        "contract": "momi.trello.task_delivery.enqueue.v1",
+        "routine": "momi_trello_delivery.enqueue_create_list_v1"
+      },
+      {
+        "contract": "momi.trello.task_delivery.enqueue.v1",
+        "routine": "momi_trello_delivery.enqueue_move_card_v1"
+      },
+      {
+        "contract": "momi.trello.task_delivery.enqueue.v1",
+        "routine": "momi_trello_delivery.enqueue_register_webhook_v1"
+      }
+    ],
+    "emitted_events": ["destination.trello.task_delivery.outcome"]
+  }
+}

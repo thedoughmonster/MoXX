@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "corrections": [
+    {
+      "migration": "20260725191244_create_model_execution_gateway.sql",
+      "from_blob_sha1": "a6081a8bd1d023339213d28ee8ebd1b72918ee4f",
+      "to_blob_sha1": "531d62d8d9b71294ca4af7eec57ed83c1f3c09c1",
+      "issue": 179,
+      "reason": "Dev apply rolled back before recording the version because the profile seed omitted its required provider endpoint.",
+      "hosted_dev_status": "absent",
+      "verified_at": "2026-07-25T20:11:07.106925Z"
+    },
+    {
+      "migration": "20260714084407_create_toast_order_source_versions_view.sql",
+      "replacement_migration": "20260714090005_create_toast_order_source_versions_view.sql",
+      "from_blob_sha1": "8316860d5d87b7cfac32a0b7f399373594361ba0",
+      "to_blob_sha1": "8316860d5d87b7cfac32a0b7f399373594361ba0",
+      "issue": 604,
+      "reason": "PR #9 renamed this absent version to the exact version assigned by hosted development without changing its blob.",
+      "hosted_dev_status": "absent",
+      "verified_at": "2026-07-14T09:04:21.000Z"
+    },
+    {
+      "migration": "20260714084419_read_webhook_order_presentations.sql",
+      "replacement_migration": "20260714090014_read_webhook_order_presentations.sql",
+      "from_blob_sha1": "aff91ee3d5188fd27074d436d2fa945d95d6f3db",
+      "to_blob_sha1": "aff91ee3d5188fd27074d436d2fa945d95d6f3db",
+      "issue": 604,
+      "reason": "PR #9 renamed this absent version to the exact version assigned by hosted development without changing its blob.",
+      "hosted_dev_status": "absent",
+      "verified_at": "2026-07-14T09:04:21.000Z"
+    },
+    {
+      "migration": "20260714084424_read_webhook_orders_by_id.sql",
+      "replacement_migration": "20260714090036_read_webhook_orders_by_id.sql",
+      "from_blob_sha1": "324cc5b2d747a88e7938a2cfcee8e9a06675b3ab",
+      "to_blob_sha1": "324cc5b2d747a88e7938a2cfcee8e9a06675b3ab",
+      "issue": 604,
+      "reason": "PR #9 renamed this absent version to the exact version assigned by hosted development without changing its blob.",
+      "hosted_dev_status": "absent",
+      "verified_at": "2026-07-14T09:04:21.000Z"
+    },
+    {
+      "migration": "20260714084428_handoff_webhooks_to_order_alerts.sql",
+      "replacement_migration": "20260714090044_handoff_webhooks_to_order_alerts.sql",
+      "from_blob_sha1": "9faee78bdc87d5aa2ea264fbba0ad93b6462ac77",
+      "to_blob_sha1": "9faee78bdc87d5aa2ea264fbba0ad93b6462ac77",
+      "issue": 604,
+      "reason": "PR #9 renamed this absent version to the exact version assigned by hosted development without changing its blob.",
+      "hosted_dev_status": "absent",
+      "verified_at": "2026-07-14T09:04:21.000Z"
+    }
+  ]
+}
