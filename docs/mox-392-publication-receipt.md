@@ -97,6 +97,15 @@ no tracked credential or private-key file. No history rewrite was required.
   after removing the retired model-gateway triage variable.
 - Names-only reads of repository secrets and both `dev` and `prod` environment
   secrets are empty; no value was requested or exposed during verification.
+- PR #19 head `d6fd995b57819562f01a963d7427791954c23d8a` passed the
+  Linear-mapping check, CodeQL, both monorepo checks, and the 5m38s authoritative
+  backend final gate. It squash-merged as
+  `0985a25a7c97ac2d50163602a976cb566f5404d8`.
+- The only failed PR check was the non-required base-branch debt verifier being
+  removed: it attempted GitHub issue lookup for `#MOX-20` and returned Not
+  Found. The merged tree contains no such workflow. Exact post-merge
+  `monorepo-routing`, `monorepo-static-config`, and CodeQL runs succeeded on
+  `0985a25a7c97ac2d50163602a976cb566f5404d8`.
 
 ## Repository mapping and credentials
 

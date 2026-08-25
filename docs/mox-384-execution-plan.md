@@ -69,9 +69,11 @@ Linear umbrella: [MOX-384](https://linear.app/moxx-workboard/issue/MOX-384)
   verified. Linear is now the sole active work-item authority: GitHub Issues are
   disabled in MoXX, active GitHub-Issues workflows are removed, and the debt
   registry keys accepted findings to Linear issues including new MOX-406 for
-  the former #572 remediation scope. MOX-392 remains In Progress only because
-  four write-only provider secret placements require secure operator re-entry.
-  Exact evidence is in `mox-392-publication-receipt.md`.
+  the former #572 remediation scope. This authority transition landed through
+  PR #19 as `0985a25a7c97ac2d50163602a976cb566f5404d8`. MOX-392 remains In
+  Progress only because four write-only provider secret placements require
+  secure operator re-entry. Exact evidence is in
+  `mox-392-publication-receipt.md`.
 
 ## Native dependency graph
 
@@ -124,6 +126,9 @@ Parent: [MOX-386](https://linear.app/moxx-workboard/issue/MOX-386)
    protected `dev` and `prod`, retained the host Git transport fix outside
    application code, and updated repository mappings while Symphony remained
    stopped. GitHub Issues are inactive and Linear is the sole work authority.
+   PR #19 landed that transition at
+   `0985a25a7c97ac2d50163602a976cb566f5404d8` with authoritative backend,
+   CodeQL, Linear-mapping, and monorepo checks.
    Its only remaining gate is secure population of two repository secrets and
    the Supabase token in each of the `dev` and `prod` environments; see
    `mox-392-publication-receipt.md`.
