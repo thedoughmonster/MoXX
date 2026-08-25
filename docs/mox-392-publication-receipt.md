@@ -35,8 +35,8 @@ no tracked credential or private-key file. No history rewrite was required.
 ## Repository governance
 
 - Repository settings retain merge, squash, and rebase merges, disable
-  auto-merge and automatic branch deletion, enable issues and projects, and
-  disable wiki and discussions.
+  auto-merge and automatic branch deletion, retain projects, and disable wiki,
+  discussions, and GitHub Issues.
 - `dev` is protected by repository ruleset `21423436` (`Protect dev`). Changes
   require a pull request, resolved review conversations, and both universal
   GitHub Actions checks. The sole owner is not deadlocked by a mandatory
@@ -61,6 +61,16 @@ no tracked credential or private-key file. No history rewrite was required.
   identifier must equal the sole Linear identifier in the head branch. Missing,
   mismatched, or ambiguous mappings fail closed without duplicating work into a
   GitHub issue ledger.
+- Linear is the sole work-item authority. The active GitHub-Issues triage and
+  remote debt-issue workflows were removed, the remaining PR check is named
+  `linear-issue-mapping.yml`, and root validation rejects any active workflow
+  that requests GitHub Issues authority.
+- The debt lifecycle registry now keys its 82 accepted fingerprints to
+  MOX-20, MOX-22, MOX-23, and
+  [MOX-406](https://linear.app/moxx-workboard/issue/MOX-406). Legacy GitHub
+  issue numbers remain only in historical provenance. MOX-406 preserves the
+  exact three-fingerprint archive/evaluation remediation formerly recorded in
+  GitHub #572.
 - Root CODEOWNERS, Dependabot, workflows, and path-routing configuration are
   present in the published tree.
 
@@ -77,10 +87,16 @@ no tracked credential or private-key file. No history rewrite was required.
 - The same unvalidated fast-forward pushed directly to `prod` was rejected with
   GH013 because both required checks were missing.
 - Neither protection probe changed a remote ref.
-- Root automation validation still discovers all 14 workflows, and both root
-  routing/static-config tests pass after the history join.
+- Root automation validation discovers the 12 active workflows after retiring
+  the two GitHub-Issues authorities, and both root routing/static-config tests
+  pass.
 - The focused issue-mapping validation passes positive, missing, mismatched, and
   ambiguous branch cases. PR `#16` is linked directly on Linear MOX-392.
+- A live settings read reports `hasIssuesEnabled: false`, public visibility,
+  and default branch `dev`. A names-only repository-variable read is empty
+  after removing the retired model-gateway triage variable.
+- Names-only reads of repository secrets and both `dev` and `prod` environment
+  secrets are empty; no value was requested or exposed during verification.
 
 ## Repository mapping and credentials
 
@@ -100,26 +116,28 @@ the identity or token. The corrected global SSH command still resolves
 
 ## Remaining external gate
 
-The public repository has no provider secret values and no copied provider
-variable values. A proposed direct transfer of values from the private source
-was rejected before execution because repository variables in a public target
-may themselves disclose sensitive configuration. Existing GitHub secret values
-cannot be read back for safe copying. No empty, placeholder, or fabricated
-credential was created.
+The public repository has no provider secret values. Existing GitHub secret
+values cannot be read back for safe copying, so no empty, placeholder, or
+fabricated credential was created. The former model-gateway repository variable
+and triage secret are not required: they served only the retired active GitHub
+Issues triage workflow. The same gateway URL name remains valid Supabase runtime
+configuration for communications services and is outside this GitHub Actions
+credential gate.
 
 Run `scripts/provision-mox-392-credentials.sh` from a trusted interactive
-terminal to finish this gate. The helper requires an explicit public-target
-confirmation, copies only the required non-secret gateway variable, prompts
-invisibly for each write-only secret, pipes it directly to GitHub CLI at its
-repository or environment scope, and verifies names without reading values
-back. It rejects empty input and never writes a secret value to disk or prints
-one.
+terminal to finish this gate. The helper prompts invisibly for four write-only
+placements, pipes each value directly to GitHub CLI at its repository or
+environment scope, and verifies names without reading values back. It rejects
+empty input and never writes a secret value to disk or prints one:
 
-MOX-392 therefore remains In Progress until an operator explicitly approves
-each non-secret value for the public destination and securely re-enters the
-required secret values. The required names are inventoried without their values
-in the Linear workpad. All other publication, protection, mapping, clone, and
-credential-path criteria are directly verified.
+- repository secrets `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`;
+- environment secret `SUPABASE_ACCESS_TOKEN` in `dev`; and
+- environment secret `SUPABASE_ACCESS_TOKEN` in `prod`.
+
+MOX-392 therefore remains In Progress until an operator securely re-enters the
+four required secret placements. The required names are inventoried without
+their values in the Linear workpad. All other publication, protection, mapping,
+clone, and credential-path criteria are directly verified.
 
 ## Preservation
 

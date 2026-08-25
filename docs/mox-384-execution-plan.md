@@ -66,10 +66,12 @@ Linear umbrella: [MOX-384](https://linear.app/moxx-workboard/issue/MOX-384)
   candidate as a synthetic test marker, digest, identifier, or fixture value;
   no credential or sensitive tracked filename was found. Publication,
   repository governance, and the stopped-service Symphony mapping are directly
-  verified. MOX-392 remains In Progress only because required provider values
-  cannot be copied safely into a public destination without explicit
-  value-level approval and secure re-entry of write-only secrets. Exact evidence
-  is in `mox-392-publication-receipt.md`.
+  verified. Linear is now the sole active work-item authority: GitHub Issues are
+  disabled in MoXX, active GitHub-Issues workflows are removed, and the debt
+  registry keys accepted findings to Linear issues including new MOX-406 for
+  the former #572 remediation scope. MOX-392 remains In Progress only because
+  four write-only provider secret placements require secure operator re-entry.
+  Exact evidence is in `mox-392-publication-receipt.md`.
 
 ## Native dependency graph
 
@@ -93,8 +95,8 @@ MOX-391, MOX-388, MOX-389, MOX-393, MOX-396, MOX-395, and MOX-397 are Done.
 MOX-392 is the active leaf in the product dependency chain. Authentication is
 valid, the operator authorized public visibility to make native protections
 available, and the full-history disclosure gate is complete. Publication and
-mapping verification are complete. The provider-value gate described above is
-the only remaining MOX-392 acceptance blocker.
+mapping and Linear-authority verification are complete. The provider-value gate
+described above is the only remaining MOX-392 acceptance blocker.
 Remaining implementation leaves are in Todo, and native blockers prevent later
 leaves from being mistaken for ready work. None has `ready-package`.
 
@@ -121,7 +123,9 @@ Parent: [MOX-386](https://linear.app/moxx-workboard/issue/MOX-386)
    operator-authorized public remote, published the verified histories,
    protected `dev` and `prod`, retained the host Git transport fix outside
    application code, and updated repository mappings while Symphony remained
-   stopped. Its only remaining gate is secure provider-value population; see
+   stopped. GitHub Issues are inactive and Linear is the sole work authority.
+   Its only remaining gate is secure population of two repository secrets and
+   the Supabase token in each of the `dev` and `prod` environments; see
    `mox-392-publication-receipt.md`.
 5. [MOX-390](https://linear.app/moxx-workboard/issue/MOX-390) inventories and
    dispositions active source-repository work before adding reversible

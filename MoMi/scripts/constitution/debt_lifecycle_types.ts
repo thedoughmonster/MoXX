@@ -8,7 +8,7 @@ export type DebtLifecycleReview = {
 }
 
 export type DebtLifecycleRecord = {
-  remediation_issue: number
+  remediation_issue: string
   accountable_owner: string
   risk: "low" | "medium" | "high" | "critical"
   temporary_reason: string
@@ -23,19 +23,18 @@ export type DebtLifecycleRecord = {
 
 export type DebtLifecycleRegistry = {
   $schema: string
-  schema_version: 1
+  schema_version: 2
   authority: {
     decision: "M169-DEBT-014"
     decision_id: string
     accepted_event: string
     content_digest: string
+    work_authority: "linear"
   }
   policy: {
     as_of: string
     review_max_days: 30
     expiry_max_days: 90
-    unrelated_remote_result: "not_applicable_success"
-    unknown_remote_result: "indeterminate_failure"
     issue_closure: "deliberate_owner_action_only"
   }
   records: DebtLifecycleRecord[]

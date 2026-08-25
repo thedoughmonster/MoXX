@@ -1,4 +1,8 @@
-# Automated issue triage
+# Automated issue triage (historical source reference)
+
+This document describes an imported source-repository workflow that is inactive
+in MoXX. Linear is the sole current work-item authority; no active root workflow
+ingests or mutates GitHub Issues.
 
 `.github/workflows/issue-triage.yml` produces one bounded triage record for each
 new issue and supports explicit manual re-triage.

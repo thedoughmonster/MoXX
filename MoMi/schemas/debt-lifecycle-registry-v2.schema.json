@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://momi.local/schemas/debt-lifecycle-registry-v2.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "authority", "policy", "records"],
+  "properties": {
+    "$schema": {
+      "const": "https://momi.local/schemas/debt-lifecycle-registry-v2.schema.json"
+    },
+    "schema_version": { "const": 2 },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["decision", "decision_id", "accepted_event",
+        "content_digest", "work_authority"],
+      "properties": {
+        "decision": { "const": "M169-DEBT-014" },
+        "decision_id": { "const": "e39f17af-e5c0-4441-89a0-6ff417e57c91" },
+        "accepted_event": { "const": "063a3b83-3168-4891-a433-7c0f5ba808b1" },
+        "content_digest": {
+          "const": "ade77d7485e290596457564a9c1d168bdbbf63bc75b740edd119108a33cd8dcd"
+        },
+        "work_authority": { "const": "linear" }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["as_of", "review_max_days", "expiry_max_days",
+        "issue_closure"],
+      "properties": {
+        "as_of": { "$ref": "#/$defs/date" },
+        "review_max_days": { "const": 30 },
+        "expiry_max_days": { "const": 90 },
+        "issue_closure": { "const": "deliberate_owner_action_only" }
+      }
+    },
+    "records": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/record" }
+    }
+  },
+  "$defs": {
+    "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" },
+    "fingerprint": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "linear_issue": { "type": "string", "pattern": "^MOX-[1-9][0-9]*$" },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reviewed_on", "reviewer", "decision", "rationale"],
+      "properties": {
+        "reviewed_on": { "$ref": "#/$defs/date" },
+        "reviewer": { "type": "string", "minLength": 1 },
+        "decision": { "enum": ["accept", "renew"] },
+        "rationale": { "type": "string", "minLength": 20 }
+      }
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["remediation_issue", "accountable_owner", "risk",
+        "temporary_reason", "introduced_on", "reviewed_on", "next_review_on",
+        "expires_on", "removal_evidence", "reviews", "fingerprints"],
+      "properties": {
+        "remediation_issue": { "$ref": "#/$defs/linear_issue" },
+        "accountable_owner": { "type": "string", "minLength": 1 },
+        "risk": { "enum": ["low", "medium", "high", "critical"] },
+        "temporary_reason": { "type": "string", "minLength": 20 },
+        "introduced_on": { "$ref": "#/$defs/date" },
+        "reviewed_on": { "$ref": "#/$defs/date" },
+        "next_review_on": { "$ref": "#/$defs/date" },
+        "expires_on": { "$ref": "#/$defs/date" },
+        "removal_evidence": { "type": "string", "minLength": 20 },
+        "reviews": { "type": "array", "minItems": 1,
+          "items": { "$ref": "#/$defs/review" } },
+        "fingerprints": { "type": "array", "minItems": 1, "uniqueItems": true,
+          "items": { "$ref": "#/$defs/fingerprint" } }
+      }
+    }
+  }
+}
