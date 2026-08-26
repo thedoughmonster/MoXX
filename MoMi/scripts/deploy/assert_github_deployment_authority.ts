@@ -7,7 +7,8 @@ export function assertGitHubDeploymentAuthority(
   runtime: RuntimeEnvironment = process.env,
 ): void {
   const expectedRef = `refs/heads/${environment}`
-  const expectedWorkflow = `/.github/workflows/deploy-${environment}.yml@`
+  const expectedWorkflow =
+    `thedoughmonster/MoXX/.github/workflows/deploy-${environment}.yml@`
   if (runtime.GITHUB_ACTIONS !== "true") {
     throw new Error("Deployment apply is restricted to GitHub Actions")
   }
@@ -18,7 +19,7 @@ export function assertGitHubDeploymentAuthority(
   if (runtime.GITHUB_REF !== expectedRef) {
     throw new Error(`Deployment apply requires ${expectedRef}`)
   }
-  if (!runtime.GITHUB_WORKFLOW_REF?.includes(expectedWorkflow)) {
+  if (!runtime.GITHUB_WORKFLOW_REF?.startsWith(expectedWorkflow)) {
     throw new Error(`Deployment apply requires deploy-${environment}.yml`)
   }
   if (runtime.MOMI_EXPECTED_SHA !== runtime.GITHUB_SHA) {

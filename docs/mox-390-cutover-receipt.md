@@ -1,10 +1,12 @@
-# MOX-390 repository cutover receipt
+# MOX-390 repository authority-establishment receipt
 
 ## Authority decision
 
-MoXX is the sole active product repository. The private source repositories
-remain readable, retain all branches, tags, releases, issues, pull requests,
-deployments, and audit history, and are explicitly non-authoritative.
+This change establishes the repository-side controls needed for MoXX to become
+the sole active product repository. It does not complete the live source
+cutover. The private source repositories remain authoritative until their open
+work is dispositioned, README tombstones land, operator mappings move, obsolete
+source workflows are disabled, and the cutover time is recorded.
 
 ## Frozen inventory
 
@@ -15,10 +17,10 @@ counts.
 
 | Class | Total | Disposition |
 | --- | ---: | --- |
-| Remote branches | 230 (217 MoMi, 13 MoXi) | Retained as non-authoritative history; open-PR heads also inherit the PR disposition |
-| Open pull requests | 15 (11 MoMi, 4 MoXi) | Explicitly closed as superseded by MoXX after item-level review |
-| Workflows | 12 (7 MoMi, 5 MoXi) | Source workflows disabled after MoXX equivalence proof |
-| Local source workspaces | 23 | Mappings changed to MoXX; no workspace was deleted |
+| Remote branches | 230 (217 MoMi, 13 MoXi) | Classified once; retained in place pending live cutover |
+| Open pull requests | 15 (11 MoMi, 4 MoXi) | Classified once; recorded dispositions remain to be executed |
+| Workflows | 12 (7 MoMi, 5 MoXi) | Classified once; active source workflows remain enabled pending equivalence proof |
+| Local source workspaces | 23 | Classified once; remapping to MoXX remains pending and no workspace will be deleted |
 | GitHub issues | 429 | Retained as read-only planning and audit history |
 | Deployments | 176 | Retained as immutable provider history |
 
@@ -26,16 +28,17 @@ Each inventory row appears in exactly one class and has exactly one disposition.
 No secret value, webhook configuration, provider payload, or private key is in
 this repository.
 
-## Accepted repository mapping
+## Prepared repository mapping
 
-| Product role | Active repository | Branch |
+| Product role | Prepared target | Branch |
 | --- | --- | --- |
 | Development and pull requests | `thedoughmonster/MoXX` | `dev` |
 | Production release history | `thedoughmonster/MoXX` | `prod` |
 | Backend subtree | `thedoughmonster/MoXX` | `MoMi/` |
 | UI subtree | `thedoughmonster/MoXX` | `MoXi/` |
 
-The imported source commits and exact source/target trees remain recorded in
+This mapping becomes active only at the recorded live cutover. The imported
+source commits and exact source/target trees remain recorded in
 [`repository-migration-manifest.md`](repository-migration-manifest.md). Source
 tombstone and final MoXX commits are recorded in the Linear workpad after the
 protected merges complete.
@@ -64,6 +67,6 @@ The drill is intentionally mapping-only and never rewrites history:
 6. Reapply the tombstone commits and disable the source workflows again.
 7. Verify MoXX mappings and workflow registration are restored.
 
-The execution workpad records the non-mutating command evidence and cutover
-timestamp. No data restoration is required because no repository object is
-deleted.
+The live-cutover execution workpad will record the non-mutating command evidence
+and cutover timestamp. No data restoration is required because no repository
+object will be deleted.

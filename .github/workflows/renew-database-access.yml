@@ -1,4 +1,3 @@
-# MOX-390 registration touch: mutation remains workflow_dispatch or schedule only.
 name: Renew Supabase database access
 
 on:

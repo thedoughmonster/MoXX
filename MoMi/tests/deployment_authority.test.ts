@@ -31,6 +31,10 @@ test("accepts only the matching GitHub deployment workflow", () => {
     { ...validDevRuntime, MOMI_EXPECTED_SHA: "different" },
     { ...validDevRuntime, GITHUB_WORKFLOW_REF:
       "thedoughmonster/MoXX/.github/workflows/validate.yml@refs/heads/dev" },
+    { ...validDevRuntime, GITHUB_WORKFLOW_REF:
+      "thedoughmonster/momi-backend/.github/workflows/deploy-dev.yml@refs/heads/dev" },
+    { ...validDevRuntime, GITHUB_WORKFLOW_REF:
+      "thedoughmonster/MoXX-fork/.github/workflows/deploy-dev.yml@refs/heads/dev" },
   ]
   for (const runtime of invalid) {
     assert.throws(() => assertGitHubDeploymentAuthority("dev", runtime))
