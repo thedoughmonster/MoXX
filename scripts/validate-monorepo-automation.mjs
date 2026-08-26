@@ -8,6 +8,7 @@ const expectedWorkflows = [
   "cloudflare-preview.yml",
   "cloudflare-production.yml",
   "codeql.yml",
+  "cutover-equivalence.yml",
   "deploy-dev.yml",
   "deploy-prod.yml",
   "linear-issue-mapping.yml",
@@ -153,6 +154,15 @@ const authority = read(`${workflowRoot}/README.md`)
 assert.match(authority, /imported[\s\S]*retained[\s\S]*not execution authorities/i)
 assert.match(authority, /deploy-dev\.yml[\s\S]*deploy-prod\.yml/)
 assert.match(authority, /Linear[\s\S]*sole work-item authority/i)
+
+const equivalence = workflows.get("cutover-equivalence.yml")
+assert.match(equivalence, /pull_request:/)
+assert.match(equivalence, /pnpm momi-impact plan/)
+assert.match(equivalence, /pnpm run cloudflare:dry-run/)
+assert.doesNotMatch(
+  equivalence,
+  /deploy:apply|database-access:renew|wrangler (?:deploy|rollback)(?! --dry-run)/,
+)
 
 for (const [name, source] of workflows) {
   assert.doesNotMatch(

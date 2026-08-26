@@ -1,3 +1,4 @@
+# MOX-390 registration touch: mutation remains workflow_dispatch-only.
 name: Deploy backend production
 run-name: deploy-prod ${{ inputs.expected_sha }} ${{ inputs.plan_sha256 }}
 

@@ -13,7 +13,7 @@ const validDevRuntime = {
   GITHUB_SHA: "abc123",
   MOMI_EXPECTED_SHA: "abc123",
   GITHUB_WORKFLOW_REF:
-    "thedoughmonster/momi-backend/.github/workflows/deploy-dev.yml@refs/heads/dev",
+    "thedoughmonster/MoXX/.github/workflows/deploy-dev.yml@refs/heads/dev",
 }
 
 test("accepts only the matching GitHub deployment workflow", () => {
@@ -22,7 +22,7 @@ test("accepts only the matching GitHub deployment workflow", () => {
     ...validDevRuntime,
     GITHUB_REF: "refs/heads/prod",
     GITHUB_WORKFLOW_REF:
-      "thedoughmonster/momi-backend/.github/workflows/deploy-prod.yml@refs/heads/prod",
+      "thedoughmonster/MoXX/.github/workflows/deploy-prod.yml@refs/heads/prod",
   }))
   const invalid = [
     { ...validDevRuntime, GITHUB_ACTIONS: "false" },
@@ -30,7 +30,11 @@ test("accepts only the matching GitHub deployment workflow", () => {
     { ...validDevRuntime, GITHUB_REF: "refs/heads/prod" },
     { ...validDevRuntime, MOMI_EXPECTED_SHA: "different" },
     { ...validDevRuntime, GITHUB_WORKFLOW_REF:
-      "thedoughmonster/momi-backend/.github/workflows/validate.yml@refs/heads/dev" },
+      "thedoughmonster/MoXX/.github/workflows/validate.yml@refs/heads/dev" },
+    { ...validDevRuntime, GITHUB_WORKFLOW_REF:
+      "thedoughmonster/momi-backend/.github/workflows/deploy-dev.yml@refs/heads/dev" },
+    { ...validDevRuntime, GITHUB_WORKFLOW_REF:
+      "thedoughmonster/MoXX-fork/.github/workflows/deploy-dev.yml@refs/heads/dev" },
   ]
   for (const runtime of invalid) {
     assert.throws(() => assertGitHubDeploymentAuthority("dev", runtime))
@@ -40,7 +44,7 @@ test("accepts only the matching GitHub deployment workflow", () => {
     GITHUB_EVENT_NAME: "push",
     GITHUB_REF: "refs/heads/prod",
     GITHUB_WORKFLOW_REF:
-      "thedoughmonster/momi-backend/.github/workflows/deploy-prod.yml@refs/heads/prod",
+      "thedoughmonster/MoXX/.github/workflows/deploy-prod.yml@refs/heads/prod",
   }))
 })
 
