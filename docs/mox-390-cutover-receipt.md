@@ -11,9 +11,9 @@ source workflows are disabled, and the cutover time is recorded.
 ## Frozen inventory
 
 The access-controlled inventory was frozen on 2026-08-25 between 16:51:57Z and
-16:52:19Z. Item-level private metadata is retained with the source tombstone
-commits and the Linear workpad; this public receipt publishes only aggregate
-counts.
+16:52:19Z. Item-level private metadata remains access-controlled and is
+referenced by the Linear workpad; the later source tombstone commits will record
+its disposition evidence. This public receipt publishes only aggregate counts.
 
 | Class | Total | Disposition |
 | --- | ---: | --- |
@@ -40,8 +40,8 @@ this repository.
 This mapping becomes active only at the recorded live cutover. The imported
 source commits and exact source/target trees remain recorded in
 [`repository-migration-manifest.md`](repository-migration-manifest.md). Source
-tombstone and final MoXX commits are recorded in the Linear workpad after the
-protected merges complete.
+tombstone and final MoXX commits will be recorded in the Linear workpad after
+the protected merges complete.
 
 ## Equivalence gate
 

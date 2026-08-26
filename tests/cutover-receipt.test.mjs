@@ -17,9 +17,12 @@ test("publishes one public-safe disposition for every frozen class", () => {
   assert.match(receipt, /recorded dispositions remain to be executed/)
   assert.match(receipt, /source workflows remain enabled pending equivalence proof/)
   assert.match(receipt, /remapping to MoXX remains pending/)
+  assert.match(receipt, /source tombstone commits will record/)
+  assert.match(receipt, /Source[\s\S]*commits will be recorded/)
   assert.doesNotMatch(receipt, /Explicitly closed as superseded/)
   assert.doesNotMatch(receipt, /Source workflows disabled/)
   assert.doesNotMatch(receipt, /Mappings changed to MoXX/)
+  assert.doesNotMatch(receipt, /metadata is retained with the source tombstone commits/)
   assert.doesNotMatch(receipt, /CLOUDFLARE_API_TOKEN|SUPABASE_ACCESS_TOKEN/)
 })
 
