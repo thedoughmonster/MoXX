@@ -16,6 +16,10 @@ on:
   schedule:
     - cron: "31 4 * * 1"
 
+concurrency:
+  group: codeql-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   security-events: write

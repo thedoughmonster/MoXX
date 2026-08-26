@@ -12,10 +12,60 @@ on:
       - "tests/cutover-receipt.test.mjs"
   workflow_dispatch:
 
+concurrency:
+  group: cutover-equivalence-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
 jobs:
+  changes:
+    name: cutover-path-classifier
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      backend: ${{ steps.paths.outputs.backend }}
+      ui: ${{ steps.paths.outputs.ui }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - name: Select bounded deployment dry-runs
+        id: paths
+        shell: bash
+        env:
+          MOXX_EVENT_NAME: ${{ github.event_name }}
+          MOXX_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          MOXX_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          backend=false
+          ui=false
+
+          if test "$MOXX_EVENT_NAME" != "pull_request"; then
+            backend=true
+            ui=true
+          else
+            while IFS= read -r path; do
+              case "$path" in
+                MoMi/*|.github/workflows/deploy-dev.yml|.github/workflows/deploy-prod.yml|.github/workflows/promote-prod.yml|.github/workflows/renew-database-access.yml|.github/workflows/supabase-credential-preflight.yml|.github/workflows/validate.yml)
+                  backend=true
+                  ;;
+                MoXi/*|.github/workflows/cloudflare-credential-preflight.yml|.github/workflows/cloudflare-preview.yml|.github/workflows/cloudflare-production.yml|.github/workflows/validate-ui.yml)
+                  ui=true
+                  ;;
+                .github/workflows/cutover-equivalence.yml)
+                  backend=true
+                  ui=true
+                  ;;
+              esac
+            done < <(git diff --name-only "$MOXX_BASE_SHA" "$MOXX_HEAD_SHA")
+          fi
+
+          echo "backend=$backend" >> "$GITHUB_OUTPUT"
+          echo "ui=$ui" >> "$GITHUB_OUTPUT"
+
   receipt:
     name: cutover-receipt
     runs-on: ubuntu-latest
@@ -26,6 +76,8 @@ jobs:
       - run: node --test tests/cutover-receipt.test.mjs
 
   backend-plan:
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     name: backend-deployment-plan-dry-run
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -53,6 +105,8 @@ jobs:
           --output .momi/cutover-plan.json
 
   ui-dry-run:
+    needs: changes
+    if: needs.changes.outputs.ui == 'true'
     name: cloudflare-worker-dry-run
     runs-on: ubuntu-latest
     timeout-minutes: 10
