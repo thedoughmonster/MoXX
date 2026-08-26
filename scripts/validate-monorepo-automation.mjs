@@ -81,12 +81,24 @@ assert.match(workflows.get("validate-ui.yml"), /paths:[\s\S]*"MoXi\/\*\*"/)
 assert.doesNotMatch(workflows.get("validate-ui.yml"), /"MoMi\/\*\*"/)
 
 const routing = workflows.get("monorepo-routing.yml")
+assert.match(routing, /name:\s*monorepo-routing/)
+assert.match(routing, /name:\s*monorepo-static-config/)
 assert.match(routing, /push:\s*\n\s+branches:\s*\[dev\]/)
 assert.match(routing, /github\.event\.head_commit\.message/)
 assert.match(routing, /github\.event\.before/)
 assert.match(routing, /scripts\/monorepo-routing\.mjs/)
 assert.match(routing, /scripts\/validate-monorepo-automation\.mjs/)
 assert.match(routing, /node --test tests\/\*\.test\.mjs/)
+
+for (const name of [
+  "codeql.yml",
+  "cutover-equivalence.yml",
+  "linear-issue-mapping.yml",
+  "monorepo-routing.yml",
+  "validate-ui.yml",
+]) {
+  assert.match(workflows.get(name), /concurrency:[\s\S]*cancel-in-progress:\s*true/)
+}
 
 const applyCallers = [...workflows]
   .filter(([, source]) => source.includes("deploy:apply"))
@@ -144,6 +156,16 @@ assert.match(dependabot, /directory:\s*\/MoMi/)
 assert.match(dependabot, /directory:\s*\/MoXi/)
 assert.match(dependabot, /package-ecosystem:\s*github-actions/)
 assert.equal((dependabot.match(/target-branch:\s*dev/g) ?? []).length, 3)
+assert.equal((dependabot.match(/interval:\s*weekly/g) ?? []).length, 2)
+assert.equal((dependabot.match(/interval:\s*monthly/g) ?? []).length, 1)
+assert.match(
+  dependabot,
+  /package-ecosystem:\s*github-actions[\s\S]*schedule:[\s\S]*interval:\s*monthly/,
+)
+assert.match(
+  dependabot,
+  /package-ecosystem:\s*github-actions[\s\S]*groups:[\s\S]*github-actions:[\s\S]*patterns:[\s\S]*-\s*"\*"/,
+)
 
 const hooks = JSON.parse(read(".codex/hooks.json"))
 const hookSource = JSON.stringify(hooks)
@@ -178,7 +200,25 @@ for (const [name, source] of workflows) {
 const linearMapping = workflows.get("linear-issue-mapping.yml")
 assert.match(linearMapping, /name:\s*Enforce Linear issue mapping/)
 assert.match(linearMapping, /check_pull_request_issue_tracking\.ts/)
+assert.match(linearMapping, /github\.event\.pull_request\.user\.login/)
+assert.match(linearMapping, /github\.event\.pull_request\.head\.repo\.full_name/)
+assert.match(linearMapping, /dependabot\[bot\]/)
+assert.match(linearMapping, /dependabot\/\*/)
+assert.equal(
+  (linearMapping.match(/if:\s*steps\.mapping\.outputs\.required == 'true'/g) ?? [])
+    .length,
+  3,
+)
 assert.doesNotMatch(linearMapping, /pull_request_target:/)
+
+assert.match(equivalence, /name:\s*cutover-path-classifier/)
+assert.match(equivalence, /needs\.changes\.outputs\.backend == 'true'/)
+assert.match(equivalence, /needs\.changes\.outputs\.ui == 'true'/)
+assert.match(
+  equivalence,
+  /if test "\$MOXX_EVENT_NAME" != "pull_request"; then[\s\S]*backend=true[\s\S]*ui=true/,
+)
+assert.match(equivalence, /\.github\/workflows\/cutover-equivalence\.yml/)
 
 const credentialHelper = read("scripts/provision-mox-392-credentials.sh")
 assert.doesNotMatch(credentialHelper, /MOMI_MODEL_EXECUTION_GATEWAY_URL/)

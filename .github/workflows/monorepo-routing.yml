@@ -7,6 +7,10 @@ on:
   push:
     branches: [dev]
 
+concurrency:
+  group: monorepo-routing-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 

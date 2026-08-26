@@ -12,6 +12,10 @@ on:
       - "MoXi/**"
       - ".github/workflows/validate-ui.yml"
 
+concurrency:
+  group: validate-ui-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
