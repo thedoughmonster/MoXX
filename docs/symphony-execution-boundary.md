@@ -61,9 +61,12 @@ only executable leaves explicitly admitted to this Symphony instance belong in
 - `Ready` and `ready-package` are obsolete and must not be used as holding,
   admission, or dispatch contracts.
 
-Material changes to a vetted planning-project `Todo` issue can invalidate it
-back to `Refinement`. No lifecycle, admission, or execution state may change
-solely because a label was added or removed.
+Material changes to any vetted `Todo` issue, including an admitted issue, can
+invalidate it. An admitted issue must leave `Symphony Execution` and return to
+its meaningful planning project before entering `Refinement`. Any later
+admission is a new controlled project move with fresh revalidation. No
+lifecycle, admission, or execution state may change solely because a label was
+added or removed.
 
 ## Executable leaf types
 
