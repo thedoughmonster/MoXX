@@ -25,7 +25,9 @@ architecture decisions, and production authority.
    necessary.
 3. Read the full issue, project, parent, children relevant to its acceptance,
    blockers and dependencies, priority/order, assignee, and workflow state.
-   Verify it is unblocked and in the workspace's Ready/Todo-equivalent state.
+   Verify it is in `Todo`, has no unfinished native blocker, and is explicitly
+   admitted through the execution project. Labels communicate facts only and
+   never authorize execution.
 4. Identify the linked open GitHub owning issue required by
    `docs/development-issue-ledger.md`. Linear is the planning authority; the
    GitHub issue remains the repository's delivery-ledger key.
