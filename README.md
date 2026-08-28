@@ -22,3 +22,6 @@ Root workflow and path-selection behavior is documented in
 [`docs/monorepo-automation.md`](docs/monorepo-automation.md).
 The source inventory, rollback procedure, and staged cutover evidence are
 recorded in [`docs/mox-390-cutover-receipt.md`](docs/mox-390-cutover-receipt.md).
+The repository-wide Symphony admission, blocker, ordering, and rollback
+contract is documented in
+[`docs/symphony-execution-boundary.md`](docs/symphony-execution-boundary.md).
