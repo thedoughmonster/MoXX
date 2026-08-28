@@ -103,7 +103,8 @@ complete under the operator-approved shared-token interpretation.
 MOX-390 is now the next executable product-chain leaf, subject to its own live
 scope and acceptance contract.
 Remaining implementation leaves are in Todo, and native blockers prevent later
-leaves from being mistaken for ready work. None has `ready-package`.
+leaves from being mistaken for executable work. Project membership, not a
+readiness label, is the final execution-exposure boundary.
 
 ## Workstream A: MoXX monorepo
 

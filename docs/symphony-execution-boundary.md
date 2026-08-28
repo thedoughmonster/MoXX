@@ -16,10 +16,14 @@ for MoXi and MoMi remain outside the execution boundary.
 ## Scheduling contract
 
 - The configured repository is `thedoughmonster/MoXX`.
-- `required_labels` is empty. Labels such as `moxx` and `ready-package` are
-  communicative metadata and never grant execution authority.
+- `required_labels` is empty. Labels communicate facts only and never grant
+  execution authority. The obsolete `ready-package` marker is retired and must
+  not be assigned or required.
 - Active states are `Todo`, `In Progress`, `Review`, `Merging`, and `Rework`.
   `Concept` and `Refinement` are not executable states.
+- The normal preliminary lifecycle is `Concept` → `Refinement` → `Todo`.
+  `Parked` and `Blocked` remain watchdog-specific exception states rather than
+  admission stages.
 - A `Todo` issue with any unfinished native Linear blocker is visible inside
   the execution project but is not dispatchable.
 - Eligible issues are ordered by Symphony priority, then creation time, then
@@ -28,9 +32,11 @@ for MoXi and MoMi remain outside the execution boundary.
   during normal running-state reconciliation. This does not by itself justify
   restoring a broader planning-project scope.
 
-Project membership is intentionally narrow. Planning parents, milestones, and
-non-admitted work stay in their meaningful planning projects; only executable
-leaves admitted to this Symphony instance belong in `Symphony Execution`.
+Project membership is intentionally narrow. A vetted `Todo` issue outside the
+execution project is not exposed to this Symphony instance. Planning parents,
+milestones, and non-admitted work stay in their meaningful planning projects;
+only executable leaves explicitly admitted to this Symphony instance belong in
+`Symphony Execution`.
 
 ## Change and rollback rules
 
