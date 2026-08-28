@@ -1,12 +1,12 @@
 ---
 name: momi-execution
-description: Run one assigned MoMi Linear issue through implementation, review, validated merge, development release, and controlled acceptance. Use when asked to work an assigned Linear issue, use the MoMi execution workflow, or perform MoMi coding work inside OpenHands.
+description: Run one assigned MoMi Linear issue through implementation, review, validated merge, development release, and controlled acceptance. Use when asked to work an assigned Linear issue, use the MoMi execution workflow, or perform MoMi coding work.
 ---
 
 # MoMi Execution
 
-Treat OpenHands as the execution harness, Linear as planning and work state,
-GitHub as branch/PR/CI state, and this repository as technical truth. Own one
+Treat Linear as planning and work state, GitHub as branch/PR/CI state, and this
+repository as technical truth. Own one
 bounded implementation issue through review, validated merge, development
 release, and controlled acceptance. A human retains planning, material
 architecture decisions, and production authority.
@@ -38,9 +38,9 @@ architecture decisions, and production authority.
    `docs/agent-deployment-procedure.md`. Inspect `git status`, the current
    branch, `origin/dev`, and the repository-native impact plan.
 7. Verify Node `24.14.x`, pnpm `11.7.x`, shell Git remote access, and GitHub CLI
-   authentication. Treat the Linear connector, OpenHands GitHub connector, SSH
-   Git, and `gh` as separate capabilities: failure of one does not prove
-   failure of another.
+   authentication. Treat the Linear connector, GitHub connector, SSH Git, and
+   `gh` as separate capabilities: failure of one does not prove failure of
+   another.
 8. Work only on an isolated feature branch from current `origin/dev`; never
    dirty `dev`. Move the Linear issue to In Progress only after these checks
    show it is eligible.
@@ -99,11 +99,5 @@ skill owns the outer Linear-to-merge lifecycle.
 7. For hosted development scope, download the exact validation receipt and run
    `pnpm release:dev`; then verify one controlled acceptance event. Review may
    be agent-performed, but required CI and unresolved-feedback gates still bind.
-8. Stop. Do not mark implementation complete before the OpenHands Stop hook
-   allows it. Never promote to production or independently select neighboring work.
-
-The Stop hook deterministically enforces the runtime, canonical changed check,
-clean branch, merged PR/head contract, resolved review threads, issue
-disposition, and required CI. Linear readiness, issue-to-path intent, and
-workflow mutations remain agent-driven because command hooks cannot call
-session MCP tools; report any incomplete merge instead of claiming success.
+8. Stop. Never promote to production or independently select neighboring work.
+   Report any incomplete merge or delivery step instead of claiming success.

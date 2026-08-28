@@ -36,7 +36,6 @@ export function classifyPath(path: string): ImpactClass {
     path.startsWith("scripts/") || path.startsWith("tests/") ||
     path.startsWith("local-tools/") ||
     path.startsWith(".agents/skills/") ||
-    path.startsWith(".openhands/") ||
     path === ".github/dependabot.yml" ||
     path === "package.json" || path === "pnpm-lock.yaml" ||
     path === ".node-version" || path === ".gitignore"
