@@ -14,14 +14,18 @@ test("retired parallel governance surfaces are absent", async () => {
   const ledger = ["issue", "ledger"].join("-")
   const triage = ["issue", "triage"].join("-")
   const mapping = ["linear", "issue", "mapping"].join("-")
+  const debtIssues = ["debt", "lifecycle", "issues"].join("-")
   const trackingCheck = ["check", "pull", "request", "issue", "tracking"]
     .join("_")
+  const remediationIssue = ["remediation", "issue"].join("[_\\s-]+")
   const removed = [
     `.github/workflows/${ledger}.yml`,
     `.github/workflows/${triage}.yml`,
+    `.github/workflows/${debtIssues}.yml`,
     `docs/development-${ledger}.md`,
     "docs/zen" + "hub-planning.md",
     `../.github/workflows/${mapping}.yml`,
+    `../.github/workflows/${debtIssues}.yml`,
   ]
   for (const path of removed) assert.equal(existsSync(path), false, path)
   for (const path of ["scripts/issue_" + "tracking", "scripts/issue_" + "triage"]) {
@@ -37,6 +41,7 @@ test("retired parallel governance surfaces are absent", async () => {
       assert.doesNotMatch(source, new RegExp(ledger, "i"))
       assert.doesNotMatch(source, new RegExp(triage, "i"))
       assert.doesNotMatch(source, new RegExp(trackingCheck, "i"))
+      assert.doesNotMatch(source, new RegExp(remediationIssue, "i"))
       assert.doesNotMatch(source, new RegExp(["Owning", "issue"].join("\\s+"), "i"))
     }
   }
