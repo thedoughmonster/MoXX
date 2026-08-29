@@ -13,11 +13,15 @@ test("repository declares one work authority and one code-evidence authority", a
 test("retired parallel governance surfaces are absent", async () => {
   const ledger = ["issue", "ledger"].join("-")
   const triage = ["issue", "triage"].join("-")
+  const mapping = ["linear", "issue", "mapping"].join("-")
+  const trackingCheck = ["check", "pull", "request", "issue", "tracking"]
+    .join("_")
   const removed = [
     `.github/workflows/${ledger}.yml`,
     `.github/workflows/${triage}.yml`,
     `docs/development-${ledger}.md`,
     "docs/zen" + "hub-planning.md",
+    `../.github/workflows/${mapping}.yml`,
   ]
   for (const path of removed) assert.equal(existsSync(path), false, path)
   for (const path of ["scripts/issue_" + "tracking", "scripts/issue_" + "triage"]) {
@@ -32,6 +36,8 @@ test("retired parallel governance surfaces are absent", async () => {
     for (const source of workflowText) {
       assert.doesNotMatch(source, new RegExp(ledger, "i"))
       assert.doesNotMatch(source, new RegExp(triage, "i"))
+      assert.doesNotMatch(source, new RegExp(trackingCheck, "i"))
+      assert.doesNotMatch(source, new RegExp(["Owning", "issue"].join("\\s+"), "i"))
     }
   }
 })
