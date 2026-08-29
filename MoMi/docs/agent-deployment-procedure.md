@@ -1,8 +1,9 @@
 # Agent Deployment Procedure
 
-Linear owns work, PR CI owns final validation, the local Node 24 coordinator
-owns receipt-bound orchestration, and protected GitHub workflows own hosted
-development migration and Edge Function deployment.
+Linear owns work state, PR CI owns final validation, the local Node 24
+coordinator owns receipt-bound orchestration, and protected GitHub workflows
+own hosted development migration and Edge Function deployment. GitHub retains
+code, CI, review, merge, and release evidence; it is not a parallel work ledger.
 
 ## Publish and validate
 
@@ -12,8 +13,8 @@ development migration and Edge Function deployment.
    `git fetch origin dev` updates `FETCH_HEAD` only and is not a freshness
    precondition.
 2. Run `pnpm momi-check changed` while iterating.
-3. Commit, push, and open one draft PR to `dev` with exactly one
-   `Owning Linear issue: MOX-…` line that matches the head branch.
+3. Commit, push, and open one draft PR to `dev`. Link the Linear issue when
+   available for traceability; no duplicate GitHub issue metadata is required.
 4. Let the PR job named `validate-final` derive and run exactly one final gate.
 5. Download its `validation-<head-sha>` artifact after success.
 

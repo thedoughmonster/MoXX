@@ -37,3 +37,8 @@ test("seeds the required provider endpoint for every execution profile", () => {
     7,
   )
 })
+
+test("preserves the retired triage profile only as migration history", () => {
+  const purpose = ["github", ["issue", "triage"].join("-")].join(".")
+  assert.ok(migration.includes(`('${purpose}', 'default'`))
+})

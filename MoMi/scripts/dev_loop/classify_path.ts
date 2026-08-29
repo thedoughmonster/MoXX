@@ -17,13 +17,6 @@ export function classifyPath(path: string): ImpactClass {
     path.startsWith("scripts/constitution/") ||
     path.startsWith("scripts/migrations/")
   ) return "architecture"
-  if (
-    path === ".github/workflows/issue-ledger.yml" ||
-    path === ".github/workflows/issue-triage.yml" ||
-    path.startsWith(".github/codex/") ||
-    path.startsWith("scripts/issue_") ||
-    path.startsWith("tests/issue_")
-  ) return "issue_automation"
   if (path.startsWith(".github/workflows/") || path.startsWith(".github/actions/")) {
     return "workflow"
   }
@@ -36,6 +29,7 @@ export function classifyPath(path: string): ImpactClass {
     path.startsWith("scripts/") || path.startsWith("tests/") ||
     path.startsWith("local-tools/") ||
     path.startsWith(".agents/skills/") ||
+    path.startsWith(".github/codex/") ||
     path === ".github/dependabot.yml" ||
     path === "package.json" || path === "pnpm-lock.yaml" ||
     path === ".node-version" || path === ".gitignore"

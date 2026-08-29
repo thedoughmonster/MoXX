@@ -4,7 +4,6 @@ export type { AdvisoryMetadata, CheckCommand, CommandEvidence } from "./check_ty
 export type ImpactClass =
   | "architecture"
   | "docs"
-  | "issue_automation"
   | "manifest"
   | "migration"
   | "repository_tooling"

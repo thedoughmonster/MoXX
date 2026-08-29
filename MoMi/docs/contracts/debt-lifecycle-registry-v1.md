@@ -8,8 +8,8 @@ new or churned debt.
 
 ## Lifecycle
 
-Each record has one accountable owner, one focused remediation issue, a risk,
-temporary reason, introduction/review/expiry dates, removal evidence, and an
+Each record has one accountable owner, one historical remediation reference, a
+risk, temporary reason, introduction/review/expiry dates, removal evidence, and an
 append-only review history. High-risk debt is reviewed within 30 days and
 expires within 90 days. An overdue review or expiry fails local validation.
 Changing metadata requires a new dated review while preserving the complete
@@ -22,9 +22,10 @@ to #572; and the remaining POS/warehouse findings map to #194 (61). The order
 is significant and partitions all 87 findings exactly once.
 
 A remediation removes the exact baseline fingerprint and registry reference
-in the same change that proves the private access is gone. Neither validation
-nor the delivery ledger closes or reopens the remediation issue; closure is a
-deliberate owner action after evidence is reconciled.
+in the same change that proves the private access is gone. The numeric GitHub
+issue references are retained as historical evidence from the accepted v1
+record; they are not consulted for current work state. Linear owns active
+remediation state.
 
 ## Verification
 
@@ -33,8 +34,6 @@ coverage, uniqueness, ordering, dates, risk, history, trusted-base continuity,
 and the generated trend artifact. The trend reports counts and age by issue,
 owner, risk, rule, and consumer service, but is not correctness proof.
 
-The separate trusted-base GitHub workflow reads the registry as inert JSON and
-checks that each remediation issue is an open issue. It executes no pull-request
-code. Unrelated pull requests conclude with successful N/A; relevant remote
-lookup failures conclude as indeterminate failures and never silently validate
-debt. Scheduled and manual runs verify the default-branch registry.
+Validation does not query or mutate any external issue tracker. Repository
+checks enforce the registry's schema, dates, append-only history, and exact
+fingerprint coverage; current remediation state remains in Linear.

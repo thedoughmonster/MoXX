@@ -105,7 +105,7 @@ capabilities. Modules remain separated by business capability.
   Postgres password.
 ## Default Development Loop (momi-default-development-loop/v1)
 - Keep one agent responsible for each change from diagnosis through handoff.
-- Bind every change to one open issue and an isolated feature worktree.
+- Bind every change to one Linear issue and an isolated feature worktree.
 - Run focused checks while iterating; do not duplicate the PR's final gate
   locally.
 - Keep mechanical enforcement in the one impact-selected PR gate.
@@ -113,13 +113,15 @@ capabilities. Modules remain separated by business capability.
   material security, privacy, cost, or exposure decision, destructive migration,
   production infrastructure change, or irreconcilable repository-law conflict.
 - Do not create role ceremonies, readiness packets, or repeated review loops.
-- Publish one PR with owning-issue disposition.
+- Publish one PR and link its Linear issue for traceability when available.
 - Verify changed hosted behavior with one controlled acceptance event.
 ## Backend Release Rules
 - For hosted backend changes, release the exact PR validation receipt to development, then promote only that exact development receipt.
-## Execution and Planning
-- Linear is the sole planning/work authority. GitHub owns branches, PRs, CI,
-  review, and deployments; PR metadata names one matching Linear issue.
+## Execution and Planning Authority
+- Use the `momi-execution` skill for an assigned Linear issue.
+- Linear is the sole authority for planning and execution work state.
+- GitHub owns branches, PRs, CI, reviews, merge, and release evidence; it is
+  not a parallel work-state ledger.
 - The coding agent owns one bounded issue through review, validated merge, development release, and controlled acceptance. Humans retain planning, material architecture decisions, and production authority.
 - After required checks pass, perform one final review and feedback sweep. With no
   blocking feedback, merge to `dev`, release required hosted changes,
