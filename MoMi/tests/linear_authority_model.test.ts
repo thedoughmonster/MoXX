@@ -50,3 +50,25 @@ test("PR template omits retired delivery-proof metadata", async () => {
   assert.doesNotMatch(template, new RegExp(`^${disposition}:`, "im"))
   assert.match(template, /Linear issue link, when available/)
 })
+
+test("active contracts omit retired remote issue authority", async () => {
+  const paths = [
+    "docs/contracts/service-access-debt-baseline-v1.md",
+    "docs/contracts/service-test-impact-metadata-v1.md",
+  ]
+  const contracts = await Promise.all(paths.map((path) => readFile(path, "utf8")))
+  const retired = [
+    ["remediation", "issue"].join("[_\\s-]+"),
+    ["issue", "automation"].join("[_\\s-]+"),
+    ["referenced", "issues", "open"].join("\\s+"),
+    ["GitHub", "workflow"].join("\\s+"),
+  ]
+  for (const [index, source] of contracts.entries()) {
+    for (const claim of retired) {
+      assert.doesNotMatch(source, new RegExp(claim, "i"), paths[index])
+    }
+  }
+  assert.match(contracts[0], /local remediation\s+description/)
+  assert.match(contracts[0], /never consult an external work tracker/)
+  assert.match(contracts[1], /architecture, docs, manifest,\s+migration,/)
+})
