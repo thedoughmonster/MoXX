@@ -16,8 +16,8 @@ caller, purpose, provider identities, timing, status, token usage, calculated
 cost, and sanitized errors. Prompts and responses remain with the caller and
 are never stored here.
 
-Current callers are communications, communications evaluation, and GitHub issue
-triage. They authenticate with separate purpose-bound secrets. The gateway
+Current callers are communications and communications evaluation. They
+authenticate with separate purpose-bound secrets. The gateway
 rejects arbitrary endpoints, models, methods, retries, and payload controls
 owned by its profile mapping.
 

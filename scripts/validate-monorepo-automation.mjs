@@ -11,7 +11,6 @@ const expectedWorkflows = [
   "cutover-equivalence.yml",
   "deploy-dev.yml",
   "deploy-prod.yml",
-  "linear-issue-mapping.yml",
   "monorepo-routing.yml",
   "promote-prod.yml",
   "renew-database-access.yml",
@@ -57,7 +56,6 @@ for (const [name, source] of workflows) {
 for (const name of [
   "deploy-dev.yml",
   "deploy-prod.yml",
-  "linear-issue-mapping.yml",
   "renew-database-access.yml",
   "validate.yml",
 ]) {
@@ -93,7 +91,6 @@ assert.match(routing, /node --test tests\/\*\.test\.mjs/)
 for (const name of [
   "codeql.yml",
   "cutover-equivalence.yml",
-  "linear-issue-mapping.yml",
   "monorepo-routing.yml",
   "validate-ui.yml",
 ]) {
@@ -196,20 +193,6 @@ for (const [name, source] of workflows) {
   assert.doesNotMatch(source, /MOMI_MODEL_EXECUTION_GATEWAY_URL/)
   assert.doesNotMatch(source, /MOMI_MODEL_GATEWAY_TRIAGE_SECRET/)
 }
-
-const linearMapping = workflows.get("linear-issue-mapping.yml")
-assert.match(linearMapping, /name:\s*Enforce Linear issue mapping/)
-assert.match(linearMapping, /check_pull_request_issue_tracking\.ts/)
-assert.match(linearMapping, /github\.event\.pull_request\.user\.login/)
-assert.match(linearMapping, /github\.event\.pull_request\.head\.repo\.full_name/)
-assert.match(linearMapping, /dependabot\[bot\]/)
-assert.match(linearMapping, /dependabot\/\*/)
-assert.equal(
-  (linearMapping.match(/if:\s*steps\.mapping\.outputs\.required == 'true'/g) ?? [])
-    .length,
-  3,
-)
-assert.doesNotMatch(linearMapping, /pull_request_target:/)
 
 assert.match(equivalence, /name:\s*cutover-path-classifier/)
 assert.match(equivalence, /needs\.changes\.outputs\.backend == 'true'/)

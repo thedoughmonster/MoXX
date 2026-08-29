@@ -12,8 +12,8 @@ and deterministic checks authoritative; do not create role ceremony around them.
 
 1. Read the applicable `AGENTS.md` files and the code, contracts, and tests
    directly implicated by the request.
-2. Bind the change to exactly one open owning GitHub issue. Create or update it
-   when the accepted work is not already represented.
+2. Bind the change to exactly one Linear issue. Use Linear as the work-state
+   authority and GitHub only for code, CI, review, merge, and release evidence.
 3. State the outcome, acceptance evidence, material constraints, and exclusions.
    Resolve minor ambiguity with a reasonable documented assumption.
 4. Work from current repository state on a feature branch or isolated worktree.
@@ -69,11 +69,11 @@ if a material blocker remains; do not commission repeated opinion reviews.
 
 ## Finish
 
-Before release, classify the owning issue as `partial` when accepted scope
-remains or `complete` when all remaining acceptance criteria are satisfied.
-Follow `docs/development-issue-ledger.md` for the exact PR or final-commit
-metadata. Record discovered follow-up work in the owning issue or one linked
-issue rather than leaving it only in the final response.
+Before release, update the Linear issue with the delivery state and evidence
+appropriate to the accepted scope. Record discovered follow-up work in that
+issue or one linked Linear issue rather than leaving it only in the final
+response. Link the Linear issue from the PR when useful for traceability; do not
+create or require a duplicate GitHub issue ledger.
 
 Commit and publish only when requested or required by the repository workflow.
 Use the repository's declared release command for hosted changes. Report the

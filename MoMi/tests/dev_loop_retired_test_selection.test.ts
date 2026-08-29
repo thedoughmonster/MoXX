@@ -6,7 +6,7 @@ import type { ImpactClass } from "../scripts/dev_loop/types.ts"
 
 test("repository plans skip deleted tests", () => {
   const classes = {
-    architecture: [], docs: [], issue_automation: [], manifest: [], migration: [],
+    architecture: [], docs: [], manifest: [], migration: [],
     repository_tooling: ["tests/deleted.test.ts"], runtime: [], unknown: [],
     workflow: [],
   } satisfies Record<ImpactClass, string[]>

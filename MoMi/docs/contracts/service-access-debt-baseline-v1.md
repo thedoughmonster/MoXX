@@ -36,7 +36,7 @@ exact provider contract.
 
 Every currently accepted fingerprint must also appear exactly once in
 `docs/debt-lifecycle-registry.json`. The sidecar adds temporary ownership,
-risk, review, expiry, renewal, removal, and focused remediation-issue metadata
-without copying or redefining finding identity. Local checks remain network-free;
-the trusted-base GitHub workflow separately proves the referenced issues open.
+risk, review, expiry, renewal, removal evidence, and a local remediation
+description without copying or redefining finding identity. Checks validate
+only these repository facts and never consult an external work tracker.
 Removing debt removes the baseline finding and lifecycle reference together.

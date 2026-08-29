@@ -33,14 +33,6 @@ export function selectTestPaths(
     selected.add(`supabase/functions/${slug}/**/*.test.ts`)
   }
   if (
-    classifications.issue_automation.length > 0 ||
-    classifications.workflow.some((path) => path.includes("issue"))
-  ) {
-    selected.add("tests/issue_tracking.test.ts")
-    selected.add("tests/issue_triage_validation.test.ts")
-    selected.add("tests/issue_triage_workflow.test.ts")
-  }
-  if (
     classifications.workflow.length > 0 ||
     classifications.repository_tooling.some((path) =>
       /(?:release|deploy|dev_loop|run_(?:release|deploy|impact|check|receipt))/

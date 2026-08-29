@@ -24,7 +24,7 @@ const markers = [
 const defaultDevelopmentLoop = [
   "## Default Development Loop (momi-default-development-loop/v1)",
   "- Keep one agent responsible for each change from diagnosis through handoff.",
-  "- Bind every change to one open issue and an isolated feature worktree.",
+  "- Bind every change to one Linear issue and an isolated feature worktree.",
   "- Run focused checks while iterating; do not duplicate the PR's final gate",
   "  locally.",
   "- Keep mechanical enforcement in the one impact-selected PR gate.",
@@ -32,7 +32,7 @@ const defaultDevelopmentLoop = [
   "  material security, privacy, cost, or exposure decision, destructive migration,",
   "  production infrastructure change, or irreconcilable repository-law conflict.",
   "- Do not create role ceremonies, readiness packets, or repeated review loops.",
-  "- Publish one PR with owning-issue disposition.",
+  "- Publish one PR and link its Linear issue for traceability when available.",
   "- Verify changed hosted behavior with one controlled acceptance event.",
 ].join("\n")
 

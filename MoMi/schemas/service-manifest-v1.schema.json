@@ -128,7 +128,7 @@
         "test": { "type": "string", "minLength": 1 }, "reason": { "type": "string", "pattern": "\\S" },
         "services": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" } },
         "contracts": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/test_impact_contract" } },
-        "triggers": { "type": "array", "uniqueItems": true, "items": { "enum": ["architecture", "docs", "issue_automation", "manifest", "migration", "repository_tooling", "runtime", "unknown", "workflow"] } } } },
+        "triggers": { "type": "array", "uniqueItems": true, "items": { "enum": ["architecture", "docs", "manifest", "migration", "repository_tooling", "runtime", "unknown", "workflow"] } } } },
     "test_impact_contract": { "type": "object", "additionalProperties": false, "required": ["provider_service", "contract"], "properties": {
       "provider_service": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" }, "contract": { "$ref": "#/$defs/versioned_contract" } } },
     "consumed_contract": { "type": "object", "additionalProperties": false,

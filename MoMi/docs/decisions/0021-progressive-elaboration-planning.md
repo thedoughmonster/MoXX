@@ -1,8 +1,15 @@
 # 0021: Progressive-Elaboration Planning
 
-- Status: accepted
+- Status: superseded
 - Date: 2026-07-30
 - Owning issue: #295
+
+## Supersession
+
+This decision records the former GitHub/Zenhub planning model. On 2026-08-28,
+MOX-429 superseded that active authority: Linear now owns planning hierarchy and
+work state, while GitHub retains code, CI, review, merge, and release evidence.
+The historical decision text below is preserved rather than silently rewritten.
 
 ## Context
 
@@ -23,8 +30,9 @@ Data, Analysis & Reporting; Platform Reliability & Governance; and Brand,
 Marketing & Customer Growth.
 
 Use the pipelines Opened, Discovering, Designing, Building, and Finalizing.
-Each pipeline has an explicit completion gate in `docs/zenhub-planning.md` and
-a compact equivalent in Zenhub's 144-character description field.
+Each pipeline had an explicit completion gate in the now-retired Zenhub
+planning document and a compact equivalent in Zenhub's 144-character
+description field.
 
 Adopt progressive elaboration:
 
@@ -51,6 +59,7 @@ They do not replace or add to the seven Initiative roots.
 - Issue creation records earned decomposition rather than possible future work.
 - Moving work backward is normal when evidence does not support its maturity.
 - Closed premature issues preserve history while parents retain candidate scope.
-- GitHub remains the engineering record and Zenhub remains planning authority.
+- At acceptance time, GitHub was the engineering record and Zenhub was the
+  planning authority; the supersession above replaces that authority.
 - Existing product/runtime behavior, services, deployments, and provider state
   are unchanged by this decision.

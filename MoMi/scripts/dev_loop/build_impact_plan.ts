@@ -3,7 +3,7 @@ import { classifyPath } from "./classify_path.ts"
 import { repositoryCheckScripts } from "./repository_validation_contract.ts"
 import { selectTestPaths } from "./select_test_paths.ts"
 import type { CheckCommand, ImpactClass, ImpactPlan } from "./types.ts"
-const classes: ImpactClass[] = ["architecture", "docs", "issue_automation",
+const classes: ImpactClass[] = ["architecture", "docs",
   "manifest", "migration", "repository_tooling", "runtime", "unknown", "workflow"]
 export function buildImpactPlan(
   paths: string[],
@@ -88,7 +88,7 @@ export function buildImpactPlan(
       }
       : {
         kind: "path_scoped",
-        reason: "Only docs, workflows, issue automation, or repository tooling changed.",
+        reason: "Only docs, workflows, or repository tooling changed.",
         checks: [
           focused,
           {

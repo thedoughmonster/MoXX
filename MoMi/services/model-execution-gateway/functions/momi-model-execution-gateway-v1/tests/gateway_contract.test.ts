@@ -45,6 +45,12 @@ test("caller identity is purpose-bound and compared without value exposure", asy
   assert.equal(await authenticateCaller("Bearer wrong-secret", read), null)
 })
 
+test("retired triage credential grants no caller identity", async () => {
+  const secretName = ["MOMI", "MODEL", "GATEWAY", "TRIAGE", "SECRET"].join("_")
+  const read = (name: string) => name === secretName ? "retired-only" : undefined
+  assert.equal(await authenticateCaller("Bearer retired-only", read), null)
+})
+
 test("callers cannot choose provider controls", () => {
   assert.deepEqual(parseRequest(create), create)
   for (const key of ["model", "reasoning", "max_output_tokens", "store",

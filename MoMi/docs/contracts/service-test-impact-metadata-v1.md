@@ -29,8 +29,8 @@ backslashes, `node_modules`, missing files, and symlink escape are rejected.
 
 Services, contract references, triggers, and selectors use unique UTF-16 order.
 Contracts contain exactly `provider_service` and a versioned contract key.
-Triggers use the existing impact classes: architecture, docs, issue automation,
-manifest, migration, repository tooling, runtime, unknown, and workflow.
+Triggers use the existing impact classes: architecture, docs, manifest,
+migration, repository tooling, runtime, unknown, and workflow.
 
 ## Category Rules
 

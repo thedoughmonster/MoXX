@@ -3,7 +3,6 @@ import type { CallerKey } from "./types.ts"
 const callers: [CallerKey, string][] = [
   ["communications-gateway", "MOMI_MODEL_GATEWAY_COMMUNICATIONS_SECRET"],
   ["communications-evaluation", "MOMI_MODEL_GATEWAY_EVALUATION_SECRET"],
-  ["github-issue-triage", "MOMI_MODEL_GATEWAY_TRIAGE_SECRET"],
 ]
 
 export async function authenticateCaller(

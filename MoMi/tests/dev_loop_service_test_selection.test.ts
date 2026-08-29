@@ -21,11 +21,6 @@ const baseTests = [
   "tests/dev_loop_release_plan.test.ts",
   "tests/retired_development_protocol.test.ts",
 ]
-const issueTests = [...baseTests,
-  "tests/issue_tracking.test.ts",
-  "tests/issue_triage_validation.test.ts",
-  "tests/issue_triage_workflow.test.ts",
-].sort()
 const releaseTests = [...baseTests,
   "tests/deployment_authority.test.ts",
   "tests/deployment_credentials.test.ts",
@@ -83,7 +78,7 @@ test("path-scoped classes retain existing policy", () => {
   for (const path of [
     "docs/example.md",
     ".github/workflows/validate.yml",
-    ".github/workflows/issue-triage.yml",
+    ".github/workflows/retired-work-automation.yml",
     "scripts/check_source_quality.ts",
   ]) {
     const plan = buildImpactPlan([path], architecture, new Map())
@@ -96,7 +91,8 @@ test("root and special focused selections remain unchanged", () => {
   const rootTest = "tests/service_test_impact_schema.test.ts"
   assert.deepEqual(selectedTests([rootTest]), [...baseTests, rootTest].sort())
   assert.deepEqual(
-    selectedTests([".github/workflows/issue-triage.yml"]), issueTests,
+    selectedTests([".github/workflows/retired-work-automation.yml"]),
+    releaseTests,
   )
   for (const path of [
     ".github/workflows/validate.yml", "scripts/dev_loop/hash_text.ts",

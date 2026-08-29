@@ -46,7 +46,7 @@ export function findServiceTestImpactSelectorDiagnostics(
     add("triggers", "category_rule_mismatch", "risk trigger required")
   }
   const allowedTriggers = [
-    "architecture", "docs", "issue_automation", "manifest", "migration",
+    "architecture", "docs", "manifest", "migration",
     "repository_tooling", "runtime", "unknown", "workflow",
   ]
   for (const trigger of selector.triggers) {

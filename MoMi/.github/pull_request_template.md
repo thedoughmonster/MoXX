@@ -6,9 +6,7 @@
 
 - List the checks and acceptance evidence.
 
-## Issue tracking
+## Traceability
 
-Owning Linear issue: MOX-REPLACE
-
-The Linear issue identifier must match the sole `MOX-…` identifier in the PR
-head branch.
+- Linear issue link, when available. This is useful traceability and is not a
+  duplicate work-state or merge authority.

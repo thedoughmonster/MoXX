@@ -1,7 +1,7 @@
 import type { JSONValue } from "postgres"
 
 export type CallerKey = "communications-gateway" |
-  "communications-evaluation" | "github-issue-triage"
+  "communications-evaluation"
 
 export type CreateRequest = {
   schema_version: 1

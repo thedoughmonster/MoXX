@@ -9,7 +9,6 @@ const permissions: Record<CallerKey, [string, string][]> = {
     ["communications.answer", "maximum"],
   ],
   "communications-evaluation": [["communications.evaluation", "default"]],
-  "github-issue-triage": [["github.issue-triage", "default"]],
 }
 
 export function callerAllows(caller: CallerKey, request: CreateRequest): boolean {

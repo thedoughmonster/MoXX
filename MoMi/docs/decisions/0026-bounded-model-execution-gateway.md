@@ -1,12 +1,20 @@
 # 0026: Bounded model execution gateway
 
-- Status: accepted
+- Status: accepted; issue-triage caller superseded 2026-08-28
 - Date: 2026-07-25
 - Owning issues: #179 and #180
 
+## Partial supersession
+
+MOX-429 retired the GitHub issue-triage caller, its purpose-bound secret, and
+its repository automation. The applied migration profile remains immutable
+history and grants no runtime caller identity. The communications callers and
+the gateway boundary below remain active; references to the retired caller are
+historical context, not current execution authority.
+
 ## Context
 
-Communications, communications evaluation, and issue triage each execute an
+At acceptance time, communications, communications evaluation, and issue triage each executed an
 OpenAI request directly. That duplicates credential custody, transport policy,
 request identity, usage accounting, and ambiguous-outcome handling. It also
 ties background response polling to the lifetime of the originating request.
@@ -19,7 +27,7 @@ physical provider requests, per-call ceilings, idempotency, provider identities,
 and a content-free metadata ledger. Prompts, tools, evidence bodies, user policy,
 and domain effects remain with their caller.
 
-Allow one exact internal HTTP contract from the three declared callers to
+The accepted decision allowed one exact internal HTTP contract from the three declared callers to
 `momi-model-execution-gateway-v1`. Requests use one purpose-bound caller secret,
 an idempotency key, a parent invocation, a mapped purpose/profile, and a bounded
 provider payload. The gateway rejects caller-supplied models, endpoints,
@@ -31,8 +39,9 @@ cost, and allowlisted provider headers. It never stores authorization headers,
 credentials, webhook secrets, or full request/response bodies. A caller owns
 and archives its full model-visible evidence through its existing contracts.
 
-Issue triage keeps its serialized durable queue and schema-constrained result,
-but replaces direct `openai/codex-action` execution with this same contract.
+Issue triage was intended to keep its serialized durable queue and
+schema-constrained result while replacing direct provider execution with this
+same contract. The partial supersession above retires that caller.
 
 ## Activation and rollback
 
