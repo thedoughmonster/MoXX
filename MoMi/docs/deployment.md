@@ -17,8 +17,8 @@ pnpm momi-check changed
 The impact plan binds exact commit/tree/diff identities, classifies changed
 paths, explains focused and final checks, names migrations, and selects affected
 manifest-owned services/functions. Runtime, architecture, manifest, migration,
-and unknown impact receive the full gate. Docs, workflows, issue automation, and
-repository tooling receive the path-scoped gate.
+and unknown impact receive the full gate. Docs, workflows, and repository tooling
+receive the path-scoped gate.
 
 Every planned command declares `hard_stop` or `advisory` enforcement. Missing or
 unknown enforcement fails closed. Source-quality errors, including handwritten

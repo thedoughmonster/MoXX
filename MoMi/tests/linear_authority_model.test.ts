@@ -77,3 +77,10 @@ test("active contracts omit retired remote issue authority", async () => {
   assert.match(contracts[0], /never consult an external work tracker/)
   assert.match(contracts[1], /architecture, docs, manifest,\s+migration,/)
 })
+
+test("deployment docs list only live path-scoped impact classes", async () => {
+  const deployment = await readFile("docs/deployment.md", "utf8")
+  const retired = ["issue", "automation"].join("[_\\s-]+")
+  assert.doesNotMatch(deployment, new RegExp(retired, "i"))
+  assert.match(deployment, /Docs, workflows, and repository tooling\s+receive the path-scoped gate/)
+})
