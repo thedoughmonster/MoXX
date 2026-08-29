@@ -16,6 +16,6 @@ renewal, or provider mutation.
 
 Linear is the sole work-item authority. Root workflows neither ingest nor
 mutate GitHub Issues, and no GitHub issue state is a planning or completion
-gate. `linear-issue-mapping.yml` only fails closed unless a pull request and its
-head branch name the same single Linear identifier. GitHub continues to own
-branches, commits, pull requests, CI, review history, and deployments.
+gate. They do not enforce a duplicate delivery ledger through pull-request
+metadata. GitHub continues to own branches, commits, pull requests, CI, review
+history, and deployments.
