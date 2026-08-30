@@ -28,8 +28,8 @@ importers:
         specifier: 12.0.2
         version: 12.0.2
       postgres:
-        specifier: 3.4.3
-        version: 3.4.3
+        specifier: 3.4.9
+        version: 3.4.9
       supabase:
         specifier: 2.109.1
         version: 2.109.1
@@ -181,8 +181,8 @@ packages:
   pgsql-ast-parser@12.0.2:
     resolution: {integrity: sha512-1WWa96Sw6h4uv9GLw98EzH/+xoBTC8j2TwV/AMW3E+Ir/fHOu/jLLbj6kPiz3y2bGISTKNYvKWwHoqvQ5FLuAw==}
 
-  postgres@3.4.3:
-    resolution: {integrity: sha512-iHJn4+M9vbTdHSdDzNkC0crHq+1CUdFhx+YqCE+SqWxPjm+Zu63jq7yZborOBF64c8pc58O5uMudyL1FQcHacA==}
+  postgres@3.4.9:
+    resolution: {integrity: sha512-GD3qdB0x1z9xgFI6cdRD6xu2Sp2WCOEoe3mtnyB5Ee0XrrL5Pe+e4CCnJrRMnL1zYtRDZmQQVbvOttLnKDLnaw==}
     engines: {node: '>=12'}
 
   railroad-diagrams@1.0.0:
@@ -339,7 +339,7 @@ snapshots:
       moo: 0.5.3
       nearley: 2.20.1
 
-  postgres@3.4.3: {}
+  postgres@3.4.9: {}
 
   railroad-diagrams@1.0.0: {}
 
