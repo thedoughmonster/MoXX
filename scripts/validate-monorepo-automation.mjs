@@ -73,6 +73,14 @@ for (const name of [
 assert.match(workflows.get("validate.yml"), /paths:[\s\S]*"MoMi\/\*\*"/)
 assert.doesNotMatch(workflows.get("validate.yml"), /"MoXi\/\*\*"/)
 assert.match(workflows.get("validate.yml"), /name:\s*validate-final/)
+assert.match(workflows.get("validate.yml"),
+  /MOMI_DEV_REF: \$\{\{ github\.event_name == 'pull_request'/)
+assert.match(workflows.get("validate.yml"), /pull_request\.base\.ref == 'prod'/)
+assert.match(workflows.get("validate.yml"), /pull_request\.head\.ref == 'dev'/)
+assert.match(workflows.get("validate.yml"),
+  /pull_request\.head\.repo\.full_name == github\.repository/)
+assert.match(workflows.get("validate.yml"),
+  /pull_request\.head\.sha \|\| github\.event\.pull_request\.base\.sha \|\| inputs\.development_baseline_sha \}\}/)
 assert.match(workflows.get("validate-ui.yml"), /paths:[\s\S]*"MoXi\/\*\*"/)
 assert.doesNotMatch(workflows.get("validate-ui.yml"), /"MoMi\/\*\*"/)
 
