@@ -3,7 +3,7 @@ import type { ArchitectureSnapshot } from
 import type { ExecutionAuthority } from "./execution_authority_types.ts"
 
 export const functionCapabilityModelSchemaId =
-  "https://momi.local/schemas/function-capability-model-v1.schema.json"
+  "https://momi.local/schemas/function-capability-model-v2.schema.json"
 
 export type DirectFunctionCapability = "database_read" | "database_write"
 
@@ -46,7 +46,7 @@ export type FunctionCapabilityRecord = {
 
 export type FunctionCapabilityModelPayload = {
   $schema: typeof functionCapabilityModelSchemaId
-  schema_version: 1
+  schema_version: 2
   source_snapshot: ArchitectureSnapshot
   functions: FunctionCapabilityRecord[]
 }

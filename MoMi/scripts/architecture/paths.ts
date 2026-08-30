@@ -21,23 +21,23 @@ export const functionSchemaPath = join(
 export const functionCapabilityModelSchemaPath = join(
   workspaceRoot,
   "schemas",
-  "function-capability-model-v1.schema.json",
+  "function-capability-model-v2.schema.json",
 )
 export const architectureSnapshotIdentitySchemaPath = join(
   workspaceRoot,
   "schemas",
-  "architecture-snapshot-identity-v1.schema.json",
+  "architecture-snapshot-identity-v2.schema.json",
 )
 export const serviceDependencyGraphSchemaPath = join(
   workspaceRoot,
   "schemas",
-  "service-dependency-graph-v1.schema.json",
+  "service-dependency-graph-v2.schema.json",
 )
 export const serviceDependencyGraphOutputPath = join(
   workspaceRoot,
   ".momi",
   "architecture",
-  "service-dependency-graph-v1.json",
+  "service-dependency-graph-v2.json",
 )
 export const retirementSchemaPath = join(
   workspaceRoot,

@@ -100,8 +100,9 @@ MOX-391, MOX-388, MOX-389, MOX-393, MOX-396, MOX-395, and MOX-397 are Done.
 MOX-392 is Done. Publication, mapping, Linear authority, all four names-only
 placements, and non-interactive validation of both active credential values are
 complete under the operator-approved shared-token interpretation.
-MOX-390 is now the next executable product-chain leaf, subject to its own live
-scope and acceptance contract.
+MOX-390 completed the product-repository authority cutover at
+`2026-08-30T14:04:01Z`; MoXX is the sole active product repository and both
+source repositories are retained as readable, non-authoritative history.
 Remaining implementation leaves are in Todo, and native blockers prevent later
 leaves from being mistaken for executable work. Project membership, not a
 readiness label, is the final execution-exposure boundary.
@@ -140,9 +141,9 @@ Parent: [MOX-386](https://linear.app/moxx-workboard/issue/MOX-386)
    helper's single Supabase input for both placements; `prod` and its environment
    policy remain unchanged. See
    `mox-392-publication-receipt.md`.
-5. [MOX-390](https://linear.app/moxx-workboard/issue/MOX-390) inventories and
-   dispositions active source-repository work before adding reversible
-   tombstones. It deletes nothing.
+5. [MOX-390](https://linear.app/moxx-workboard/issue/MOX-390) inventoried and
+   dispositioned active source-repository work, added reversible tombstones,
+   and retired obsolete source workflows without deleting history.
 
 Branch policy:
 

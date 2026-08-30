@@ -13,10 +13,11 @@ export type DependencyDefinition = {
 
 export const graphSnapshotIdentity: ArchitectureSnapshotIdentity = {
   $schema:
-    "https://momi.local/schemas/architecture-snapshot-identity-v1.schema.json",
-  schema_version: 1,
-  repository: "thedoughmonster/momi-backend",
+    "https://momi.local/schemas/architecture-snapshot-identity-v2.schema.json",
+  schema_version: 2,
+  repository: "thedoughmonster/MoXX",
   branch: "dev",
+  product_path: "MoMi",
   commit: "dcfd655b26f96bca94cfbc4a8180342e83c9a7fc",
   service_manifest_schema: {
     id: "https://momi.local/schemas/service-manifest-v1.schema.json",

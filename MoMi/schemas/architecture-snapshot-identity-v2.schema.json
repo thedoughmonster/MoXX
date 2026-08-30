@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://momi.local/schemas/architecture-snapshot-identity-v2.schema.json",
+  "title": "Architecture Snapshot Identity v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "repository",
+    "branch",
+    "product_path",
+    "commit",
+    "service_manifest_schema",
+    "function_manifest_schema",
+    "architecture_contract_version"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "https://momi.local/schemas/architecture-snapshot-identity-v2.schema.json"
+    },
+    "schema_version": { "const": 2 },
+    "repository": { "const": "thedoughmonster/MoXX" },
+    "branch": { "const": "dev" },
+    "product_path": { "const": "MoMi" },
+    "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "service_manifest_schema": { "$ref": "#/$defs/service_manifest_schema" },
+    "function_manifest_schema": { "$ref": "#/$defs/function_manifest_schema" },
+    "architecture_contract_version": { "const": 2 }
+  },
+  "$defs": {
+    "service_manifest_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": {
+          "const": "https://momi.local/schemas/service-manifest-v1.schema.json"
+        },
+        "version": { "const": 1 }
+      }
+    },
+    "function_manifest_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": {
+          "const": "https://momi.local/schemas/function-manifest-v1.schema.json"
+        },
+        "version": { "const": 1 }
+      }
+    }
+  }
+}
