@@ -26,8 +26,9 @@ authoritative ref. The producer does not fetch or mutate refs.
 
 ## Compatibility
 
-Function Capability Model v1 and Service Dependency Graph v1 keep their existing
-shapes and semantics while embedding the complete v2 source snapshot. Changing
-the identity shape, repository, path, schema, or canonical encoding requires a
-later identity version. Changing architecture interpretation still requires an
-architecture-contract version bump.
+Function Capability Model v2 and Service Dependency Graph v2 preserve their v1
+projection semantics while embedding the complete v2 source snapshot. Their
+closed v1 schemas remain immutable historical evidence and do not admit this
+identity. Changing the identity shape, repository, path, schema, or canonical
+encoding requires a later identity version. Changing architecture
+interpretation still requires an architecture-contract version bump.

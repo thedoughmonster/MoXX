@@ -3,6 +3,8 @@ import type {
   LoadedFunction,
   LoadedService,
 } from "../scripts/architecture/types.ts"
+import { inspectRawFunctionCapabilityModel } from
+  "../scripts/architecture/inspect_raw_function_capability_model.ts"
 
 export type CapabilityServiceDefinition = {
   key: string
@@ -52,10 +54,10 @@ export function createCapabilityArchitecture(
   const functions = functionDefinitions.map((definition) => {
     const slug = definition.slug ?? definition.key.replaceAll(".", "-")
     const capability_model = definition.absent ? undefined : {
-      schema_version: 2 as const,
+      schema_version: 1 as const,
       called_contracts: definition.called ?? [],
     }
-    return {
+    const loaded = {
       slug,
       service: byKey.get(definition.owner),
       manifest: {
@@ -65,7 +67,15 @@ export function createCapabilityArchitecture(
         declared_side_effects: [],
         capability_model,
       },
-    } as unknown as LoadedFunction
+    }
+    if (!definition.absent) {
+      const path = `services/${definition.owner}/functions/${slug}/function.json`
+      const diagnostics = inspectRawFunctionCapabilityModel(loaded.manifest, path)
+      if (diagnostics.length > 0) {
+        throw new Error(`invalid capability fixture: ${JSON.stringify(diagnostics)}`)
+      }
+    }
+    return loaded as unknown as LoadedFunction
   })
   return { services, functions }
 }
