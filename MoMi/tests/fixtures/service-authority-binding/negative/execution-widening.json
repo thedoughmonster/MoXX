@@ -1,10 +1,10 @@
 {
   "$schema": "../../../../schemas/service-authority-binding-v1.schema.json",
   "schema_version": "service-authority-binding/v1",
-  "repository": "thedoughmonster/momi-backend",
+  "repository": "thedoughmonster/MoXX",
   "revision": "1111111111111111111111111111111111111111",
   "service": "fixture-owner",
-  "binding_digest": "87d83717678ed6a38270542a6d7d4173031d7efb8aea74b6c342a2ab0383fbff",
+  "binding_digest": "23d9313723da570e6fc77d5d2800bc09d94dfd8830a4b2234880cf39a2c00add",
   "target_authority": {
     "source_path": "services/fixture-owner/service.json",
     "json_pointer": "/owned_dataset",
@@ -29,6 +29,6 @@
     "grant_id": "ea-mox-204-fixture-widened",
     "base_revision": "1111111111111111111111111111111111111111",
     "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-    "declaration_digest": "26072f0c9057c5a6a04b0561303cc18e67fe9dacd754085aa061c512c8306406"
+    "declaration_digest": "1759379d82f79b80756456e19c8968447f8cf1ee0ccf9871a8b16f14eb1e55fd"
   }
 }

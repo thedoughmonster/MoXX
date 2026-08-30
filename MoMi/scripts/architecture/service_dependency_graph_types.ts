@@ -2,7 +2,7 @@ import type { ArchitectureSnapshot } from
   "./architecture_snapshot_identity_types.ts"
 
 export const serviceDependencyGraphSchemaId =
-  "https://momi.local/schemas/service-dependency-graph-v1.schema.json"
+  "https://momi.local/schemas/service-dependency-graph-v2.schema.json"
 
 export type ServiceDependencyNode = {
   service_key: string
@@ -19,7 +19,7 @@ export type ServiceDependencyEdge = {
 
 export type ServiceDependencyGraphPayload = {
   $schema: typeof serviceDependencyGraphSchemaId
-  schema_version: 1
+  schema_version: 2
   source_snapshot: ArchitectureSnapshot
   nodes: ServiceDependencyNode[]
   edges: ServiceDependencyEdge[]

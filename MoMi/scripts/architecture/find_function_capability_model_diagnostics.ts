@@ -40,7 +40,7 @@ export function findFunctionCapabilityModelDiagnostics(
       code: graph.code === "cycle_detected"
         ? "dependency_cycle" : "called_contract_unknown",
       target: canonicalJson(graph.actual),
-      provenance: ["service-dependency-graph/v1", graph.code],
+      provenance: ["service-dependency-graph/v2", graph.code],
     })
   }
   const transitiveLooking = new Set([

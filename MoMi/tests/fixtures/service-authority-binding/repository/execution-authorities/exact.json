@@ -4,7 +4,7 @@
   "grant_id": "ea-mox-204-fixture-exact",
   "work_item": "MOX-204",
   "service": "fixture-owner",
-  "repository": "thedoughmonster/momi-backend",
+  "repository": "thedoughmonster/MoXX",
   "base_revision": "1111111111111111111111111111111111111111",
   "source_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "filesystem": { "read": [], "write": [] },

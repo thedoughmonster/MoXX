@@ -11,16 +11,15 @@ otherwise.
 
 ## Repository authority
 
-MoXX contains the prepared product-repository authority controls. Live cutover
-is still pending: the source repositories remain authoritative until their open
-work is dispositioned, their README tombstones land, operator mappings move,
-and obsolete source workflows are disabled at the recorded cutover time.
+MoXX is the sole active product-repository authority. The retained MoMi and
+MoXi source repositories are readable, tombstoned history only; new product
+work, CI, deployment, and operator routing belong here.
 
 The durable migration and control-plane plan is in
 [`docs/mox-384-execution-plan.md`](docs/mox-384-execution-plan.md).
 Root workflow and path-selection behavior is documented in
 [`docs/monorepo-automation.md`](docs/monorepo-automation.md).
-The source inventory, rollback procedure, and staged cutover evidence are
+The source inventory, proof-only rollback procedure, and final cutover evidence are
 recorded in [`docs/mox-390-cutover-receipt.md`](docs/mox-390-cutover-receipt.md).
 The repository-wide Symphony admission, blocker, ordering, and rollback
 contract is documented in
