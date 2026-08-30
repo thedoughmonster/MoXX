@@ -66,8 +66,11 @@ Supabase plugin, CLI, dashboard, or local code.
 
 - GitHub credentials remain in the GitHub CLI credential store.
 - Development Supabase credentials remain protected GitHub environment secrets.
-- The workflow authenticates through its account token and never substitutes it
-  as a database password; the CLI creates and uses its short-lived database login.
+- The default database login is short-lived and internal to the pinned CLI.
+- During active development, an accepted Linear issue may authorize a
+  non-expiring credential or Supabase token-to-database use only through the
+  protected, least-privilege, owner-bound, revocable, and rollback-ready
+  exception in [Release credentials](release-credentials.md).
 - Repository children strip `SUPABASE_DB_PASSWORD` and `PGPASSWORD`.
 - GitHub deployment tokens remain protected environment secrets.
 - Runtime/API secrets remain Supabase Edge Function secrets and follow the

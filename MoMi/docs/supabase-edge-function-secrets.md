@@ -88,8 +88,8 @@ credential works.
 | Repository and Edge Function deployment credentials | Protected GitHub environments used by the two authorized workflows |
 | GitHub CLI account | Approved release host's GitHub CLI credential store |
 | Development Supabase account credential | Protected GitHub `dev` environment secret |
-| Production Supabase account credential | Approved release host's authenticated Supabase CLI profile |
-| Database login | Short-lived login minted and used internally by the pinned Supabase CLI |
+| Production Supabase account credential | Protected GitHub `prod` environment for workflows; approved release host's authenticated Supabase CLI profile for the coordinator |
+| Database login | Short-lived by default; an accepted Linear issue may authorize the [active-development non-expiring exception](release-credentials.md#active-development-non-expiring-exception) |
 
 See [Release credentials](release-credentials.md) and the
 [Agent Deployment Procedure](agent-deployment-procedure.md) for those existing
