@@ -54,7 +54,7 @@ test("rejects wrong repository and current branch", async (t) => {
     (error: unknown) => JSON.stringify(error).includes("repository") ||
       (error instanceof Error && error.message.includes("source is invalid")))
   assert.equal(spawnSync("git", ["remote", "set-url", "origin",
-    "https://github.com/thedoughmonster/momi-backend.git"],
+    "https://github.com/thedoughmonster/MoXX.git"],
   { cwd: root }).status, 0)
   assert.equal(spawnSync("git", ["branch", "-m", "wrong"], { cwd: root }).status, 0)
   await assert.rejects(buildArchitectureSnapshotIdentity(root),

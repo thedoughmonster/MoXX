@@ -26,6 +26,7 @@ test("publishes one public-safe disposition for every frozen class", () => {
     "ffad94ff15436cfd452f048a87ea09cc49aa0419",
     "f3e45b3ddedcd3c5ff7ee2f2de14a2d69aed2795",
     "89486f572b1c142db42903bbdf71cb19924bda08",
+    "3ffaff1a0c7fd1e4cb50db34ba13246820047e46",
   ]) assert.match(receipt, new RegExp(commit))
   assert.doesNotMatch(
     receipt,
@@ -44,6 +45,7 @@ test("records a reconstructible proof-only rollback without live mutation", () =
     "9791a7676fe956fb49af6c6ba7bf87ac1f04a377795366563f1013d6c604379d",
     "9bf8abf5ed4ff7ee101595c6ec2e959c33d15b0bf59f06df5638868e9be4038e",
     "3e996c72b16e99b08fb08bd7b41adf9b25f23e91167877d79aff0c8b2d571e9f",
+    "0d569b622ab54160ab8cbff01803fee6d48bbf4f7f88d921110e91db28ee6974",
   ]) assert.match(receipt, new RegExp(digest))
   assert.match(receipt, /separately authorized rollback window/)
   assert.match(receipt, /No history\s+rewrite or data restoration is\s+required/)
@@ -74,4 +76,21 @@ test("keeps MoXX free of a scheduled Supabase renewal workflow", () => {
     existsSync("MoMi/.github/workflows/renew-database-access.yml"),
     false,
   )
+})
+
+test("keeps active workspace instructions and architecture identity on MoXX", () => {
+  const agents = read("MoXi/AGENTS.md")
+  assert.match(agents, /workspace in `thedoughmonster\/MoXX`/)
+  assert.match(agents, /Linear is the sole active work-item authority/)
+  assert.doesNotMatch(agents, /This private repository owns|momi-backend#\d+/)
+
+  const schema = read("MoMi/schemas/architecture-snapshot-identity-v2.schema.json")
+  assert.match(schema, /"repository": \{ "const": "thedoughmonster\/MoXX" \}/)
+  assert.match(schema, /"product_path": \{ "const": "MoMi" \}/)
+  for (const path of [
+    "MoMi/scripts/architecture/build_architecture_snapshot_identity.ts",
+    "MoMi/scripts/architecture/inspect_architecture_snapshot_source.ts",
+    "MoMi/scripts/architecture/load_service_authority_binding_context.ts",
+    "MoMi/scripts/architecture/load_database_object_authority_revision.ts",
+  ]) assert.doesNotMatch(read(path), /thedoughmonster\/momi-backend/)
 })

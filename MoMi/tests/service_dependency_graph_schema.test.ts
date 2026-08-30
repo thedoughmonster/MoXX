@@ -26,7 +26,7 @@ test("strict-validates the complete graph contract", async () => {
   const invalid = [
     missingEdges,
     { ...graph, unexpected: true },
-    { ...graph, schema_version: 2 },
+    { ...graph, schema_version: 3 },
     { ...graph, digest: graph.digest.toUpperCase() },
     { ...graph, nodes: [{ ...graph.nodes[0], service_key: "Bad" }] },
     { ...graph, nodes: [{ ...graph.nodes[0], unexpected: true }] },

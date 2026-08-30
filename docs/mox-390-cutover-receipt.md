@@ -6,7 +6,8 @@ MoXX became the sole active product repository at `2026-08-30T14:04:01Z`, when
 the last obsolete source scheduler was disabled after replacement and
 production-equivalence proof. The private source repositories remain readable
 and retain all branches, tags, releases, issues, pull requests, and audit
-history, but their merged tombstones make them non-authoritative.
+history, but their merged tombstones and retired governing instructions make
+them non-authoritative.
 
 ## Frozen inventory
 
@@ -53,6 +54,7 @@ and Linear remains the sole work-item authority.
 | MoMi final non-authoritative instructions | `ffad94ff15436cfd452f048a87ea09cc49aa0419` |
 | MoMi final source authority record | `f3e45b3ddedcd3c5ff7ee2f2de14a2d69aed2795` |
 | MoXi source tombstone | `89486f572b1c142db42903bbdf71cb19924bda08` |
+| MoXi final non-authoritative instructions | `3ffaff1a0c7fd1e4cb50db34ba13246820047e46` |
 
 ## Equivalence gate
 
@@ -63,6 +65,17 @@ without provider mutation:
 - Wrangler builds both preview and production Workers with `--dry-run`;
 - the receipt and root workflow-authority invariants pass;
 - ordinary MoMi and MoXi validation remain independently path-routed.
+
+Architecture Snapshot Identity v2 pins current backend models to
+`thedoughmonster/MoXX`, `dev`, and product path `MoMi`; the immutable v1 source
+identity remains historical evidence. Active architecture builders, inspectors,
+and authority contexts no longer accept the retired source repository as the
+current mapping.
+
+Immutable Execution Authority v1 fixtures still name source-era commits as
+historical provenance. MoXX contains no active `execution-authorities/`
+declarations; any future declaration requires a separately versioned MoXX
+identity rather than reinterpretation of those retained v1 records.
 
 The source workflows were disabled only after these exact-head checks passed.
 Post-disable protected-production preflight run `33315868802` succeeded at
@@ -75,9 +88,10 @@ product-authority path.
 ## Proof-only rollback drill
 
 The operator-authorized drill was read-only. It resolved both tombstone commits,
-their parents, inverse README patches, and the workflow files at the prior
-accepted commits without re-enabling a workflow, changing a mapping, removing a
-tombstone, or mutating provider state.
+the later source-instruction commits, their parents, inverse documentation
+patches, and the workflow files at the prior accepted commits without
+re-enabling a workflow, changing a mapping, removing a tombstone, or mutating
+provider state.
 
 | Evidence | SHA-256 or object identity |
 | --- | --- |
@@ -88,11 +102,13 @@ tombstone, or mutating provider state.
 | MoMi prior workflow manifest | `9791a7676fe956fb49af6c6ba7bf87ac1f04a377795366563f1013d6c604379d` |
 | MoXi tombstone parent | `74279ef82c4759c50021eba5bccb8d21f2749978` |
 | MoXi inverse README patch | `9bf8abf5ed4ff7ee101595c6ec2e959c33d15b0bf59f06df5638868e9be4038e` |
+| MoXi final-instruction inverse patch set | `0d569b622ab54160ab8cbff01803fee6d48bbf4f7f88d921110e91db28ee6974` |
 | MoXi prior workflow manifest | `3e996c72b16e99b08fb08bd7b41adf9b25f23e91167877d79aff0c8b2d571e9f` |
 
 In a separately authorized rollback window, operators would create normal
-branches from the current source heads and revert the recorded tombstone commits
-in reverse order through reviewed pull requests. They would then restore the
+branches from the current source heads and revert the recorded instruction and
+tombstone commits in reverse order through reviewed pull requests. They would
+then restore the
 recorded source workflow IDs with GitHub's workflow-enable API and restore the
 recorded MoMi `dev`/MoXi `main` execution mapping. Reapplying the cutover is the
 inverse: merge the recorded tombstones, restore the MoXX mapping, and disable

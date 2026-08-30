@@ -77,7 +77,7 @@ const authority = Object.fromEntries(services.map(({ manifest }) => [
 ]))
 export const bindingContext: ServiceAuthorityBindingContext = {
   root: bindingSourceRoot,
-  repository: "thedoughmonster/momi-backend",
+  repository: "thedoughmonster/MoXX",
   revision: "1111111111111111111111111111111111111111",
   manifests,
   debt: {
@@ -100,7 +100,7 @@ export const bindingContext: ServiceAuthorityBindingContext = {
     externalAuthorities: [],
   } } },
   execution_context: {
-    root: bindingSourceRoot, repository: "thedoughmonster/momi-backend",
+    root: bindingSourceRoot, repository: "thedoughmonster/MoXX",
     baseRevision: "", sourceDigest: "", services: authority,
     databaseOwners: buildExecutionAuthorityDatabaseOwners(services),
     externalAuthorities: [], debtTargets: ["fixture_private.records"],

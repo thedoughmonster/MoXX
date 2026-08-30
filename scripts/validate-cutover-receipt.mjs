@@ -4,6 +4,11 @@ import { readFileSync } from "node:fs"
 const receipt = readFileSync("docs/mox-390-cutover-receipt.md", "utf8")
 const readme = readFileSync("README.md", "utf8")
 const workflowReadme = readFileSync(".github/workflows/README.md", "utf8")
+const moxiAgents = readFileSync("MoXi/AGENTS.md", "utf8")
+const architectureIdentity = readFileSync(
+  "MoMi/schemas/architecture-snapshot-identity-v2.schema.json",
+  "utf8",
+)
 
 assert.match(readme, /MoXX is the sole active product-repository authority/)
 assert.match(receipt, /sole active product repository at `2026-08-30T14:04:01Z`/)
@@ -26,6 +31,12 @@ assert.match(receipt, /d4c8ef79c5da6bd85bbc3d591a7999394267a110/)
 assert.match(receipt, /ffad94ff15436cfd452f048a87ea09cc49aa0419/)
 assert.match(receipt, /f3e45b3ddedcd3c5ff7ee2f2de14a2d69aed2795/)
 assert.match(receipt, /89486f572b1c142db42903bbdf71cb19924bda08/)
+assert.match(receipt, /3ffaff1a0c7fd1e4cb50db34ba13246820047e46/)
+assert.match(receipt, /0d569b622ab54160ab8cbff01803fee6d48bbf4f7f88d921110e91db28ee6974/)
 assert.match(workflowReadme, /not execution authorities/)
+assert.match(moxiAgents, /workspace in `thedoughmonster\/MoXX`/)
+assert.doesNotMatch(moxiAgents, /This private repository owns|momi-backend#\d+/)
+assert.match(architectureIdentity, /"repository": \{ "const": "thedoughmonster\/MoXX" \}/)
+assert.match(architectureIdentity, /"product_path": \{ "const": "MoMi" \}/)
 
 process.stdout.write("Validated MOX-390 cutover receipt and authority mapping.\n")

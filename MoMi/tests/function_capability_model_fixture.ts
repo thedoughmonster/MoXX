@@ -52,7 +52,7 @@ export function createCapabilityArchitecture(
   const functions = functionDefinitions.map((definition) => {
     const slug = definition.slug ?? definition.key.replaceAll(".", "-")
     const capability_model = definition.absent ? undefined : {
-      schema_version: 1 as const,
+      schema_version: 2 as const,
       called_contracts: definition.called ?? [],
     }
     return {

@@ -12,6 +12,7 @@ import type {
   DatabaseObjectAuthorityRevision,
 } from "./database_object_authority_types.ts"
 import type { ServiceManifest } from "./types.ts"
+import { repositoryAuthority } from "./repository_authority.ts"
 
 export function loadDatabaseObjectAuthorityRevision(
   root: string,
@@ -89,7 +90,7 @@ export function loadDatabaseObjectAuthorityRevision(
     [canonicalJson(item), item])).values()].sort((left, right) =>
       compareUtf16(canonicalJson(left), canonicalJson(right)))
   return {
-    repository: "thedoughmonster/momi-backend", revision: commit,
+    repository: repositoryAuthority, revision: commit,
     manifests, migrations, external_relations,
     legacy_debt: { path: debtEntry.path, blob_id: debtEntry.blob_id,
       source: debtSource,

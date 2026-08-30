@@ -27,7 +27,7 @@ export function subject(
       replay_identity: `${identity.schema}.${identity.name}` })
   const authority: DatabaseObjectAuthority = {
     schema_version: "database-object-authority/v1",
-    repository: "thedoughmonster/momi-backend", revision: "1".repeat(40),
+    repository: "thedoughmonster/MoXX", revision: "1".repeat(40),
     source_digest: "2".repeat(64), authority_digest: "3".repeat(64),
     objects: [record(relation, "preorder-operations"),
       record(readRoutine, "toast-data-acquisition"),

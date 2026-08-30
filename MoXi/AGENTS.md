@@ -1,6 +1,9 @@
-# moxi-web Agent Contract
+# MoXi UI Agent Contract
 
-This private repository owns Dough Monster web presentation surfaces. The initial scope is only the public preorder application governed by `momi-backend#167`, #223, #225, and #226.
+This `MoXi/` workspace in `thedoughmonster/MoXX` owns Dough Monster web
+presentation surfaces. Linear is the sole active work-item authority; the
+retained `moxi-web` repository and its GitHub issues are historical evidence,
+not execution instructions.
 
 ## Hard rules
 
@@ -15,4 +18,3 @@ This private repository owns Dough Monster web presentation surfaces. The initia
 - Use semantic, accessible HTML and include loading, pending, failure, and recovery states when the product slice activates them.
 - Run focused checks while iterating and one final `pnpm check` before handoff. Inspect rendered output before declaring UI work complete.
 - Do not deploy, mutate provider settings, push, create a PR, or handle credentials without exact authority from the owning task.
-
