@@ -55,6 +55,10 @@ test("keeps the production mapping proof manual and read-only", () => {
   assert.match(workflow, /permanent_database_mapping/)
   assert.match(workflow, /scripts\/assert-supabase-preflight-authority\.mjs/)
   assert.ok(
+    workflow.indexOf("actions/checkout@") <
+      workflow.indexOf("Verify exact workflow authority before secret use"),
+  )
+  assert.ok(
     workflow.indexOf("Verify exact workflow authority before secret use") <
       workflow.indexOf("secrets.SUPABASE_ACCESS_TOKEN"),
   )

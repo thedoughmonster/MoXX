@@ -145,6 +145,10 @@ assert.match(
   /scripts\/assert-supabase-preflight-authority\.mjs/,
 )
 assert.ok(
+  supabaseCredentialPreflight.indexOf("actions/checkout@") <
+    supabaseCredentialPreflight.indexOf("Verify exact workflow authority"),
+)
+assert.ok(
   supabaseCredentialPreflight.indexOf("Verify exact workflow authority") <
     supabaseCredentialPreflight.indexOf("secrets.SUPABASE_ACCESS_TOKEN"),
 )
