@@ -1,6 +1,9 @@
 # MoXX repository migration manifest
 
-## Source authorities
+## Imported source identities (historical)
+
+These repositories and commits are import provenance, not current execution
+authority. MoXX is the sole active product repository after MOX-390.
 
 | Product | Repository | Branch | Accepted commit | Source tree |
 | --- | --- | --- | --- | --- |
@@ -37,7 +40,7 @@ The accepted MoMi development and MoXi main commits are ancestors of the MoXX
 `dev` import commit. The accepted MoMi production commit is an ancestor of the
 MoXX `prod` import commit.
 
-## Mutation record
+## Import-time mutation record
 
 - Created only `/home/ubuntu/MoXX` and temporary read-only source mirrors.
 - Did not change source branches, tags, remotes, worktrees, repository settings,
@@ -45,8 +48,9 @@ MoXX `prod` import commit.
 - Did not create or push the MoXX GitHub remote.
 - Did not restart Symphony.
 
-## Remaining cutover work
+## Cutover status
 
-This manifest proves history import only. MOX-388, MOX-389, MOX-392, and
-MOX-390 remain required for automation adaptation, validation, remote creation,
-active-work reconciliation, and authority cutover.
+The imported history remains intact. MOX-388, MOX-389, and MOX-392 established
+the automation, validation, remote, and mapping prerequisites. MOX-390 completed
+the authority cutover at `2026-08-30T14:04:01Z`; the accepted source tombstones
+and final MoXX commits are recorded in `mox-390-cutover-receipt.md`.

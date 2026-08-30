@@ -194,8 +194,9 @@ or the Linear workpad.
 - Source MoMi and MoXi repositories and all their settings are unchanged.
 - The temporary GitHub mirror issue created while diagnosing the inherited
   ledger was closed as not planned; Linear MOX-392 remains the sole authority.
-- Source repositories remain authoritative until MOX-390 performs the
-  separately governed cutover and reversible tombstoning work.
+- MOX-390 subsequently completed the separately governed cutover. The source
+  repositories remain readable and retained, but MoXX is the sole active
+  product authority.
 - No deployment or provider configuration changed.
 - Symphony was not installed, enabled, started, or restarted.
 - The stock `symphony/elixir/` tree and all recovery packages remain untouched.
