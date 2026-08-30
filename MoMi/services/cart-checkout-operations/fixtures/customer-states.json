@@ -1,0 +1,13 @@
+[
+  { "customer_state": "loading", "phase": "review", "payment_status": "not_started", "next_actions": ["refresh"] },
+  { "customer_state": "empty", "phase": "review", "payment_status": "not_started", "next_actions": ["edit_cart"] },
+  { "customer_state": "incomplete", "phase": "contact", "payment_status": "not_started", "next_actions": ["provide_contact"] },
+  { "customer_state": "ready", "phase": "payment_required", "payment_status": "required", "next_actions": ["initiate_payment"] },
+  { "customer_state": "invalid", "phase": "revalidation", "payment_status": "not_started", "next_actions": ["edit_cart"] },
+  { "customer_state": "stale", "phase": "revalidation", "payment_status": "not_started", "next_actions": ["refresh"] },
+  { "customer_state": "pending", "phase": "pending", "payment_status": "pending", "next_actions": ["refresh"] },
+  { "customer_state": "declined", "phase": "payment_required", "payment_status": "declined", "next_actions": ["retry_payment"] },
+  { "customer_state": "indeterminate", "phase": "recovery", "payment_status": "indeterminate", "next_actions": ["recover"] },
+  { "customer_state": "recovery_required", "phase": "recovery", "payment_status": "indeterminate", "next_actions": ["recover"] },
+  { "customer_state": "confirmed", "phase": "confirmed", "payment_status": "paid", "next_actions": ["view_confirmation"] }
+]

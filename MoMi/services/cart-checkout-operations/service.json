@@ -1,0 +1,41 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "cart-checkout-operations",
+  "purpose": "Own source-neutral shared draft-order, cart, checkout, recovery, and order-change contracts.",
+  "kind": "core_capability",
+  "service_type": "dataset_owner",
+  "lifecycle_status": "active",
+  "implementation_status": "declared",
+  "functions": [],
+  "contracts": {
+    "provides": [
+      "momi.cart_checkout.cart.read.v1",
+      "momi.cart_checkout.checkout.command.v1",
+      "momi.cart_checkout.checkout.recover.v1",
+      "momi.cart_checkout.checkout.status.read.v1",
+      "momi.cart_checkout.draft_order.mutate.v1",
+      "momi.cart_checkout.draft_order.read.v1",
+      "momi.cart_checkout.flow_contribution.revalidate.v1",
+      "momi.cart_checkout.flow_contribution.submit.v1",
+      "momi.cart_checkout.order_change.reference.v1"
+    ],
+    "consumes": []
+  },
+  "database": { "read": ["momi_cart_checkout"], "write": ["momi_cart_checkout"] },
+  "network": { "outbound_hosts": [] },
+  "secrets": [],
+  "deployment": { "owns": [], "depends_on": [] },
+  "runtime_dependencies": ["npm:ajv@8.20.0"],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "momi.cart_checkout_operations",
+    "dataset_class": "domain",
+    "private_schema": "momi_cart_checkout",
+    "private_relations": [],
+    "private_routines": [],
+    "public_reads": [],
+    "public_commands": [],
+    "emitted_events": ["cart_checkout.order.changed"]
+  }
+}

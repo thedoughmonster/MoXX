@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "surface": "preorder-public-v1",
+  "status": "active",
+  "compatibility": "additive",
+  "active_writer": "preorder-operations",
+  "future_logical_owner": "cart-checkout-operations",
+  "provided_contracts": [
+    "momi.preorder.bootstrap.read.v1",
+    "momi.preorder.checkout_hold.manage.v1",
+    "momi.preorder.order_intent.create.v1",
+    "momi.preorder.order_status.read.v1",
+    "momi.preorder.payment.initiate.v1",
+    "momi.preorder.payment.reconcile.v1",
+    "momi.preorder.quote.create.v1"
+  ],
+  "cutover_rule": "Keep these keys and routes unchanged until an additive adapter and one-writer cutover are separately accepted and proven."
+}
