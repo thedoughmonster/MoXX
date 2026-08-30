@@ -56,7 +56,7 @@ capabilities. Modules remain separated by business capability.
   deployment apply; imported `MoMi/.github/workflows/` files are inert history.
 - The Node 24 release coordinator is the sole normal release orchestrator.
   Development migrations run inside `deploy-dev.yml` through its pinned
-  Supabase CLI, exact-project `--linked` transport, and short-lived login role.
+  Supabase CLI, exact-project `--linked` transport, and governed credential path.
 - A development release may start only after its exact commit is validated.
   Functions require planned parity or exact-baseline parity with no migration diff.
 - Keep manual operator programs under `local-tools/` and obey its `AGENTS.md`.
@@ -100,9 +100,9 @@ capabilities. Modules remain separated by business capability.
 - Build joins and projections as explicitly named, versioned database views.
 - Treat the Toast event GUID as the delivery idempotency key.
 - Store runtime secrets in Supabase, deployment secrets in GitHub, and local CLI credentials in the approved release host's credential store; use the [branch-scoped Edge Function secret guide](docs/supabase-edge-function-secrets.md) for target selection, names-only placement, and content-free verification.
-- Authenticate the pinned Supabase CLI by OAuth/PAT; let the CLI mint its own
-  short-lived database login role, and never reuse the account token as a
-  Postgres password.
+- Authenticate the pinned Supabase CLI by OAuth/PAT; short-lived database login remains the default.
+  During active development, an accepted Linear issue may explicitly authorize a non-expiring credential, including Supabase token-to-database access, under [Release credentials](docs/release-credentials.md).
+  The exception changes lifetime only; protected placement, least privilege, named ownership, rotation/revocation, rollback, and content-free verification remain mandatory.
 ## Default Development Loop (momi-default-development-loop/v1)
 - Keep one agent responsible for each change from diagnosis through handoff.
 - Bind every change to one Linear issue and an isolated feature worktree.

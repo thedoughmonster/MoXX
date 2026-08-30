@@ -10,6 +10,12 @@
 - Amendment: 2026-08-14; development migration execution moved into the
   receipt-bound protected GitHub deployment workflow so an owning agent needs
   no locally transferable Supabase credential.
+- Amendment: 2026-08-30; while MoMi remains in active development, an accepted
+  Linear issue may authorize the governed non-expiring credential exception in
+  `docs/release-credentials.md`. That exception supersedes this decision's
+  short-lived lifetime requirement only for its exact workflow, target, role,
+  owner, and rollback; deployment authority, custody, and non-exposure rules do
+  not change.
 
 ## Context
 
@@ -28,10 +34,12 @@ exact-project `--linked` transport.
 Each migration apply is previewed, ordered, noninteractive, and followed by an
 exact comparison of local and hosted migration versions. The migration module
 links the selected ref again immediately before apply and validates the CLI's exact
-`.temp/project-ref`. The CLI obtains its own short-lived login role and keeps
-that generated credential inside the CLI process. Repository code never reads,
-passes, logs, hashes, or stores it. Migrations must remain backward-compatible
-because schema can precede code while GitHub completes.
+`.temp/project-ref`. By default the CLI obtains its own short-lived login role
+and keeps that generated credential inside the CLI process. An exact accepted
+active-development exception may instead let the approved pinned client consume
+the authorized non-expiring credential internally. Repository code never reads,
+passes, logs, hashes, or stores either credential. Migrations must remain
+backward-compatible because schema can precede code while GitHub completes.
 
 GitHub Actions remains the sole Edge Function deployment authority. Development
 uses one exact-SHA/tree/plan dispatch to apply migrations, prove parity, and
@@ -52,10 +60,11 @@ On the authoritative Linux release host, the CLI profile is authenticated by
 OAuth or a personal access token. That account credential remains only in the
 CLI credential store. Apply links the exact target ref, validates the saved
 ref, then previews, applies, and proves parity with that linked identity.
-The CLI creates and expires the
-temporary database login internally; no repository child receives the account
-token or generated database password as `SUPABASE_DB_PASSWORD`, `PGPASSWORD`,
-an argument, a URL, or a receipt. The pinned CLI's remote path is TLS-only.
+By default, the CLI creates and expires the temporary database login internally.
+Under the accepted active-development exception, the approved pinned client may
+instead consume the authorized non-expiring credential internally. No repository
+child receives either credential as `SUPABASE_DB_PASSWORD`, `PGPASSWORD`, an
+argument, a URL, or a receipt. The pinned CLI's remote path is TLS-only.
 
 This supersedes ADR `0006` only where it paused migrations and required the
 development function workflow itself to use a push event.

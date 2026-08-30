@@ -13,7 +13,6 @@ const expectedWorkflows = [
   "deploy-prod.yml",
   "monorepo-routing.yml",
   "promote-prod.yml",
-  "renew-database-access.yml",
   "supabase-credential-preflight.yml",
   "validate-ui.yml",
   "validate.yml",
@@ -56,7 +55,6 @@ for (const [name, source] of workflows) {
 for (const name of [
   "deploy-dev.yml",
   "deploy-prod.yml",
-  "renew-database-access.yml",
   "validate.yml",
 ]) {
   assert.match(workflows.get(name), /working-directory:\s*MoMi/)
@@ -139,10 +137,38 @@ assert.match(
 )
 assert.match(supabaseCredentialPreflight, /\/v1\/projects\/\$\{targetProjectRef\}/)
 assert.match(supabaseCredentialPreflight, /\/v1\/branches\/\$\{targetProjectRef\}/)
+assert.match(supabaseCredentialPreflight, /\/database\/jit/)
+assert.match(supabaseCredentialPreflight, /\/jit-access/)
+assert.match(supabaseCredentialPreflight, /permanent_database_mapping/)
+assert.match(
+  supabaseCredentialPreflight,
+  /scripts\/assert-supabase-preflight-authority\.mjs/,
+)
+assert.ok(
+  supabaseCredentialPreflight.indexOf("actions/checkout@") <
+    supabaseCredentialPreflight.indexOf("Verify exact workflow authority"),
+)
+assert.ok(
+  supabaseCredentialPreflight.indexOf("Verify exact workflow authority") <
+    supabaseCredentialPreflight.indexOf("secrets.SUPABASE_ACCESS_TOKEN"),
+)
+const supabasePreflightAuthority = read(
+  "scripts/assert-supabase-preflight-authority.mjs",
+)
+assert.match(supabasePreflightAuthority, /thedoughmonster\/MoXX/)
+assert.match(supabasePreflightAuthority, /workflow_dispatch/)
+assert.match(supabasePreflightAuthority, /refs\/heads\/\$\{environment\}/)
+assert.match(supabasePreflightAuthority, /supabase-credential-preflight\.yml/)
+assert.doesNotMatch(supabaseCredentialPreflight, /on:\s*[\s\S]*schedule:/)
 assert.doesNotMatch(
   supabaseCredentialPreflight,
   /method:\s*["'](?:POST|PUT|PATCH|DELETE)["']/i,
 )
+
+assert.equal(workflows.has("renew-database-access.yml"), false)
+for (const source of workflows.values()) {
+  assert.doesNotMatch(source, /database-access:renew/)
+}
 assert.doesNotMatch(
   supabaseCredentialPreflight,
   /deploy:apply|database-access:renew|supabase(?:\.cmd)?\s+(?:db|functions)/,

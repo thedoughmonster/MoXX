@@ -14,6 +14,17 @@ environment secrets by name.
 They validate credential authority without invoking deployment, database access
 renewal, or provider mutation.
 
+The Supabase preflight binds each environment to its canonical project. For
+production it also reads the current token-to-database mapping and succeeds only
+when temporary database access is applied and the existing `postgres` mapping
+has no expiry. A first step binds repository, event, workflow path, environment,
+and branch before a later step receives the protected secret. The preflight
+emits booleans and target identity only; it never emits the provider user,
+network restrictions, or token.
+MoXX has no scheduled database-access renewal workflow. MOX-409 authorizes the
+non-scheduled production model documented in
+`MoMi/docs/release-credentials.md`.
+
 Linear is the sole work-item authority. Root workflows neither ingest nor
 mutate GitHub Issues, and no GitHub issue state is a planning or completion
 gate. They do not enforce a duplicate delivery ledger through pull-request

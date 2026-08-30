@@ -87,13 +87,22 @@ test("codifies the supported agent deployment path", async () => {
     new URL("../docs/agent-deployment-procedure.md", import.meta.url),
     "utf8",
   )
+  const credentials = await readFile(
+    new URL("../docs/release-credentials.md", import.meta.url),
+    "utf8",
+  )
   assert.match(contract, /agent-deployment-procedure\.md/)
   assert.match(procedure, /pnpm release:dev/)
   assert.match(procedure, /Never merge or push `prod` directly/)
   assert.match(procedure, /protected development workflow/)
-  assert.match(procedure, /account token/)
-  assert.match(procedure, /short-lived database login/)
-  assert.match(procedure, /never substitutes it.*database password/s)
+  assert.match(procedure, /default database login is short-lived/)
+  assert.match(procedure, /accepted Linear issue.*non-expiring credential/s)
+  assert.match(credentials, /minimum\s+required roles or scopes/)
+  assert.match(credentials, /name the owner/)
+  assert.match(credentials, /rotation and immediate-revocation/)
+  assert.match(credentials, /rollback path/)
+  assert.match(credentials, /No human, agent, diagnostic, verification/)
+  assert.match(credentials, /only the approved workflow or pinned\s+client may consume it/)
   assert.match(procedure, /Do not retry through a different deployment authority/)
 })
 

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict"
-import { readFileSync } from "node:fs"
+import { existsSync, readFileSync } from "node:fs"
 import test from "node:test"
 
 const read = (path) => readFileSync(path, "utf8")
@@ -45,7 +45,10 @@ test("pins prepared deployment authority to the exact MoXX repository", () => {
   assert.doesNotMatch(contract, /thedoughmonster\/momi-backend\/\.github/)
 })
 
-test("does not touch the scheduled Supabase renewal workflow", () => {
-  const workflow = read(".github/workflows/renew-database-access.yml")
-  assert.doesNotMatch(workflow, /MOX-390 registration touch/)
+test("keeps MoXX free of a scheduled Supabase renewal workflow", () => {
+  assert.equal(existsSync(".github/workflows/renew-database-access.yml"), false)
+  assert.equal(
+    existsSync("MoMi/.github/workflows/renew-database-access.yml"),
+    false,
+  )
 })
