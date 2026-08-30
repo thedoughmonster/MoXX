@@ -2,12 +2,16 @@ import { spawnSync } from "node:child_process"
 
 import { workspaceRoot } from "../architecture/paths.ts"
 
-export function runGit(args: string[], trim = true): string {
+export function runGit(
+  args: string[],
+  trim = true,
+  cwd = workspaceRoot,
+): string {
   const env = { ...process.env }
   delete env.SUPABASE_DB_PASSWORD
   delete env.PGPASSWORD
   const result = spawnSync("git", args, {
-    cwd: workspaceRoot,
+    cwd,
     encoding: "utf8",
     env,
   })

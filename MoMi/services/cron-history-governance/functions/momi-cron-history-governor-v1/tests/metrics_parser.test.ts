@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { metricsAuthorization } from "../src/metrics-authorization.ts";
+import { parseMetricLine } from "../src/parse_metric_line.ts";
 import { reduceMetrics } from "../src/reduce_metrics.ts";
 
 const fixture = [
@@ -56,4 +57,20 @@ test("authenticates the Metrics API as service_role", () => {
   const authorization = metricsAuthorization("test-secret");
   assert.match(authorization, /^Basic /u);
   assert.equal(atob(authorization.slice("Basic ".length)), "service_role:test-secret");
+});
+
+test("decodes metric label escapes in one pass", () => {
+  const point = parseMetricLine(
+    String.raw`metric{line="first\nsecond",quote="say \"hi\"",slash="a\\b"} 1`,
+  );
+  assert.deepEqual(point, {
+    name: "metric",
+    labels: { line: "first\nsecond", quote: 'say "hi"', slash: "a\\b" },
+    value: 1,
+  });
+});
+
+test("rejects an unterminated escaped label in linear time", { timeout: 1_000 }, () => {
+  const point = parseMetricLine(`metric{A="${"\\!".repeat(100_000)}} 1`);
+  assert.deepEqual(point, { name: "metric", labels: {}, value: 1 });
 });

@@ -18,6 +18,11 @@ code, CI, review, merge, and release evidence; it is not a parallel work ledger.
 4. Let the PR job named `validate-final` derive and run exactly one final gate.
 5. Download its `validation-<head-sha>` artifact after success.
 
+The bound `diff_sha256` is SHA-256 over the exact raw bytes emitted by
+`git diff --relative --binary --no-ext-diff --no-renames`. The coordinator
+streams those bytes into the digest so large binary patches cannot be truncated
+or rejected by a child-process output buffer.
+
 Do not run the same full gate locally and in PR CI. `dev` and `prod` pushes do
 not trigger another repository validation.
 
