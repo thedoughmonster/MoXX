@@ -18,7 +18,6 @@
     "dev:guard": "node scripts/check_dev_branch_clean.ts",
     "constitution:check": "node scripts/check_service_constitution.ts",
     "debt-lifecycle:generate": "node scripts/generate_debt_lifecycle_trend.ts",
-    "database-access:renew": "node scripts/run_renew_database_access.ts",
     "deploy:apply": "node scripts/run_deploy_apply.ts",
     "deploy:plan": "node scripts/run_impact_plan.ts plan",
     "edge:check": "node scripts/check_edge_functions.ts",

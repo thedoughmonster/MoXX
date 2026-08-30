@@ -51,6 +51,30 @@ step, or evidence collector may read, print, copy, hash, measure, log, or record
 the credential value or value-derived data; only the approved workflow or pinned
 client may consume it for its authorized operation.
 
+### MOX-409 production authority
+
+The operator decision recorded in Linear issue `MOX-409` on 2026-08-30 selects
+the non-scheduled model for `thedoughmonster/MoXX`. `dev` is the authoritative
+integration branch; production workflow configuration remains on `prod`. The
+dedicated non-expiring Supabase PAT or Scoped PAT is stored only as the protected
+GitHub `prod` environment secret `SUPABASE_ACCESS_TOKEN`, owned by Zac.
+
+The token may authenticate only the existing approved production database and
+deployment paths. Its database authority is the existing production `postgres`
+role mapping with its accepted network and role restrictions preserved and no
+`expires_at`. MoXX registers no monthly or other scheduled renewal event and
+contains no renewal PUT path. Verification is the manual, read-only
+`supabase-credential-preflight.yml` event: it checks the exact production project
+and expiry-free mapping without printing user identity, restrictions, token, or
+value-derived data.
+
+After that check passes, MOX-390 may disable the source schedule and confirm both
+repositories have zero registered renewal schedules. Keep the prior credential
+and mapping until the replacement passes. Before prior-credential revocation,
+rollback restores that protected credential/mapping; afterward, revoke a failed
+replacement and issue another through the same bounded process. Re-enabling a
+source scheduler requires separate explicit authority.
+
 Repository-only development releases require no Supabase access. Migration
 releases invoke the linked CLI preview/apply/parity path only in the protected
 development workflow; Edge Function credentials stay in that same environment.
