@@ -23,7 +23,7 @@ export async function buildBoundPlan(baseRef: string, headRef: string): Promise<
     base,
     head,
     changed_paths: changedPaths,
-    diff_sha256: hashDiff(base.sha, head.sha),
+    diff_sha256: await hashDiff(base.sha, head.sha),
     impact_sha256: hashText(canonicalJson(impact)),
     impact,
   }
