@@ -85,6 +85,7 @@ export function validateValidationReceipt(value: unknown): ValidationReceipt {
   if (
     receipt?.schema_version !== 2 || receipt.kind !== "validation" ||
     receipt.required_job !== "validate-final" ||
+    receipt.evidence_scope !== "exact_committed_head" ||
     (receipt.gate !== "full" && receipt.gate !== "path_scoped") ||
     !/^[1-9][0-9]*$/.test(receipt.run_log?.run_id ?? "") ||
     !/^[0-9a-f]{40}$/.test(receipt.identities?.base_sha ?? "") ||

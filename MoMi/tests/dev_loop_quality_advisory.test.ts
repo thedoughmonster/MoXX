@@ -2,11 +2,9 @@ import assert from "node:assert/strict"
 import test from "node:test"
 import { buildCompactReceipt } from "../scripts/dev_loop/build_compact_receipt.ts"
 import { executeChecks } from "../scripts/dev_loop/execute_checks.ts"
-import { renderValidationSummary } from
-  "../scripts/dev_loop/render_validation_summary.ts"
+import { renderValidationSummary } from "../scripts/dev_loop/render_validation_summary.ts"
 import { repositoryHardCheckIds } from "../scripts/dev_loop/repository_validation_contract.ts"
-import { validateValidationReceipt } from
-  "../scripts/dev_loop/validate_validation_receipt.ts"
+import { validateValidationReceipt } from "../scripts/dev_loop/validate_validation_receipt.ts"
 import { validationExitCode } from "../scripts/dev_loop/validation_exit_code.ts"
 import { isQualityReportCurrent } from
   "../scripts/quality/is_quality_report_current.ts"
@@ -96,9 +94,11 @@ test("validation receipt counts are recomputed", () => {
   })
   const receipt = {
     ...compact, kind: "validation" as const, gate: "full" as const,
-    required_job: "validate-final",
+    required_job: "validate-final", evidence_scope: "exact_committed_head" as const,
   }
   assert.equal(validateValidationReceipt(receipt), receipt)
+  assert.throws(() => validateValidationReceipt({ ...receipt,
+    evidence_scope: "focused_worktree" }), /Invalid authoritative validation receipt/)
   assert.throws(() => validateValidationReceipt({
     ...receipt,
     counts: { ...receipt.counts, hard_passed: 0 },

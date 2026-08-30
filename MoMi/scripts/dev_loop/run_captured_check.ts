@@ -9,6 +9,7 @@ export function runCapturedCheck(
   check: CheckCommand,
   stdoutPath: string,
   stderrPath: string,
+  environment: NodeJS.ProcessEnv = {},
 ): { status: number; stdout_sha256: string; stderr_sha256: string } {
   const stdoutDescriptor = openSync(stdoutPath, "w")
   const stderrDescriptor = openSync(stderrPath, "w")
@@ -19,6 +20,7 @@ export function runCapturedCheck(
       stdio: ["ignore", stdoutDescriptor, stderrDescriptor],
       env: {
         ...process.env,
+        ...environment,
         SUPABASE_DB_PASSWORD: undefined,
         PGPASSWORD: undefined,
       },

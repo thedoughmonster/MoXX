@@ -12,11 +12,17 @@ code, CI, review, merge, and release evidence; it is not a parallel work ledger.
    `git fetch origin refs/heads/dev:refs/remotes/origin/dev`; a narrowed
    `git fetch origin dev` updates `FETCH_HEAD` only and is not a freshness
    precondition.
-2. Run `pnpm momi-check changed` while iterating.
-3. Commit, push, and open one draft PR to `dev`. Link the Linear issue when
+2. Run `pnpm momi-check changed` while iterating. This is focused working-tree
+   evidence only; it writes `.momi/focused-validation-receipt.json` and cannot
+   satisfy the exact-HEAD final gate.
+3. Final validation runs `pnpm momi-check changed --final --base <commit>
+   --head <commit>`. It requires a clean repository, resolves both identities
+   once, binds every child check to those commit SHAs, and rechecks the clean
+   HEAD and refs before writing `.momi/validation-receipt.json`.
+4. Commit, push, and open one draft PR to `dev`. Link the Linear issue when
    available for traceability; no duplicate GitHub issue metadata is required.
-4. Let the PR job named `validate-final` derive and run exactly one final gate.
-5. Download its `validation-<head-sha>` artifact after success.
+5. Let the PR job named `validate-final` derive and run exactly one final gate.
+6. Download its `validation-<head-sha>` artifact after success.
 
 The bound `diff_sha256` is SHA-256 over the exact raw bytes emitted by
 `git diff --relative --binary --no-ext-diff --no-renames`. The coordinator

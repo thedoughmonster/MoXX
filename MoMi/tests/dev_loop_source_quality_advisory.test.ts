@@ -88,7 +88,7 @@ test("authoritative receipts bind advisory metadata to command identity", () => 
         advisory: qualityAdvisory, status: 0, duration_ms: 1 },
     ] })
   const receipt = { ...compact, kind: "validation" as const, gate: "full" as const,
-    required_job: "validate-final" }
+    required_job: "validate-final", evidence_scope: "exact_committed_head" as const }
   assert.equal(validateValidationReceipt(receipt), receipt)
   const swapped = { ...receipt, commands: receipt.commands.map((item) =>
     item.id === "source-quality-soft-limit" ? { ...item, advisory: qualityAdvisory }

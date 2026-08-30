@@ -92,6 +92,7 @@ export type ValidationReceipt = CompactReceipt & {
   kind: "validation"
   gate: "full" | "path_scoped"
   required_job: string
+  evidence_scope: "exact_committed_head"
 }
 
 export type TriageConfig = {
