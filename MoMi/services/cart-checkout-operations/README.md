@@ -21,9 +21,9 @@ payloads, or policy bodies.
 
 The service and its version-one shapes are declared, not implemented or hosted.
 There are no functions, routes, relations, routines, subscriptions, deployment
-units, secrets, or runtime writer. The declared Ajv dependency supports the
-contract fixture test only. Contract keys are reserved and non-callable until
-later implementation manifests bind them.
+units, secrets, runtime dependencies, or runtime writer. Repository contract
+tests use the workspace's development-only Ajv dependency. Contract keys are
+reserved and non-callable until later implementation manifests bind them.
 
 `preorder-operations` remains the sole active writer for the existing preorder
 public v1 surface. Its contract keys and route shapes remain active and

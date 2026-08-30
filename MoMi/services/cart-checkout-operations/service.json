@@ -22,11 +22,11 @@
     ],
     "consumes": []
   },
-  "database": { "read": ["momi_cart_checkout"], "write": ["momi_cart_checkout"] },
+  "database": { "read": [], "write": [] },
   "network": { "outbound_hosts": [] },
   "secrets": [],
   "deployment": { "owns": [], "depends_on": [] },
-  "runtime_dependencies": ["npm:ajv@8.20.0"],
+  "runtime_dependencies": [],
   "approved_packages": [],
   "owned_dataset": {
     "dataset_key": "momi.cart_checkout_operations",
