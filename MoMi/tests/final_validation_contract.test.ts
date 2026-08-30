@@ -13,6 +13,7 @@ test("final gate routes all Git authority through immutable child identities", a
   assert.match(entry, /MOMI_VALIDATION_BASE_SHA: plan\.base\.sha/u)
   assert.match(entry, /MOMI_VALIDATION_HEAD_SHA: plan\.head\.sha/u)
   assert.match(entry, /MOMI_PROD_REF: finalState\.production\.sha/u)
+  assert.match(entry, /tempRoot[\s\S]+finalState\.repository_root[\s\S]+TMPDIR: tempRoot/u)
   assert.match(entry, /evidence_scope: final \? "exact_committed_head"/u)
   assert.match(entry, /Focused non-final validation/u)
   assert.match(architecture, /MOMI_VALIDATION_BASE_SHA[\s\S]+MOMI_VALIDATION_HEAD_SHA/u)

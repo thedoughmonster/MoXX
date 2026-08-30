@@ -35,15 +35,17 @@ test("ref movement prevents replacing a stale final receipt", () => {
     const state = captureFinalValidationState(
       "receipt-base", head, workspace, "origin/prod",
     )
+    let cleaned = false
     writeFileSync(receipt, "stale pass\n")
     assert.throws(() => runValidation({ kind: "validation", receipt_path: receipt,
       execution_binding: { assert_invariants: () =>
-        assertFinalValidationState(state) }, checks: [{
+        assertFinalValidationState(state), cleanup: () => { cleaned = true } }, checks: [{
         id: "move-ref", command: process.execPath, enforcement: "hard_stop",
         args: ["-e", `require("node:child_process").execFileSync("git",
           ["update-ref", "refs/heads/receipt-base", "${head}"],
           { cwd: ${JSON.stringify(repository)} })`],
       }] }), /base ref moved during checks/u)
+    assert.equal(cleaned, true)
     assert.equal(existsSync(receipt), false)
   } finally {
     rmSync(repository, { recursive: true, force: true })

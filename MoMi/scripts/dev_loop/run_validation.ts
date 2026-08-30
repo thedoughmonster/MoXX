@@ -5,7 +5,12 @@ import { buildCompactReceipt } from "./build_compact_receipt.ts"
 import { canonicalJson } from "./canonical_json.ts"
 import { executeChecks } from "./execute_checks.ts"
 import { renderAgentValidationSummary } from "./render_agent_validation_summary.ts"
-import type { CheckCommand, CompactReceipt, ReceiptInput } from "./types.ts"
+import type {
+  CheckCommand,
+  CommandEvidence,
+  CompactReceipt,
+  ReceiptInput,
+} from "./types.ts"
 import type { CheckExecutionBinding } from "./final_validation_types.ts"
 
 export type ValidationRun = Omit<ReceiptInput, "commands"> & {
@@ -18,9 +23,15 @@ export type ValidationRun = Omit<ReceiptInput, "commands"> & {
 
 export function runValidation(input: ValidationRun): CompactReceipt {
   rmSync(input.receipt_path, { force: true })
+  let commands: CommandEvidence[]
+  try {
+    commands = executeChecks(input.checks, input.execution_binding)
+  } finally {
+    input.execution_binding?.cleanup?.()
+  }
   const compact = buildCompactReceipt({
     ...input,
-    commands: executeChecks(input.checks, input.execution_binding),
+    commands,
   })
   input.execution_binding?.assert_invariants?.()
   const receipt = { ...compact, ...input.receipt_fields }

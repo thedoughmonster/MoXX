@@ -39,6 +39,10 @@ try {
   const assertInvariants = finalState
     ? () => assertFinalValidationState(finalState)
     : undefined
+  const tempRoot = finalState
+    ? join(finalState.repository_root, "..", ".momi-tmp",
+      `${plan.head.sha}-${process.pid}`)
+    : undefined
   const compact = runValidation({
     kind: "validation", base_sha: plan.base.sha, head_sha: plan.head.sha,
     base_tree: plan.base.tree, head_tree: plan.head.tree,
@@ -51,8 +55,9 @@ try {
       : undefined,
     checks,
     receipt_path: output,
-    execution_binding: finalState ? {
+    execution_binding: finalState && tempRoot ? {
       assert_invariants: assertInvariants,
+      cleanup: () => rmSync(tempRoot, { recursive: true, force: true }),
       environment: {
         MOMI_VALIDATION_MODE: "exact-committed-head",
         MOMI_VALIDATION_BASE_SHA: plan.base.sha,
@@ -60,7 +65,7 @@ try {
         MOMI_BASE_REF: plan.base.sha,
         MOMI_HEAD_REF: plan.head.sha,
         MOMI_PROD_REF: finalState.production.sha,
-        TMPDIR: join(finalState.workspace_root, ".momi", "tmp"),
+        TMPDIR: tempRoot,
         MOMI_DEV_REF: /^[0-9a-f]{40}$/u.test(process.env.MOMI_DEV_REF ?? "")
           ? process.env.MOMI_DEV_REF
           : plan.base.sha,

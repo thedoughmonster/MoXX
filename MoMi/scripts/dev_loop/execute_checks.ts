@@ -34,7 +34,8 @@ export function executeChecks(
     ) throw new Error(`Invalid enforcement metadata for check ${check.id || "(missing)"}`)
   }
   const logRoot = join(workspaceRoot, ".momi", "logs")
-  const tempRoot = join(workspaceRoot, ".momi", "tmp")
+  const tempRoot = binding.environment?.TMPDIR ??
+    join(workspaceRoot, ".momi", "tmp")
   mkdirSync(logRoot, { recursive: true })
   mkdirSync(tempRoot, { recursive: true })
   const directory = mkdtempSync(join(logRoot, "run-"))

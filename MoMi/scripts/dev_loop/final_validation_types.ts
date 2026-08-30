@@ -14,4 +14,5 @@ export type FinalValidationState = {
 export type CheckExecutionBinding = {
   environment?: NodeJS.ProcessEnv
   assert_invariants?: () => void
+  cleanup?: () => void
 }
