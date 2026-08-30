@@ -32,7 +32,9 @@ test("ref movement prevents replacing a stale final receipt", () => {
     writeFileSync(join(workspace, "fixture.txt"), "head\n")
     git(["commit", "--quiet", "-am", "head"])
     const head = git(["rev-parse", "HEAD"])
-    const state = captureFinalValidationState("receipt-base", head, workspace)
+    const state = captureFinalValidationState(
+      "receipt-base", head, workspace, "origin/prod",
+    )
     writeFileSync(receipt, "stale pass\n")
     assert.throws(() => runValidation({ kind: "validation", receipt_path: receipt,
       execution_binding: { assert_invariants: () =>

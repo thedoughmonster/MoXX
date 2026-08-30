@@ -1,5 +1,6 @@
 import { rmSync } from "node:fs"
 import { appendFile } from "node:fs/promises"
+import { join } from "node:path"
 
 import { assertFinalValidationState } from
   "./dev_loop/assert_final_validation_state.ts"
@@ -59,6 +60,7 @@ try {
         MOMI_BASE_REF: plan.base.sha,
         MOMI_HEAD_REF: plan.head.sha,
         MOMI_PROD_REF: finalState.production.sha,
+        TMPDIR: join(finalState.workspace_root, ".momi", "tmp"),
         MOMI_DEV_REF: /^[0-9a-f]{40}$/u.test(process.env.MOMI_DEV_REF ?? "")
           ? process.env.MOMI_DEV_REF
           : plan.base.sha,

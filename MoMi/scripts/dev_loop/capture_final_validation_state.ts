@@ -9,6 +9,7 @@ export function captureFinalValidationState(
   baseRef: string,
   headRef: string,
   candidateRoot = workspaceRoot,
+  productionRef = process.env.MOMI_PROD_REF ?? "origin/prod",
 ): FinalValidationState {
   const workspace = resolve(candidateRoot)
   const repository = resolve(runGit(["rev-parse", "--show-toplevel"], true, workspace))
@@ -31,7 +32,6 @@ export function captureFinalValidationState(
   }
   const base = resolveIdentity(baseRef, repository)
   const head = resolveIdentity(headRef, repository)
-  const productionRef = process.env.MOMI_PROD_REF ?? "origin/prod"
   const production = resolveIdentity(productionRef, repository)
   const checkedOut = resolveIdentity("HEAD", repository)
   if (checkedOut.sha !== head.sha || checkedOut.tree !== head.tree) {
