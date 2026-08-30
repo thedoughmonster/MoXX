@@ -59,21 +59,41 @@ integration branch; production workflow configuration remains on `prod`. The
 dedicated non-expiring Supabase PAT or Scoped PAT is stored only as the protected
 GitHub `prod` environment secret `SUPABASE_ACCESS_TOKEN`, owned by Zac.
 
-The token may authenticate only the existing approved production database and
-deployment paths. Its database authority is the existing production `postgres`
-role mapping with its accepted network and role restrictions preserved and no
-`expires_at`. MoXX registers no monthly or other scheduled renewal event and
-contains no renewal PUT path. Verification is the manual, read-only
-`supabase-credential-preflight.yml` event: it checks the exact production project
-and expiry-free mapping without printing user identity, restrictions, token, or
-value-derived data.
+The token has exactly two repository consumers, both `workflow_dispatch` events
+on `prod`: `.github/workflows/deploy-prod.yml` may consume it through the pinned
+Supabase client for receipt-bound function deployment, and
+`.github/workflows/supabase-credential-preflight.yml` may consume it for GET-only
+verification. Its database authority is that token owner's existing production
+`postgres` role mapping with accepted network and role restrictions preserved
+and no `expires_at`. The release-host CLI profile is a separate credential and
+continues to use the CLI-owned short-lived database login for production
+migrations; MOX-409 does not grant that profile non-expiring database access.
+
+MoXX registers no monthly or other scheduled renewal event and contains no
+renewal PUT path. The preflight first enforces exact repository, workflow, event,
+environment, and matching branch before receiving the secret. It then checks the
+exact production project, applied temporary-access feature state, and expiry-free
+mapping without printing user identity, restrictions, token, or value-derived
+data. Only Zac may establish or repair the one-time provider mapping; neither
+repository workflow may mutate it.
 
 After that check passes, MOX-390 may disable the source schedule and confirm both
-repositories have zero registered renewal schedules. Keep the prior credential
-and mapping until the replacement passes. Before prior-credential revocation,
-rollback restores that protected credential/mapping; afterward, revoke a failed
-replacement and issue another through the same bounded process. Re-enabling a
-source scheduler requires separate explicit authority.
+repositories have zero registered renewal schedules. The source is
+`thedoughmonster/momi-backend`, workflow
+`.github/workflows/renew-database-access.yml`; its prior credential remains the
+source GitHub `prod` environment secret `SUPABASE_ACCESS_TOKEN`, owned by Zac.
+Keep that credential and mapping until the replacement passes.
+
+The MOX-390 retirement order is: prove the MoXX production preflight; disable
+the source workflow without deleting its file or history; verify its GitHub
+workflow state is `disabled_manually`; and verify MoXX has no registered renewal
+workflow. Its rollback drill is proof-only. Before prior-credential revocation,
+the names-only rollback restores the source `prod` secret from its protected
+owner-held source and restores its prior provider mapping, then verifies it
+read-only. Re-enabling the source scheduler is not part of MOX-409 and requires
+separate explicit authority. After prior-credential revocation, revoke a failed
+replacement and issue another through the same bounded process instead of
+restoring the source schedule.
 
 Repository-only development releases require no Supabase access. Migration
 releases invoke the linked CLI preview/apply/parity path only in the protected

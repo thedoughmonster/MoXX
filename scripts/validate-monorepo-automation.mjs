@@ -138,7 +138,23 @@ assert.match(
 assert.match(supabaseCredentialPreflight, /\/v1\/projects\/\$\{targetProjectRef\}/)
 assert.match(supabaseCredentialPreflight, /\/v1\/branches\/\$\{targetProjectRef\}/)
 assert.match(supabaseCredentialPreflight, /\/database\/jit/)
+assert.match(supabaseCredentialPreflight, /\/jit-access/)
 assert.match(supabaseCredentialPreflight, /permanent_database_mapping/)
+assert.match(
+  supabaseCredentialPreflight,
+  /scripts\/assert-supabase-preflight-authority\.mjs/,
+)
+assert.ok(
+  supabaseCredentialPreflight.indexOf("Verify exact workflow authority") <
+    supabaseCredentialPreflight.indexOf("secrets.SUPABASE_ACCESS_TOKEN"),
+)
+const supabasePreflightAuthority = read(
+  "scripts/assert-supabase-preflight-authority.mjs",
+)
+assert.match(supabasePreflightAuthority, /thedoughmonster\/MoXX/)
+assert.match(supabasePreflightAuthority, /workflow_dispatch/)
+assert.match(supabasePreflightAuthority, /refs\/heads\/\$\{environment\}/)
+assert.match(supabasePreflightAuthority, /supabase-credential-preflight\.yml/)
 assert.doesNotMatch(supabaseCredentialPreflight, /on:\s*[\s\S]*schedule:/)
 assert.doesNotMatch(
   supabaseCredentialPreflight,
