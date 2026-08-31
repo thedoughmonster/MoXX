@@ -33,6 +33,14 @@ const workflows = new Map(
 
 for (const [name, source] of workflows) {
   for (const match of source.matchAll(/uses:\s+([^\s#]+)/g)) {
+    if (match[1].startsWith("./")) {
+      assert.match(
+        match[1],
+        /^\.\/\.github\/workflows\/[^/]+\.ya?ml$/,
+        `${name} has an invalid local reusable workflow reference`,
+      )
+      continue
+    }
     assert.match(
       match[1],
       /@[0-9a-f]{40}$/,
@@ -70,27 +78,34 @@ for (const name of [
   assert.match(source, /version:\s*10\.0\.0/)
 }
 
-assert.match(workflows.get("validate.yml"), /paths:[\s\S]*"MoMi\/\*\*"/)
-assert.doesNotMatch(workflows.get("validate.yml"), /"MoXi\/\*\*"/)
+assert.match(workflows.get("validate.yml"), /workflow_call:/)
 assert.match(workflows.get("validate.yml"), /name:\s*validate-final/)
-assert.match(workflows.get("validate.yml"),
-  /MOMI_DEV_REF: \$\{\{ github\.event_name == 'pull_request'/)
+assert.match(workflows.get("validate.yml"), /MOMI_BASE_REF: \$\{\{ inputs\.base_sha \}\}/)
+assert.match(workflows.get("validate.yml"), /MOMI_HEAD_REF: \$\{\{ inputs\.head_sha \}\}/)
 assert.match(workflows.get("validate.yml"), /pull_request\.base\.ref == 'prod'/)
 assert.match(workflows.get("validate.yml"), /pull_request\.head\.ref == 'dev'/)
 assert.match(workflows.get("validate.yml"),
   /pull_request\.head\.repo\.full_name == github\.repository/)
 assert.match(workflows.get("validate.yml"),
-  /pull_request\.head\.sha \|\| github\.event\.pull_request\.base\.sha \|\| inputs\.development_baseline_sha \}\}/)
-assert.match(workflows.get("validate-ui.yml"), /paths:[\s\S]*"MoXi\/\*\*"/)
-assert.doesNotMatch(workflows.get("validate-ui.yml"), /"MoMi\/\*\*"/)
+  /inputs\.head_sha \|\| inputs\.development_baseline_sha \}\}/)
+assert.match(workflows.get("validate-ui.yml"), /workflow_call:/)
+assert.match(workflows.get("validate-ui.yml"), /ref:\s*\$\{\{ inputs\.head_sha \|\| github\.sha \}\}/)
 
 const routing = workflows.get("monorepo-routing.yml")
 assert.match(routing, /name:\s*monorepo-routing/)
 assert.match(routing, /name:\s*monorepo-static-config/)
+assert.match(routing, /name:\s*product-validation/)
 assert.match(routing, /push:\s*\n\s+branches:\s*\[dev\]/)
 assert.match(routing, /github\.event\.head_commit\.message/)
 assert.match(routing, /github\.event\.before/)
 assert.match(routing, /scripts\/monorepo-routing\.mjs/)
+assert.match(routing, /scripts\/product-validation-gate\.mjs/)
+assert.match(routing, /uses:\s*\.\/\.github\/workflows\/validate\.yml/)
+assert.match(routing, /uses:\s*\.\/\.github\/workflows\/validate-ui\.yml/)
+assert.match(routing, /needs\.backend-validation\.result/)
+assert.match(routing, /needs\.ui-validation\.result/)
+assert.match(routing, /github\.event\.pull_request\.base\.sha/)
+assert.match(routing, /github\.event\.pull_request\.head\.sha/)
 assert.match(routing, /scripts\/validate-monorepo-automation\.mjs/)
 assert.match(routing, /node --test tests\/\*\.test\.mjs/)
 

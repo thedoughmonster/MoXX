@@ -27,6 +27,29 @@ test("MoXi-only changes select only UI validation", () => {
   })
 })
 
+test("product validation workflow changes retain their product selection", () => {
+  assert.deepEqual(
+    classifyPaths([".github/workflows/validate.yml"]),
+    {
+      paths: [".github/workflows/validate.yml"],
+      momi: true,
+      moxi: false,
+      root: false,
+      cross: false,
+    },
+  )
+  assert.deepEqual(
+    classifyPaths([".github/workflows/validate-ui.yml"]),
+    {
+      paths: [".github/workflows/validate-ui.yml"],
+      momi: false,
+      moxi: true,
+      root: false,
+      cross: false,
+    },
+  )
+})
+
 test("cross-product changes select both and require interface evidence", () => {
   const paths = ["MoMi/services/preorder/index.ts", "MoXi/src/api/preorder.ts"]
   assert.throws(() => assertRoutingPolicy(paths, "Interface impact: none"))
