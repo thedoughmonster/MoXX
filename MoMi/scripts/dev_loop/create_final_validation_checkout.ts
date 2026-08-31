@@ -23,6 +23,7 @@ export function createFinalValidationCheckout(
       cpSync(dependencies, checkoutDependencies, {
         recursive: true,
         preserveTimestamps: true,
+        verbatimSymlinks: true,
         mode: constants.COPYFILE_FICLONE,
       })
     }

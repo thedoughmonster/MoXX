@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import { execFileSync } from "node:child_process"
-import { lstatSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { lstatSync, mkdirSync, mkdtempSync, realpathSync, rmSync,
+  symlinkSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import test from "node:test"
@@ -30,7 +31,12 @@ test("final checks use an isolated detached candidate checkout", () => {
     git(["config", "user.email", "momi-test@example.invalid"])
     git(["config", "user.name", "MoMi test"])
     mkdirSync(workspace)
-    mkdirSync(join(workspace, "node_modules"))
+    mkdirSync(join(workspace, "node_modules/.store/fixture-package"), {
+      recursive: true,
+    })
+    symlinkSync(".store/fixture-package", join(
+      workspace, "node_modules/fixture-package",
+    ), "dir")
     writeFileSync(join(repository, ".gitignore"),
       "MoMi/.momi/\nMoMi/node_modules\n")
     writeFileSync(join(workspace, "fixture.txt"), "base\n")
@@ -49,6 +55,9 @@ test("final checks use an isolated detached candidate checkout", () => {
     assert.equal(lstatSync(join(
       checkout.workspace_root, "node_modules",
     )).isDirectory(), true)
+    assert.equal(realpathSync(join(
+      checkout.workspace_root, "node_modules/fixture-package",
+    )).startsWith(checkout.workspace_root), true)
     const [liveMutation] = executeChecks([{
       id: "transient-live-mutation", command: process.execPath,
       enforcement: "hard_stop", args: ["-e", `const fs=require("node:fs");

@@ -33,7 +33,7 @@ test("ref movement prevents replacing a stale final receipt", () => {
     git(["commit", "--quiet", "-am", "head"])
     const head = git(["rev-parse", "HEAD"])
     const state = captureFinalValidationState(
-      "receipt-base", head, workspace, "origin/prod",
+      "receipt-base", head, workspace, "origin/prod", base,
     )
     let cleaned = false
     writeFileSync(receipt, "stale pass\n")

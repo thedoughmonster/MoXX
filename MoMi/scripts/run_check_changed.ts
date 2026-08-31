@@ -1,6 +1,6 @@
 import { rmSync } from "node:fs"
 import { appendFile } from "node:fs/promises"
-import { join } from "node:path"
+import { dirname, join } from "node:path"
 
 import { assertFinalValidationState } from
   "./dev_loop/assert_final_validation_state.ts"
@@ -54,7 +54,7 @@ try {
     MOMI_HEAD_REF: source.head.sha,
     MOMI_DEV_REF: source.development.sha,
     MOMI_PROD_REF: source.production.sha,
-    TMPDIR: join(checkout.workspace_root, ".momi", "tmp"),
+    TMPDIR: dirname(checkout.repository_root),
   } : undefined
   const plan = checkout && environment
     ? buildBoundPlanFromCheckout(

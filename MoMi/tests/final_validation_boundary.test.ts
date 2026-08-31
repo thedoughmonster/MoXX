@@ -30,7 +30,7 @@ test("final validation binds one clean committed base and HEAD", async (context)
 
     await context.test("clean committed and detached HEAD candidates pass", () => {
       const attached = captureFinalValidationState(base, "HEAD", workspace,
-        "origin/prod")
+        "origin/prod", base)
       assert.equal(attached.base.sha, base)
       assert.equal(attached.head.sha, head)
       assert.equal(attached.development.sha, base)
@@ -38,7 +38,7 @@ test("final validation binds one clean committed base and HEAD", async (context)
       assert.doesNotThrow(() => assertFinalValidationState(attached))
       git(["checkout", "--quiet", "--detach", head])
       const detached = captureFinalValidationState(base, head, workspace,
-        "origin/prod")
+        "origin/prod", base)
       assert.equal(detached.head.sha, head)
       assert.doesNotThrow(() => assertFinalValidationState(detached))
     })
@@ -46,7 +46,9 @@ test("final validation binds one clean committed base and HEAD", async (context)
     await context.test("unstaged tracked changes reject before checks", () => {
       writeFileSync(join(workspace, "fixture.txt"), "dirty\n")
       assert.throws(
-        () => captureFinalValidationState(base, head, workspace, "origin/prod"),
+        () => captureFinalValidationState(
+          base, head, workspace, "origin/prod", base,
+        ),
         /clean repository; commit or discard tracked changes: MoMi\/fixture\.txt/u,
       )
       git(["restore", "."])
@@ -56,7 +58,9 @@ test("final validation binds one clean committed base and HEAD", async (context)
       writeFileSync(join(workspace, "fixture.txt"), "staged\n")
       git(["add", "."])
       assert.throws(
-        () => captureFinalValidationState(base, head, workspace, "origin/prod"),
+        () => captureFinalValidationState(
+          base, head, workspace, "origin/prod", base,
+        ),
         /clean repository; commit or unstage indexed changes: MoMi\/fixture\.txt/u,
       )
       git(["reset", "--quiet", "--hard", head])
@@ -65,12 +69,16 @@ test("final validation binds one clean committed base and HEAD", async (context)
     await context.test("untracked files and a mismatched candidate reject", () => {
       writeFileSync(join(workspace, "untracked.txt"), "not committed\n")
       assert.throws(
-        () => captureFinalValidationState(base, head, workspace, "origin/prod"),
+        () => captureFinalValidationState(
+          base, head, workspace, "origin/prod", base,
+        ),
         /clean repository; remove or commit untracked files: MoMi\/untracked\.txt/u,
       )
       rmSync(join(workspace, "untracked.txt"))
       assert.throws(
-        () => captureFinalValidationState(base, base, workspace, "origin/prod"),
+        () => captureFinalValidationState(
+          base, base, workspace, "origin/prod", base,
+        ),
         /head must equal checked-out HEAD; checkout/u,
       )
     })
@@ -78,7 +86,7 @@ test("final validation binds one clean committed base and HEAD", async (context)
     await context.test("moving symbolic base rejects completion", () => {
       git(["branch", "moving-base", base])
       const state = captureFinalValidationState("moving-base", head, workspace,
-        "origin/prod")
+        "origin/prod", base)
       git(["update-ref", "refs/heads/moving-base", head])
       assert.throws(
         () => assertFinalValidationState(state),
@@ -87,7 +95,9 @@ test("final validation binds one clean committed base and HEAD", async (context)
     })
 
     await context.test("post-plan dirtiness rejects receipt completion", () => {
-      const state = captureFinalValidationState(base, head, workspace, "origin/prod")
+      const state = captureFinalValidationState(
+        base, head, workspace, "origin/prod", base,
+      )
       writeFileSync(join(workspace, "fixture.txt"), "changed during checks\n")
       assert.throws(
         () => assertFinalValidationState(state),
@@ -98,7 +108,7 @@ test("final validation binds one clean committed base and HEAD", async (context)
 
     await context.test("checkout and production ref movement reject completion", () => {
       const checkoutState = captureFinalValidationState(base, head, workspace,
-        "origin/prod")
+        "origin/prod", base)
       git(["checkout", "--quiet", "--detach", base])
       assert.throws(
         () => assertFinalValidationState(checkoutState),
@@ -106,7 +116,7 @@ test("final validation binds one clean committed base and HEAD", async (context)
       )
       git(["checkout", "--quiet", "--detach", head])
       const productionState = captureFinalValidationState(base, head, workspace,
-        "origin/prod")
+        "origin/prod", base)
       git(["update-ref", "refs/remotes/origin/prod", head])
       assert.throws(
         () => assertFinalValidationState(productionState),
