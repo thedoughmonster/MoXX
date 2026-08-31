@@ -41,6 +41,32 @@ test("checkout states reject payment, phase, issue, and confirmation contradicti
   for (const value of invalid) assert.equal(validate(value), false, JSON.stringify(value))
 })
 
+test("cart reads reject checkout-payment states and incoherent actions", () => {
+  const validate = ajv.getSchema("cart-checkout#/$defs/CartReadResponse")
+  const empty = {
+    customer_state: "empty",
+    projection_status: "current",
+    order: null,
+    next_actions: ["edit_cart"],
+    issues: [],
+  }
+  const invalid = [
+    {
+      customer_state: "indeterminate",
+      projection_status: "recovering",
+      order: null,
+      next_actions: ["retry_payment"],
+      issues: [],
+    },
+    { ...empty, next_actions: ["retry_payment"] },
+    { ...empty, projection_status: "stale" },
+  ]
+
+  assert.ok(validate)
+  assert.equal(validate(empty), true, ajv.errorsText(validate.errors))
+  for (const value of invalid) assert.equal(validate(value), false, JSON.stringify(value))
+})
+
 test("reference contracts reject malformed formats and forbidden material", async () => {
   const reference = await readJson<Record<string, unknown>>(
     "fixtures/order-change-reference.json",
