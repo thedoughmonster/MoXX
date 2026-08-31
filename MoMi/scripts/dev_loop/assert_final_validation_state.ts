@@ -9,12 +9,18 @@ export function assertFinalValidationState(state: FinalValidationState): void {
     state.repository_root,
   )
   if (status) {
+    const first = status.split("\n")[0] ?? "unknown change"
     throw new Error(
-      "Final validation repository changed during checks; restore the clean committed HEAD and rerun",
+      "Final validation repository changed during checks; restore the clean " +
+        `committed HEAD and rerun: ${first.slice(3)}`,
     )
   }
   const base = resolveIdentity(state.base_ref, state.repository_root)
   const head = resolveIdentity(state.head_ref, state.repository_root)
+  const development = resolveIdentity(
+    state.development_ref,
+    state.repository_root,
+  )
   const production = resolveIdentity(state.production_ref, state.repository_root)
   const checkedOut = resolveIdentity("HEAD", state.repository_root)
   if (base.sha !== state.base.sha || base.tree !== state.base.tree) {
@@ -22,6 +28,12 @@ export function assertFinalValidationState(state: FinalValidationState): void {
   }
   if (head.sha !== state.head.sha || head.tree !== state.head.tree) {
     throw new Error("Final validation head ref moved during checks; rerun with the resolved head SHA")
+  }
+  if (development.sha !== state.development.sha ||
+    development.tree !== state.development.tree) {
+    throw new Error(
+      "Final validation development ref moved during checks; rerun from fresh refs",
+    )
   }
   if (production.sha !== state.production.sha ||
     production.tree !== state.production.tree) {

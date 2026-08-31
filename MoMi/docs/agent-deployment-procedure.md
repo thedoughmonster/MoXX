@@ -17,8 +17,10 @@ code, CI, review, merge, and release evidence; it is not a parallel work ledger.
    satisfy the exact-HEAD final gate.
 3. Final validation runs `pnpm momi-check changed --final --base <commit>
    --head <commit>`. It requires a clean repository, resolves both identities
-   once, binds every child check to those commit SHAs, and rechecks the clean
-   HEAD and refs before writing `.momi/validation-receipt.json`.
+   once, then builds the plan and runs every child check in a locked detached
+   checkout materialized from the committed head. Development and production
+   migration baselines are pinned to resolved SHAs and recorded with their trees
+   in the receipt before the clean source HEAD and refs are rechecked.
 4. Commit, push, and open one draft PR to `dev`. Link the Linear issue when
    available for traceability; no duplicate GitHub issue metadata is required.
 5. Let the PR job named `validate-final` derive and run exactly one final gate.

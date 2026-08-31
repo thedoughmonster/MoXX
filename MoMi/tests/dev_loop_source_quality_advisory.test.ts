@@ -78,6 +78,8 @@ test("authoritative receipts bind advisory metadata to command identity", () => 
   const compact = buildCompactReceipt({ kind: "validation", run_id: "7",
     base_sha: "a".repeat(40), head_sha: "b".repeat(40),
     base_tree: "c".repeat(40), head_tree: "d".repeat(40),
+    development_sha: "a".repeat(40), development_tree: "c".repeat(40),
+    production_sha: "9".repeat(40), production_tree: "8".repeat(40),
     diff_sha256: "e".repeat(64), impact_sha256: "f".repeat(64),
     plan_sha256: "1".repeat(64), commands: [
       ...repositoryHardCheckIds.map((id) => ({ id, enforcement: "hard_stop" as const,

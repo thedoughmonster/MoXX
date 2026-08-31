@@ -6,8 +6,7 @@ import { renderValidationSummary } from "../scripts/dev_loop/render_validation_s
 import { repositoryHardCheckIds } from "../scripts/dev_loop/repository_validation_contract.ts"
 import { validateValidationReceipt } from "../scripts/dev_loop/validate_validation_receipt.ts"
 import { validationExitCode } from "../scripts/dev_loop/validation_exit_code.ts"
-import { isQualityReportCurrent } from
-  "../scripts/quality/is_quality_report_current.ts"
+import { isQualityReportCurrent } from "../scripts/quality/is_quality_report_current.ts"
 import { parseQualityReport } from "../scripts/quality/parse_quality_report.ts"
 test("quality metric drift is advisory with deterministic guidance", () => {
   assert.equal(isQualityReportCurrent("135191\n", "135205\n"), false)
@@ -26,8 +25,7 @@ test("quality metric drift is advisory with deterministic guidance", () => {
       stderr: "token=advisory-secret\nStatus: stale\nRegenerate: pnpm quality:generate",
     }],
   })
-  assert.equal(receipt.counts.hard_failed, 0)
-  assert.equal(receipt.counts.advisory_findings, 1)
+  assert.equal(receipt.counts.hard_failed, 0); assert.equal(receipt.counts.advisory_findings, 1)
   assert.equal(validationExitCode(receipt), 0)
   assert.doesNotMatch(receipt.commands[0].advisory_excerpt ?? "", /advisory-secret/)
   const summary = renderValidationSummary(receipt)
@@ -74,6 +72,8 @@ test("validation receipt counts are recomputed", () => {
     kind: "validation",
     base_sha: "a".repeat(40), head_sha: "b".repeat(40),
     base_tree: "c".repeat(40), head_tree: "d".repeat(40),
+    development_sha: "a".repeat(40), development_tree: "c".repeat(40),
+    production_sha: "9".repeat(40), production_tree: "8".repeat(40),
     diff_sha256: "e".repeat(64), impact_sha256: "f".repeat(64),
     plan_sha256: "1".repeat(64), run_id: "7",
     commands: [...repositoryHardCheckIds.map((id) => ({

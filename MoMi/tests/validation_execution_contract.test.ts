@@ -33,19 +33,24 @@ test("output beyond the child-process buffer stays complete", () => {
 test("bound child checks receive only the resolved final candidate identities", () => {
   const base = "a".repeat(40)
   const head = "b".repeat(40)
+  const production = "c".repeat(40)
   const [evidence] = executeChecks([{
     id: "fixture-bound-identities", command: process.execPath,
     args: ["-e", `process.exit(
       process.env.MOMI_VALIDATION_BASE_SHA === "${base}" &&
       process.env.MOMI_VALIDATION_HEAD_SHA === "${head}" &&
       process.env.MOMI_BASE_REF === "${base}" &&
-      process.env.MOMI_HEAD_REF === "${head}" ? 0 : 9)`],
+      process.env.MOMI_HEAD_REF === "${head}" &&
+      process.env.MOMI_DEV_REF === "${base}" &&
+      process.env.MOMI_PROD_REF === "${production}" ? 0 : 9)`],
     enforcement: "hard_stop",
   }], { environment: {
     MOMI_VALIDATION_BASE_SHA: base,
     MOMI_VALIDATION_HEAD_SHA: head,
     MOMI_BASE_REF: base,
     MOMI_HEAD_REF: head,
+    MOMI_DEV_REF: base,
+    MOMI_PROD_REF: production,
   } })
   assert.equal(evidence.status, 0)
 })

@@ -51,6 +51,7 @@ export function executeChecks(
       join(workspaceRoot, stdoutPath),
       join(workspaceRoot, stderrPath),
       binding.environment,
+      binding.workspace_root,
     )
     binding.assert_invariants?.()
     return {

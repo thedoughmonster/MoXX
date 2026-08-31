@@ -10,6 +10,7 @@ export function captureFinalValidationState(
   headRef: string,
   candidateRoot = workspaceRoot,
   productionRef = process.env.MOMI_PROD_REF ?? "origin/prod",
+  developmentRef = process.env.MOMI_DEV_REF ?? baseRef,
 ): FinalValidationState {
   const workspace = resolve(candidateRoot)
   const repository = resolve(runGit(["rev-parse", "--show-toplevel"], true, workspace))
@@ -32,6 +33,7 @@ export function captureFinalValidationState(
   }
   const base = resolveIdentity(baseRef, repository)
   const head = resolveIdentity(headRef, repository)
+  const development = resolveIdentity(developmentRef, repository)
   const production = resolveIdentity(productionRef, repository)
   const checkedOut = resolveIdentity("HEAD", repository)
   if (checkedOut.sha !== head.sha || checkedOut.tree !== head.tree) {
@@ -39,14 +41,21 @@ export function captureFinalValidationState(
       `Final validation head must equal checked-out HEAD; checkout ${head.sha}`,
     )
   }
+  if (development.sha !== base.sha && development.sha !== head.sha) {
+    throw new Error(
+      "Final validation development baseline must equal the resolved base or head SHA",
+    )
+  }
   return {
     repository_root: repository,
     workspace_root: workspace,
     base_ref: baseRef,
     head_ref: headRef,
+    development_ref: developmentRef,
     production_ref: productionRef,
     base,
     head,
+    development,
     production,
   }
 }

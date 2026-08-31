@@ -5,10 +5,8 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import test from "node:test"
 
-import { assertFinalValidationState } from
-  "../scripts/dev_loop/assert_final_validation_state.ts"
-import { captureFinalValidationState } from
-  "../scripts/dev_loop/capture_final_validation_state.ts"
+import { assertFinalValidationState } from "../scripts/dev_loop/assert_final_validation_state.ts"
+import { captureFinalValidationState } from "../scripts/dev_loop/capture_final_validation_state.ts"
 
 test("final validation binds one clean committed base and HEAD", async (context) => {
   const repository = mkdtempSync(join(tmpdir(), "momi-final-boundary-"))
@@ -35,6 +33,7 @@ test("final validation binds one clean committed base and HEAD", async (context)
         "origin/prod")
       assert.equal(attached.base.sha, base)
       assert.equal(attached.head.sha, head)
+      assert.equal(attached.development.sha, base)
       assert.equal(attached.head.tree, git(["rev-parse", "HEAD^{tree}"]))
       assert.doesNotThrow(() => assertFinalValidationState(attached))
       git(["checkout", "--quiet", "--detach", head])

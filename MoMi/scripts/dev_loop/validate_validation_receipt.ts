@@ -92,6 +92,10 @@ export function validateValidationReceipt(value: unknown): ValidationReceipt {
     !/^[0-9a-f]{40}$/.test(receipt.identities?.head_sha ?? "") ||
     !/^[0-9a-f]{40}$/.test(receipt.identities?.base_tree ?? "") ||
     !/^[0-9a-f]{40}$/.test(receipt.identities?.head_tree ?? "") ||
+    !/^[0-9a-f]{40}$/.test(receipt.identities?.development_sha ?? "") ||
+    !/^[0-9a-f]{40}$/.test(receipt.identities?.development_tree ?? "") ||
+    !/^[0-9a-f]{40}$/.test(receipt.identities?.production_sha ?? "") ||
+    !/^[0-9a-f]{40}$/.test(receipt.identities?.production_tree ?? "") ||
     !/^[0-9a-f]{64}$/.test(receipt.identities?.diff_sha256 ?? "") ||
     !/^[0-9a-f]{64}$/.test(receipt.identities?.impact_sha256 ?? "") ||
     !/^[0-9a-f]{64}$/.test(receipt.identities?.plan_sha256 ?? "") ||

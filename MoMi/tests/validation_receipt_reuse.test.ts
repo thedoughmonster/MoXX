@@ -20,6 +20,7 @@ test("validation receipts cannot be reused for another base or candidate tree", 
   const validation = {
     identities: { base_sha: plan.base.sha, base_tree: plan.base.tree,
       head_sha: plan.head.sha, head_tree: plan.head.tree,
+      development_sha: plan.base.sha, development_tree: plan.base.tree,
       diff_sha256: plan.diff_sha256, impact_sha256: plan.impact_sha256 },
     gate: "path_scoped",
   } as ValidationReceipt
@@ -28,6 +29,8 @@ test("validation receipts cannot be reused for another base or candidate tree", 
     { ...validation.identities, base_tree: "1".repeat(40) },
     { ...validation.identities, head_sha: "2".repeat(40) },
     { ...validation.identities, head_tree: "3".repeat(40) },
+    { ...validation.identities, development_sha: "4".repeat(40) },
+    { ...validation.identities, development_tree: "5".repeat(40) },
   ]) assert.throws(
     () => assertPlanMatchesValidation(plan, { ...validation, identities }),
     /Release plan differs materially/u,
