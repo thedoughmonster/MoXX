@@ -14,11 +14,11 @@ test("projects the accepted current dev service graph exactly", async () => {
   const provided = architecture.services.flatMap(
     (service) => service.manifest.contracts.provides,
   )
-  assert.equal(graph.nodes.length, 29)
+  assert.equal(graph.nodes.length, 30)
   assert.equal(graph.edges.length, 43)
-  assert.equal(new Set(provided).size, 76)
-  assert.equal(provided.length, 76)
-  assert.equal(new Set(graph.nodes.map((node) => node.service_key)).size, 29)
+  assert.equal(new Set(provided).size, 85)
+  assert.equal(provided.length, 85)
+  assert.equal(new Set(graph.nodes.map((node) => node.service_key)).size, 30)
   assert.equal(new Set(graph.edges.map((edge) => canonicalJson([
     edge.provider, edge.consumer, edge.contract,
   ]))).size, 43)

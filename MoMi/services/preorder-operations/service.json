@@ -2,7 +2,7 @@
   "$schema": "../../schemas/service-manifest-v1.schema.json",
   "schema_version": 1,
   "service_key": "preorder-operations",
-  "purpose": "Own the versioned public preorder business lifecycle and customer-safe contracts.",
+  "purpose": "Own the active public preorder lifecycle and additive v1 compatibility contracts.",
   "kind": "core_capability",
   "service_type": "dataset_owner",
   "lifecycle_status": "active",

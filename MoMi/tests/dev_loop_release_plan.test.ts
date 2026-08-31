@@ -109,7 +109,7 @@ test("release receipts bind the exact plan and validation digest", () => {
     commands: [{ id: "focused-tests", enforcement: "hard_stop",
       status: 0, duration_ms: 1 }],
     gate: "path_scoped",
-    required_job: "validate-final",
+    required_job: "validate-final", evidence_scope: "exact_committed_head",
   } as ValidationReceipt
   const receipt = buildReleaseReceipt(
     "dev", plan, validation, "1".repeat(64), false,
