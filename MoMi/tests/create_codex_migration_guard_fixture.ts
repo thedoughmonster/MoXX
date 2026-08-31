@@ -35,6 +35,7 @@ export async function createCodexMigrationGuardFixture(t: TestContext) {
       const result = spawnSync(process.execPath, [runner], {
         cwd: root,
         encoding: "utf8",
+        env: { ...process.env, MOMI_PROD_REF: "origin/prod" },
         input: JSON.stringify({
           session_id: "fixture-session",
           turn_id: "fixture-turn",

@@ -10,7 +10,9 @@ if (process.argv[2] !== "plan") throw new Error("Usage: momi-impact plan")
 const base = readOption("base", "origin/dev")
 const head = readOption("head", "HEAD")
 const output = readOption("output", "")
-const source = `${canonicalJson(redactValue(await buildBoundPlan(base, head)))}\n`
+const committed = process.argv.includes("--committed")
+const plan = await buildBoundPlan(base, head, !committed)
+const source = `${canonicalJson(redactValue(plan))}\n`
 if (output) {
   await mkdir(dirname(output), { recursive: true })
   await writeFile(output, source)

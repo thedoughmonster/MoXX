@@ -104,7 +104,7 @@ test("rejects an alternate ref that could redefine the production baseline", () 
   try {
     assert.throws(
       () => loadProductionMigrations("supabase/migrations"),
-      /MOMI_PROD_REF must be origin\/prod/,
+      /MOMI_PROD_REF must be origin\/prod or a full commit SHA/,
     )
   } finally {
     if (previous === undefined) delete process.env.MOMI_PROD_REF

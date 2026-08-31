@@ -73,8 +73,10 @@ test("loads development history from the exact accepted ref", async () => {
     import.meta.url,
   ), "utf8")
   assert.match(source, /process\.env\.MOMI_DEV_REF/)
-  assert.match(source, /productSourceCommit\("origin\/prod"\)/)
-  assert.match(source, /productSourceCommit\(ref\)/)
+  assert.match(source, /process\.env\.MOMI_PROD_REF/)
+  assert.match(source, /productSourceCommit\(productionRef\)/)
+  assert.match(source, /productSourceCommit\(developmentRef\)/)
+  assert.doesNotMatch(source, /productSourceCommit\("origin\/prod"\)/)
   assert.match(source, /\$\{productionSource\}\.\.\$\{developmentSource\}/)
   assert.match(source, /"--raw", "--abbrev=40", "--no-renames"/)
   assert.doesNotMatch(source, /origin\/prod\.\.origin\/dev/)

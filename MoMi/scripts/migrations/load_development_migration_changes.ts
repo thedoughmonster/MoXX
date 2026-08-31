@@ -6,12 +6,18 @@ import { gitRepositoryRoot, productSourceCommit } from
 export function loadDevelopmentMigrationChanges(
   migrationPath: string,
 ): string {
-  const ref = process.env.MOMI_DEV_REF ?? "origin/dev"
-  if (ref !== "origin/dev" && !/^[0-9a-f]{40}$/.test(ref)) {
+  const developmentRef = process.env.MOMI_DEV_REF ?? "origin/dev"
+  const productionRef = process.env.MOMI_PROD_REF ?? "origin/prod"
+  if (developmentRef !== "origin/dev" &&
+    !/^[0-9a-f]{40}$/.test(developmentRef)) {
     throw new Error("MOMI_DEV_REF must be origin/dev or a full commit SHA")
   }
-  const productionSource = productSourceCommit("origin/prod")
-  const developmentSource = productSourceCommit(ref)
+  if (productionRef !== "origin/prod" &&
+    !/^[0-9a-f]{40}$/.test(productionRef)) {
+    throw new Error("MOMI_PROD_REF must be origin/prod or a full commit SHA")
+  }
+  const productionSource = productSourceCommit(productionRef)
+  const developmentSource = productSourceCommit(developmentRef)
   const result = spawnSync("git", [
     "log", "--reverse", "--first-parent", "--diff-merges=first-parent",
     "--format=commit:%H", "--raw", "--abbrev=40", "--no-renames",
