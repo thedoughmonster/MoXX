@@ -1,0 +1,34 @@
+[
+  {
+    "contribution_id": "10000000-0000-4000-8000-000000000001", "flow_key": "preorder",
+    "source_ref": { "owner_service": "preorder-operations", "contract_key": "momi.preorder.bootstrap.read.v1", "resource_id": "11000000-0000-4000-8000-000000000001", "resource_version": 4 },
+    "product_ref": { "owner_service": "preorder-operations", "contract_key": "momi.preorder.bootstrap.read.v1", "resource_id": "12000000-0000-4000-8000-000000000001", "resource_version": 7 }, "quantity": 2, "option_refs": [],
+    "fulfillment_ref": { "owner_service": "preorder-operations", "contract_key": "momi.preorder.bootstrap.read.v1", "resource_id": "13000000-0000-4000-8000-000000000001", "resource_version": 3 },
+    "rule_refs": [{ "owner_service": "preorder-operations", "contract_key": "momi.preorder.quote.create.v1", "resource_id": "14000000-0000-4000-8000-000000000001", "resource_version": 5 }], "disclosures": ["Pickup window and capacity are revalidated before placement."],
+    "revalidation_ref": { "owner_service": "preorder-operations", "contract_key": "momi.preorder.quote.create.v1", "resource_id": "15000000-0000-4000-8000-000000000001", "resource_version": 5 }
+  },
+  {
+    "contribution_id": "20000000-0000-4000-8000-000000000001", "flow_key": "catalog",
+    "source_ref": { "owner_service": "catalog-operations", "contract_key": "momi.catalog.surface.read.v1", "resource_id": "21000000-0000-4000-8000-000000000001", "resource_version": 9 },
+    "product_ref": { "owner_service": "catalog-operations", "contract_key": "momi.catalog.product.read.v1", "resource_id": "22000000-0000-4000-8000-000000000001", "resource_version": 12 }, "quantity": 1, "option_refs": [],
+    "fulfillment_ref": { "owner_service": "catalog-operations", "contract_key": "momi.catalog.fulfillment.read.v1", "resource_id": "23000000-0000-4000-8000-000000000001", "resource_version": 2 },
+    "rule_refs": [{ "owner_service": "catalog-operations", "contract_key": "momi.catalog.product.read.v1", "resource_id": "24000000-0000-4000-8000-000000000001", "resource_version": 12 }], "disclosures": [],
+    "revalidation_ref": { "owner_service": "catalog-operations", "contract_key": "momi.catalog.contribution.revalidate.v1", "resource_id": "25000000-0000-4000-8000-000000000001", "resource_version": 12 }
+  },
+  {
+    "contribution_id": "30000000-0000-4000-8000-000000000001", "flow_key": "event_menu",
+    "source_ref": { "owner_service": "event-menu-operations", "contract_key": "momi.event_menu.surface.read.v1", "resource_id": "31000000-0000-4000-8000-000000000001", "resource_version": 6 },
+    "product_ref": { "owner_service": "event-menu-operations", "contract_key": "momi.event_menu.item.read.v1", "resource_id": "32000000-0000-4000-8000-000000000001", "resource_version": 8 }, "quantity": 6, "option_refs": [],
+    "fulfillment_ref": { "owner_service": "event-menu-operations", "contract_key": "momi.event_menu.fulfillment.read.v1", "resource_id": "33000000-0000-4000-8000-000000000001", "resource_version": 4 },
+    "rule_refs": [{ "owner_service": "event-menu-operations", "contract_key": "momi.event_menu.eligibility.read.v1", "resource_id": "34000000-0000-4000-8000-000000000001", "resource_version": 4 }], "disclosures": ["Event minimums are revalidated before placement."],
+    "revalidation_ref": { "owner_service": "event-menu-operations", "contract_key": "momi.event_menu.contribution.revalidate.v1", "resource_id": "35000000-0000-4000-8000-000000000001", "resource_version": 4 }
+  },
+  {
+    "contribution_id": "40000000-0000-4000-8000-000000000001", "flow_key": "direct_link",
+    "source_ref": { "owner_service": "direct-link-operations", "contract_key": "momi.direct_link.offer.read.v1", "resource_id": "41000000-0000-4000-8000-000000000001", "resource_version": 3 },
+    "product_ref": { "owner_service": "direct-link-operations", "contract_key": "momi.direct_link.offer.read.v1", "resource_id": "42000000-0000-4000-8000-000000000001", "resource_version": 3 }, "quantity": 1, "option_refs": [],
+    "fulfillment_ref": { "owner_service": "direct-link-operations", "contract_key": "momi.direct_link.fulfillment.read.v1", "resource_id": "43000000-0000-4000-8000-000000000001", "resource_version": 2 },
+    "rule_refs": [{ "owner_service": "direct-link-operations", "contract_key": "momi.direct_link.offer.read.v1", "resource_id": "44000000-0000-4000-8000-000000000001", "resource_version": 3 }], "disclosures": ["Offer eligibility is checked again at checkout."],
+    "revalidation_ref": { "owner_service": "direct-link-operations", "contract_key": "momi.direct_link.contribution.revalidate.v1", "resource_id": "45000000-0000-4000-8000-000000000001", "resource_version": 3 }
+  }
+]
