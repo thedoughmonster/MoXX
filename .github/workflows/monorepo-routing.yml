@@ -19,12 +19,18 @@ jobs:
     name: monorepo-routing
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    outputs:
+      base_sha: ${{ steps.selection.outputs.base_sha }}
+      head_sha: ${{ steps.selection.outputs.head_sha }}
+      momi: ${{ steps.selection.outputs.momi }}
+      moxi: ${{ steps.selection.outputs.moxi }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
       - name: Select product validation and enforce interface evidence
+        id: selection
         env:
           MOXX_PR_BODY: >-
             ${{ github.event.pull_request.body || github.event.head_commit.message }}
@@ -32,10 +38,56 @@ jobs:
             ${{ github.event.pull_request.base.sha || github.event.before }}
           MOXX_HEAD_SHA: >-
             ${{ github.event.pull_request.head.sha || github.sha }}
-        run: >-
-          node scripts/monorepo-routing.mjs
-          --base "$MOXX_BASE_SHA"
-          --head "$MOXX_HEAD_SHA"
+        run: |
+          node scripts/monorepo-routing.mjs \
+            --base "$MOXX_BASE_SHA" \
+            --head "$MOXX_HEAD_SHA" \
+            --github-output "$GITHUB_OUTPUT"
+          printf 'base_sha=%s\nhead_sha=%s\n' \
+            "$MOXX_BASE_SHA" "$MOXX_HEAD_SHA" >> "$GITHUB_OUTPUT"
+
+  backend-validation:
+    name: selected-backend-validation
+    needs: routing
+    if: >-
+      github.event_name == 'pull_request' &&
+      needs.routing.outputs.momi == 'true'
+    uses: ./.github/workflows/validate.yml
+    with:
+      base_sha: ${{ needs.routing.outputs.base_sha }}
+      head_sha: ${{ needs.routing.outputs.head_sha }}
+      development_baseline_sha: ${{ needs.routing.outputs.base_sha }}
+
+  ui-validation:
+    name: selected-ui-validation
+    needs: routing
+    if: >-
+      github.event_name == 'pull_request' &&
+      needs.routing.outputs.moxi == 'true'
+    uses: ./.github/workflows/validate-ui.yml
+    with:
+      head_sha: ${{ needs.routing.outputs.head_sha }}
+
+  product-validation:
+    name: product-validation
+    needs: [routing, backend-validation, ui-validation]
+    if: ${{ always() && github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Require every selected product validation
+        env:
+          MOXX_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          MOXX_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          MOXX_ROUTING_RESULT: ${{ needs.routing.result }}
+          MOXX_MOMI_SELECTED: ${{ needs.routing.outputs.momi }}
+          MOXX_MOMI_RESULT: ${{ needs.backend-validation.result }}
+          MOXX_MOXI_SELECTED: ${{ needs.routing.outputs.moxi }}
+          MOXX_MOXI_RESULT: ${{ needs.ui-validation.result }}
+        run: node scripts/product-validation-gate.mjs
 
   static-config:
     name: monorepo-static-config
