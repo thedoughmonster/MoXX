@@ -4,7 +4,7 @@ import test from "node:test"
 
 test("final gate routes all Git authority through immutable child identities", async () => {
   const [entry, architecture, production, history, runner, planBuilder,
-    checkout, lock] =
+    checkout] =
     await Promise.all([
     readFile("scripts/run_check_changed.ts", "utf8"),
     readFile("scripts/check_architecture.ts", "utf8"),
@@ -13,7 +13,6 @@ test("final gate routes all Git authority through immutable child identities", a
     readFile("scripts/dev_loop/run_validation.ts", "utf8"),
     readFile("scripts/dev_loop/build_bound_plan_from_checkout.ts", "utf8"),
     readFile("scripts/dev_loop/create_final_validation_checkout.ts", "utf8"),
-    readFile("scripts/dev_loop/set_final_validation_checkout_writable.ts", "utf8"),
   ])
   assert.match(entry, /await buildBoundPlan\(base, head, true\)/u)
   assert.match(entry, /buildBoundPlanFromCheckout/u)
@@ -31,5 +30,5 @@ test("final gate routes all Git authority through immutable child identities", a
   assert.match(history, /MOMI_PROD_REF[\s\S]+productSourceCommit\(productionRef\)/u)
   assert.match(runner, /assert_invariants/u)
   assert.match(checkout, /"worktree", "add", "--detach"/u)
-  assert.match(lock, /0o555[\s\S]+0o444/u)
+  assert.match(checkout, /cpSync\(dependencies, checkoutDependencies/u)
 })

@@ -17,7 +17,7 @@ code, CI, review, merge, and release evidence; it is not a parallel work ledger.
    satisfy the exact-HEAD final gate.
 3. Final validation runs `pnpm momi-check changed --final --base <commit>
    --head <commit>`. It requires a clean repository, resolves both identities
-   once, then builds the plan and runs every child check in a locked detached
+   once, then builds the plan and runs every child check in an isolated detached
    checkout materialized from the committed head. Development and production
    migration baselines are pinned to resolved SHAs and recorded with their trees
    in the receipt before the clean source HEAD and refs are rechecked.

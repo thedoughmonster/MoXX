@@ -17,8 +17,6 @@ import { removeFinalValidationCheckout } from
   "./dev_loop/remove_final_validation_checkout.ts"
 import { renderValidationSummary } from "./dev_loop/render_validation_summary.ts"
 import { runValidation } from "./dev_loop/run_validation.ts"
-import { setFinalValidationCheckoutWritable } from
-  "./dev_loop/set_final_validation_checkout_writable.ts"
 import type { FinalValidationState } from "./dev_loop/final_validation_types.ts"
 import { validationExitCode } from "./dev_loop/validation_exit_code.ts"
 import { readOption } from "./read_option.ts"
@@ -58,11 +56,6 @@ try {
     MOMI_PROD_REF: source.production.sha,
     TMPDIR: join(checkout.workspace_root, ".momi", "tmp"),
   } : undefined
-  if (checkout && environment) {
-    setFinalValidationCheckoutWritable(checkout.repository_root, [
-      join(checkout.workspace_root, ".momi"), environment.TMPDIR,
-    ], false)
-  }
   const plan = checkout && environment
     ? buildBoundPlanFromCheckout(
       checkout.workspace_root, source!.base.sha, source!.head.sha, environment,

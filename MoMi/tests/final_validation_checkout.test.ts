@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { execFileSync } from "node:child_process"
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
+import { lstatSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import test from "node:test"
@@ -14,12 +14,10 @@ import { createFinalValidationCheckout } from
 import { executeChecks } from "../scripts/dev_loop/execute_checks.ts"
 import { removeFinalValidationCheckout } from
   "../scripts/dev_loop/remove_final_validation_checkout.ts"
-import { setFinalValidationCheckoutWritable } from
-  "../scripts/dev_loop/set_final_validation_checkout_writable.ts"
 import type { FinalValidationState } from
   "../scripts/dev_loop/final_validation_types.ts"
 
-test("final checks use a locked detached candidate checkout", () => {
+test("final checks use an isolated detached candidate checkout", () => {
   const repository = mkdtempSync(join(tmpdir(), "momi-final-source-"))
   const checkoutRoot = `${repository}-checkout`
   const workspace = join(repository, "MoMi")
@@ -48,10 +46,10 @@ test("final checks use a locked detached candidate checkout", () => {
     )
     checkout = createFinalValidationCheckout(source, checkoutRoot)
     const scratch = join(checkout.workspace_root, ".momi", "tmp")
-    setFinalValidationCheckoutWritable(checkout.repository_root, [
-      join(checkout.workspace_root, ".momi"), scratch,
-    ], false)
-    const [liveMutation, checkoutMutation] = executeChecks([{
+    assert.equal(lstatSync(join(
+      checkout.workspace_root, "node_modules",
+    )).isDirectory(), true)
+    const [liveMutation] = executeChecks([{
       id: "transient-live-mutation", command: process.execPath,
       enforcement: "hard_stop", args: ["-e", `const fs=require("node:fs");
         const live=${JSON.stringify(join(workspace, "fixture.txt"))};
@@ -59,11 +57,6 @@ test("final checks use a locked detached candidate checkout", () => {
         const observed=fs.readFileSync("fixture.txt","utf8");
         fs.writeFileSync(live,"head\\n");
         process.exit(observed==="head\\n"?0:9)`],
-    }, {
-      id: "locked-candidate", command: process.execPath,
-      enforcement: "hard_stop", args: ["-e", `const fs=require("node:fs");
-        try{fs.writeFileSync("fixture.txt","mutated\\n");process.exit(9)}
-        catch{process.exit(0)}`],
     }], {
       workspace_root: checkout.workspace_root,
       environment: { TMPDIR: scratch },
@@ -73,8 +66,16 @@ test("final checks use a locked detached candidate checkout", () => {
       },
     })
     assert.equal(liveMutation.status, 0)
-    assert.equal(checkoutMutation.status, 0)
     assert.equal(git(["status", "--porcelain"]), "")
+    assert.throws(() => executeChecks([{
+      id: "candidate-drift", command: process.execPath,
+      enforcement: "hard_stop", args: ["-e",
+        'require("node:fs").writeFileSync("fixture.txt","mutated\\n")'],
+    }], {
+      workspace_root: checkout!.workspace_root,
+      environment: { TMPDIR: scratch },
+      assert_invariants: () => assertFinalValidationState(checkout!),
+    }), /repository changed during checks/u)
   } finally {
     if (checkout) removeFinalValidationCheckout(repository, checkout.repository_root)
     rmSync(repository, { recursive: true, force: true })

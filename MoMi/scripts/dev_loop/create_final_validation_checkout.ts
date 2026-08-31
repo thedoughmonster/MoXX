@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, rmSync, symlinkSync } from "node:fs"
+import { constants, cpSync, existsSync, mkdirSync, rmSync } from "node:fs"
 import { dirname, join, relative } from "node:path"
 
 import { runGit } from "./run_git.ts"
@@ -20,7 +20,11 @@ export function createFinalValidationCheckout(
     const dependencies = join(source.workspace_root, "node_modules")
     const checkoutDependencies = join(checkoutWorkspace, "node_modules")
     if (existsSync(dependencies) && !existsSync(checkoutDependencies)) {
-      symlinkSync(dependencies, checkoutDependencies, "dir")
+      cpSync(dependencies, checkoutDependencies, {
+        recursive: true,
+        preserveTimestamps: true,
+        mode: constants.COPYFILE_FICLONE,
+      })
     }
     mkdirSync(join(checkoutWorkspace, ".momi"), { recursive: true })
     return {
