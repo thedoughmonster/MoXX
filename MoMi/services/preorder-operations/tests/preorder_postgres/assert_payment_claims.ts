@@ -4,6 +4,8 @@ import type { Sql } from "postgres";
 
 import { lifecycleFixture } from "./fixture.ts";
 import { paymentFixture } from "./payment_fixture.ts";
+import { assertPaymentReplayAuthority } from
+  "./assert_payment_replay_authority.ts";
 
 export async function assertPaymentClaims(sql: Sql, windowId: string) {
   const created = await paymentFixture.order(sql, windowId);
@@ -24,6 +26,8 @@ export async function assertPaymentClaims(sql: Sql, windowId: string) {
   assert.equal(replay.disposition, "busy");
   assert.equal((replay.receipt as Record<string, unknown>).payment_attempt_id,
     receipt.payment_attempt_id);
+  await assertPaymentReplayAuthority(sql, request, created.authority,
+    String(receipt.payment_attempt_id));
   const reused = await paymentFixture.claim(sql, { ...request,
     order_id: crypto.randomUUID() }, created.authority);
   assert.equal((reused.error as Record<string, unknown>)?.code, "stale_version");
