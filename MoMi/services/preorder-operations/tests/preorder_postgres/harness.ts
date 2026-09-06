@@ -33,6 +33,9 @@ export const postgresHarness = {
       end $$;
       create schema extensions;
       create extension pgcrypto with schema extensions;
+      create schema cron;
+      create function cron.schedule(text, text, text) returns bigint
+        language sql as 'select 1::bigint';
     `);
     for (const migration of [
       "20260728204051_create_preorder_bootstrap_foundation.sql",
@@ -43,6 +46,7 @@ export const postgresHarness = {
       "20260801184632_expose_preorder_payment_recovery_identity.sql",
       "20260805081330_add_preorder_pricing_eligibility_policy.sql",
       "20260805135432_add_preorder_launch_policy_v3.sql",
+      "20260906095813_stabilize_preorder_capacity_lifecycle.sql",
     ]) {
       const source = await readFile(new URL(
         `../../../../supabase/migrations/${migration}`,

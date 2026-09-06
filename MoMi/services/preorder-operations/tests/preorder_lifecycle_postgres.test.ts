@@ -2,6 +2,7 @@ import test from "node:test";
 
 import { assertAdmission } from "./preorder_postgres/assert_admission.ts";
 import { assertCapacityLifecycle } from "./preorder_postgres/assert_capacity_lifecycle.ts";
+import { assertPaidAttemptProtectsCapacity } from "./preorder_postgres/assert_capacity_payment_evidence.ts";
 import { assertCurrentAuthority } from "./preorder_postgres/assert_authority.ts";
 import { assertContracts } from "./preorder_postgres/assert_contracts.ts";
 import { assertHolds } from "./preorder_postgres/assert_holds.ts";
@@ -26,6 +27,7 @@ test("executes preorder state, recovery, security, and contract behavior on Post
   await assertPricingEligibility(database.sql, windowId);
   await assertLaunchPolicy(database.sql);
   await assertCapacityLifecycle(database.sql, windowId);
+  await assertPaidAttemptProtectsCapacity(database.sql, windowId);
   const hold = await assertHolds(database.sql, windowId);
   await assertCurrentAuthority(database.sql, windowId);
   const order = await assertOrders(database.sql, windowId);

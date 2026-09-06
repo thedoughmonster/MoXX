@@ -113,8 +113,8 @@ begin
       and payment_status in ('not_started', 'declined', 'canceled')
       and not exists (select 1 from momi_preorder.payment_attempts attempt
         where attempt.order_id = orders.order_id
-          and attempt.payment_status in ('pending', 'authorized',
-            'indeterminate', 'refund_pending'))
+          and (attempt.payment_status not in ('declined', 'canceled')
+            or attempt.requires_review))
       and capacity_released_at is null
       and capacity_expires_at <= clock_timestamp()
     order by capacity_expires_at limit 100 for update skip locked
@@ -165,4 +165,4 @@ select cron.schedule(
 );
 
 comment on function momi_preorder.expire_abandoned_orders_v1() is
-  'Expires 30-minute unpaid preorder allocations only after durable payment state is terminal or no payment attempt exists; replay is idempotent.';
+  'Expires 30-minute unpaid preorder allocations only when every payment attempt is authoritatively declined or canceled, or no attempt exists; replay is idempotent.';
