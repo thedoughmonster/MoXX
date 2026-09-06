@@ -24,6 +24,16 @@ export async function assertCapacityPublication(
     expected_quote_version: 1,
   })}::jsonb, ${quote.revalidation_token}) as result`;
   assert.equal(held.result.outcome, "accepted");
+  const [admissionQuoteRow] = await sql`select momi_preorder.create_quote_v1(
+    ${sql.json({ command_id: crypto.randomUUID(),
+      surface_id: launchSurfaceId, fulfillment_window_id: window.window_id,
+      versions: quoted.result.quote.versions, cart_version: 1,
+      avoided_allergens: [], lines: [{ line_id: crypto.randomUUID(),
+        item_id: launchItemId, item_version: 1, quantity: 1, choice_ids: [] }],
+    })}::jsonb) as result`;
+  const admissionQuote = admissionQuoteRow.result.quote;
+  const admission = { command_id: crypto.randomUUID(), action: "create",
+    quote_id: admissionQuote.quote_id, expected_quote_version: 1 };
   await sql`update momi_preorder.orders set
     capacity_expires_at = clock_timestamp() - interval '1 second'
     where order_id = ${orderId}::uuid`;
@@ -36,10 +46,16 @@ export async function assertCapacityPublication(
     sql`select momi_preorder.expire_abandoned_orders_v1() as count`,
     sql`select momi_preorder.publish_configuration_v1(
       ${sql.json(next)}::jsonb, ${"f".repeat(64)}, 'postgres-test') as result`,
+    sql`select momi_preorder.manage_checkout_hold_v1(
+      ${sql.json(admission)}::jsonb, ${admissionQuote.revalidation_token}) as result`,
+    sql`select momi_preorder.manage_checkout_hold_v1(
+      ${sql.json(admission)}::jsonb, ${admissionQuote.revalidation_token}) as result`,
   ]);
   assert.equal(results[1][0].count + results[2][0].count, 1);
   assert.deepEqual([results[0][0].result.replayed, results[3][0].result.replayed]
     .sort(), [false, true]);
+  assert.deepEqual(results[4][0].result, results[5][0].result);
+  const admissionAccepted = results[4][0].result.outcome === "accepted";
   const release = { command_id: crypto.randomUUID(), action: "release",
     quote_id: quote.quote_id, expected_quote_version: 1,
     hold_id: held.result.hold_id };
@@ -51,7 +67,8 @@ export async function assertCapacityPublication(
     from momi_preorder.fulfillment_windows
     where surface_id = ${launchSurfaceId}::uuid
       and fulfillment_date = ${fulfillmentDate}::date`;
-  assert.deepEqual(beforeRelease, { versions: 3, held_min: 0, held_max: 1,
+  assert.deepEqual(beforeRelease, { versions: 3, held_min: 0,
+    held_max: admissionAccepted ? 2 : 1,
     committed_min: 0, committed_max: 47 });
   const releases = await Promise.all([
     sql`select momi_preorder.manage_checkout_hold_v1(
@@ -61,6 +78,13 @@ export async function assertCapacityPublication(
   ]);
   assert.deepEqual(releases[0][0].result, releases[1][0].result);
   assert.equal(releases[0][0].result.hold_status, "released");
+  if (admissionAccepted) {
+    await sql`select momi_preorder.manage_checkout_hold_v1(${sql.json({
+      command_id: crypto.randomUUID(), action: "release",
+      quote_id: admissionQuote.quote_id, expected_quote_version: 1,
+      hold_id: results[4][0].result.hold_id,
+    })}::jsonb, ${admissionQuote.revalidation_token})`;
+  }
   const counters = await sql`
     select 'window' as source, held_quantity, committed_quantity
     from momi_preorder.fulfillment_windows

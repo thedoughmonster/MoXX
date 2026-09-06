@@ -87,8 +87,10 @@ and computes the cutoff from versioned data as 17:00 local on the prior day.
 ## Quote authority
 
 Physical capacity is keyed by surface and pickup date across policy versions.
-Window counters mirror that locked ledger; publication keeps historical window
-identities and copies existing held and committed quantities into new windows.
+The locked physical ledger is used for bootstrap, quote, hold, and direct-order
+admission against the current published limit. Window counters remain local to
+the policy version that created each quote or order, so publication preserves
+historical identities without copying an allocation into another window.
 Unpaid orders receive a 30-minute capacity deadline. The minute-scheduled
 `expire_abandoned_orders_v1` releases each allocation once, only for
 `awaiting_payment` orders whose durable attempts are all declined or canceled
