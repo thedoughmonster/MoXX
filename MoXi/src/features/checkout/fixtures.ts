@@ -43,7 +43,7 @@ export const checkoutStatusFixtures = {
 } as const;
 
 export type CheckoutFixtureScenario = keyof typeof checkoutStatusFixtures;
-export type CheckoutFixtureFailure = 'load-once' | 'command-once' | 'recover-once';
+export type CheckoutFixtureFailure = 'load-once' | 'command-once' | 'fulfillment-once' | 'recover-once';
 
 const fulfillmentRef = {
   owner_service: 'fixture-fulfillment-owner',
@@ -75,10 +75,25 @@ export function createFixtureCheckoutClient(
   failure?: CheckoutFixtureFailure
 ): CheckoutClient {
   let remainingFailures = failure === 'load-once' ? 2 : failure ? 1 : 0;
-  const response = (nextScenario: CheckoutFixtureScenario = scenario) => checkoutReferenceSchema.parse({
-    status: checkoutStatusFixtures[nextScenario],
+  let current = checkoutReferenceSchema.parse({
+    status: checkoutStatusFixtures[scenario],
     review
   });
+  let paymentSubmitted = false;
+  const transition = (nextScenario: CheckoutFixtureScenario) => {
+    current = checkoutReferenceSchema.parse({
+      status: {
+        ...checkoutStatusFixtures[nextScenario],
+        order_version: current.status.order_version + 1,
+        checkout_version: current.status.checkout_version + 1
+      },
+      review: current.review
+    });
+    return structuredClone(current);
+  };
+  const assertVersion = (expected: number) => {
+    if (expected !== current.status.order_version) throw new Error('Synthetic version conflict');
+  };
   const rejectOnce = (target: CheckoutFixtureFailure) => {
     if (failure !== target || remainingFailures === 0) return;
     remainingFailures -= 1;
@@ -89,11 +104,27 @@ export function createFixtureCheckoutClient(
     async load(request) {
       checkoutStatusRequestSchema.parse(request);
       rejectOnce('load-once');
-      return response();
+      // A submitted fixture payment settles on refresh. The standalone pending
+      // scenario intentionally remains pending for repeated status inspection.
+      if (paymentSubmitted && current.status.customer_state === 'pending') {
+        return transition('confirmed');
+      }
+      return structuredClone(current);
     },
     async command(request) {
       const accepted = checkoutCommandRequestSchema.parse(request);
+      assertVersion(accepted.expected_order_version);
       rejectOnce('command-once');
+      if (accepted.action === 'confirm_fulfillment') {
+        if (JSON.stringify(accepted.fulfillment_ref) !== JSON.stringify(current.review.fulfillment_ref)) {
+          throw new Error('Synthetic fulfillment reference conflict');
+        }
+        rejectOnce('fulfillment-once');
+      }
+      if (accepted.action === 'save_contact') {
+        // Exercise callers consuming the latest owner reference after a save.
+        current.review.fulfillment_ref.resource_version += 1;
+      }
       const destination = accepted.action === 'save_contact'
         ? 'incomplete'
         : accepted.action === 'confirm_fulfillment'
@@ -102,13 +133,18 @@ export function createFixtureCheckoutClient(
             ? 'ready'
             : accepted.action === 'place'
               ? 'pending'
-              : scenario;
-      return response(destination);
+              : current.status.customer_state === 'recovery_required' ? 'recovery' : current.status.customer_state;
+      if (accepted.action === 'place') paymentSubmitted = true;
+      return transition(destination);
     },
     async recover(request) {
-      checkoutRecoveryRequestSchema.parse(request);
+      const accepted = checkoutRecoveryRequestSchema.parse(request);
+      assertVersion(accepted.expected_order_version);
+      if (accepted.expected_checkout_version !== current.status.checkout_version) {
+        throw new Error('Synthetic checkout version conflict');
+      }
       rejectOnce('recover-once');
-      return response('confirmed');
+      return transition('confirmed');
     }
   };
 }
@@ -122,7 +158,7 @@ export function readFixtureScenario(search: string): CheckoutFixtureScenario {
 
 export function readFixtureFailure(search: string): CheckoutFixtureFailure | undefined {
   const value = new URLSearchParams(search).get('failure');
-  return value === 'load-once' || value === 'command-once' || value === 'recover-once'
+  return value === 'load-once' || value === 'command-once' || value === 'fulfillment-once' || value === 'recover-once'
     ? value
     : undefined;
 }

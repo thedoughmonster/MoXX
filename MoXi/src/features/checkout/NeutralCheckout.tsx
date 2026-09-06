@@ -159,11 +159,13 @@ export function NeutralCheckout({
         crypto.randomUUID(),
         { action: 'save_contact', contact }
       ));
+      // Keep every successful authority response, even if the next command fails.
+      setSnapshot(afterContact);
       return client.command(createCommandRequest(
         handoff,
         afterContact.status.order_version,
         crypto.randomUUID(),
-        { action: 'confirm_fulfillment', fulfillment_ref: review.fulfillment_ref }
+        { action: 'confirm_fulfillment', fulfillment_ref: afterContact.review.fulfillment_ref }
       ));
     });
   };

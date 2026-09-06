@@ -25,14 +25,40 @@ for (const [scenario, heading] of states) {
   });
 }
 
-test('supports keyboard contact and fulfillment progression', async ({ page }) => {
-  await page.goto('/checkout/reference?scenario=incomplete');
+test('supports keyboard checkout progression through payment confirmation', async ({ page }) => {
+  await page.goto('/checkout/reference');
   await page.getByLabel('Name').fill('Synthetic Customer');
   await page.getByLabel('Email').fill('customer@example.invalid');
   await page.getByLabel(/Confirm this fulfillment selection/).check();
   await page.getByRole('button', { name: 'Save contact details' }).focus();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Payment is required' })).toBeFocused();
+  await page.getByRole('button', { name: 'Continue to payment' }).click();
+  await expect(page.getByRole('heading', { name: 'Payment is pending' })).toBeFocused();
+  await page.getByRole('button', { name: 'Refresh checkout' }).click();
+  await expect(page.getByRole('heading', { name: 'Order confirmed' })).toBeFocused();
+  await expect(page.getByRole('button', { name: 'Continue to payment' })).toHaveCount(0);
+});
+
+test('retries fulfillment failure using the saved version and latest owner reference', async ({ page }) => {
+  await page.goto('/checkout/reference?failure=fulfillment-once');
+  await page.getByLabel('Name').fill('Synthetic Customer');
+  await page.getByLabel('Email').fill('customer@example.invalid');
+  await page.getByLabel(/Confirm this fulfillment selection/).check();
+  await page.getByRole('button', { name: 'Save contact details' }).click();
+  await expect(page.getByRole('alert')).toContainText('could not complete that action');
+  await expect(page.locator('.checkout-reference')).toContainText('version 4');
+  await expect(page.getByLabel('Name')).toHaveValue('Synthetic Customer');
+  await page.getByRole('button', { name: 'Save contact details' }).click();
+  await expect(page.getByRole('heading', { name: 'Payment is required' })).toBeFocused();
+  await expect(page.locator('.checkout-reference')).toContainText('version 6');
+  await expect(page.getByRole('alert')).toHaveCount(0);
+});
+
+test('keeps the standalone pending scenario pending on refresh', async ({ page }) => {
+  await page.goto('/checkout/reference?scenario=pending');
+  await page.getByRole('button', { name: 'Refresh checkout' }).click();
+  await expect(page.getByRole('heading', { name: 'Payment is pending' })).toBeFocused();
 });
 
 test('reflows at 200 percent zoom without horizontal overflow', async ({ page }) => {

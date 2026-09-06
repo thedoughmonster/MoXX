@@ -83,5 +83,29 @@ describe('canonical checkout adapter', () => {
       { action: 'confirm_fulfillment', fulfillment_ref: contact.review.fulfillment_ref }
     ));
     expect(ready.status.customer_state).toBe('ready');
+    expect(await client.load(createStatusRequest(checkoutFixtureHandoff))).toEqual(ready);
+    const pending = await client.command(createCommandRequest(
+      checkoutFixtureHandoff,
+      ready.status.order_version,
+      commandId,
+      { action: 'place' }
+    ));
+    expect(pending.status.customer_state).toBe('pending');
+    const confirmed = await client.load(createStatusRequest(checkoutFixtureHandoff));
+    expect(confirmed.status.customer_state).toBe('confirmed');
+    expect(await client.load(createStatusRequest(checkoutFixtureHandoff))).toEqual(confirmed);
+  });
+
+  test('retains recovery confirmation across status reads', async () => {
+    const client = createFixtureCheckoutClient('recovery');
+    const initial = await client.load(createStatusRequest(checkoutFixtureHandoff));
+    const confirmed = await client.recover(createRecoveryRequest(
+      checkoutFixtureHandoff,
+      initial.status.order_version,
+      initial.status.checkout_version,
+      commandId
+    ));
+    expect(confirmed.status.customer_state).toBe('confirmed');
+    expect(await client.load(createStatusRequest(checkoutFixtureHandoff))).toEqual(confirmed);
   });
 });
