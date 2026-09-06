@@ -1,95 +1,46 @@
-# Symphony Execution Project Architecture
+# Symphony execution boundary
 
-## Ownership
+The consolidated scheduler executes `thedoughmonster/MoXX` work against `dev` using `/home/ubuntu/symphony-cutover/WORKFLOW.md`. That workflow owns operational stage routing and model selection. Repository instructions own implementation, validation, and authorized release procedures.
 
-Linear project membership is the admission boundary for the stock Symphony
-instance that executes work in `thedoughmonster/MoXX`. This repository records
-the cross-product contract; the deployed scheduler configuration remains owned
-by `/home/ubuntu/symphony/WORKFLOW.md`.
+## Admission and ownership
 
-The canonical execution project is `Symphony Execution`, with ID
-`b32e8427-1378-4c1c-81f9-8ca5193b5191` and URL slug
-`symphony-execution-d6f95c4b712e`. Only issues in that exact project can be
-observed or dispatched by this Symphony instance. Product planning projects
-for MoXi and MoMi remain outside the execution boundary.
+The approved `tracker.provider.project_slugs` are:
 
-## Scheduling contract
+- `symphony-execution-d6f95c4b712e` — Symphony Execution
+- `backend-product-delivery-e3a66ebf25d7` — Backend Product Delivery
+- `backend-stabilization-ab5229c3c922` — Backend Stabilization
 
-- The configured repository is `thedoughmonster/MoXX`.
-- `required_labels` is empty. Labels communicate facts only and never grant
-  execution authority, request evaluation, or change lifecycle state. The
-  obsolete `ready-package` marker is retired and must not be assigned or
-  required.
-- Active states are `Todo`, `In Progress`, `Review`, `Merging`, and `Rework`.
-  `Concept` and `Refinement` are not executable states.
-- The normal preliminary lifecycle is `Concept` → `Refinement` → `Todo`.
-  `Parked` and `Blocked` remain watchdog-specific exception states rather than
-  admission stages.
-- A `Todo` issue with any unfinished native Linear blocker is visible inside
-  the execution project but is not dispatchable.
-- Eligible issues are ordered by Symphony priority, then creation time, then
-  identifier. Visual board position is not an execution-order input.
-- Moving an active issue outside the configured project can stop its worker
-  during normal running-state reconciliation. This does not by itself justify
-  restoring a broader planning-project scope.
+Issues stay in their appropriate delivery project. Admission does not require moving every executable leaf into Symphony Execution. Other projects remain outside this instance. Planning coordinators must revalidate materially changed work before releasing it into an active state in one of these projects.
 
-Project membership is intentionally narrow. A vetted `Todo` issue outside the
-execution project is not exposed to this Symphony instance. Planning parents,
-milestones, and non-admitted work stay in their meaningful planning projects;
-only executable leaves explicitly admitted to this Symphony instance belong in
-`Symphony Execution`.
+`required_labels: []` means labels are not admission credentials. `ready-package` is retired. Native unfinished blockers prevent Todo dispatch. Native hierarchy and blocker relationships remain authoritative; labels do not replace them. Priority, creation time, and identifier determine scheduling order, not visual board position.
 
-## Lifecycle and admission
+## Stages
 
-- `Concept` contains incomplete, stale, or failed-evaluation work for which no
-  execution is requested.
-- Entering `Refinement` requests an external, event-driven evaluation outside
-  Symphony. A passing evaluation moves the issue to `Todo` while retaining its
-  meaningful planning project; a failing evaluation moves it to `Concept` with
-  one concise gap comment.
-- `Todo` in a meaningful planning project is vetted but waiting. It remains
-  outside this Symphony instance.
-- Admission is an explicit, controlled project move into `Symphony Execution`.
-  The admission handler must re-fetch and revalidate the issue immediately
-  before that move. `Todo` in `Symphony Execution` is admitted.
-- Unfinished native Linear blockers prevent an admitted `Todo` issue from
-  dispatching. Native parent/sub-issue, related, duplicate, and blocker
-  relations remain authoritative. Only native hierarchy and blockers form the
-  durable dependency structure; related-work labels are search hints only.
-- `Parked` and `Blocked` remain watchdog exception states, not normal admission
-  or execution lanes.
-- `Ready` and `ready-package` are obsolete and must not be used as holding,
-  admission, or dispatch contracts.
+| State | Stage | Profile |
+| --- | --- | --- |
+| Todo, In Progress | implementation | Sol / low |
+| Review | review | Sol / medium |
+| Rework | rework | Sol / medium |
+| Escalated Review | escalated_review | Astra / medium |
+| Escalated Rework | escalated_rework | Astra / medium |
+| Merging | merging | Sol / low |
 
-Material changes to any vetted `Todo` issue, including an admitted issue, can
-invalidate it. An admitted issue must leave `Symphony Execution` and return to
-its meaningful planning project before entering `Refinement`. Any later
-admission is a new controlled project move with fresh revalidation. No
-lifecycle, admission, or execution state may change solely because a label was
-added or removed.
+Capacity is one shared worker. Each stage boundary starts a fresh conversation while retaining the workspace, branch, PR, and workpad. Todo to In Progress stays within implementation. Review stages are automated independent reviews, not a Human Review queue.
 
-## Executable leaf types
+Passing review goes to Merging. Blocking ordinary review goes to Rework, then Escalated Review. A first blocking escalated review goes to Escalated Rework, which adds `final-review` before returning to Escalated Review. A passing final review goes to Merging; a failing final review goes to Parked for help. Preserve the marker unless a human authorizes another automatic correction cycle.
 
-Code-changing leaves follow implementation, pull request, independent review,
-and merge. Read-only planning or evidence leaves may complete directly after
-producing and validating their explicitly required artifact when no
-code-changing pull-request route applies. Uniformity alone must not force a
-read-only leaf through the code-change lifecycle.
+Concept, Refinement, Blocked, Parked, and terminal states are not automatic execution stages. Use Parked for unresolved external blockers in this workflow. Watchdog budget thresholds steer work; they do not impose automatic budget holds or quality approval gates. Explicit operator holds remain effective.
 
-## Change and rollback rules
+## Workpad and completion
 
-Changes to the canonical project, active states, label semantics, repository, or
-polling behavior require an explicitly authorized cutover issue. Apply workflow
-changes by normal hot reload without restarting Symphony or manually stopping
-workers. Preserve unrelated changes in the Symphony worktree.
+Keep one current `## Codex Workpad` using the OpenAI format: an environment stamp, Plan, Acceptance Criteria, Validation, Notes, and optional Confusions. Edit the same comment in place. Replace obsolete conclusions and summarize resolved findings. Keep the current review verdict and reviewed SHA in Notes; link durable validation evidence and attach the PR natively. Do not accumulate stage transcripts or separate approval packets.
 
-Rollback is warranted only when the exact execution project cannot discover or
-dispatch eligible admitted work, native blockers fail to suppress dispatch, or
-another execution acceptance criterion makes the boundary unusable. A worker
-being reconciled out solely because its issue is outside the new scope is an
-expected transition, not a rollback trigger.
+Use focused local checks and the authoritative PR gate. Pending CI is not a code defect; Merging owns the final bounded wait. Required acceptance behavior needs actual evidence, including investigating relevant tests that were skipped. Unrelated path-selected skips and nonblocking suggestions do not delay delivery.
 
-The live cutover and three-poll runtime evidence are recorded in the persistent
-workpads for MOX-419 and MOX-423. Those records, together with the deployed
-workflow, are authoritative for operational timestamps, project membership,
-worker disposition, and rollback evidence.
+Explicitly read-only planning or evidence issues may complete after their requested artifact is validated, without manufacturing a code-change PR. Code issues follow the configured stages. A merge does not prove deployment: any explicitly required hosted delivery or acceptance must be fulfilled or recorded as remaining work before Done.
+
+## Operational changes
+
+Keep one scheduler and the former implementation/review services disabled. Instruction changes must be coordinated with Watchdog's immutable configuration revision so new attempts report the instruction identity actually in use. Do not hot-reload a changed prompt while leaving its accounting manifest stale. Apply a prepared update at a safe worker boundary, preserve workspaces and accounting history, and verify ready ingest before resuming admission.
+
+The September 2026 consolidation canary is a completed cutover acceptance exercise. It does not create a recurring canary or approval requirement for ordinary product issues. Operational topology or metadata changes require proportionate validation of the behavior being changed.
