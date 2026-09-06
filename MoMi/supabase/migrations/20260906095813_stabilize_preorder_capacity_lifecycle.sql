@@ -38,13 +38,12 @@ create function momi_preorder.sync_physical_capacity_v1()
 returns trigger language plpgsql security definer set search_path = '' as $$
 declare
   v_capacity momi_preorder.fulfillment_capacity%rowtype;
+  v_capacity_limit integer;
+  v_held_delta integer := case when tg_op = 'UPDATE'
+    then new.held_quantity - old.held_quantity else 0 end;
+  v_committed_delta integer := case when tg_op = 'UPDATE'
+    then new.committed_quantity - old.committed_quantity else 0 end;
 begin
-  -- Surface publication legitimately nests window insertion. Only skip the
-  -- counter UPDATE issued by our propagation trigger, at its exact child depth.
-  if tg_op = 'UPDATE' and pg_trigger_depth()::text =
-      current_setting('momi_preorder.capacity_propagation_depth', true) then
-    return new;
-  end if;
   insert into momi_preorder.fulfillment_capacity (
     surface_id, fulfillment_date, held_quantity, committed_quantity
   ) values (new.surface_id, new.fulfillment_date, 0, 0)
@@ -52,60 +51,43 @@ begin
   select * into v_capacity from momi_preorder.fulfillment_capacity
     where surface_id = new.surface_id
       and fulfillment_date = new.fulfillment_date for update;
+  if v_held_delta + v_committed_delta > 0 then
+    select current_window.capacity_limit into v_capacity_limit
+    from momi_preorder.surfaces surface
+    join momi_preorder.fulfillment_windows current_window
+      on current_window.surface_id = surface.surface_id
+      and current_window.policy_version = surface.policy_version
+      and current_window.fulfillment_date = new.fulfillment_date
+    where surface.surface_id = new.surface_id;
+    if v_capacity_limit is null and new.policy_version = (
+        select policy_version from momi_preorder.surfaces
+        where surface_id = new.surface_id) then
+      v_capacity_limit := new.capacity_limit;
+    end if;
+    if v_capacity_limit is null or v_capacity.held_quantity
+        + v_capacity.committed_quantity + v_held_delta
+        + v_committed_delta > v_capacity_limit then
+      raise exception using errcode = '23514',
+        message = 'preorder physical capacity limit exceeded';
+    end if;
+  end if;
   if tg_op = 'UPDATE' then
     update momi_preorder.fulfillment_capacity set
-      held_quantity = held_quantity + new.held_quantity - old.held_quantity,
-      committed_quantity = committed_quantity + new.committed_quantity
-        - old.committed_quantity,
+      held_quantity = held_quantity + v_held_delta,
+      committed_quantity = committed_quantity + v_committed_delta,
       updated_at = clock_timestamp()
     where surface_id = new.surface_id
       and fulfillment_date = new.fulfillment_date
     returning * into v_capacity;
   end if;
-  new.held_quantity := v_capacity.held_quantity;
-  new.committed_quantity := v_capacity.committed_quantity;
   return new;
 end;
 $$;
-
-create function momi_preorder.propagate_physical_capacity_v1()
-returns trigger language plpgsql security definer set search_path = '' as $$
-declare
-  v_previous_depth text := current_setting(
-    'momi_preorder.capacity_propagation_depth', true);
-begin
-  if pg_trigger_depth()::text = v_previous_depth then return new; end if;
-  perform set_config('momi_preorder.capacity_propagation_depth',
-    (pg_trigger_depth() + 1)::text, true);
-  update momi_preorder.fulfillment_windows set
-    held_quantity = new.held_quantity,
-    committed_quantity = new.committed_quantity
-  where surface_id = new.surface_id
-    and fulfillment_date = new.fulfillment_date
-    and window_id <> new.window_id
-    and (held_quantity, committed_quantity) is distinct from
-      (new.held_quantity, new.committed_quantity);
-  perform set_config('momi_preorder.capacity_propagation_depth',
-    coalesce(v_previous_depth, ''), true);
-  return new;
-end;
-$$;
-
-update momi_preorder.fulfillment_windows w set
-  held_quantity = c.held_quantity,
-  committed_quantity = c.committed_quantity
-from momi_preorder.fulfillment_capacity c
-where c.surface_id = w.surface_id
-  and c.fulfillment_date = w.fulfillment_date;
 
 create trigger sync_physical_capacity_v1
 before insert or update of held_quantity, committed_quantity
 on momi_preorder.fulfillment_windows for each row
 execute function momi_preorder.sync_physical_capacity_v1();
-create trigger propagate_physical_capacity_v1
-after insert or update of held_quantity, committed_quantity
-on momi_preorder.fulfillment_windows for each row
-execute function momi_preorder.propagate_physical_capacity_v1();
 
 alter table momi_preorder.orders
   add column capacity_expires_at timestamptz not null

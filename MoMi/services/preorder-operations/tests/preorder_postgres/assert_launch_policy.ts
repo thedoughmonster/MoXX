@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import type { Sql } from "postgres";
 import { assertCapacityPublication } from "./assert_capacity_publication.ts";
+import { assertCapacityPolicyChanges } from "./assert_capacity_policy_changes.ts";
 import { launchBigAppleId, launchConfig, launchItemId,
   launchSurfaceId } from "./launch_policy_fixture.ts";
 export async function assertLaunchPolicy(sql: Sql): Promise<void> {
@@ -120,7 +121,7 @@ export async function assertLaunchPolicy(sql: Sql): Promise<void> {
     from momi_preorder.fulfillment_windows
     where surface_id = ${launchSurfaceId}::uuid
       and fulfillment_date = ${window.fulfillment_date}::date`;
-  assert.deepEqual(capacity, { versions: 2, minimum: 48, maximum: 48 });
+  assert.deepEqual(capacity, { versions: 2, minimum: 0, maximum: 48 });
   const [frozen] = await sql<{ status: Record<string, unknown> }[]>`
     select momi_preorder.read_order_status_v1(
       ${(order.result.order_id as string)}::uuid,
@@ -129,4 +130,5 @@ export async function assertLaunchPolicy(sql: Sql): Promise<void> {
     .window_id, window.window_id);
   await assertCapacityPublication(sql, window.fulfillment_date,
     String(order.result.order_id));
+  await assertCapacityPolicyChanges(sql);
 }

@@ -51,8 +51,8 @@ export async function assertCapacityPublication(
     from momi_preorder.fulfillment_windows
     where surface_id = ${launchSurfaceId}::uuid
       and fulfillment_date = ${fulfillmentDate}::date`;
-  assert.deepEqual(beforeRelease, { versions: 3, held_min: 1, held_max: 1,
-    committed_min: 47, committed_max: 47 });
+  assert.deepEqual(beforeRelease, { versions: 3, held_min: 0, held_max: 1,
+    committed_min: 0, committed_max: 47 });
   const releases = await Promise.all([
     sql`select momi_preorder.manage_checkout_hold_v1(
       ${sql.json(release)}::jsonb, ${quote.revalidation_token}) as result`,
@@ -62,15 +62,21 @@ export async function assertCapacityPublication(
   assert.deepEqual(releases[0][0].result, releases[1][0].result);
   assert.equal(releases[0][0].result.hold_status, "released");
   const counters = await sql`
-    select held_quantity, committed_quantity from momi_preorder.fulfillment_windows
+    select 'window' as source, held_quantity, committed_quantity
+    from momi_preorder.fulfillment_windows
     where surface_id = ${launchSurfaceId}::uuid
       and fulfillment_date = ${fulfillmentDate}::date
-    union all select held_quantity, committed_quantity
+    union all select 'capacity', held_quantity, committed_quantity
     from momi_preorder.fulfillment_capacity
     where surface_id = ${launchSurfaceId}::uuid
       and fulfillment_date = ${fulfillmentDate}::date`;
   assert.equal(counters.length, 4);
-  for (const counter of counters) {
-    assert.deepEqual(counter, { held_quantity: 0, committed_quantity: 47 });
-  }
+  const capacity = counters.find((counter) => counter.source === 'capacity');
+  const windows = counters.filter((counter) => counter.source === 'window');
+  assert.deepEqual(capacity, { source: "capacity", held_quantity: 0,
+    committed_quantity: 47 });
+  assert.equal(windows.reduce((sum, counter) =>
+    sum + counter.held_quantity, 0), 0);
+  assert.equal(windows.reduce((sum, counter) =>
+    sum + counter.committed_quantity, 0), 47);
 }
