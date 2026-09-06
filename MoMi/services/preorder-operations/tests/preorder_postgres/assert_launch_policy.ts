@@ -111,6 +111,15 @@ export async function assertLaunchPolicy(sql: Sql): Promise<void> {
     from momi_preorder.fulfillment_windows
     where surface_id = ${launchSurfaceId}::uuid`;
   assert.deepEqual(preserved, { total: 28, current: 14 });
+  const [capacity] = await sql<{ versions: number; minimum: number;
+    maximum: number }[]>`
+    select count(*)::integer as versions,
+      min(committed_quantity)::integer as minimum,
+      max(committed_quantity)::integer as maximum
+    from momi_preorder.fulfillment_windows
+    where surface_id = ${launchSurfaceId}::uuid
+      and fulfillment_date = ${window.fulfillment_date}::date`;
+  assert.deepEqual(capacity, { versions: 2, minimum: 48, maximum: 48 });
   const [frozen] = await sql<{ status: Record<string, unknown> }[]>`
     select momi_preorder.read_order_status_v1(
       ${(order.result.order_id as string)}::uuid,
