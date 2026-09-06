@@ -17,7 +17,7 @@ export async function assertCapacityPolicyChanges(sql: Sql): Promise<void> {
   increased.publication_ref = "71000000-0000-4000-8000-000000000009";
   increased.capacity_policy.daily_limit = 100;
   await sql`select momi_preorder.publish_configuration_v1(
-    ${sql.json(increased)}::jsonb, ${"a".repeat(64)}, 'postgres-test')`;
+    ${sql.json(increased)}::jsonb, ${"7".repeat(64)}, 'postgres-test')`;
   const [current] = await sql`
     select window_id from momi_preorder.fulfillment_windows window
     join momi_preorder.surfaces surface using (surface_id)
@@ -49,7 +49,7 @@ export async function assertCapacityPolicyChanges(sql: Sql): Promise<void> {
   lowered.publication_ref = "71000000-0000-4000-8000-00000000000a";
   lowered.capacity_policy.daily_limit = 50;
   await sql`select momi_preorder.publish_configuration_v1(
-    ${sql.json(lowered)}::jsonb, ${"b".repeat(64)}, 'postgres-test')`;
+    ${sql.json(lowered)}::jsonb, ${"8".repeat(64)}, 'postgres-test')`;
   await assert.rejects(sql`update momi_preorder.fulfillment_windows
     set held_quantity = held_quantity + 1 where window_id = ${current.window_id}::uuid`);
   await sql`update momi_preorder.fulfillment_windows set held_quantity = held_quantity - 1
