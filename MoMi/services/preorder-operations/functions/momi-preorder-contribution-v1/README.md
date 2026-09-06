@@ -16,6 +16,8 @@ versioned preorder contribution being restored or edited.
 The response is accepted only when the supplied selection exactly matches the
 current product, options, fulfillment, price, full-payment rule, rule versions,
 and disclosures. Otherwise it returns typed, accessible corrections.
+Unexpired evidence may retain an earlier expiry than a fresh owner read;
+expired evidence or expiry beyond the current owner bound requires refresh.
 
 ## Side Effects
 

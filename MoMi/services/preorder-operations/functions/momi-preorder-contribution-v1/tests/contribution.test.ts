@@ -7,6 +7,7 @@ import { handleRequestWithReader } from "../src/handle_request_with_reader.ts"
 import { revalidate } from "../src/revalidate.ts"
 import type { Input, OwnerRef, Selection } from "../src/types.ts"
 import { assertRevalidationRegressions } from "./revalidation_regressions.ts"
+import { assertRollingExpiryRegressions } from "./rolling_expiry_regressions.ts"
 
 const fixture = JSON.parse(await readFile(new URL(
   "../../../fixtures/bootstrap-response.json", import.meta.url), "utf8")) as {
@@ -58,6 +59,8 @@ test("reports every material changed field before acceptance", () => {
 })
 test("rejects altered context and reports missing identities", () =>
   assertRevalidationRegressions(input, fixture.data))
+test("restores across rolling owner reads and rejects expired or extended evidence", (t) =>
+  assertRollingExpiryRegressions(t, input, fixture.data))
 
 test("fails closed for missing policy, sold out capacity, and quantity", () => {
   assert.equal(revalidate(input, null).corrections[0].code,

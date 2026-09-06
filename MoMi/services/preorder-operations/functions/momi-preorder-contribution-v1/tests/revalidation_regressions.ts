@@ -11,7 +11,7 @@ export function assertRevalidationRegressions(
       resource_version: current.fulfillment_ref.resource_version + 1 } }, "window"],
     [{ ...current, pricing: { ...current.pricing,
       option_price_deltas: [{ currency: "USD", amount_minor: 1 }] } }, "price"],
-    [{ ...current, valid_until: "2098-01-01T00:00:00Z" }, "eligibility"],
+    [{ ...current, valid_until: "2100-01-01T00:00:00Z" }, "eligibility"],
   ]
   for (const [selection, field] of selections) {
     const result = revalidate({ ...input, selection }, data)

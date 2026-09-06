@@ -11,7 +11,7 @@ test("projects the six adopted consumers without provider authority", async () =
   assert(result.projection)
   assert.equal(result.projection.functions.length, 6)
   assert.equal(result.diagnostics.filter((item) =>
-    item.code === "capability_model_absent").length, 33)
+    item.code === "capability_model_absent").length, 34)
   const square = result.projection.functions.find((item) => item.function_key === "momi.preorder.payment.initiate.v1")!
   assert.deepEqual(square.direct_capabilities, ["database_read", "database_write"])
   assert.deepEqual(square.called_contracts, [{

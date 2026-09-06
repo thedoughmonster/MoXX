@@ -63,11 +63,15 @@ export function compareContext(
     "deposit_changed", "deposit",
     "The preorder payment or deposit rule changed. Review the current rule.",
     "review_price"))
-  if (supplied.valid_until !== current.valid_until) changed.push(correction(
+  const suppliedExpiry = Date.parse(supplied.valid_until)
+  const currentExpiry = Date.parse(current.valid_until)
+  // Bootstrap freshness rolls forward on every owner read; it is not a rule version.
+  if (!Number.isFinite(suppliedExpiry) || !Number.isFinite(currentExpiry) ||
+      suppliedExpiry > currentExpiry) changed.push(correction(
     "stale", "eligibility",
     "The preorder validity period changed. Refresh the selection.", "refresh"))
-  if (Date.parse(supplied.valid_until) <= Date.now()) changed.push(correction(
-    "expired", "eligibility", "The saved preorder evidence expired. Refresh it.",
+  if (suppliedExpiry <= Date.now() || currentExpiry <= Date.now()) changed.push(correction(
+    "expired", "eligibility", "The preorder evidence expired. Refresh it.",
     "refresh"))
   return changed
 }
