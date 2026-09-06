@@ -7,6 +7,7 @@
   "future_logical_owner": "cart-checkout-operations",
   "provided_contracts": [
     "momi.preorder.bootstrap.read.v1",
+    "momi.preorder.contribution.revalidate.v1",
     "momi.preorder.checkout_hold.manage.v1",
     "momi.preorder.order_intent.create.v1",
     "momi.preorder.order_status.read.v1",

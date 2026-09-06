@@ -16,11 +16,11 @@ const categories = {
   risk_triggered: [],
 }
 
-test("accepts the 24-selector pilot, absence, and explicit empty metadata", () => {
+test("accepts the 25-selector pilot, absence, and explicit empty metadata", () => {
   const absent = structuredClone(manifest)
   delete absent.test_impact
   assert.deepEqual(Object.values(manifest.test_impact.categories)
-    .map((selectors: unknown[]) => selectors.length), [9, 8, 1, 1, 1, 3, 1])
+    .map((selectors: unknown[]) => selectors.length), [10, 8, 1, 1, 1, 3, 1])
   assert.doesNotThrow(() => validateJson(schema, manifest, "manifest"))
   assert.doesNotThrow(() => validateJson(schema, absent, "manifest"))
   assert.doesNotThrow(() => validateJson(schema, {
