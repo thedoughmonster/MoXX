@@ -86,6 +86,22 @@ and computes the cutoff from versioned data as 17:00 local on the prior day.
 
 ## Quote authority
 
+Physical capacity is keyed by surface and pickup date across policy versions.
+Window counters mirror that locked ledger; publication keeps historical window
+identities and copies existing held and committed quantities into new windows.
+Unpaid orders receive a 30-minute capacity deadline. The minute-scheduled
+`expire_abandoned_orders_v1` releases each allocation once, only for
+`awaiting_payment` orders whose durable attempts are all declined or canceled
+without review flags (or which have no attempt). Pending, authorized, paid,
+indeterminate, refund, and review-required evidence protects capacity until
+authoritative reconciliation permits release. Browser disappearance is not
+payment evidence. Late payment after release requires attention and never
+allocates a second slot.
+
+Required backend CI enables `MOMI_PREORDER_PG_INTEGRATION=1` and runs the
+preorder PostgreSQL suites against disposable containers, including publication,
+concurrent expiry/replay, hold release, and payment-evidence regressions.
+
 The quote route accepts no customer identity or payment data. The database
 locks one command identity, refreshes the exact fourteen-day window horizon,
 checks current configuration and item versions, and persists the accepted

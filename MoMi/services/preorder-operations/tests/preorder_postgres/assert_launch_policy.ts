@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import type { Sql } from "postgres";
+import { assertCapacityPublication } from "./assert_capacity_publication.ts";
 import { launchBigAppleId, launchConfig, launchItemId,
   launchSurfaceId } from "./launch_policy_fixture.ts";
 export async function assertLaunchPolicy(sql: Sql): Promise<void> {
@@ -126,4 +127,6 @@ export async function assertLaunchPolicy(sql: Sql): Promise<void> {
       ${String(order.result.recovery_authority)}) as status`;
   assert.equal((frozen.status.fulfillment_window as Record<string, unknown>)
     .window_id, window.window_id);
+  await assertCapacityPublication(sql, window.fulfillment_date,
+    String(order.result.order_id));
 }

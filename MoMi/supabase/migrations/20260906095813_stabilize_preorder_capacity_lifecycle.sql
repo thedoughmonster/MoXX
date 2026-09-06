@@ -39,7 +39,12 @@ returns trigger language plpgsql security definer set search_path = '' as $$
 declare
   v_capacity momi_preorder.fulfillment_capacity%rowtype;
 begin
-  if pg_trigger_depth() > 1 then return new; end if;
+  -- Surface publication legitimately nests window insertion. Only skip the
+  -- counter UPDATE issued by our propagation trigger, at its exact child depth.
+  if tg_op = 'UPDATE' and pg_trigger_depth()::text =
+      current_setting('momi_preorder.capacity_propagation_depth', true) then
+    return new;
+  end if;
   insert into momi_preorder.fulfillment_capacity (
     surface_id, fulfillment_date, held_quantity, committed_quantity
   ) values (new.surface_id, new.fulfillment_date, 0, 0)
@@ -65,14 +70,23 @@ $$;
 
 create function momi_preorder.propagate_physical_capacity_v1()
 returns trigger language plpgsql security definer set search_path = '' as $$
+declare
+  v_previous_depth text := current_setting(
+    'momi_preorder.capacity_propagation_depth', true);
 begin
-  if pg_trigger_depth() > 1 then return new; end if;
+  if pg_trigger_depth()::text = v_previous_depth then return new; end if;
+  perform set_config('momi_preorder.capacity_propagation_depth',
+    (pg_trigger_depth() + 1)::text, true);
   update momi_preorder.fulfillment_windows set
     held_quantity = new.held_quantity,
     committed_quantity = new.committed_quantity
   where surface_id = new.surface_id
     and fulfillment_date = new.fulfillment_date
-    and window_id <> new.window_id;
+    and window_id <> new.window_id
+    and (held_quantity, committed_quantity) is distinct from
+      (new.held_quantity, new.committed_quantity);
+  perform set_config('momi_preorder.capacity_propagation_depth',
+    coalesce(v_previous_depth, ''), true);
   return new;
 end;
 $$;
