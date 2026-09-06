@@ -84,6 +84,18 @@ their policy version so later publications cannot rewrite frozen quote or order
 evidence. The launch maps weekdays to 07:00–14:00, weekends to 08:00–14:00,
 and computes the cutoff from versioned data as 17:00 local on the prior day.
 
+## Shared cart contribution boundary
+
+`momi.preorder.contribution.revalidate.v1` is the additive preorder-owner
+boundary for the shared cart contract family. It rebuilds selected campaign,
+menu, product, option, pickup date/location/window, price, full-payment,
+allergen, capacity, quantity, cutoff, eligibility, disclosure, and exact rule
+version evidence from the current published owner configuration. Restored or
+edited selections receive every material customer-safe correction before they
+can be accepted. The route reads the existing physical capacity ledger through
+the bootstrap owner routine; it creates no second cart, checkout, order, hold,
+or capacity ledger and never accepts browser state as policy evidence.
+
 ## Quote authority
 
 Physical capacity is keyed by surface and pickup date across policy versions.
