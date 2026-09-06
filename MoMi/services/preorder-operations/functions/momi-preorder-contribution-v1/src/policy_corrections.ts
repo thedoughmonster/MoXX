@@ -27,13 +27,22 @@ export function policyCorrections(
       "The selected quantity exceeds the current limit.", "edit_quantity"))
   }
   if (item) {
-    const choices = (item.option_groups as Array<Record<string, unknown>> ?? [])
+    const groups = item.option_groups as Array<Record<string, unknown>> ?? []
+    const choices = groups
       .flatMap((group) => group.choices as Array<Record<string, unknown>> ?? [])
     const selected = new Set(input.selection.option_refs.map((ref) =>
       ref.resource_id))
     if (choices.some((choice) => selected.has(choice.choice_id as string) &&
       choice.available !== true)) issues.push(correction(
       "option_changed", "option", "A selected option is no longer available.",
+      "edit_item"))
+    if (groups.some((group) => {
+      const selectedCount = (group.choices as Array<Record<string, unknown>> ?? [])
+        .filter((choice) => selected.has(choice.choice_id as string)).length
+      return selectedCount < (group.minimum as number) ||
+        selectedCount > (group.maximum as number)
+    })) issues.push(correction("option_changed", "option",
+      "The selected options no longer meet the product requirements.",
       "edit_item"))
   }
   return issues

@@ -1,13 +1,9 @@
-import type { Input, OwnerRef, Selection } from "./types.ts"
+import { ownerRef as ref } from "./owner_ref.ts"
+import type { Input, Selection } from "./types.ts"
 
 type Versions = Record<string, number>
 type Item = Record<string, unknown>
 type Window = Record<string, unknown>
-
-function ref(contractKey: string, id: string, version: number): OwnerRef {
-  return { owner_service: "preorder-operations", contract_key: contractKey,
-    resource_id: id, resource_version: version }
-}
 
 export function buildContext(
   input: Input, data: Record<string, unknown>,

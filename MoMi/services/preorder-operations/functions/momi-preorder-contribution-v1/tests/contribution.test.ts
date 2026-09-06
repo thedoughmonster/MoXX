@@ -89,3 +89,21 @@ test("handler is bounded and returns no customer or payment material", async () 
   assert.ok(validate)
   assert.equal(validate(JSON.parse(body)), true, ajv.errorsText(validate.errors))
 })
+
+test("rejects malformed nested selection as an invalid request", async () => {
+  const request = new Request("https://example.test", { method: "POST",
+    body: JSON.stringify({ ...input, selection: { quantity: 1 } }) })
+  const response = await handleRequestWithReader(request,
+    () => Promise.resolve({ admitted: true, data: fixture.data }))
+  assert.equal(response.status, 400)
+  assert.equal((await response.json()).error.code, "invalid_request")
+})
+
+test("revalidates configured option group cardinality", () => {
+  const changed = structuredClone(fixture.data) as Record<string, unknown>
+  const catalog = changed.catalog as Array<Record<string, unknown>>
+  catalog[0].option_groups = [{ minimum: 1, maximum: 1, choices: [] }]
+  const result = revalidate(input, changed)
+  assert.equal(result.outcome, "rejected")
+  assert.ok(result.corrections.some((issue) => issue.code === "option_changed"))
+})
