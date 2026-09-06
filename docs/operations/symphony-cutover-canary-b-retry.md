@@ -1,6 +1,7 @@
 # Consolidated cutover canary B retry
 
 canary: consolidated-review-rework
+retention_contract: same-workspace-new-conversation
 accounting_verification: external-coordinator-pending
 
 This documentation-only fixture belongs to MOX-572. Its intentionally missing
