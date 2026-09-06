@@ -1,7 +1,12 @@
+import canonicalCustomerStates from '../../../../MoMi/services/cart-checkout-operations/fixtures/customer-states.json';
+import { z } from 'zod';
 import {
+  checkoutCommandRequestSchema,
+  checkoutRecoveryRequestSchema,
   checkoutReferenceSchema,
+  checkoutStatusRequestSchema,
+  checkoutStatusSchema,
   type CheckoutHandoff,
-  type CheckoutNextAction,
   type CheckoutReference,
   type CheckoutStatus
 } from './contracts';
@@ -14,34 +19,38 @@ export const checkoutFixtureHandoff: CheckoutHandoff = {
   shopping_authority_id: '60000000-0000-4000-8000-000000000003'
 };
 
-const base = {
-  order_id: checkoutFixtureHandoff.order_id,
-  order_version: checkoutFixtureHandoff.order_version,
-  checkout_version: 2,
-  confirmation_ref: null
+const acceptedStatuses = z.array(checkoutStatusSchema).parse(canonicalCustomerStates);
+const statusByCustomerState = (state: CheckoutStatus['customer_state']) => {
+  const status = acceptedStatuses.find((candidate) => candidate.customer_state === state);
+  if (!status) throw new Error(`Accepted fixture is missing checkout state: ${state}`);
+  return status;
+};
+
+// These are the accepted MOX-439 fixtures, parsed directly from the owning
+// service. Scenario aliases are presentation-only and add no checkout policy.
+export const checkoutStatusFixtures = {
+  loading: statusByCustomerState('loading'),
+  empty: statusByCustomerState('empty'),
+  incomplete: statusByCustomerState('incomplete'),
+  ready: statusByCustomerState('ready'),
+  invalid: statusByCustomerState('invalid'),
+  stale: statusByCustomerState('stale'),
+  pending: statusByCustomerState('pending'),
+  declined: statusByCustomerState('declined'),
+  indeterminate: statusByCustomerState('indeterminate'),
+  recovery: statusByCustomerState('recovery_required'),
+  confirmed: statusByCustomerState('confirmed')
 } as const;
 
-const issue = (code: CheckoutStatus['issues'][number]['code'], message: string,
-  retryable: boolean, next_action: CheckoutNextAction) => ({
-  code, message, retryable, next_action
-});
-
-export const checkoutStatusFixtures = {
-  loading: { ...base, customer_state: 'loading', phase: 'review', payment_status: 'not_started', next_actions: ['refresh'], issues: [] },
-  empty: { ...base, customer_state: 'empty', phase: 'review', payment_status: 'not_started', next_actions: ['edit_cart'], issues: [] },
-  incomplete: { ...base, customer_state: 'incomplete', phase: 'contact', payment_status: 'not_started', next_actions: ['provide_contact'], issues: [] },
-  ready: { ...base, customer_state: 'ready', phase: 'payment_required', payment_status: 'required', next_actions: ['initiate_payment'], issues: [] },
-  invalid: { ...base, customer_state: 'invalid', phase: 'revalidation', payment_status: 'not_started', next_actions: ['edit_cart'], issues: [issue('invalid', 'Cart details need attention.', false, 'edit_cart')] },
-  stale: { ...base, customer_state: 'stale', phase: 'revalidation', payment_status: 'not_started', next_actions: ['refresh'], issues: [issue('stale', 'Refresh before continuing.', true, 'refresh')] },
-  pending: { ...base, customer_state: 'pending', phase: 'pending', payment_status: 'pending', next_actions: ['refresh'], issues: [] },
-  declined: { ...base, customer_state: 'declined', phase: 'payment_required', payment_status: 'declined', next_actions: ['retry_payment'], issues: [issue('payment_declined', 'Payment was declined.', true, 'retry_payment')] },
-  indeterminate: { ...base, customer_state: 'indeterminate', phase: 'recovery', payment_status: 'indeterminate', next_actions: ['recover'], issues: [issue('payment_indeterminate', 'Payment status needs recovery.', false, 'recover')] },
-  recovery: { ...base, customer_state: 'recovery_required', phase: 'recovery', payment_status: 'indeterminate', next_actions: ['recover'], issues: [issue('payment_indeterminate', 'Recover payment status before continuing.', false, 'recover')] },
-  confirmed: { ...base, customer_state: 'confirmed', phase: 'confirmed', payment_status: 'paid', next_actions: ['view_confirmation'], issues: [], confirmation_ref: { owner_service: 'cart-checkout-operations', contract_key: 'momi.cart_checkout.draft_order.read.v1', resource_id: '60000000-0000-4000-8000-000000000002', resource_version: 1 } }
-} satisfies Record<string, CheckoutStatus>;
-
 export type CheckoutFixtureScenario = keyof typeof checkoutStatusFixtures;
+export type CheckoutFixtureFailure = 'load-once' | 'command-once' | 'recover-once';
 
+const fulfillmentRef = {
+  owner_service: 'fixture-fulfillment-owner',
+  contract_key: 'fixture.fulfillment.read.v1',
+  resource_id: '60000000-0000-4000-8000-000000000005',
+  resource_version: 1
+} as const;
 const review: CheckoutReference['review'] = {
   lines: [{
     line_id: '60000000-0000-4000-8000-000000000004',
@@ -50,6 +59,7 @@ const review: CheckoutReference['review'] = {
     quantity: 2,
     total: { currency: 'USD', amount_minor: 2400 }
   }],
+  fulfillment_ref: fulfillmentRef,
   fulfillment_summary: 'Fixture pickup window · Test location',
   disclosures: ['Availability and fulfillment are confirmed by the owning flow during revalidation.'],
   totals: [
@@ -60,25 +70,45 @@ const review: CheckoutReference['review'] = {
   hold_summary: 'This fixture hold is temporary. Its timing comes from checkout authority.'
 };
 
-export function createFixtureCheckoutClient(scenario: CheckoutFixtureScenario): CheckoutClient {
-  const response = () => checkoutReferenceSchema.parse({
-    status: checkoutStatusFixtures[scenario],
+export function createFixtureCheckoutClient(
+  scenario: CheckoutFixtureScenario,
+  failure?: CheckoutFixtureFailure
+): CheckoutClient {
+  let remainingFailures = failure === 'load-once' ? 2 : failure ? 1 : 0;
+  const response = (nextScenario: CheckoutFixtureScenario = scenario) => checkoutReferenceSchema.parse({
+    status: checkoutStatusFixtures[nextScenario],
     review
   });
+  const rejectOnce = (target: CheckoutFixtureFailure) => {
+    if (failure !== target || remainingFailures === 0) return;
+    remainingFailures -= 1;
+    throw new Error('Synthetic adapter rejection');
+  };
+
   return {
-    async load() { return response(); },
-    async act(_handoff, action) {
-      const destination: Partial<Record<CheckoutNextAction, CheckoutFixtureScenario>> = {
-        provide_contact: 'ready',
-        confirm_fulfillment: 'ready',
-        retry_payment: 'ready',
-        recover: 'confirmed',
-        refresh: scenario === 'pending' ? 'confirmed' : 'ready'
-      };
-      return checkoutReferenceSchema.parse({
-        status: checkoutStatusFixtures[destination[action] ?? scenario],
-        review
-      });
+    async load(request) {
+      checkoutStatusRequestSchema.parse(request);
+      rejectOnce('load-once');
+      return response();
+    },
+    async command(request) {
+      const accepted = checkoutCommandRequestSchema.parse(request);
+      rejectOnce('command-once');
+      const destination = accepted.action === 'save_contact'
+        ? 'incomplete'
+        : accepted.action === 'confirm_fulfillment'
+          ? 'ready'
+          : accepted.action === 'revalidate' || accepted.action === 'resume'
+            ? 'ready'
+            : accepted.action === 'place'
+              ? 'pending'
+              : scenario;
+      return response(destination);
+    },
+    async recover(request) {
+      checkoutRecoveryRequestSchema.parse(request);
+      rejectOnce('recover-once');
+      return response('confirmed');
     }
   };
 }
@@ -88,4 +118,11 @@ export function readFixtureScenario(search: string): CheckoutFixtureScenario {
   return value && value in checkoutStatusFixtures
     ? value as CheckoutFixtureScenario
     : 'incomplete';
+}
+
+export function readFixtureFailure(search: string): CheckoutFixtureFailure | undefined {
+  const value = new URLSearchParams(search).get('failure');
+  return value === 'load-once' || value === 'command-once' || value === 'recover-once'
+    ? value
+    : undefined;
 }

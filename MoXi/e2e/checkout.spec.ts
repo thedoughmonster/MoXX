@@ -18,7 +18,7 @@ const states = [
 
 for (const [scenario, heading] of states) {
   test(`renders the ${scenario} contract fixture`, async ({ page }) => {
-    await page.goto(`/checkout?scenario=${scenario}`);
+    await page.goto(`/checkout/reference?scenario=${scenario}`);
     await expect(page.getByRole('heading', { name: heading })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Review' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Totals and holds' })).toBeVisible();
@@ -26,7 +26,7 @@ for (const [scenario, heading] of states) {
 }
 
 test('supports keyboard contact and fulfillment progression', async ({ page }) => {
-  await page.goto('/checkout?scenario=incomplete');
+  await page.goto('/checkout/reference?scenario=incomplete');
   await page.getByLabel('Name').fill('Synthetic Customer');
   await page.getByLabel('Email').fill('customer@example.invalid');
   await page.getByLabel(/Confirm this fulfillment selection/).check();
@@ -37,11 +37,32 @@ test('supports keyboard contact and fulfillment progression', async ({ page }) =
 
 test('reflows at 200 percent zoom without horizontal overflow', async ({ page }) => {
   await page.setViewportSize({ width: 640, height: 900 });
-  await page.goto('/checkout?scenario=declined');
+  await page.goto('/checkout/reference?scenario=declined');
   await page.evaluate(() => { document.documentElement.style.zoom = '2'; });
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   expect(overflow).toBe(false);
   const button = page.getByRole('button', { name: 'Try another payment' });
   const box = await button.boundingBox();
   expect(box?.height).toBeGreaterThanOrEqual(48);
+});
+
+test('keeps synthetic authority on the explicit reference route', async ({ page }) => {
+  await page.goto('/checkout?order_id=60000000-0000-4000-8000-000000000001&order_version=3&shopping_authority_id=60000000-0000-4000-8000-000000000003&scenario=confirmed');
+  await expect(page.getByRole('heading', { name: 'Checkout is not connected' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Order confirmed' })).toHaveCount(0);
+});
+
+test('announces a load rejection and provides an operable retry', async ({ page }) => {
+  await page.goto('/checkout/reference?scenario=ready&failure=load-once');
+  await expect(page.getByRole('alert')).toContainText('Checkout is unavailable');
+  await page.getByRole('button', { name: 'Try loading again' }).click();
+  await expect(page.getByRole('heading', { name: 'Payment is required' })).toBeFocused();
+});
+
+test('announces an action rejection and permits retry', async ({ page }) => {
+  await page.goto('/checkout/reference?scenario=ready&failure=command-once');
+  await page.getByRole('button', { name: 'Continue to payment' }).click();
+  await expect(page.getByRole('alert')).toContainText('could not complete that action');
+  await page.getByRole('button', { name: 'Continue to payment' }).click();
+  await expect(page.getByRole('heading', { name: 'Payment is pending' })).toBeFocused();
 });

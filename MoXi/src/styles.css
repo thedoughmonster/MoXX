@@ -97,6 +97,14 @@
 .checkout-totals dd { margin: 0; }
 .checkout-disclosure { max-width: 65ch; color: #555; line-height: 1.55; overflow-wrap: anywhere; }
 .checkout-actions { padding-top: 1.5rem; border-top: 1px solid #d7d7d2; }
+.checkout-operation-error {
+  margin-top: 1rem;
+  padding: .75rem 1rem;
+  border-left: 5px solid #9b1c1c;
+  background: #fff0f0;
+  color: #681313;
+}
+.checkout-operation-error p { margin: 0; line-height: 1.5; }
 
 .checkout-primary {
   min-width: 48px;

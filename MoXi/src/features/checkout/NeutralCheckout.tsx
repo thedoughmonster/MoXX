@@ -1,10 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from 'react-aria-components';
-import type { CheckoutClient } from './client';
+import {
+  createCommandRequest,
+  createRecoveryRequest,
+  createStatusRequest,
+  type CheckoutClient
+} from './client';
 import type {
   CheckoutHandoff,
   CheckoutNextAction,
-  CheckoutReference
+  CheckoutReference,
+  CustomerContact
 } from './contracts';
 
 const stateCopy: Record<CheckoutReference['status']['customer_state'], Readonly<{ title: string; body: string }>> = {
@@ -37,22 +43,24 @@ const actionLabels: Record<CheckoutNextAction, string> = {
 export function NeutralCheckout({
   client,
   handoff
-}: Readonly<{ client: CheckoutClient; handoff: CheckoutHandoff | null }>) {
+}: Readonly<{ client: CheckoutClient | null; handoff: CheckoutHandoff | null }>) {
   const [snapshot, setSnapshot] = useState<CheckoutReference | null>(null);
   const [busy, setBusy] = useState(false);
   const [loadError, setLoadError] = useState(false);
+  const [operationError, setOperationError] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const heading = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
-    if (!handoff) return;
+    if (!handoff || !client) return;
     let active = true;
-    void client.load(handoff).then((next) => {
+    void client.load(createStatusRequest(handoff)).then((next) => {
       if (active) setSnapshot(next);
     }).catch(() => {
       if (active) setLoadError(true);
     });
     return () => { active = false; };
-  }, [client, handoff]);
+  }, [client, handoff, loadAttempt]);
 
   useEffect(() => {
     if (snapshot) heading.current?.focus();
@@ -61,8 +69,21 @@ export function NeutralCheckout({
   if (!handoff) {
     return <CheckoutShell><Status title="Checkout link is incomplete" body="Return to the cart and start checkout again." assertive /></CheckoutShell>;
   }
+  if (!client) {
+    return <CheckoutShell><Status title="Checkout is not connected" body="Return to the cart and try again when checkout is available." assertive /></CheckoutShell>;
+  }
   if (loadError) {
-    return <CheckoutShell><Status title="Checkout is unavailable" body="Your cart is safe. Try loading checkout again." assertive /></CheckoutShell>;
+    return (
+      <CheckoutShell>
+        <Status title="Checkout is unavailable" body="Your cart is safe. Try loading checkout again." assertive />
+        <Button className="checkout-primary" onPress={() => {
+          setLoadError(false);
+          setLoadAttempt((attempt) => attempt + 1);
+        }}>
+          Try loading again
+        </Button>
+      </CheckoutShell>
+    );
   }
   if (!snapshot) {
     return <CheckoutShell><Status title="Loading checkout" body="Retrieving the current checkout state." /></CheckoutShell>;
@@ -74,27 +95,77 @@ export function NeutralCheckout({
   const announceAssertively = ['invalid', 'stale', 'declined', 'indeterminate', 'recovery_required']
     .includes(status.customer_state);
 
-  const act = async (action: CheckoutNextAction) => {
-    if (action === 'edit_cart') {
-      window.location.assign('/');
-      return;
-    }
+  const runOperation = async (operation: () => Promise<CheckoutReference>) => {
     setBusy(true);
+    setOperationError(false);
     try {
-      setSnapshot(await client.act(handoff, action));
+      setSnapshot(await operation());
+    } catch {
+      setOperationError(true);
     } finally {
       setBusy(false);
     }
   };
 
-  const saveContactAndFulfillment = async () => {
-    setBusy(true);
-    try {
-      await client.act(handoff, 'provide_contact');
-      setSnapshot(await client.act(handoff, 'confirm_fulfillment'));
-    } finally {
-      setBusy(false);
+  const act = (action: CheckoutNextAction) => {
+    if (action === 'edit_cart') {
+      window.location.assign('/');
+      return;
     }
+    if (action === 'view_confirmation') {
+      heading.current?.focus();
+      return;
+    }
+    if (action === 'contact_shop' || action === 'provide_contact' || action === 'confirm_fulfillment') {
+      setOperationError(true);
+      return;
+    }
+    void runOperation(() => {
+      if (action === 'refresh') return client.load(createStatusRequest(handoff));
+      if (action === 'recover') {
+        return client.recover(createRecoveryRequest(
+          handoff,
+          status.order_version,
+          status.checkout_version,
+          crypto.randomUUID()
+        ));
+      }
+      const commandAction = action === 'retry_revalidation'
+        ? 'revalidate'
+        : action === 'initiate_payment'
+          ? 'place'
+          : 'resume';
+      return client.command(createCommandRequest(
+        handoff,
+        status.order_version,
+        crypto.randomUUID(),
+        { action: commandAction }
+      ));
+    });
+  };
+
+  const saveContactAndFulfillment = (form: HTMLFormElement) => {
+    const data = new FormData(form);
+    const phone = String(data.get('phone') ?? '').trim();
+    const contact: CustomerContact = {
+      name: String(data.get('name') ?? '').trim(),
+      email: String(data.get('email') ?? '').trim(),
+      ...(phone ? { phone } : {})
+    };
+    void runOperation(async () => {
+      const afterContact = await client.command(createCommandRequest(
+        handoff,
+        status.order_version,
+        crypto.randomUUID(),
+        { action: 'save_contact', contact }
+      ));
+      return client.command(createCommandRequest(
+        handoff,
+        afterContact.status.order_version,
+        crypto.randomUUID(),
+        { action: 'confirm_fulfillment', fulfillment_ref: review.fulfillment_ref }
+      ));
+    });
   };
 
   return (
@@ -124,7 +195,7 @@ export function NeutralCheckout({
       </section>
 
       {showContact && (
-        <form className="checkout-section checkout-form" onSubmit={(event) => { event.preventDefault(); void saveContactAndFulfillment(); }}>
+        <form className="checkout-section checkout-form" onSubmit={(event) => { event.preventDefault(); saveContactAndFulfillment(event.currentTarget); }}>
           <h2>Customer contact</h2>
           <label>Name <input name="name" autoComplete="name" required /></label>
           <label>Email <input name="email" type="email" autoComplete="email" required /></label>
@@ -154,10 +225,15 @@ export function NeutralCheckout({
       {!showContact && (
         <div className="checkout-actions" aria-label="Checkout actions">
           {status.next_actions.map((action) => (
-            <Button key={action} className="checkout-primary" isDisabled={busy || status.customer_state === 'loading'} onPress={() => void act(action)}>
+            <Button key={action} className="checkout-primary" isDisabled={busy} onPress={() => act(action)}>
               {busy ? 'Working…' : actionLabels[action]}
             </Button>
           ))}
+        </div>
+      )}
+      {operationError && (
+        <div className="checkout-operation-error" role="alert">
+          <p>Checkout could not complete that action. Your cart is safe; try again.</p>
         </div>
       )}
       <p className="checkout-reference">Reference: {status.order_id.slice(0, 8)} · version {status.order_version}</p>

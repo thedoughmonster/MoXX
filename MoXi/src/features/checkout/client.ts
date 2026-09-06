@@ -1,16 +1,25 @@
 import {
+  checkoutCommandRequestSchema,
   checkoutHandoffSchema,
+  checkoutRecoveryRequestSchema,
+  checkoutStatusRequestSchema,
+  type CheckoutCommandRequest,
   type CheckoutHandoff,
-  type CheckoutNextAction,
-  type CheckoutReference
+  type CheckoutRecoveryRequest,
+  type CheckoutReference,
+  type CheckoutStatusRequest,
+  type CustomerContact,
+  type OwnerReadReference
 } from './contracts';
 
 export type CheckoutClient = Readonly<{
-  load(handoff: CheckoutHandoff): Promise<CheckoutReference>;
-  act(handoff: CheckoutHandoff, action: CheckoutNextAction): Promise<CheckoutReference>;
+  load(request: CheckoutStatusRequest): Promise<CheckoutReference>;
+  command(request: CheckoutCommandRequest): Promise<CheckoutReference>;
+  recover(request: CheckoutRecoveryRequest): Promise<CheckoutReference>;
 }>;
 
 export const CHECKOUT_PATH = '/checkout';
+export const CHECKOUT_REFERENCE_PATH = '/checkout/reference';
 
 export function createCheckoutHref(handoff: CheckoutHandoff): string {
   const accepted = checkoutHandoffSchema.parse(handoff);
@@ -21,6 +30,7 @@ export function createCheckoutHref(handoff: CheckoutHandoff): string {
   });
   return `${CHECKOUT_PATH}?${search.toString()}`;
 }
+
 export function readCheckoutHandoff(search: string): CheckoutHandoff | null {
   const params = new URLSearchParams(search);
   const parsed = checkoutHandoffSchema.safeParse({
@@ -30,4 +40,41 @@ export function readCheckoutHandoff(search: string): CheckoutHandoff | null {
     shopping_authority_id: params.get('shopping_authority_id')
   });
   return parsed.success ? parsed.data : null;
+}
+
+export function createStatusRequest(handoff: CheckoutHandoff): CheckoutStatusRequest {
+  return checkoutStatusRequestSchema.parse({ order_id: handoff.order_id });
+}
+
+type CommandInput =
+  | Readonly<{ action: 'save_contact'; contact: CustomerContact }>
+  | Readonly<{ action: 'confirm_fulfillment'; fulfillment_ref: OwnerReadReference }>
+  | Readonly<{ action: 'begin' | 'revalidate' | 'place' | 'resume' }>;
+
+export function createCommandRequest(
+  handoff: CheckoutHandoff,
+  expectedOrderVersion: number,
+  commandId: string,
+  input: CommandInput
+): CheckoutCommandRequest {
+  return checkoutCommandRequestSchema.parse({
+    command_id: commandId,
+    order_id: handoff.order_id,
+    expected_order_version: expectedOrderVersion,
+    ...input
+  });
+}
+
+export function createRecoveryRequest(
+  handoff: CheckoutHandoff,
+  expectedOrderVersion: number,
+  expectedCheckoutVersion: number,
+  commandId: string
+): CheckoutRecoveryRequest {
+  return checkoutRecoveryRequestSchema.parse({
+    command_id: commandId,
+    order_id: handoff.order_id,
+    expected_order_version: expectedOrderVersion,
+    expected_checkout_version: expectedCheckoutVersion
+  });
 }
