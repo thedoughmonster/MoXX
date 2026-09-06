@@ -10,12 +10,12 @@ export function revalidate(input: Input, data: Record<string, unknown> | null) {
       "Preordering is unavailable because required configuration is missing.",
       "contact_shop"),
   ] }
+  const blocking = policyCorrections(input, data)
   const context = buildContext(input, data)
   if (!context) return { outcome: "rejected", context: null, corrections: [
-    correction("incompatible", "product",
-      "The saved preorder selection is no longer compatible.", "edit_item"),
+    ...(blocking.length > 0 ? blocking : [correction("incompatible", "campaign",
+      "The saved preorder selection is no longer compatible.", "refresh")]),
   ] }
-  const blocking = policyCorrections(input, data)
   const differences = compareContext(input.selection, context)
   const corrections = [...blocking, ...differences]
   return { outcome: blocking.length > 0 ? "rejected" :

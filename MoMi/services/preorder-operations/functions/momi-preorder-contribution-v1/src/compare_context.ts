@@ -22,8 +22,14 @@ export function compareContext(
         `The preorder ${field.replace("_", " ")} changed. Review the current selection.`,
         action),
     ])
-  if (supplied.fulfillment_ref.resource_id !==
-      current.fulfillment_ref.resource_id) changed.push(correction(
+  if (supplied.fulfillment_ref.owner_service !==
+        current.fulfillment_ref.owner_service ||
+      supplied.fulfillment_ref.contract_key !==
+        current.fulfillment_ref.contract_key ||
+      supplied.fulfillment_ref.resource_id !==
+        current.fulfillment_ref.resource_id ||
+      supplied.fulfillment_ref.resource_version !==
+        current.fulfillment_ref.resource_version) changed.push(correction(
     "fulfillment_changed", "window", "The pickup window changed.",
     "choose_fulfillment"))
   if (supplied.fulfillment_evidence.pickup_date !==
@@ -46,12 +52,20 @@ export function compareContext(
       JSON.stringify(current.pricing.unit_price)) changed.push(correction(
     "price_changed", "price", "The preorder price changed. Review the current price.",
     "review_price"))
+  if (JSON.stringify(supplied.pricing.option_price_deltas) !==
+      JSON.stringify(current.pricing.option_price_deltas)) changed.push(correction(
+    "price_changed", "price",
+    "The preorder option price changed. Review the current price.",
+    "review_price"))
   if (supplied.pricing.deposit_rule !== current.pricing.deposit_rule ||
       JSON.stringify(supplied.pricing.deposit) !==
         JSON.stringify(current.pricing.deposit)) changed.push(correction(
     "deposit_changed", "deposit",
     "The preorder payment or deposit rule changed. Review the current rule.",
     "review_price"))
+  if (supplied.valid_until !== current.valid_until) changed.push(correction(
+    "stale", "eligibility",
+    "The preorder validity period changed. Refresh the selection.", "refresh"))
   if (Date.parse(supplied.valid_until) <= Date.now()) changed.push(correction(
     "expired", "eligibility", "The saved preorder evidence expired. Refresh it.",
     "refresh"))

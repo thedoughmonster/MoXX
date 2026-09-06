@@ -6,6 +6,7 @@ import Ajv from "ajv"
 import { handleRequestWithReader } from "../src/handle_request_with_reader.ts"
 import { revalidate } from "../src/revalidate.ts"
 import type { Input, OwnerRef, Selection } from "../src/types.ts"
+import { assertRevalidationRegressions } from "./revalidation_regressions.ts"
 
 const fixture = JSON.parse(await readFile(new URL(
   "../../../fixtures/bootstrap-response.json", import.meta.url), "utf8")) as {
@@ -55,6 +56,8 @@ test("reports every material changed field before acceptance", () => {
   assert.ok(result.corrections.every((issue) =>
     issue.announcement && issue.focus_target && issue.next_action))
 })
+test("rejects altered context and reports missing identities", () =>
+  assertRevalidationRegressions(input, fixture.data))
 
 test("fails closed for missing policy, sold out capacity, and quantity", () => {
   assert.equal(revalidate(input, null).corrections[0].code,

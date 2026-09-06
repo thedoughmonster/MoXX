@@ -32,6 +32,10 @@ export function policyCorrections(
       .flatMap((group) => group.choices as Array<Record<string, unknown>> ?? [])
     const selected = new Set(input.selection.option_refs.map((ref) =>
       ref.resource_id))
+    if ([...selected].some((id) =>
+      !choices.some((choice) => choice.choice_id === id))) issues.push(correction(
+        "option_changed", "option", "A selected option is no longer available.",
+        "edit_item"))
     if (choices.some((choice) => selected.has(choice.choice_id as string) &&
       choice.available !== true)) issues.push(correction(
       "option_changed", "option", "A selected option is no longer available.",
