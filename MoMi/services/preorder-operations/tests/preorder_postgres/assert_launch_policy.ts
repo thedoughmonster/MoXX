@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
 import type { Sql } from "postgres";
+import { assertCapacityPublication } from "./assert_capacity_publication.ts";
+import { assertCapacityPolicyChanges } from "./assert_capacity_policy_changes.ts";
+import { assertQuoteAdmissionLockOrder } from "./assert_quote_admission_lock_order.ts";
 import { launchBigAppleId, launchConfig, launchItemId,
   launchSurfaceId } from "./launch_policy_fixture.ts";
 export async function assertLaunchPolicy(sql: Sql): Promise<void> {
@@ -111,10 +114,23 @@ export async function assertLaunchPolicy(sql: Sql): Promise<void> {
     from momi_preorder.fulfillment_windows
     where surface_id = ${launchSurfaceId}::uuid`;
   assert.deepEqual(preserved, { total: 28, current: 14 });
+  const [capacity] = await sql<{ versions: number; minimum: number;
+    maximum: number }[]>`
+    select count(*)::integer as versions,
+      min(committed_quantity)::integer as minimum,
+      max(committed_quantity)::integer as maximum
+    from momi_preorder.fulfillment_windows
+    where surface_id = ${launchSurfaceId}::uuid
+      and fulfillment_date = ${window.fulfillment_date}::date`;
+  assert.deepEqual(capacity, { versions: 2, minimum: 0, maximum: 48 });
   const [frozen] = await sql<{ status: Record<string, unknown> }[]>`
     select momi_preorder.read_order_status_v1(
       ${(order.result.order_id as string)}::uuid,
       ${String(order.result.recovery_authority)}) as status`;
   assert.equal((frozen.status.fulfillment_window as Record<string, unknown>)
     .window_id, window.window_id);
+  await assertQuoteAdmissionLockOrder(sql);
+  await assertCapacityPublication(sql, window.fulfillment_date,
+    String(order.result.order_id));
+  await assertCapacityPolicyChanges(sql);
 }

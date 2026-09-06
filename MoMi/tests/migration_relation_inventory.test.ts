@@ -16,8 +16,8 @@ test("replays the exact current application relation inventory", async () => {
   ));
   const inventory = replayRelationInventory(migrations);
   const kinds = [...inventory.values()];
-  assert.equal(inventory.size, 176);
-  assert.equal(kinds.filter((kind) => kind === "table").length, 146);
+  assert.equal(inventory.size, 177);
+  assert.equal(kinds.filter((kind) => kind === "table").length, 147);
   assert.equal(kinds.filter((kind) => kind === "view").length, 30);
   for (
     const relation of [
@@ -28,6 +28,7 @@ test("replays the exact current application relation inventory", async () => {
       "momi_preorder.configuration_item_policies",
       "momi_preorder.configuration_pickup_schedule_days",
       "momi_preorder.configuration_price_classes",
+      "momi_preorder.fulfillment_capacity",
       "momi_preorder.fulfillment_windows",
       "momi_preorder.orders",
       "momi_preorder.payment_attempts",

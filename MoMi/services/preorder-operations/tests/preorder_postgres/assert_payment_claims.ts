@@ -26,8 +26,6 @@ export async function assertPaymentClaims(sql: Sql, windowId: string) {
   assert.equal(replay.disposition, "busy");
   assert.equal((replay.receipt as Record<string, unknown>).payment_attempt_id,
     receipt.payment_attempt_id);
-  await assertPaymentReplayAuthority(sql, request, created.authority,
-    String(receipt.payment_attempt_id));
   const reused = await paymentFixture.claim(sql, { ...request,
     order_id: crypto.randomUUID() }, created.authority);
   assert.equal((reused.error as Record<string, unknown>)?.code, "stale_version");
@@ -69,5 +67,13 @@ export async function assertPaymentClaims(sql: Sql, windowId: string) {
   assert.equal(results.filter((result) =>
     (result.error as Record<string, unknown> | undefined)?.code ===
       "stale_version").length, 1);
+  // Expiry changes order version and payment state; use a dedicated order so
+  // the remaining payment projection/matrix suite retains its pending claim.
+  const replayCase = await paymentFixture.order(sql, windowId);
+  const replayRequest = { command_id: crypto.randomUUID(),
+    order_id: replayCase.order.order_id, expected_order_version: 1 };
+  const replayClaim = await paymentFixture.claim(sql, replayRequest, replayCase.authority);
+  await assertPaymentReplayAuthority(sql, replayRequest, replayCase.authority,
+    String((replayClaim.receipt as Record<string, unknown>).payment_attempt_id));
   return { authority: created.authority, claim, receipt, envelope: first };
 }

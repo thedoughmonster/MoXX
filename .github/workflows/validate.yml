@@ -60,6 +60,7 @@ jobs:
     env:
       MOMI_BASE_REF: ${{ inputs.base_sha }}
       MOMI_HEAD_REF: ${{ inputs.head_sha }}
+      MOMI_PREORDER_PG_INTEGRATION: "1"
       MOMI_PROD_REF: origin/prod
       MOMI_DEV_REF: ${{ github.event.pull_request.base.ref == 'prod' && github.event.pull_request.head.ref == 'dev' && github.event.pull_request.head.repo.full_name == github.repository && inputs.head_sha || inputs.development_baseline_sha }}
       ORDER_ALERT_DELIVERY_CONCURRENCY_DATABASE_URL: >-
