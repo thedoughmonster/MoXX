@@ -14,6 +14,7 @@ const expectedWorkflows = [
   "monorepo-routing.yml",
   "promote-prod.yml",
   "supabase-credential-preflight.yml",
+  "validate-architecture.yml",
   "validate-ui.yml",
   "validate.yml",
 ]
@@ -54,7 +55,7 @@ for (const [name, source] of workflows) {
   if (/cache:\s*pnpm/.test(source)) {
     assert.match(
       source,
-      /cache-dependency-path:\s*(?:MoMi|MoXi)\/pnpm-lock\.yaml/,
+      /cache-dependency-path:\s*(?:MoMi|MoXi|architecture)\/pnpm-lock\.yaml/,
       `${name} must bind the cache to a product lockfile`,
     )
   }
@@ -200,9 +201,10 @@ assert.doesNotMatch(
 const dependabot = read(".github/dependabot.yml")
 assert.match(dependabot, /directory:\s*\/MoMi/)
 assert.match(dependabot, /directory:\s*\/MoXi/)
+assert.match(dependabot, /directory:\s*\/architecture/)
 assert.match(dependabot, /package-ecosystem:\s*github-actions/)
-assert.equal((dependabot.match(/target-branch:\s*dev/g) ?? []).length, 3)
-assert.equal((dependabot.match(/interval:\s*weekly/g) ?? []).length, 2)
+assert.equal((dependabot.match(/target-branch:\s*dev/g) ?? []).length, 4)
+assert.equal((dependabot.match(/interval:\s*weekly/g) ?? []).length, 3)
 assert.equal((dependabot.match(/interval:\s*monthly/g) ?? []).length, 1)
 assert.match(
   dependabot,

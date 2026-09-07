@@ -7,6 +7,9 @@
 - `MoMi/` owns backend services, database migrations, and backend contracts.
   Follow `MoMi/AGENTS.md` and any more-specific descendant instructions for
   every change beneath that directory.
+- `architecture/` owns the repository-wide LikeC4 model and its generated
+  architecture dashboard. Follow `architecture/AGENTS.md` for every change
+  beneath that directory.
 - Root files own only repository-wide coordination, CI routing, dependency
   automation, and documentation that genuinely applies to both products.
 
@@ -20,6 +23,9 @@
   contract.
 - Preserve the distinct toolchains and lockfiles. Run package-manager commands
   from the owning directory; there is no root dependency installation.
+- Architecture discovery is not implementation evidence. Every LikeC4 element
+  must carry exactly one lifecycle tag: `#discovery`, `#planned`, or
+  `#implemented`.
 - Use feature branches or isolated worktrees. Treat `dev` and `prod` as
   protected integration branches.
 - Do not deploy, change provider settings, or retire a source repository
@@ -33,4 +39,3 @@
   versioned interface that connects them.
 - Root-only changes run the smallest checks that prove repository routing and
   automation remain correct.
-

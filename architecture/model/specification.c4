@@ -1,0 +1,62 @@
+specification {
+  element person {
+    style {
+      shape person
+    }
+  }
+
+  element external_system {
+    style {
+      shape rectangle
+      color secondary
+    }
+  }
+
+  element system {
+    style {
+      shape rectangle
+    }
+  }
+
+  element application {
+    style {
+      shape browser
+    }
+  }
+
+  element service {
+    style {
+      shape component
+    }
+  }
+
+  element data_store {
+    style {
+      shape cylinder
+    }
+  }
+
+  tag discovery {
+  }
+
+  tag planned {
+  }
+
+  tag implemented {
+  }
+
+  tag legacy {
+  }
+
+  tag moxx-owned {
+    color green
+  }
+
+  tag managed-platform {
+    color indigo
+  }
+
+  tag third-party {
+    color gray
+  }
+}

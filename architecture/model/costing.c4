@@ -1,0 +1,90 @@
+model {
+  operator = person 'Dough Monster operator' {
+    #implemented, #moxx-owned
+    description 'Looks up product costs and investigates incomplete or stale evidence.'
+  }
+
+  sysco = external_system 'Sysco' {
+    #implemented, #third-party
+    description 'Current supplier that sends purchase invoices by email.'
+  }
+
+  future_supplier_channels = external_system 'Other supplier channels' {
+    #discovery, #third-party
+    description 'Future supplier email, API, portal import, or manual upload adapters.'
+  }
+
+  costing = system 'Persistent Costing' {
+    #planned, #moxx-owned
+    description 'Provides explainable materials-cost estimates with provenance and completeness.'
+
+    dashboard = application 'Costing Dashboard' {
+      #planned, #moxx-owned
+      description 'Persistent lookup surface for batch and per-item cost, breakdown, freshness, and gaps.'
+    }
+
+    dashboard_api = service 'Dashboard API' {
+      #planned, #moxx-owned
+      description 'Stable costing-oriented API that keeps calculation logic out of the browser.'
+    }
+
+    cost_calculation = service 'Cost Calculation' {
+      #planned, #moxx-owned
+      description 'Expands recipes, applies quantities and yields, selects evidence, and reports completeness.'
+    }
+
+    recipe_data = data_store 'Recipe and yield data' {
+      #implemented, #legacy, #moxx-owned
+      description 'Verified structured recipe versions, ingredients, and yields in the Supabase development import; authority and completeness still require validation.'
+    }
+
+    invoice_acquisition = service 'Invoice Acquisition' {
+      #planned, #moxx-owned
+      description 'Captures immutable source candidates plus supplier identity, provenance, deduplication, and handoff state.'
+    }
+
+    raw_artifact_store = data_store 'Raw Invoice Artifacts' {
+      #discovery, #managed-platform
+      description 'Durable raw email and attachment storage. R2 is the leading candidate but is not yet selected.'
+    }
+
+    invoice_ingestion = service 'Invoice Ingestion' {
+      #planned, #moxx-owned
+      description 'Standalone MOXX module that parses supplier invoices into canonical headers and line items with explicit ambiguities.'
+    }
+
+    purchase_cost_evidence = data_store 'Purchase and Cost Evidence' {
+      #discovery, #moxx-owned
+      description 'Canonical purchase items, supplier aliases, pack quantities, price history, freshness, and source provenance; exact ownership and contract remain open.'
+    }
+
+    ingredient_mapping = service 'Ingredient Mapping and Conversion' {
+      #discovery, #moxx-owned
+      description 'Maps purchased products to recipe ingredients and resolves units, quantities, substitutions, and applicable loss.'
+    }
+
+    correction_workflow = application 'Correction and Exception Workflow' {
+      #discovery, #moxx-owned
+      description 'Turns parsing, mapping, conversion, price, recipe, yield, and packaging problems into durable source corrections.'
+    }
+  }
+
+  operator -> costing.dashboard 'looks up and investigates costs'
+  costing.dashboard -> costing.dashboard_api 'requests an explainable product cost'
+  costing.dashboard_api -> costing.cost_calculation 'requests the canonical calculation'
+  costing.cost_calculation -> costing.recipe_data 'reads recipes, quantities, and yields'
+  costing.cost_calculation -> costing.purchase_cost_evidence 'selects price evidence and provenance'
+  costing.ingredient_mapping -> costing.cost_calculation 'resolves ingredient cost inputs'
+
+  sysco -> costing.invoice_acquisition 'sends invoices to a supplier-specific address'
+  future_supplier_channels -> costing.invoice_acquisition 'provide future invoice candidates'
+  costing.invoice_acquisition -> costing.raw_artifact_store 'preserves original email and attachments'
+  costing.invoice_acquisition -> costing.invoice_ingestion 'hands off an immutable invoice candidate'
+  costing.invoice_ingestion -> costing.purchase_cost_evidence 'produces canonical invoice and purchase evidence'
+  costing.purchase_cost_evidence -> costing.ingredient_mapping 'provides supplier items and normalized cost evidence'
+
+  operator -> costing.correction_workflow 'reviews unresolved or incorrect inputs'
+  costing.correction_workflow -> costing.invoice_ingestion 'submits durable parsing corrections'
+  costing.correction_workflow -> costing.ingredient_mapping 'submits durable mapping and conversion corrections'
+  costing.correction_workflow -> costing.recipe_data 'submits durable recipe and yield corrections'
+}
