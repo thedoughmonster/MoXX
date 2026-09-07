@@ -12,7 +12,7 @@ The approved `tracker.provider.project_slugs` are:
 
 Issues stay in their appropriate delivery project. Admission does not require moving every executable leaf into Symphony Execution. Other projects remain outside this instance. Planning coordinators must revalidate materially changed work before releasing it into an active state in one of these projects.
 
-`required_labels: []` means labels are not admission credentials. `ready-package` is retired. Native unfinished blockers prevent Todo dispatch. Native hierarchy and blocker relationships remain authoritative; labels do not replace them. Priority, creation time, and identifier determine scheduling order, not visual board position.
+Choose exactly one workflow-selection label before moving future work into an active execution state. `default-v1` selects the canonical `moxx-consolidated-v1` workflow; `Donatello` selects the staged alternative whose Todo and In Progress implementation profile is Astra / low. Retain the selector across stage handoffs. Neither label matches either workflow, while both labels independently satisfy both positive-label gates and are therefore an ambiguity to resolve before activation. These selectors do not revive `ready-package`, `agent:*`, or `budget:*`, and they never bypass project, state, native blocker, or execution-authority checks. Native unfinished blockers prevent Todo dispatch. Native hierarchy and blocker relationships remain authoritative. Priority, creation time, and identifier determine scheduling order, not visual board position.
 
 ## Stages
 
@@ -24,6 +24,9 @@ Issues stay in their appropriate delivery project. Admission does not require mo
 | Escalated Review | escalated_review | Astra / medium |
 | Escalated Rework | escalated_rework | Astra / medium |
 | Merging | merging | Sol / low |
+
+This table is the default workflow. Donatello changes only Todo and In Progress
+to Astra / low; all downstream profiles remain identical.
 
 Capacity is one shared worker. Each stage boundary starts a fresh conversation while retaining the workspace, branch, PR, and workpad. Todo to In Progress stays within implementation. Review stages are automated independent reviews, not a Human Review queue.
 
@@ -41,6 +44,6 @@ Explicitly read-only planning or evidence issues may complete after their reques
 
 ## Operational changes
 
-Keep one scheduler and the former implementation/review services disabled. Instruction changes must be coordinated with Watchdog's immutable configuration revision so new attempts report the instruction identity actually in use. Do not hot-reload a changed prompt while leaving its accounting manifest stale. Apply a prepared update at a safe worker boundary, preserve workspaces and accounting history, and verify ready ingest before resuming admission.
+Keep one scheduler and the former implementation/review services disabled. Donatello is a selectable staged configuration, not authority to run a second instance against the shared workspace and deployment paths. Instruction changes must be coordinated with Watchdog's immutable configuration revision so new attempts report the instruction identity actually in use. Do not hot-reload a changed prompt while leaving its accounting manifest stale. Apply a reviewed, merged update at an idle worker boundary, preserve workspaces and accounting history, verify ready ingest, and resume the existing service with the default-label gate. Keep Donatello inactive unless a separate explicit activation selects it.
 
 The September 2026 consolidation canary is a completed cutover acceptance exercise. It does not create a recurring canary or approval requirement for ordinary product issues. Operational topology or metadata changes require proportionate validation of the behavior being changed.
