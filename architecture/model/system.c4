@@ -1,0 +1,358 @@
+model {
+  customer = person 'Customer' {
+    #implemented, #third-party
+    description 'Browses, orders, pays, and follows order status.'
+  }
+
+  staff = person 'Dough Monster staff' {
+    #implemented, #moxx-owned
+    description 'Runs point-of-sale, kitchen, expo, fulfillment, and operational workflows.'
+  }
+
+  ownership = person 'Dough Monster ownership' {
+    #implemented, #moxx-owned
+    description 'Operates and oversees the business.'
+  }
+
+  moxx = product 'MoXX' {
+    #implemented, #moxx-owned
+    description 'The complete Dough Monster application and sole active product authority.'
+
+    moxi = plane 'MoXi · Monster Experience Interface' {
+      #implemented, #moxx-owned
+      description 'Human-facing workflows and presentation for customers, staff, and ownership.'
+
+      customerExperiences = experience 'Customer experiences' {
+        #implemented, #moxx-owned, #customer-facing
+
+        preorder = webapp 'Online preorder' {
+          #implemented, #moxx-owned, #customer-facing
+          description 'Current React and Vite storefront at preorder.dough.monster.'
+          technology 'React / Vite / TypeScript'
+        }
+
+        kiosk = webapp 'Self-service kiosk' {
+          #planned, #moxx-owned, #customer-facing
+          description 'Accepted in-shop customer ordering surface; not yet verified operational.'
+        }
+
+        status = webapp 'Customer order status' {
+          #planned, #moxx-owned, #customer-facing
+          description 'Accepted customer-facing order progress and pickup surface.'
+        }
+      }
+
+      staffExperiences = experience 'Staff and ownership experiences' {
+        #planned, #moxx-owned, #staff-facing
+
+        pos = webapp 'Staffed POS' {
+          #planned, #moxx-owned, #staff-facing
+          description 'Staff-operated order entry and payment experience.'
+        }
+
+        kds = webapp 'Kitchen display system' {
+          #planned, #moxx-owned, #staff-facing
+          description 'Kitchen production and task workflow.'
+        }
+
+        expo = webapp 'Expo' {
+          #planned, #moxx-owned, #staff-facing
+          description 'Order assembly, readiness, and handoff workflow.'
+        }
+
+        operations = webapp 'Staff and ownership operations' {
+          #planned, #moxx-owned, #staff-facing
+          description 'Operational control, oversight, and administrative workflows.'
+        }
+
+        costingDashboard = webapp 'Costing dashboard' {
+          #planned, #moxx-owned, #staff-facing
+          description 'Persistent lookup surface for batch and per-item cost, breakdown, freshness, and gaps.'
+        }
+
+        costingCorrection = webapp 'Costing correction and exceptions' {
+          #discovery, #moxx-owned, #staff-facing
+          description 'Proposed workflow for turning cost evidence problems into durable source corrections.'
+        }
+      }
+    }
+
+    momi = plane 'MoMi · Business Authority' {
+      #implemented, #moxx-owned
+      description 'The brain: Dough Monster operating system, business rules, and authoritative state.'
+
+      commerce = domain 'Preorder and checkout' {
+        #implemented, #moxx-owned
+
+        preorder = service 'preorder-operations' {
+          #discovery, #moxx-owned
+          description 'Active versioned preorder API boundary; manifest does not yet classify implementation.'
+          technology 'Supabase Edge Functions'
+        }
+
+        checkout = service 'cart-checkout-operations' {
+          #planned, #moxx-owned
+          description 'Declared source-neutral shared cart and checkout contract boundary.'
+        }
+      }
+
+      ingestion = domain 'Source acquisition' {
+        #implemented, #moxx-owned
+
+        toastIntegration = domain 'Toast integration' {
+          #discovery, #moxx-owned
+          webhook = adapter 'toast-webhook-ingestion' { #discovery, #moxx-owned }
+          acquisition = adapter 'toast-data-acquisition' { #discovery, #moxx-owned }
+          orders = adapter 'toast-order-ingest' { #discovery, #moxx-owned }
+          stock = adapter 'toast-stock-ingest' { #discovery, #moxx-owned }
+          hydration = service 'toast-order-hydration' { #discovery, #legacy, #moxx-owned }
+          readApi = service 'toast-order-read-api' { #implemented, #legacy, #moxx-owned }
+        }
+
+        squareIntegration = domain 'Square integration' {
+          #implemented, #moxx-owned
+          acquisition = adapter 'square-payment-acquisition' { #implemented, #moxx-owned }
+          delivery = adapter 'square-payment-delivery' { #implemented, #moxx-owned }
+        }
+
+        trelloIntegration = domain 'Trello integration' {
+          #discovery, #moxx-owned
+          acquisition = adapter 'trello-data-acquisition' { #discovery, #moxx-owned }
+          evidence = adapter 'trello-evidence-ingestion' { #discovery, #moxx-owned }
+          delivery = adapter 'trello-task-delivery' { #discovery, #moxx-owned }
+        }
+      }
+
+      data = domain 'Canonical data platform' {
+        #implemented, #moxx-owned
+
+        routing = service 'momi-event-routing' {
+          #discovery, #moxx-owned
+          description 'Routes source-neutral canonical events to downstream consumers.'
+        }
+
+        projection = service 'warehouse-projection' {
+          #discovery, #moxx-owned
+          description 'Projects canonical events and source evidence into queryable warehouse state.'
+        }
+
+        readApi = service 'warehouse-read-api' {
+          #discovery, #moxx-owned
+          description 'Exposes canonical warehouse data through stable versioned APIs.'
+        }
+
+        rawArchive = database 'Raw source archive' {
+          #implemented, #moxx-owned
+          description 'Immutable source payload storage and ingestion evidence.'
+          technology 'Postgres'
+        }
+
+        warehouse = database 'Canonical warehouse' {
+          #implemented, #moxx-owned
+          description 'Authoritative, source-neutral operational state and projections.'
+          technology 'Postgres'
+        }
+
+        legacyRecipeTransform = service 'legacy-recipe-transform' {
+          #discovery, #legacy, #moxx-owned
+          description 'Bounded retiring recipe import and reconciliation operation.'
+        }
+      }
+
+      workflows = domain 'Operations and communications' {
+        #implemented, #moxx-owned
+
+        fulfillment = domain 'Fulfillment operations' {
+          #planned, #moxx-owned
+          kitchen = service 'kitchen-task-management' { #planned, #moxx-owned }
+        }
+
+        alerting = domain 'Order alerting' {
+          #discovery, #moxx-owned
+          orderAlerting = service 'order-alerting' { #discovery, #moxx-owned }
+          slackDelivery = adapter 'slack-order-delivery' { #discovery, #moxx-owned }
+        }
+
+        communicationsDomain = domain 'Communications' {
+          #discovery, #moxx-owned
+          gateway = service 'communications-gateway' { #discovery, #moxx-owned }
+          archive = service 'communications-archive' { #discovery, #moxx-owned }
+          evaluation = service 'communications-evaluation' { #discovery, #moxx-owned }
+          operations = service 'communications-operations' { #discovery, #moxx-owned }
+        }
+
+        aiRuntime = domain 'Model execution' {
+          #implemented, #moxx-owned
+          gateway = adapter 'model-execution-gateway' { #discovery, #moxx-owned }
+          registry = service 'runtime-registry' { #implemented, #moxx-owned }
+        }
+      }
+
+      governance = domain 'Governance' {
+        #implemented, #moxx-owned
+        archive = service 'archive-governance' { #implemented, #moxx-owned }
+        cronHistory = service 'cron-history-governance' { #discovery, #moxx-owned }
+        baseline = service 'project-baseline-governance' { #discovery, #moxx-owned }
+        agentControl = service 'agent-control' { #planned, #legacy, #moxx-owned }
+      }
+
+      costing = domain 'Persistent costing' {
+        #planned, #moxx-owned
+        description 'Explainable materials-cost estimates with provenance and completeness.'
+
+        dashboardApi = service 'Costing dashboard API' {
+          #planned, #moxx-owned
+          description 'Stable costing-oriented API that keeps calculation logic out of the browser.'
+        }
+
+        calculation = service 'Cost calculation' {
+          #planned, #moxx-owned
+          description 'Expands recipes, applies quantities and yields, selects evidence, and reports completeness.'
+        }
+
+        recipeData = database 'Recipe and yield data' {
+          #implemented, #legacy, #moxx-owned
+          description 'Verified structured development import; authority and completeness still require validation.'
+        }
+
+        invoiceAcquisition = service 'Invoice acquisition' {
+          #planned, #moxx-owned
+          description 'Captures immutable source candidates, provenance, deduplication, and handoff state.'
+        }
+
+        rawArtifactStore = database 'Raw invoice artifacts' {
+          #discovery, #managed-platform
+          description 'Durable raw email and attachment storage; R2 is a candidate, not a selection.'
+        }
+
+        invoiceIngestion = service 'Invoice ingestion' {
+          #planned, #moxx-owned
+          description 'Parses supplier invoices into canonical headers and line items with explicit ambiguities.'
+        }
+
+        purchaseEvidence = database 'Purchase and cost evidence' {
+          #discovery, #moxx-owned
+          description 'Proposed canonical purchase items, aliases, pack quantities, price history, freshness, and provenance.'
+        }
+
+        ingredientMapping = service 'Ingredient mapping and conversion' {
+          #discovery, #moxx-owned
+          description 'Proposed mapping from purchased products to recipe ingredients, units, substitutions, and loss.'
+        }
+      }
+    }
+
+    mosi = plane 'MoSi · Monster Sensory Infrastructure' {
+      #planned, #moxx-owned
+      description 'Topology-neutral physical sensory and IoT plane; no concrete service is authorized yet.'
+
+      devices = domain 'Device lifecycle' {
+        #planned, #moxx-owned
+        identity = capability 'Device identity and enrollment' { #planned, #moxx-owned }
+        declaredCapabilities = capability 'Declared device capabilities' { #planned, #moxx-owned }
+        health = capability 'Health and connectivity' { #planned, #moxx-owned }
+      }
+
+      sensing = domain 'Shop sensing' {
+        #planned, #moxx-owned
+        acquisition = capability 'Sensor acquisition' { #planned, #moxx-owned }
+        adapters = capability 'Local hardware adapters' { #planned, #moxx-owned }
+        telemetry = capability 'Shop telemetry' { #planned, #moxx-owned }
+        diagnostics = capability 'Device diagnostics' { #planned, #moxx-owned }
+      }
+    }
+  }
+
+  cloudflare = platform 'Cloudflare' {
+    #implemented, #managed-platform
+    description 'Hosts MoXi web experiences and custom domains.'
+  }
+
+  supabase = platform 'Supabase' {
+    #implemented, #managed-platform
+    description 'Runs MoMi Edge Functions and managed Postgres.'
+  }
+
+  toast = external 'Toast' { #discovery, #third-party }
+  square = external 'Square' { #implemented, #third-party }
+  trello = external 'Trello' { #discovery, #third-party }
+  slack = external 'Slack' { #discovery, #third-party }
+  openai = external 'OpenAI' { #discovery, #third-party }
+  sentry = external 'Sentry' { #discovery, #third-party }
+  sysco = external 'Sysco' { #implemented, #third-party }
+  futureSupplierChannels = external 'Other supplier channels' { #discovery, #third-party }
+
+  customer -> moxx.moxi.customerExperiences.preorder 'places preorders'
+  customer -> moxx.moxi.customerExperiences.kiosk 'orders in shop'
+  customer -> moxx.moxi.customerExperiences.status 'follows order status'
+  staff -> moxx.moxi.staffExperiences.pos 'enters orders'
+  staff -> moxx.moxi.staffExperiences.kds 'runs kitchen work'
+  staff -> moxx.moxi.staffExperiences.expo 'assembles and hands off orders'
+  staff -> moxx.moxi.staffExperiences.operations 'runs operations'
+  ownership -> moxx.moxi.staffExperiences.operations 'oversees the business'
+
+  cloudflare -> moxx.moxi.customerExperiences.preorder 'hosts current web experience'
+  moxx.moxi.customerExperiences.preorder -> moxx.momi.commerce.preorder 'calls versioned API'
+  moxx.moxi -> moxx.momi 'uses versioned business contracts'
+  moxx.moxi.customerExperiences.preorder -> sentry 'reports optional sanitized telemetry'
+  moxx.mosi -> moxx.momi 'publishes observations through versioned contracts'
+
+  moxx.momi.commerce.preorder -> moxx.momi.data.warehouse 'reads and writes preorder state'
+  moxx.momi.commerce.preorder -> moxx.momi.ingestion.squareIntegration.delivery 'commands payment through'
+
+  toast -> moxx.momi.ingestion.toastIntegration.webhook 'delivers webhooks'
+  moxx.momi.ingestion.toastIntegration.acquisition -> toast 'pulls source data'
+  toast -> moxx.momi.ingestion.toastIntegration.orders 'supplies order data'
+  toast -> moxx.momi.ingestion.toastIntegration.stock 'supplies stock data'
+  moxx.momi.ingestion.toastIntegration.hydration -> toast 'hydrates transitional order work'
+  square -> moxx.momi.ingestion.squareIntegration.acquisition 'supplies payment events'
+  moxx.momi.ingestion.squareIntegration.delivery -> square 'delivers payment commands'
+  moxx.momi.ingestion.trelloIntegration.acquisition -> trello 'pulls task data'
+  trello -> moxx.momi.ingestion.trelloIntegration.evidence 'supplies task evidence'
+  moxx.momi.ingestion.trelloIntegration.delivery -> trello 'delivers tasks'
+
+  moxx.momi.ingestion.toastIntegration.webhook -> moxx.momi.data.rawArchive 'archives raw events'
+  moxx.momi.ingestion.toastIntegration.acquisition -> moxx.momi.data.rawArchive 'archives source data'
+  moxx.momi.ingestion.toastIntegration.orders -> moxx.momi.data.routing 'emits canonical events'
+  moxx.momi.ingestion.toastIntegration.stock -> moxx.momi.data.routing 'emits canonical events'
+  moxx.momi.ingestion.toastIntegration.readApi -> moxx.momi.data.projection 'reads projected state'
+  moxx.momi.ingestion.squareIntegration.acquisition -> moxx.momi.commerce.preorder 'provides payment facts'
+  moxx.momi.ingestion.toastIntegration.acquisition -> moxx.momi.data.projection 'provides acquired source versions'
+  moxx.momi.ingestion.trelloIntegration.acquisition -> moxx.momi.ingestion.trelloIntegration.evidence 'provides task data'
+  moxx.momi.ingestion.trelloIntegration.delivery -> moxx.momi.workflows.fulfillment.kitchen 'provides delivered outcomes'
+  moxx.momi.data.routing -> moxx.momi.data.projection 'routes canonical events'
+  moxx.momi.data.projection -> moxx.momi.data.warehouse 'updates projections'
+  moxx.momi.data.readApi -> moxx.momi.data.warehouse 'reads canonical state'
+
+  moxx.momi.data.routing -> moxx.momi.workflows.alerting.orderAlerting 'routes order events'
+  moxx.momi.workflows.alerting.orderAlerting -> moxx.momi.workflows.alerting.slackDelivery 'creates alerts'
+  moxx.momi.workflows.alerting.slackDelivery -> slack 'delivers notifications'
+  moxx.momi.workflows.aiRuntime.gateway -> moxx.momi.workflows.communicationsDomain.gateway 'provides model execution'
+  moxx.momi.workflows.aiRuntime.gateway -> moxx.momi.workflows.communicationsDomain.evaluation 'provides model execution'
+  moxx.momi.workflows.communicationsDomain.gateway -> moxx.momi.workflows.communicationsDomain.archive 'archives records'
+  moxx.momi.workflows.communicationsDomain.evaluation -> moxx.momi.workflows.communicationsDomain.archive 'evaluates records'
+  moxx.momi.workflows.communicationsDomain.archive -> moxx.momi.workflows.communicationsDomain.operations 'provides evidence'
+  moxx.momi.workflows.aiRuntime.gateway -> openai 'executes approved model calls'
+
+  ownership -> moxx.moxi.staffExperiences.costingDashboard 'looks up product costs'
+  moxx.moxi.staffExperiences.costingDashboard -> moxx.momi.costing.dashboardApi 'requests explainable costs'
+  moxx.momi.costing.dashboardApi -> moxx.momi.costing.calculation 'requests the canonical calculation'
+  moxx.momi.costing.calculation -> moxx.momi.costing.recipeData 'reads recipes, quantities, and yields'
+  moxx.momi.costing.calculation -> moxx.momi.costing.purchaseEvidence 'selects price evidence'
+  moxx.momi.costing.ingredientMapping -> moxx.momi.costing.calculation 'resolves ingredient inputs'
+  sysco -> moxx.momi.costing.invoiceAcquisition 'sends invoices'
+  futureSupplierChannels -> moxx.momi.costing.invoiceAcquisition 'provide future invoice candidates'
+  moxx.momi.costing.invoiceAcquisition -> moxx.momi.costing.rawArtifactStore 'preserves originals'
+  moxx.momi.costing.invoiceAcquisition -> moxx.momi.costing.invoiceIngestion 'hands off immutable candidates'
+  moxx.momi.costing.invoiceIngestion -> moxx.momi.costing.purchaseEvidence 'produces canonical evidence'
+  moxx.momi.costing.purchaseEvidence -> moxx.momi.costing.ingredientMapping 'provides normalized evidence'
+  ownership -> moxx.moxi.staffExperiences.costingCorrection 'reviews unresolved inputs'
+  moxx.moxi.staffExperiences.costingCorrection -> moxx.momi.costing.invoiceIngestion 'submits parsing corrections'
+  moxx.moxi.staffExperiences.costingCorrection -> moxx.momi.costing.ingredientMapping 'submits mapping corrections'
+  moxx.moxi.staffExperiences.costingCorrection -> moxx.momi.costing.recipeData 'submits recipe corrections'
+
+  moxx.momi.commerce.preorder -> supabase 'runs on'
+  moxx.momi.commerce.checkout -> supabase 'is planned to run on'
+  moxx.momi.data.rawArchive -> supabase 'is hosted by'
+  moxx.momi.data.warehouse -> supabase 'is hosted by'
+}

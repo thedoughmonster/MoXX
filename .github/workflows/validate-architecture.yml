@@ -5,11 +5,13 @@ on:
     branches: [dev, prod]
     paths:
       - architecture/**
+      - MoMi/services/**/service.json
       - .github/workflows/validate-architecture.yml
   push:
     branches: [dev]
     paths:
       - architecture/**
+      - MoMi/services/**/service.json
       - .github/workflows/validate-architecture.yml
 
 concurrency:

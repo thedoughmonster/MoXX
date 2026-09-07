@@ -44,7 +44,18 @@ then makes the source migration non-disruptive.
 
 ## Current scope
 
-The initial model captures the persistent costing discovery, including cost
-lookup and invoice maintenance views. It intentionally shows unresolved storage,
-catalog, mapping, conversion, and correction ownership as discovery rather than
-pretending those capabilities are already planned or implemented.
+This is the single repository-owned model for the complete MOXX product. It
+reconciles the former Watchdog-hosted architecture with the current monorepo and
+covers:
+
+- the MoXi, MoMi, and MoSi product planes;
+- customer, staff, and ownership experiences;
+- all current `MoMi/services/*/service.json` service boundaries;
+- source acquisition, canonical data, operations, communications, and governance;
+- persistent costing discovery, including cost lookup and invoice maintenance;
+- managed platforms and third-party providers.
+
+`pnpm run catalog:check` prevents the modeled service inventory and source links
+from drifting away from the current MoMi manifests. Costing remains deliberately
+mixed-state: accepted boundaries are planned, unresolved storage/mapping/correction
+decisions are discovery, and imported recipe evidence is implemented but legacy.

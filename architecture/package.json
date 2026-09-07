@@ -10,7 +10,8 @@
   },
   "scripts": {
     "build": "likec4 build --output dist",
-    "check": "pnpm run format:check && pnpm run validate && pnpm run lifecycle:check && pnpm run build",
+    "catalog:check": "node scripts/check-catalog.mjs",
+    "check": "pnpm run format:check && pnpm run validate && pnpm run lifecycle:check && pnpm run catalog:check && pnpm run build",
     "dev": "likec4 serve --listen ${LIKEC4_HOST:-127.0.0.1} --port ${LIKEC4_PORT:-5174} --no-react-hmr",
     "format": "likec4 format",
     "format:check": "likec4 format --check",

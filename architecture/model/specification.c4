@@ -2,37 +2,101 @@ specification {
   element person {
     style {
       shape person
+      color muted
     }
   }
 
-  element external_system {
+  element product {
+    notation 'Product boundary'
     style {
       shape rectangle
-      color secondary
+      icon bootstrap:boxes
+      opacity 5%
     }
   }
 
-  element system {
+  element plane {
+    notation 'Product plane'
     style {
       shape rectangle
+      icon bootstrap:folder
+      opacity 5%
     }
   }
 
-  element application {
+  element experience {
+    notation 'Experience family'
+    style {
+      shape rectangle
+      icon bootstrap:window
+      opacity 10%
+    }
+  }
+
+  element domain {
+    notation 'Product domain'
+    style {
+      shape rectangle
+      icon bootstrap:diagram-3
+      opacity 10%
+    }
+  }
+
+  element capability {
+    notation 'Architectural capability'
+    style {
+      shape rectangle
+      icon bootstrap:check2-square
+    }
+  }
+
+  element webapp {
+    notation 'Web application'
     style {
       shape browser
+      icon bootstrap:window
     }
   }
 
   element service {
+    notation 'Backend service'
     style {
-      shape component
+      shape rectangle
+      icon bootstrap:gear
     }
   }
 
-  element data_store {
+  element adapter {
+    notation 'Integration adapter'
+    style {
+      shape component
+      icon bootstrap:arrow-left-right
+    }
+  }
+
+  element database {
+    notation 'Data store'
     style {
       shape cylinder
+      icon bootstrap:database
+    }
+  }
+
+  element platform {
+    notation 'Managed platform'
+    style {
+      shape rectangle
+      icon bootstrap:cloud
+      opacity 20%
+    }
+  }
+
+  element external {
+    notation 'Third-party system'
+    style {
+      shape rectangle
+      icon bootstrap:building
+      opacity 20%
     }
   }
 
@@ -46,6 +110,12 @@ specification {
   }
 
   tag legacy {
+  }
+
+  tag customer-facing {
+  }
+
+  tag staff-facing {
   }
 
   tag moxx-owned {
