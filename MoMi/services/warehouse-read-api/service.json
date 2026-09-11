@@ -36,7 +36,7 @@
     ]
   },
   "database": {
-    "read": ["momi_api", "momi_warehouse", "momi_analysis", "momi_admin_reads"],
+    "read": ["momi_api", "momi_warehouse"],
     "write": [
       "momi_api.order_alert_delivery_bindings_v2",
       "momi_api.read_capabilities",

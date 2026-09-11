@@ -103,9 +103,10 @@ with scope as materialized (
   from momi_admin_reads.consumers_v1 as consumer
   join momi_analysis.scopes_v1 as configured using (scope_key)
   where consumer.enabled and consumer.resource = 'sales/health'
-), eligible as materialized (
-  select scope.consumer_key, scope.ordinary_ticket_limit,
-    recorded.business_date::text as date, recorded.total_amount,
+), scoped_orders as materialized (
+  select scope.consumer_key, scope.history_days, scope.ordinary_ticket_limit,
+    scope.current_business_date, recorded.business_date, recorded.total_amount,
+    recorded.source_observed_at, recorded.voided,
     coalesce(nullif(recorded.channel_kind,''), nullif(recorded.channel,''), 'unknown') as channel,
     (floor((extract(hour from coalesce(recorded.submitted_at, recorded.opened_at)
       at time zone scope.timezone) * 60
@@ -113,10 +114,16 @@ with scope as materialized (
         at time zone scope.timezone)) / 15) * 15)::integer as minute
   from momi_analysis.orders_v1 as recorded
   join scope on recorded.location_id = scope.location_id
-  where coalesce(recorded.voided, false) = false
-    and recorded.business_date between
-      scope.current_business_date - (scope.history_days - 1)
-      and scope.current_business_date
+), latest as (
+  select consumer_key, max(source_observed_at) as observed_at
+  from scoped_orders group by consumer_key
+), eligible as materialized (
+  select consumer_key, ordinary_ticket_limit, business_date::text as date,
+    total_amount, channel, minute
+  from scoped_orders
+  where coalesce(voided, false) = false
+    and business_date between current_business_date - (history_days - 1)
+      and current_business_date
 ), buckets as (
   select consumer_key, date, minute, channel,
     coalesce(sum(total_amount), 0) as sales, count(*)::integer as orders,
@@ -125,9 +132,18 @@ with scope as materialized (
     count(*) filter (where total_amount < ordinary_ticket_limit)::integer as ordinary_orders
   from eligible where minute is not null
   group by consumer_key, date, minute, channel
+), bucket_days as materialized (
+  select consumer_key, date, jsonb_agg(jsonb_build_array(
+    minute, sales, orders, ordinary_sales, ordinary_orders, channel)
+    order by minute, channel) as values
+  from buckets group by consumer_key, date
 ), channels as (
   select consumer_key, date, channel, coalesce(sum(total_amount), 0) as sales,
     count(*)::integer as orders from eligible group by consumer_key, date, channel
+), channel_days as materialized (
+  select consumer_key, date, jsonb_agg(jsonb_build_object(
+    'channel', channel, 'sales', sales, 'orders', orders) order by channel) as values
+  from channels group by consumer_key, date
 ), days as (
   select consumer_key, date, coalesce(sum(total_amount), 0) as sales,
     count(*)::integer as orders,
@@ -137,27 +153,26 @@ with scope as materialized (
     count(*) filter (where total_amount is null)::integer as missing_amounts,
     count(*) filter (where minute is null)::integer as missing_times
   from eligible group by consumer_key, date
+), reports as (
+  select d.consumer_key, jsonb_agg(jsonb_build_object(
+    'date', d.date, 'sales', d.sales, 'orders', d.orders,
+    'ordinarySales', d.ordinary_sales, 'ordinaryOrders', d.ordinary_orders,
+    'missingAmounts', d.missing_amounts, 'missingTimes', d.missing_times,
+    'buckets', coalesce(b.values, '[]'::jsonb), 'channels', c.values
+  ) order by d.date) as days
+  from days as d
+  left join bucket_days as b using (consumer_key, date)
+  join channel_days as c using (consumer_key, date)
+  group by d.consumer_key
 )
 select scope.consumer_key, jsonb_build_object(
   'schemaVersion', 1, 'capturedAt', statement_timestamp(),
   'timezone', scope.timezone, 'location', scope.location_name, 'bucketMinutes', 15,
-  'latestObservation', (select max(recorded.source_observed_at)
-    from momi_analysis.orders_v1 as recorded
-    where recorded.location_id = scope.location_id),
-  'days', coalesce((select jsonb_agg(jsonb_build_object(
-    'date', d.date, 'sales', d.sales, 'orders', d.orders,
-    'ordinarySales', d.ordinary_sales, 'ordinaryOrders', d.ordinary_orders,
-    'missingAmounts', d.missing_amounts, 'missingTimes', d.missing_times,
-    'buckets', coalesce((select jsonb_agg(jsonb_build_array(
-      b.minute, b.sales, b.orders, b.ordinary_sales, b.ordinary_orders, b.channel)
-      order by b.minute, b.channel) from buckets as b
-      where b.consumer_key = d.consumer_key and b.date = d.date), '[]'::jsonb),
-    'channels', (select jsonb_agg(jsonb_build_object(
-      'channel', c.channel, 'sales', c.sales, 'orders', c.orders) order by c.channel)
-      from channels as c where c.consumer_key = d.consumer_key and c.date = d.date)
-  ) order by d.date) from days as d
-    where d.consumer_key = scope.consumer_key), '[]'::jsonb)
-) as dataset from scope;
+  'latestObservation', latest.observed_at,
+  'days', coalesce(reports.days, '[]'::jsonb)
+) as dataset from scope
+left join latest using (consumer_key)
+left join reports using (consumer_key);
 revoke all on momi_analysis.admin_sales_health_v1
   from public, anon, authenticated, service_role;
 grant select on momi_analysis.admin_sales_health_v1 to svc_warehouse_read_api;
