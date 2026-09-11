@@ -1,12 +1,13 @@
-# 0034: Permanent admin sales reader
+# 0034: Provisional admin sales reader
 
 Status: accepted scope; implementation under MOX-583.
 Date: 2026-09-11.
 
-The user requested one continuing admin connection and explicitly confirmed a
-permanent live connection for the private admin. Its first permission is the
-previously proposed Berwick sales aggregate reader. Existing gateway admission
-does not admit this consumer and must not be reused.
+The user requested one continuing admin connection, then clarified on
+September 11 that its permission is provisional until the official dashboard
+goes live. This supersedes the earlier permanent-access wording. Its first
+permission is the previously proposed Berwick sales aggregate reader. Existing
+gateway admission does not admit this consumer and must not be reused.
 
 warehouse-read-api remains the read facade and owns the new versioned
 momi.admin.sales_health.v1 HTTP contract, admission counters and one-use read
@@ -15,8 +16,9 @@ business dataset ownership moves and no frontend database login is created.
 Future modules must declare their own resource contracts and permissions.
 
 The new scoped server credential is held in the target MoMi and Sites protected
-runtime stores, entered directly by Zac. It remains valid until revoked under
-MOX-583's active-development scope, rotation and revocation controls. Short-lived
+runtime stores, entered directly by Zac. Its authority ends at the official
+dashboard production cutover, or earlier revocation. Credential rotation cannot
+extend that provisional term or transfer it to the official dashboard. Short-lived
 one-use capabilities still authorize each database read. This exception concerns
 the scoped admin API credential, never a Supabase PAT, service-role key or
 database password. The app credential cannot reach payroll, personal identifiers,
@@ -30,6 +32,16 @@ after its tests and architecture checks pass.
 Production activation follows the existing release procedure and protected
 credential placement. Rolling back disables the new consumer and restores the
 labeled snapshot configuration; no old temporary feed is revived.
+
+Official dashboard go-live requires its own reviewed admission and credential,
+followed by disablement of dough-monster-admin and revocation/removal of its
+matching MoMi and interim app credentials in every provisioned target. Zac owns
+credential revocation; the warehouse-read-api owner disables the consumer via
+the approved delivery path. The cutover is incomplete until fresh requests and
+outstanding capabilities are verified denied. This is a required cutover step,
+not an implemented automatic launch trigger. A preview is not a production
+cutover, and shared warehouse data and other consumers remain outside this
+revocation. See the contract for the exact cutover checklist.
 
 The declared owner role already exists in development but the pooled postgres
 login cannot assume it. The manifest now explicitly declares

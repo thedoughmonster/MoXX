@@ -4,6 +4,10 @@
 The private admin asks one guarded MoMi entry point for current sales totals.
 The server credential admits only its configured sales resource. Each admitted
 request issues and consumes a private, expiring one-use read capability.
+This consumer permission is provisional until the official dashboard goes live
+in production. Its cutover must disable the interim consumer, revoke its
+credentials, and verify new requests and outstanding capabilities are denied.
+No automatic launch trigger or transfer of this credential is implemented.
 
 ## Trigger And Input
 GET /functions/v1/momi-admin-data-v1/sales/health, server to server.

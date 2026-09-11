@@ -2,7 +2,9 @@
 
 Owner: warehouse-read-api. Consumer: the private Dough Monster admin server,
 Sites project appgprj_6a9ffac3acd481918a274f6acf285342.
-Authority: MOX-583; user requested permanent live admin access September 11.
+Authority: MOX-583; September 11 user clarification limits this permission
+to provisional live access until the official dashboard goes live. This
+supersedes the earlier permanent-access wording.
 
 ## Admission
 GET /functions/v1/momi-admin-data-v1/sales/health accepts only Authorization:
@@ -56,10 +58,12 @@ secret MOMI_ADMIN_DATA_TOKEN and the private Sites server secret
 ADMIN_DATA_API_TOKEN; never in chat, repository files, logs or local env files.
 ADMIN_DATA_API_URL names the exact target root above. Development and production
 use different values and their own project references. No credential is copied
-from one hosted store to another. The persistent connection uses an owner-held
-credential until revoked; rotate after exposure, owner/scope change, failed
-verification or the end of active development. MOX-583 records this purpose-bound
-runtime credential exception; it grants no Supabase account/PAT access.
+from one hosted store to another. The interim connection uses an owner-held
+credential only until the official dashboard production cutover, or earlier
+revocation. Rotate after exposure, owner/scope change or failed verification;
+rotation does not extend the provisional term. MOX-583 records this
+purpose-bound runtime credential exception; it grants no Supabase account/PAT
+access. It authorizes no automatic rollover into official dashboard access.
 
 Application and backend use only their own protected placement. No network
 allowlist is asserted: the Sites runtime has no verified fixed egress address.
@@ -73,3 +77,23 @@ failure. Revoke by disabling the consumer and removing/rotating its credential.
 Rollback disables the new consumer first, restores the explicitly labeled
 snapshot application configuration, verifies, then revokes the replacement.
 Never restore the retired temporary feed. Existing UI publication is separate.
+
+## Required official dashboard cutover
+The permission ends when the official dashboard is verified ready and goes
+live for use in production. A preview is not this event. The warehouse-read-api
+owner and Zac must complete these steps as part of that cutover:
+
+1. Verify the official dashboard uses its own reviewed admission and credential.
+2. Through the approved owner delivery path, set enabled=false for only the
+   dough-monster-admin consumer in momi_admin_reads.consumers_v1 in every
+   target where provisioned. This blocks both new and outstanding capabilities.
+3. Zac revokes/removes MOMI_ADMIN_DATA_TOKEN and the matching interim app
+   ADMIN_DATA_API_TOKEN from their protected stores. Remove the interim app
+   connection configuration; retain any snapshot with its truthful timestamps.
+4. Record names-only revocation evidence and denied fresh requests and
+   previously issued capabilities. Cutover cannot be marked complete without it.
+
+This is a required owner-executed cutover gate. No automatic launch-event
+revocation integration exists. Shared warehouse views, source data and other
+consumers are outside this revocation. Re-enabling the interim permission after
+cutover requires explicit owner authorization.
