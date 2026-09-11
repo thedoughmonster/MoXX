@@ -134,3 +134,6 @@ verify_jwt = false
 
 [functions.momi-cron-history-governor-v1]
 verify_jwt = false
+
+[functions.momi-admin-data-v1]
+verify_jwt = false

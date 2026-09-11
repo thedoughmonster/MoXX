@@ -67,7 +67,7 @@ test("summary churn does not change projected findings identity", () => {
   assert.notEqual(report.source.sha256, happy.source.sha256)
 })
 
-test("checked-in artifact is the exact current 82-row projection", async () => {
+test("checked-in artifact is the exact current 81-row projection", async () => {
   const sourceText = await readFile(join(
     workspaceRoot, "docs", "service-access-debt-baseline.json",
   ), "utf8")
@@ -76,10 +76,10 @@ test("checked-in artifact is the exact current 82-row projection", async () => {
   const artifactText = await readFile(join(
     workspaceRoot, "docs", "legacy-access-governance-report.json",
   ), "utf8")
-  assert.equal(report.source.git_blob, "c0db86de330cae544f8ab66f063cc7f2e24d13a9")
+  assert.equal(report.source.git_blob, "180c9a3ee479a8b222e5e53e60fafeaefaabcc96")
   assert.equal(report.source.sha256,
-    "f08e391db08bca99e7492b3e9833a9be301cfd777a38afda619291c81c5924b4")
-  assert.equal(report.source.finding_count, 82)
+    "610af32a95aa23640453f3fa0f6fb1468da16286822524f2d72b002c7ff46edf")
+  assert.equal(report.source.finding_count, 81)
   assert.equal(artifactText, renderLegacyAccessGovernanceReport(report))
   assert.equal(artifactText, `${canonicalJson(JSON.parse(artifactText))}\n`)
   validateLegacyAccessGovernanceReport(

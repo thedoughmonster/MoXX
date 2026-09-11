@@ -2,24 +2,23 @@
   "generated": true,
   "as_of": "2026-08-25",
   "purpose": "Review signal only; lower debt counts do not prove correct ownership.",
-  "total": 82,
+  "total": 81,
   "oldest_age_days": 38,
   "by_issue": {
-    "MOX-20": 57,
+    "MOX-20": 56,
     "MOX-22": 15,
     "MOX-23": 7,
     "MOX-406": 3
   },
   "by_owner": {
-    "Zac": 82
+    "Zac": 81
   },
   "by_risk": {
-    "high": 82
+    "high": 81
   },
   "by_rule": {
     "direct_private_relation_access": 80,
-    "direct_private_routine_call": 1,
-    "dynamic_relation_identifier": 1
+    "direct_private_routine_call": 1
   },
   "by_consumer_service": {
     "communications-archive": 2,
@@ -32,7 +31,6 @@
     "toast-order-read-api": 2,
     "toast-stock-ingest": 2,
     "toast-webhook-ingestion": 1,
-    "warehouse-projection": 25,
-    "warehouse-read-api": 1
+    "warehouse-projection": 25
   }
 }

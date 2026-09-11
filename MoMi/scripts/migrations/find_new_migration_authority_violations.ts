@@ -80,6 +80,7 @@ export function findNewMigrationAuthorityViolations(
     for (const change of findRoleAuthorityChanges(normalized,
       consumer.manifest.owned_dataset?.db_role,
       consumer.manifest.owned_dataset?.dynamic_read_routines ?? [],
+      consumer.manifest.owned_dataset?.runtime_set_role_from,
     )) {
       violations.push(`${file}: ${change}`)
     }

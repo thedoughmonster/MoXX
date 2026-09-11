@@ -34,7 +34,7 @@ test("covers every accepted fingerprint with the accepted issue partition", () =
       record.remediation_issue,
       record.fingerprints.length,
     ])),
-    { "MOX-20": 57, "MOX-22": 15, "MOX-23": 7, "MOX-406": 3 },
+    { "MOX-20": 56, "MOX-22": 15, "MOX-23": 7, "MOX-406": 3 },
   )
 })
 

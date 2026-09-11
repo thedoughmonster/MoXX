@@ -105,3 +105,14 @@ does not consume it at runtime, and does not publish canonical recipes from it.
 ## Verification
 
 Run `npm run check -- --service warehouse-projection` with Node.js 24.
+
+## Bounded Sales Source
+
+`warehouse_projection.sales_source_entities_v1` extends the existing canonical
+read-view contract for warehouse-read-api. It selects the latest version of each
+active order/location using existing indexes and unchanged observed-time,
+projected-time and version-ID ordering. It exposes only typed sales fields and
+location identity, without canonical documents, order identifiers or personal
+fields. Other entity types, inactive entities and superseded versions are
+excluded before analytical aggregation. No projection writer, event lifecycle,
+raw source, network access or business-data ownership changes.
