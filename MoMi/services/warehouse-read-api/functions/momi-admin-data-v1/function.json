@@ -1,0 +1,29 @@
+{
+  "function_key": "momi.admin.sales_health.v1",
+  "contract_version": 1,
+  "purpose": "Serve scoped current sales aggregates to the private Dough Monster admin.",
+  "owner_service": "warehouse-read-api",
+  "function_type": "read",
+  "capability": "read",
+  "boundary": "momi_internal",
+  "runtime": "supabase_edge",
+  "route_path": "/functions/v1/momi-admin-data-v1",
+  "authentication_policy_key": "momi.admin.scoped_server_credential.v1",
+  "entrypoint": "index.ts",
+  "input_schema": "contracts/input.schema.json",
+  "output_schema": "contracts/output.schema.json",
+  "required_capabilities": [
+    "database_read",
+    "database_write"
+  ],
+  "declared_side_effects": [
+    "issues_and_consumes_admin_read_capability",
+    "bounds_admin_read_admission"
+  ],
+  "probe": {
+    "method": "GET",
+    "acceptable_statuses": [
+      200
+    ]
+  }
+}
