@@ -10,7 +10,7 @@ does not admit this consumer and must not be reused.
 
 warehouse-read-api remains the read facade and owns the new versioned
 momi.admin.sales_health.v1 HTTP contract, admission counters and one-use read
-capabilities. Existing warehouse-owned analysis views supply the data. No
+capabilities. An indexed warehouse-owned canonical sales view supplies the data. No
 business dataset ownership moves and no frontend database login is created.
 Future modules must declare their own resource contracts and permissions.
 
@@ -46,5 +46,16 @@ before applying this reader; a passing local test is not a production receipt.
 
 Admin admission objects live in the new, exclusively owned momi_admin_reads
 schema. This keeps the schema grant within warehouse-read-api ownership; the
-shared momi_api schema's authority is not changed. Aggregate source views remain
-in the existing approved momi_analysis contract.
+shared momi_api schema's authority is not changed. The aggregate stays in momi_analysis; its source remains behind the warehouse
+owner's declared canonical read contract.
+
+The original general-purpose analysis bridge exceeded bounded production reads.
+The new warehouse-owned sales_source_entities_v1 view uses the existing entity
+type and latest-version indexes, preserving the exact order/location winner
+ordering while excluding unrelated entity types before document projection.
+The facade joins preaggregated daily buckets/channels rather than rescanning
+them for each date. No index, business table, writer, or event lifecycle changes.
+A read-only production prototype returned the same 22,868 dated non-voided
+orders across 630 observed dates in 1.395 seconds, with a 744,747-byte payload.
+September 10 still reconciles to 34 orders / 588.85. This is operator query
+evidence, not proof of a deployed endpoint or completed ingestion.

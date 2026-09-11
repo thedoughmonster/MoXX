@@ -39,3 +39,63 @@ insert into momi_analysis.test_orders
 select '20000000-0000-4000-8000-000000000002', current_business_date,
   888, 'counter', '', now(), null, false, now()
 from momi_analysis.scopes_v1;
+
+create table momi_api.beta_analysis_scopes as
+select scope_key, location_id, location_name, timezone, true as enabled
+from momi_analysis.scopes_v1;
+create schema warehouse_projection;
+create schema momi_warehouse;
+create table momi_warehouse.entities (
+  entity_id uuid primary key, entity_type text, lifecycle_status text
+);
+create table momi_warehouse.entity_versions (
+  entity_version_id uuid primary key default gen_random_uuid(),
+  entity_id uuid references momi_warehouse.entities, canonical_document jsonb,
+  source_observed_at timestamptz, projected_at timestamptz default now()
+);
+create index test_latest_version on momi_warehouse.entity_versions
+  (entity_id, source_observed_at desc);
+alter table momi_analysis.test_orders add column entity_id uuid default gen_random_uuid();
+insert into momi_warehouse.entities
+select entity_id, 'order', 'active' from momi_analysis.test_orders;
+insert into momi_warehouse.entity_versions (entity_id, canonical_document, source_observed_at)
+select entity_id, jsonb_build_object(
+  'location_id', location_id, 'business_date', business_date,
+  'opened_at', opened_at, 'submitted_at', submitted_at, 'voided', voided,
+  'presentation', jsonb_build_object('total_amount', total_amount),
+  'channel', channel, 'channel_kind', channel_kind,
+  'customer_email', 'excluded@example.test'
+), source_observed_at from momi_analysis.test_orders;
+insert into momi_warehouse.entities values
+  ('10000000-0000-4000-8000-000000000001', 'location', 'active'),
+  ('30000000-0000-4000-8000-000000000003', 'order', 'inactive'),
+  ('40000000-0000-4000-8000-000000000004', 'menu', 'active');
+insert into momi_warehouse.entity_versions (entity_id, canonical_document, source_observed_at)
+select entity_id, jsonb_build_object('location_id', '10000000-0000-4000-8000-000000000001',
+  'business_date', (now() at time zone 'America/New_York')::date,
+  'presentation', jsonb_build_object('total_amount', 999)), now()
+from momi_warehouse.entities where entity_type in ('location','menu') or lifecycle_status='inactive';
+
+-- Older observations and tied versions must never double-count or replace the winner.
+insert into momi_warehouse.entity_versions
+  (entity_id, canonical_document, source_observed_at, projected_at)
+select version.entity_id, jsonb_set(version.canonical_document,
+  '{presentation,total_amount}', '666'), version.source_observed_at - interval '1 hour',
+  version.projected_at from momi_warehouse.entity_versions as version
+join momi_analysis.test_orders as original using (entity_id)
+where original.total_amount = 10;
+insert into momi_warehouse.entity_versions
+  (entity_id, canonical_document, source_observed_at, projected_at)
+select version.entity_id, jsonb_set(version.canonical_document,
+  '{presentation,total_amount}', '777'), version.source_observed_at,
+  version.projected_at - interval '1 second' from momi_warehouse.entity_versions as version
+join momi_analysis.test_orders as original using (entity_id)
+where original.total_amount = 10 and version.canonical_document #>> '{presentation,total_amount}' = '10';
+insert into momi_warehouse.entity_versions
+  (entity_version_id, entity_id, canonical_document, source_observed_at, projected_at)
+select '00000000-0000-0000-0000-000000000001', version.entity_id,
+  jsonb_set(version.canonical_document, '{presentation,total_amount}', '778'),
+  version.source_observed_at, version.projected_at
+from momi_warehouse.entity_versions as version
+join momi_analysis.test_orders as original using (entity_id)
+where original.total_amount = 10 and version.canonical_document #>> '{presentation,total_amount}' = '10';

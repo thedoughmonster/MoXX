@@ -22,6 +22,12 @@ per successful admission; this bounded authorization history contains no orders.
 The API assumes its manifest-owned non-login svc_warehouse_read_api role and
 uses six-second statement limits. Business data is read only through approved
 views; the role can update only its own admission counters and capabilities.
+The warehouse owner exposes warehouse_projection.sales_source_entities_v1
+through momi.warehouse.canonical_read_views.v1. It selects only active order and
+location entities, using each entity's latest observed/projected/version ordering
+and existing indexes. The facade combines those typed fields with its owned
+primary-scope configuration. It cannot read the warehouse's private tables.
+No raw documents, order identifiers or personal fields leave the source view.
 No caller chooses a relation, location, date range or SQL.
 
 ## Payload

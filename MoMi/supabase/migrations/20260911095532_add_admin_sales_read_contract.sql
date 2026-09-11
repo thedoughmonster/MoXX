@@ -34,7 +34,7 @@ revoke all on momi_admin_reads.consumers_v1,
   momi_admin_reads.capabilities_v1 from public, anon, authenticated, service_role;
 grant usage on schema momi_admin_reads, momi_analysis to svc_warehouse_read_api;
 grant select on momi_admin_reads.consumers_v1,
-  momi_analysis.orders_v1, momi_analysis.scopes_v1 to svc_warehouse_read_api;
+  momi_api.beta_analysis_scopes to svc_warehouse_read_api;
 grant update (window_started_at, window_requests)
   on momi_admin_reads.consumers_v1 to svc_warehouse_read_api;
 grant select, insert, delete on momi_admin_reads.capabilities_v1
@@ -96,12 +96,21 @@ grant execute on function momi_admin_reads.issue_read_capability_v1(text, text)
 
 create view momi_analysis.admin_sales_health_v1
 with (security_invoker = true) as
-with scope as materialized (
+with source as materialized (
+  select * from warehouse_projection.sales_source_entities_v1
+), configured_scopes as (
+  select configured.scope_key,
+    coalesce(configured.location_id, (select source.location_id from source
+      where source.entity_type = 'location' order by source.location_id limit 1)) as location_id,
+    configured.location_name, configured.timezone,
+    (current_timestamp at time zone configured.timezone)::date as current_business_date
+  from momi_api.beta_analysis_scopes as configured where configured.enabled
+), scope as materialized (
   select consumer.consumer_key, consumer.history_days, consumer.ordinary_ticket_limit,
     configured.scope_key, configured.location_id, configured.location_name,
     configured.timezone, configured.current_business_date
   from momi_admin_reads.consumers_v1 as consumer
-  join momi_analysis.scopes_v1 as configured using (scope_key)
+  join configured_scopes as configured using (scope_key)
   where consumer.enabled and consumer.resource = 'sales/health'
 ), scoped_orders as materialized (
   select scope.consumer_key, scope.history_days, scope.ordinary_ticket_limit,
@@ -112,8 +121,9 @@ with scope as materialized (
       at time zone scope.timezone) * 60
       + extract(minute from coalesce(recorded.submitted_at, recorded.opened_at)
         at time zone scope.timezone)) / 15) * 15)::integer as minute
-  from momi_analysis.orders_v1 as recorded
+  from source as recorded
   join scope on recorded.location_id = scope.location_id
+  where recorded.entity_type = 'order'
 ), latest as (
   select consumer_key, max(source_observed_at) as observed_at
   from scoped_orders group by consumer_key

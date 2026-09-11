@@ -12,6 +12,7 @@
   "entrypoint": "index.ts",
   "input_schema": "contracts/input.schema.json",
   "output_schema": "contracts/output.schema.json",
+  "capability_model": { "schema_version": 1, "called_contracts": [] },
   "required_capabilities": [
     "database_read",
     "database_write"

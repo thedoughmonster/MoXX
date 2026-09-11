@@ -11,7 +11,8 @@ GET of the root is a side-effect-free liveness probe.
 
 A server bearer credential in Authorization. No body, query, SQL, or client
 location selector. The configured consumer resolves primary scope in the
-warehouse-owned analysis views.
+facade-owned primary configuration and the warehouse's declared canonical
+sales source view. Raw warehouse tables remain inaccessible to the reader role.
 
 ## Output
 SalesHealthDataset v1: at most 730 calendar dates including today in the scope

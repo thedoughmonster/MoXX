@@ -19,18 +19,17 @@ const trend = buildDebtLifecycleTrend(
 )
 
 test("renders deterministic bounded trend dimensions", () => {
-  assert.equal(trend.total, 82)
+  assert.equal(trend.total, 81)
   assert.equal(trend.oldest_age_days, 38)
   assert.deepEqual(trend.by_issue, {
-    "MOX-20": 57,
+    "MOX-20": 56,
     "MOX-22": 15,
     "MOX-23": 7,
     "MOX-406": 3,
   })
-  assert.deepEqual(trend.by_risk, { high: 82 })
+  assert.deepEqual(trend.by_risk, { high: 81 })
   assert.deepEqual(trend.by_rule, {
     direct_private_relation_access: 80,
     direct_private_routine_call: 1,
-    dynamic_relation_identifier: 1,
   })
 })

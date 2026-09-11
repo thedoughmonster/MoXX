@@ -79,7 +79,8 @@
       "momi_warehouse.version_observations",
       "warehouse_projection.canonical_resource_replay_v2",
       "warehouse_projection.delivery_reservations",
-      "warehouse_projection.worker_settings"
+      "warehouse_projection.worker_settings",
+      "warehouse_projection.sales_source_entities_v1"
     ],
     "private_routines": [
       "warehouse_projection.begin_reserved_delivery", "warehouse_projection.build_toast_menu_edges",
@@ -108,6 +109,7 @@
       "momi.warehouse.toast_order_read_view.v1"
     ],
     "public_relation_reads": [
+      { "contract": "momi.warehouse.canonical_read_views.v1", "relation": "warehouse_projection.sales_source_entities_v1" },
       { "contract": "momi.warehouse.canonical_read_views.v1", "relation": "momi_api.employees_by_id_v1" },
       { "contract": "momi.warehouse.canonical_read_views.v1", "relation": "momi_api.menu_entities_by_id_v1" },
       { "contract": "momi.warehouse.canonical_read_views.v1", "relation": "momi_api.order_versions_by_id_v1" },

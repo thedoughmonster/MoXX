@@ -16,11 +16,15 @@ test("replays the exact current application relation inventory", async () => {
   ));
   const inventory = replayRelationInventory(migrations);
   const kinds = [...inventory.values()];
-  assert.equal(inventory.size, 177);
-  assert.equal(kinds.filter((kind) => kind === "table").length, 147);
-  assert.equal(kinds.filter((kind) => kind === "view").length, 30);
+  assert.equal(inventory.get("momi_analysis.admin_sales_health_v1"), "view");
+  assert.equal(inventory.get("warehouse_projection.sales_source_entities_v1"), "view");
+  assert.equal(inventory.size, 181);
+  assert.equal(kinds.filter((kind) => kind === "table").length, 149);
+  assert.equal(kinds.filter((kind) => kind === "view").length, 32);
   for (
     const relation of [
+      "momi_admin_reads.consumers_v1",
+      "momi_admin_reads.capabilities_v1",
       "momi_preorder.catalog_items",
       "momi_preorder.checkout_holds",
       "momi_preorder.commands",

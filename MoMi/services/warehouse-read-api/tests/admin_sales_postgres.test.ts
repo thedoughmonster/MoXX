@@ -40,7 +40,7 @@ test("admin sales aggregate preserves scope, history, missingness and cents", as
       { channel: "unknown", sales: 12, orders: 1 },
     ])
     const serialized = JSON.stringify(data)
-    assert.doesNotMatch(serialized, /location_id|order_id|employee|payload|10000000|888|999/)
+    assert.doesNotMatch(serialized, /location_id|order_id|employee|customer|payload|10000000|666|777|778|888|999/)
     assert.ok(Date.parse(String(data.capturedAt)) > Date.parse(String(data.latestObservation)))
     const replay = await db.query<{ dataset: unknown }>(
       "select momi_admin_reads.read_sales_health_v1($1) as dataset",
@@ -83,6 +83,7 @@ test("disabled, expired, unknown, wrong resource and over-limit reads fail close
     assert.equal(revoked.rows[0].data, null)
     await assert.rejects(db.exec("update momi_admin_reads.consumers_v1 set enabled=true"),
       /permission denied/)
+    await assert.rejects(db.exec("select * from momi_warehouse.entity_versions"), /permission denied/)
     await assert.rejects(db.exec("select * from toast_raw.private_evidence"),
       /permission denied/)
   } finally { await db.close() }
