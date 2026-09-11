@@ -1,10 +1,10 @@
 {
   "$schema": "../../../../schemas/service-authority-binding-v1.schema.json",
   "schema_version": "service-authority-binding/v1",
-  "repository": "thedoughmonster/momi-backend",
+  "repository": "thedoughmonster/MoXX",
   "revision": "1111111111111111111111111111111111111111",
   "service": "fixture-dynamic-debt",
-  "binding_digest": "6842d683582b9f38163c87bc2a2f849ee140db5d9b976f832b1be4d877cd4fba",
+  "binding_digest": "82769e5000c092985fde947ba4307e9ba7e40970835087e71b611a76ce915077",
   "target_authority": null,
   "runtime_compatibility": {
     "source_path": "services/fixture-dynamic-debt/service.json",

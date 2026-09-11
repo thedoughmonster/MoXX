@@ -9,6 +9,8 @@ import { validateArchitectureWithDiagnostics } from
 const architecture = await validateArchitectureWithDiagnostics()
 const databaseAuthorityViolations = await findDatabaseObjectAuthorityViolations(
   workspaceRoot,
+  process.env.MOMI_VALIDATION_BASE_SHA ?? "origin/dev",
+  process.env.MOMI_VALIDATION_HEAD_SHA ?? "HEAD",
 )
 if (databaseAuthorityViolations.length > 0) {
   throw new Error(

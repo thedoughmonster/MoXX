@@ -8,10 +8,14 @@ import { readMigrationOwners } from "./read_migration_owners.ts"
 import { resolveIdentity } from "./resolve_identity.ts"
 import type { BoundPlan } from "./types.ts"
 
-export async function buildBoundPlan(baseRef: string, headRef: string): Promise<BoundPlan> {
+export async function buildBoundPlan(
+  baseRef: string,
+  headRef: string,
+  includeWorktree = true,
+): Promise<BoundPlan> {
   const base = resolveIdentity(baseRef)
   const head = resolveIdentity(headRef)
-  const changedPaths = listChangedPaths(base.sha, head.sha)
+  const changedPaths = listChangedPaths(base.sha, head.sha, includeWorktree)
   const architecture = await validateArchitecture()
   const impact = buildImpactPlan(
     changedPaths,
@@ -23,7 +27,7 @@ export async function buildBoundPlan(baseRef: string, headRef: string): Promise<
     base,
     head,
     changed_paths: changedPaths,
-    diff_sha256: await hashDiff(base.sha, head.sha),
+    diff_sha256: await hashDiff(base.sha, head.sha, undefined, includeWorktree),
     impact_sha256: hashText(canonicalJson(impact)),
     impact,
   }

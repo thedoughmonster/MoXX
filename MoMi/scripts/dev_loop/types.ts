@@ -47,6 +47,8 @@ export type ReceiptInput = {
   head_sha?: string
   base_tree?: string
   head_tree?: string
+  development_sha?: string; development_tree?: string
+  production_sha?: string; production_tree?: string
   diff_sha256?: string
   impact_sha256?: string
   plan_sha256?: string
@@ -59,7 +61,9 @@ export type CompactReceipt = {
   schema_version: 2
   kind: ReceiptInput["kind"]
   identities: { base_sha?: string; head_sha?: string; base_tree?: string
-    head_tree?: string; diff_sha256?: string; impact_sha256?: string
+    head_tree?: string; development_sha?: string; development_tree?: string
+    production_sha?: string; production_tree?: string; diff_sha256?: string
+    impact_sha256?: string
     plan_sha256?: string }
   counts: {
     commands: number
@@ -92,6 +96,7 @@ export type ValidationReceipt = CompactReceipt & {
   kind: "validation"
   gate: "full" | "path_scoped"
   required_job: string
+  evidence_scope: "exact_committed_head"
 }
 
 export type TriageConfig = {

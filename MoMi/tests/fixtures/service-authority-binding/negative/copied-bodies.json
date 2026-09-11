@@ -1,10 +1,10 @@
 {
   "$schema": "../../../../schemas/service-authority-binding-v1.schema.json",
   "schema_version": "service-authority-binding/v1",
-  "repository": "thedoughmonster/momi-backend",
+  "repository": "thedoughmonster/MoXX",
   "revision": "1111111111111111111111111111111111111111",
   "service": "fixture-owner",
-  "binding_digest": "fbb02bdfa0683609473971972acd5d6d51e7248d9378d37047a0ad2184a48014",
+  "binding_digest": "c5c36537667aac9fdb0373d92edd34243f676fb24861faea4c5fb56c52f11d71",
   "target_authority": {
     "source_path": "services/fixture-owner/service.json",
     "json_pointer": "/owned_dataset",

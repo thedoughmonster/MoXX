@@ -115,7 +115,7 @@ test("regenerates exact evidence and validates active origins", () => {
       Number(finding.evidence.reference_count)])
   }
   checks.assertOrigins(inventory.findings, origins)
-  assert.equal(baseline.findings.length, 82)
+  assert.equal(baseline.findings.length, 81)
 })
 test("rejects duplicate rows and arbitrary targets", () => {
   checks.assertInventory(inventory)

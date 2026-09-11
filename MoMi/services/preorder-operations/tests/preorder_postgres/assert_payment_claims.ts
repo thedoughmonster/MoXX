@@ -4,6 +4,8 @@ import type { Sql } from "postgres";
 
 import { lifecycleFixture } from "./fixture.ts";
 import { paymentFixture } from "./payment_fixture.ts";
+import { assertPaymentReplayAuthority } from
+  "./assert_payment_replay_authority.ts";
 
 export async function assertPaymentClaims(sql: Sql, windowId: string) {
   const created = await paymentFixture.order(sql, windowId);
@@ -65,5 +67,13 @@ export async function assertPaymentClaims(sql: Sql, windowId: string) {
   assert.equal(results.filter((result) =>
     (result.error as Record<string, unknown> | undefined)?.code ===
       "stale_version").length, 1);
+  // Expiry changes order version and payment state; use a dedicated order so
+  // the remaining payment projection/matrix suite retains its pending claim.
+  const replayCase = await paymentFixture.order(sql, windowId);
+  const replayRequest = { command_id: crypto.randomUUID(),
+    order_id: replayCase.order.order_id, expected_order_version: 1 };
+  const replayClaim = await paymentFixture.claim(sql, replayRequest, replayCase.authority);
+  await assertPaymentReplayAuthority(sql, replayRequest, replayCase.authority,
+    String((replayClaim.receipt as Record<string, unknown>).payment_attempt_id));
   return { authority: created.authority, claim, receipt, envelope: first };
 }

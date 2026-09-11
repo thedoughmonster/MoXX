@@ -25,6 +25,6 @@ test("writes only canonical bytes without a trailing newline", async (t) => {
   assert.notEqual(bytes.at(-1), 0x0a)
   assert.match(
     serviceDependencyGraphOutputPath,
-    /\/\.momi\/architecture\/service-dependency-graph-v1\.json$/,
+    /\/\.momi\/architecture\/service-dependency-graph-v2\.json$/,
   )
 })

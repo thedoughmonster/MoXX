@@ -28,9 +28,9 @@ export function findServiceDependencyGraphDiagnostics(
     code: "schema_mismatch", field_path: "/$schema",
     expected: serviceDependencyGraphSchemaId, actual: record.$schema,
   })
-  if (record.schema_version !== 1) diagnostics.push({
+  if (record.schema_version !== 2) diagnostics.push({
     code: "version_mismatch", field_path: "/schema_version",
-    expected: 1, actual: record.schema_version,
+    expected: 2, actual: record.schema_version,
   })
   const expectedDigest = digestServiceDependencyGraph(
     record as unknown as ServiceDependencyGraph,

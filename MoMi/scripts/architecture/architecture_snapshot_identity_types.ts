@@ -1,5 +1,5 @@
 export const architectureSnapshotIdentitySchemaId =
-  "https://momi.local/schemas/architecture-snapshot-identity-v1.schema.json"
+  "https://momi.local/schemas/architecture-snapshot-identity-v2.schema.json"
 
 export type ArchitectureManifestSchemaIdentity = {
   id: string
@@ -8,9 +8,10 @@ export type ArchitectureManifestSchemaIdentity = {
 
 export type ArchitectureSnapshotIdentity = {
   $schema: typeof architectureSnapshotIdentitySchemaId
-  schema_version: 1
-  repository: "thedoughmonster/momi-backend"
+  schema_version: 2
+  repository: "thedoughmonster/MoXX"
   branch: "dev"
+  product_path: "MoMi"
   commit: string
   service_manifest_schema: ArchitectureManifestSchemaIdentity
   function_manifest_schema: ArchitectureManifestSchemaIdentity

@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://momi.local/schemas/service-dependency-graph-v2.schema.json",
+  "title": "Service Dependency Graph v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "$schema",
+    "schema_version",
+    "source_snapshot",
+    "nodes",
+    "edges",
+    "digest"
+  ],
+  "properties": {
+    "$schema": {
+      "const": "https://momi.local/schemas/service-dependency-graph-v2.schema.json"
+    },
+    "schema_version": { "const": 2 },
+    "source_snapshot": { "$ref": "#/$defs/source_snapshot" },
+    "nodes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "edges": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/edge" }
+    },
+    "digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "service_key": { "type": "string", "pattern": "^[a-z][a-z0-9-]+$" },
+    "manifest_path": {
+      "type": "string",
+      "pattern": "^services/[a-z][a-z0-9-]+/service\\.json$"
+    },
+    "contract": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*\\.v[1-9][0-9]*$"
+    },
+    "digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "node": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["service_key", "manifest_path"],
+      "properties": {
+        "service_key": { "$ref": "#/$defs/service_key" },
+        "manifest_path": { "$ref": "#/$defs/manifest_path" }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider",
+        "consumer",
+        "contract",
+        "provider_manifest_path",
+        "consumer_manifest_path"
+      ],
+      "properties": {
+        "provider": { "$ref": "#/$defs/service_key" },
+        "consumer": { "$ref": "#/$defs/service_key" },
+        "contract": { "$ref": "#/$defs/contract" },
+        "provider_manifest_path": { "$ref": "#/$defs/manifest_path" },
+        "consumer_manifest_path": { "$ref": "#/$defs/manifest_path" }
+      }
+    },
+    "source_snapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identity", "digest"],
+      "properties": {
+        "identity": { "$ref": "#/$defs/snapshot_identity" },
+        "digest": { "$ref": "#/$defs/digest" }
+      }
+    },
+    "snapshot_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "$schema",
+        "schema_version",
+        "repository",
+        "branch",
+        "product_path",
+        "commit",
+        "service_manifest_schema",
+        "function_manifest_schema",
+        "architecture_contract_version"
+      ],
+      "properties": {
+        "$schema": {
+          "const": "https://momi.local/schemas/architecture-snapshot-identity-v2.schema.json"
+        },
+        "schema_version": { "const": 2 },
+        "repository": { "const": "thedoughmonster/MoXX" },
+        "branch": { "const": "dev" },
+        "product_path": { "const": "MoMi" },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "service_manifest_schema": {
+          "$ref": "#/$defs/service_manifest_schema"
+        },
+        "function_manifest_schema": {
+          "$ref": "#/$defs/function_manifest_schema"
+        },
+        "architecture_contract_version": { "const": 2 }
+      }
+    },
+    "service_manifest_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": {
+          "const": "https://momi.local/schemas/service-manifest-v1.schema.json"
+        },
+        "version": { "const": 1 }
+      }
+    },
+    "function_manifest_schema": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": {
+          "const": "https://momi.local/schemas/function-manifest-v1.schema.json"
+        },
+        "version": { "const": 1 }
+      }
+    }
+  }
+}

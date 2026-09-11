@@ -76,10 +76,10 @@ test("compares the complete payload and excludes only digest from hashing", () =
 })
 
 test("emits exact four-field diagnostics", () => {
-  const candidate = { ...graph, schema_version: 2 }
+  const candidate = { ...graph, schema_version: 3 }
   candidate.digest = digestServiceDependencyGraph(candidate)
   assert.deepEqual(findServiceDependencyGraphDiagnostics(candidate), [{
     code: "version_mismatch", field_path: "/schema_version",
-    expected: 1, actual: 2,
+    expected: 2, actual: 3,
   }])
 })

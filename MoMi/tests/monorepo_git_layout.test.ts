@@ -17,7 +17,7 @@ test("resolves accepted source commits behind monorepo subtree imports", () => {
   )
   assert.equal(
     productSourceCommit("origin/prod"),
-    "9b2addfcbb99c8f5d83276b4d6475d302b4c8de6",
+    "f52215975104aa8448f9cad4a05945ffe8282b46",
   )
 })
 

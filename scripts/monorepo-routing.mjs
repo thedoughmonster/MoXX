@@ -5,10 +5,16 @@ import { resolve } from "node:path"
 
 const MOMI_PREFIX = "MoMi/"
 const MOXI_PREFIX = "MoXi/"
+const MOMI_VALIDATION_WORKFLOW = ".github/workflows/validate.yml"
+const MOXI_VALIDATION_WORKFLOW = ".github/workflows/validate-ui.yml"
 
 export function classifyPath(path) {
-  if (path.startsWith(MOMI_PREFIX)) return "momi"
-  if (path.startsWith(MOXI_PREFIX)) return "moxi"
+  if (path.startsWith(MOMI_PREFIX) || path === MOMI_VALIDATION_WORKFLOW) {
+    return "momi"
+  }
+  if (path.startsWith(MOXI_PREFIX) || path === MOXI_VALIDATION_WORKFLOW) {
+    return "moxi"
+  }
   return "root"
 }
 

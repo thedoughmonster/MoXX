@@ -12,6 +12,7 @@ import {
   workspaceRoot,
 } from "./paths.ts"
 import { validateJson } from "./validate_json.ts"
+import { repositoryAuthority } from "./repository_authority.ts"
 
 export async function loadExternalFunctionAuthorities(
   directory: string,
@@ -28,7 +29,7 @@ export async function loadExternalFunctionAuthorities(
     if (file !== `${authority.function_slug}.json`) {
       throw new Error(`${file}: filename must match function_slug`)
     }
-    if (authority.owner_repository === "thedoughmonster/momi-backend") {
+    if (authority.owner_repository === repositoryAuthority) {
       throw new Error(`${file}: external owner must be another repository`)
     }
     if (authority.adapter_path !==

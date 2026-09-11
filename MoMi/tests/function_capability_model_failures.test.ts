@@ -68,7 +68,10 @@ test("fails closed on cycles and stale source identity", async () => {
   const cycle = await provideFunctionCapabilityModel(
     architecture, graphSourceSnapshot, graphSourceSnapshot,
   )
-  assert(cycle.diagnostics.some((item) => item.code === "dependency_cycle"))
+  const cycleDiagnostic = cycle.diagnostics.find((item) =>
+    item.code === "dependency_cycle")
+  assert.deepEqual(cycleDiagnostic?.provenance,
+    ["service-dependency-graph/v2", "cycle_detected"])
   const valid = createCapabilityArchitecture([{ key: "solo" }], [{
     key: "momi.solo.run.v1", owner: "solo",
   }])
@@ -77,8 +80,10 @@ test("fails closed on cycles and stale source identity", async () => {
   const source = await provideFunctionCapabilityModel(
     valid, stale, graphSourceSnapshot,
   )
-  assert(source.diagnostics.some((item) =>
-    item.code === "source_snapshot_stale"))
+  const sourceDiagnostic = source.diagnostics.find((item) =>
+    item.code === "source_snapshot_stale")
+  assert.deepEqual(sourceDiagnostic?.provenance,
+    ["architecture-snapshot-identity/v2", "candidate"])
   const oldVersion = structuredClone(graphSourceSnapshot) as ArchitectureSnapshot
   const oldIdentity = oldVersion.identity as unknown as Record<string, unknown>
   oldIdentity.architecture_contract_version = 1

@@ -77,23 +77,18 @@ mapping without printing user identity, restrictions, token, or value-derived
 data. Only Zac may establish or repair the one-time provider mapping; neither
 repository workflow may mutate it.
 
-After that check passes, MOX-390 may disable the source schedule and confirm both
-repositories have zero registered renewal schedules. The source is
-`thedoughmonster/momi-backend`, workflow
-`.github/workflows/renew-database-access.yml`; its prior credential remains the
-source GitHub `prod` environment secret `SUPABASE_ACCESS_TOKEN`, owned by Zac.
-Keep that credential and mapping until the replacement passes.
+MOX-390 completed that retirement order on 2026-08-30. The source workflow at
+`thedoughmonster/momi-backend` is `disabled_manually`, MoXX registers no renewal
+schedule, and the post-disable protected-production preflight succeeded at the
+exact accepted `prod` commit. The workflow file, source history, and names-only
+source credential placement remain retained for rollback evidence; no value was
+read or exposed.
 
-The MOX-390 retirement order is: prove the MoXX production preflight; disable
-the source workflow without deleting its file or history; verify its GitHub
-workflow state is `disabled_manually`; and verify MoXX has no registered renewal
-workflow. Its rollback drill is proof-only. Before prior-credential revocation,
-the names-only rollback restores the source `prod` secret from its protected
-owner-held source and restores its prior provider mapping, then verifies it
-read-only. Re-enabling the source scheduler is not part of MOX-409 and requires
-separate explicit authority. After prior-credential revocation, revoke a failed
-replacement and issue another through the same bounded process instead of
-restoring the source schedule.
+The rollback drill is proof-only. Re-enabling the source scheduler, restoring
+the prior provider mapping, or changing credential placement requires a
+separately authorized rollback window. After prior-credential revocation,
+revoke a failed replacement and issue another through the same bounded process
+instead of restoring the source schedule.
 
 Repository-only development releases require no Supabase access. Migration
 releases invoke the linked CLI preview/apply/parity path only in the protected

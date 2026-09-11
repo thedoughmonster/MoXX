@@ -9,6 +9,8 @@ export function renderValidationSummary(receipt: CompactReceipt): string {
     `- Base tree: \`${identities.base_tree ?? "missing"}\``,
     `- Head commit: \`${identities.head_sha ?? "missing"}\``,
     `- Head tree: \`${identities.head_tree ?? "missing"}\``,
+    `- Development baseline: \`${identities.development_sha ?? "missing"}\``,
+    `- Production baseline: \`${identities.production_sha ?? "missing"}\``,
     `- Diff SHA-256: \`${identities.diff_sha256 ?? "missing"}\``,
     `- Impact SHA-256: \`${identities.impact_sha256 ?? "missing"}\``,
     `- Plan SHA-256: \`${identities.plan_sha256 ?? "missing"}\``,

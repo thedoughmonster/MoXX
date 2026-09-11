@@ -7,6 +7,10 @@ import type {
   ArchitectureSnapshotSource,
 } from "./architecture_snapshot_identity_types.ts"
 import { readJson } from "./read_json.ts"
+import {
+  repositoryAuthority,
+  repositoryAuthorityBranch,
+} from "./repository_authority.ts"
 
 export async function inspectArchitectureSnapshotSource(
   root: string,
@@ -40,25 +44,30 @@ export async function inspectArchitectureSnapshotSource(
   const repository = originUrl.replace(/^git@github\.com:/, "")
     .replace(/^ssh:\/\/git@github\.com\//, "")
     .replace(/^https:\/\/github\.com\//, "").replace(/\.git$/, "")
-  if (origin.status !== 0 || repository !== "thedoughmonster/momi-backend") {
+  if (origin.status !== 0 || repository !== repositoryAuthority) {
     diagnostics.push({
       code: "repository_mismatch", field_path: "/repository",
-      expected: "thedoughmonster/momi-backend", actual: repository || originUrl,
+      expected: repositoryAuthority, actual: repository || originUrl,
     })
   }
   const workspace = await readJson<{
     environments?: { dev?: { branch?: unknown } }
   }>(join(root, "workspace.json"))
-  if (workspace.environments?.dev?.branch !== "dev") diagnostics.push({
+  if (workspace.environments?.dev?.branch !== repositoryAuthorityBranch) {
+    diagnostics.push({
     code: "branch_mismatch", field_path: "/branch",
-    expected: "dev", actual: workspace.environments?.dev?.branch,
-  })
+      expected: repositoryAuthorityBranch,
+      actual: workspace.environments?.dev?.branch,
+    })
+  }
   const branch = spawnSync("git", ["branch", "--show-current"], options)
   const currentBranch = String(branch.stdout ?? "").trim()
-  if (branch.status !== 0 || currentBranch !== "dev") diagnostics.push({
+  if (branch.status !== 0 || currentBranch !== repositoryAuthorityBranch) {
+    diagnostics.push({
     code: "branch_mismatch", field_path: "/checkout/branch",
-    expected: "dev", actual: currentBranch || "detached",
-  })
+      expected: repositoryAuthorityBranch, actual: currentBranch || "detached",
+    })
+  }
   const ref = spawnSync(
     "git", ["rev-parse", "--verify", "refs/remotes/origin/dev^{commit}"], options,
   )

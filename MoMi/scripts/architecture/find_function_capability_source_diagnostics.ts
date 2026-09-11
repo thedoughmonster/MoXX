@@ -38,7 +38,7 @@ export async function findFunctionCapabilitySourceDiagnostics(
       field_path: `/source_snapshot/${name}`,
       code: "source_snapshot_stale",
       target: actual === "valid" ? canonicalJson(snapshot) : actual,
-      provenance: ["architecture-snapshot-identity/v1", name],
+      provenance: ["architecture-snapshot-identity/v2", name],
     })
   }
   if (diagnostics.length === 0 &&

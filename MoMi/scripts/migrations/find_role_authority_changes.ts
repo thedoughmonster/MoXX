@@ -6,6 +6,7 @@ export function findRoleAuthorityChanges(
   source: string,
   allowedRole?: string,
   bindings: DynamicReadBinding[] = [],
+  runtimeSetRoleFrom?: "postgres",
 ): string[] {
   const changes: string[] = []
   const statements = splitSqlStatements(source)
@@ -13,6 +14,14 @@ export function findRoleAuthorityChanges(
     .trim().replace(/;$/u, "").trim().replace(/\s+/gu, " ").toLowerCase()
   const compacted = statements.map((statement) => compact(statement.text))
   const safe = new Set<number>()
+  if (allowedRole && runtimeSetRoleFrom === "postgres") {
+    for (const [index, statement] of compacted.entries()) {
+      if (statement === `grant ${allowedRole} to postgres with inherit false, set true` ||
+        statement === `grant ${allowedRole} to postgres with inherit false, set false`) {
+        safe.add(index)
+      }
+    }
+  }
   for (const binding of bindings) {
     const expected = [
       `grant ${binding.role} to postgres with inherit false, set true`,
