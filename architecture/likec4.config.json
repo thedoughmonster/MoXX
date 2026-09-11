@@ -1,0 +1,9 @@
+{
+  "$schema": "https://likec4.dev/schemas/config.json",
+  "name": "moxx-architecture",
+  "title": "MOXX Architecture",
+  "metadata": {
+    "owner": "thedoughmonster/MoXX",
+    "lifecycle": "discovery-planned-implemented"
+  }
+}

@@ -1,0 +1,284 @@
+views {
+  style element.tag = #discovery {
+    border dotted
+    notation 'Lifecycle: discovery — unresolved and not committed for implementation'
+  }
+
+  style element.tag = #planned {
+    border dashed
+    notation 'Lifecycle: planned — accepted architecture, not yet verified operational'
+  }
+
+  style element.tag = #implemented {
+    border solid
+    notation 'Lifecycle: implemented — verified current behavior or data'
+  }
+
+  style element.tag = #legacy {
+    opacity 60%
+  }
+
+  style element.tag = #moxx-owned {
+    color green
+  }
+
+  style element.tag = #managed-platform {
+    color indigo
+  }
+
+  style element.tag = #third-party {
+    color gray
+  }
+
+  view index {
+    title 'MOXX architecture'
+    description 'One product map spanning MoXi experiences, MoMi business authority, MoSi capabilities, integrations, governance, and costing discovery.'
+
+    include *
+    autoLayout LeftRight 180 120
+  }
+
+  view productPlanes of moxx {
+    title 'MOXX product planes'
+    description 'MoXX is the complete application; MoXi, MoMi, and MoSi are its three architectural planes.'
+
+    include
+      moxi,
+      momi,
+      mosi,
+      customer,
+      staff,
+      ownership,
+      cloudflare,
+      supabase,
+      toast,
+      square,
+      trello,
+      slack,
+      openai
+
+    autoLayout LeftRight 170 110
+  }
+
+  view moxiExperiences of moxx.moxi {
+    title 'MoXi human experiences'
+    description 'Customer experiences are separated from staff and ownership workflows.'
+
+    include
+      *,
+      customerExperiences.*,
+      staffExperiences.*,
+      customer,
+      staff,
+      ownership,
+      moxx.momi,
+      cloudflare,
+      sentry
+
+    autoLayout LeftRight 150 100
+  }
+
+  view preorder of moxx.momi.commerce {
+    title 'Current online preorder path'
+
+    include
+      *,
+      moxx.moxi.customerExperiences.preorder,
+      moxx.momi.data.warehouse,
+      customer,
+      cloudflare,
+      supabase,
+      square,
+      sentry
+
+    autoLayout LeftRight 130 90
+  }
+
+  view momiArchitecture of moxx.momi {
+    title 'MoMi · the brain'
+    description 'Business authority, source acquisition, canonical data, operational workflows, governance, and costing.'
+
+    include
+      *,
+      moxx.moxi,
+      moxx.mosi,
+      supabase,
+      toast,
+      square,
+      trello,
+      slack,
+      openai,
+      sysco
+
+    autoLayout LeftRight 170 110
+  }
+
+  view dataFlow of moxx.momi.data {
+    title 'MoMi source-to-warehouse data flow'
+    description 'Provider-level overview feeding the canonical routing, projection, and read pipeline.'
+
+    include
+      *,
+      moxx.momi.ingestion.*,
+      toast,
+      square,
+      trello,
+      supabase
+
+    autoLayout LeftRight 170 110
+  }
+
+  view toastFlow of moxx.momi.ingestion.toastIntegration {
+    title 'Toast source acquisition'
+
+    include
+      *,
+      toast,
+      moxx.momi.data.rawArchive,
+      moxx.momi.data.routing,
+      moxx.momi.data.projection
+
+    autoLayout LeftRight 150 100
+  }
+
+  view squareFlow of moxx.momi.ingestion.squareIntegration {
+    title 'Square payment integration'
+
+    include
+      *,
+      square,
+      moxx.momi.commerce.preorder
+
+    autoLayout LeftRight 150 100
+  }
+
+  view trelloFlow of moxx.momi.ingestion.trelloIntegration {
+    title 'Trello task integration'
+
+    include
+      *,
+      trello,
+      moxx.momi.workflows.fulfillment.kitchen
+
+    autoLayout LeftRight 150 100
+  }
+
+  view operations of moxx.momi.workflows {
+    title 'MoMi operations and communications'
+    description 'Capability-level overview; open a focused view for service-level routes.'
+
+    include
+      alerting,
+      communicationsDomain,
+      aiRuntime,
+      fulfillment,
+      moxx.momi.data.routing,
+      slack,
+      openai
+
+    autoLayout LeftRight 170 110
+  }
+
+  view orderAlerting of moxx.momi.workflows.alerting {
+    title 'Order alerting flow'
+
+    include
+      *,
+      moxx.momi.data.routing,
+      slack
+
+    autoLayout LeftRight 150 100
+  }
+
+  view communications of moxx.momi.workflows.communicationsDomain {
+    title 'Communications flow'
+
+    include
+      *,
+      moxx.momi.workflows.aiRuntime.gateway,
+      openai
+
+    autoLayout LeftRight 150 100
+  }
+
+  view modelExecution of moxx.momi.workflows.aiRuntime {
+    title 'Model execution flow'
+
+    include
+      *,
+      moxx.momi.workflows.communicationsDomain.gateway,
+      moxx.momi.workflows.communicationsDomain.evaluation,
+      openai
+
+    autoLayout LeftRight 150 100
+  }
+
+  view governance of moxx.momi.governance {
+    title 'MoMi governance services'
+    description 'Archive evidence, cron-history retention, project-baseline authority, and transferred agent-control history.'
+
+    include *
+    autoLayout LeftRight 150 100
+  }
+
+  view mosiCapabilities of moxx.mosi {
+    title 'MoSi sensory and IoT capabilities'
+    description 'Named architectural capabilities; concrete MoSi services are not yet authorized.'
+
+    include
+      *,
+      devices.*,
+      sensing.*,
+      moxx.momi
+
+    autoLayout LeftRight 140 100
+  }
+
+  view costingCapabilities of moxx.momi.costing {
+    title 'Persistent costing capabilities'
+    description 'Costing capability boundaries colored by lifecycle truth, not by desired future state.'
+
+    include
+      *,
+      moxx.moxi.staffExperiences.costingDashboard,
+      moxx.moxi.staffExperiences.costingCorrection,
+      ownership,
+      sysco,
+      futureSupplierChannels
+
+    autoLayout LeftRight 160 100
+  }
+
+  view costLookup {
+    title 'Cost lookup'
+    description 'The shortest path from a product lookup to an explainable materials-cost estimate.'
+
+    include ownership
+    include moxx.moxi.staffExperiences.costingDashboard
+    include moxx.momi.costing.dashboardApi
+    include moxx.momi.costing.calculation
+    include moxx.momi.costing.recipeData
+    include moxx.momi.costing.purchaseEvidence
+    include moxx.momi.costing.ingredientMapping
+
+    autoLayout LeftRight 150 90
+  }
+
+  view costMaintenance {
+    title 'Invoice acquisition and cost maintenance'
+    description 'How supplier evidence becomes cost evidence and unresolved inputs return to durable source data.'
+
+    include sysco
+    include futureSupplierChannels
+    include moxx.momi.costing.invoiceAcquisition
+    include moxx.momi.costing.rawArtifactStore
+    include moxx.momi.costing.invoiceIngestion
+    include moxx.momi.costing.purchaseEvidence
+    include moxx.momi.costing.ingredientMapping
+    include moxx.moxi.staffExperiences.costingCorrection
+    include ownership
+    include moxx.momi.costing.recipeData
+
+    autoLayout LeftRight 150 90
+  }
+}
