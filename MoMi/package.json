@@ -55,7 +55,7 @@
     "pgsql-ast-parser": "12.0.2",
     "postgres": "3.4.3",
     "supabase": "2.109.1",
-    "typescript": "6.0.3"
+    "typescript": "7.0.2"
   },
   "dependencies": {
     "ws": "8.21.3"
