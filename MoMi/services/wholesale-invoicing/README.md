@@ -111,8 +111,10 @@ so they do not claim a two-session lock-contention test.
 
 ## Delivery and rollback
 
-Only the normal exact-receipt protected development release is authorized.
-Use the existing ordered migration history; no private ledger or second deployer.
+Development bootstrap `20261014090216` is applied and verified; see
+`development-bootstrap-evidence.json` for the exact SQL hash and private state.
+ADR 0037 permits existing connected development administration and focused checks.
+Retain actual migration identity and bytes; no private ledger or new publisher.
 The migration verifies exact objects, owner-only ACLs, RLS, disabled policy and
 zero business rows before commit; `verify-bootstrap.sql` repeats read-only
 acceptance immediately afterward as the same approved owner. Unknown grants abort.

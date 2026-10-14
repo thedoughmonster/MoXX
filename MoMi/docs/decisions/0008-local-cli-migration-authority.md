@@ -1,6 +1,8 @@
 # 0008: Use One Local Migration And Release Coordinator
 
 - Status: accepted
+- Amendment: 2026-10-14; ADR `0037` adds standing development `bridge` schema
+  administration through existing connected access, with truthful history.
 - Date: 2026-07-14
 - Amendment: 2026-07-23; the authoritative Linux release host must use its
   authenticated CLI profile and the CLI-owned short-lived login role.

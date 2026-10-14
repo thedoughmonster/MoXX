@@ -57,6 +57,7 @@ capabilities. Modules remain separated by business capability.
 - The Node 24 release coordinator is the sole normal release orchestrator.
   Development migrations run inside `deploy-dev.yml` through its pinned
   Supabase CLI, exact-project `--linked` transport, and governed credential path.
+- ADR `0037` permits existing connected development `bridge` administration and focused checks without the normal release gate.
 - A development release may start only after its exact commit is validated.
   Functions require planned parity or exact-baseline parity with no migration diff.
 - Keep manual operator programs under `local-tools/` and obey its `AGENTS.md`.
@@ -64,8 +65,7 @@ capabilities. Modules remain separated by business capability.
   import it into runtime code.
 - Follow `docs/agent-deployment-procedure.md` for every hosted release. Do not
   improvise another publisher after an authentication or permission failure.
-- The Supabase plugin may inspect or repair migration state in an emergency,
-  but it is not a normal migration or repository deployment authority.
+- The Supabase plugin may inspect, perform explicit emergency repair, and administer eligible development `bridge` changes under ADR `0037`.
 - Preserve complete source payloads. Do not omit source fields.
 - Do not perform business decisions or delivery work in ingestion code.
 - Treat the warehouse as the system of record for all source and business data.

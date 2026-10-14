@@ -12,7 +12,7 @@ const provenance = JSON.parse(readFileSync(new URL("../provenance.json", import.
 const sql = readFileSync(new URL("../../../" + provenance.migration, import.meta.url), "utf8")
 const verify = readFileSync(new URL("../verify-bootstrap.sql", import.meta.url), "utf8")
 
-test("reviewed business SQL and pending migration bytes are pinned; native owner validation passes", async () => {
+test("reviewed business SQL and recorded migration bytes are pinned; native owner validation passes", async () => {
   assert.equal(createHash("sha256").update(sql).digest("hex"), provenance.migration_sha256)
   const body = sql.slice(sql.indexOf("-- Source: supabase/migrations/"), sql.indexOf("-- Immediate bootstrap verification"))
   assert.equal(createHash("sha256").update(body).digest("hex"), provenance.unchanged_business_sql_sha256)

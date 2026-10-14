@@ -1,6 +1,8 @@
 # 0036: Release the Invoice Calendar Database with Runtime Access Deferred
 
 - Status: accepted for the bounded development release
+- Amendment: 2026-10-14; ADR `0037` supersedes the normal-release-only path
+  below for development `bridge` schema work. Runtime access remains deferred.
 - Date: 2026-10-14
 - Work: MOX-584; decision owner: Zac
 

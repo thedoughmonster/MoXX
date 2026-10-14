@@ -1,6 +1,8 @@
 # 0006: Use GitHub As The Only Deployment Authority
 
 - Status: accepted
+- Amendment: 2026-10-14; ADR `0037` permits existing connected administration
+  for development `bridge` schema work only; runtime deployments are unchanged.
 - Date: 2026-07-14
 - Amendment: ADR `0008` supersedes the migration pause and development
   push-event requirement below.

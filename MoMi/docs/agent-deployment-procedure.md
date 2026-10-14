@@ -5,6 +5,22 @@ coordinator owns receipt-bound orchestration, and protected GitHub workflows
 own hosted development migration and Edge Function deployment. GitHub retains
 code, CI, review, merge, and release evidence; it is not a parallel work ledger.
 
+## Standing development bridge exception
+
+[ADR 0037](decisions/0037-development-bridge-schema-administration.md) permits
+authorized changes confined to `bridge` in development project
+`xtbraqnlskmqxinjxxdn` through existing connected Supabase administration access
+and focused checks. That database path does not require the normal global
+release receipt or renewal of unrelated external-function authorities. The
+remaining sections describe normal releases and do not override this exception.
+
+Retain private access, transactional rollback, exact SQL evidence and verified
+readback. Preserve tool-assigned migration versions and bytes; reconcile pending
+repository files before merge so the same SQL cannot apply twice. Never repair
+history, invent a release receipt, create credentials, expand runtime grants,
+change other schemas, or extend the exception to production/live external work.
+Use no new publisher; follow platform confirmations and stop on access denial.
+
 ## Publish and validate
 
 1. Work in one isolated feature worktree from exact current `dev`.

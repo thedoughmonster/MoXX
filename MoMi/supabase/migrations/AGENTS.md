@@ -2,6 +2,9 @@
 
 - Create migration files with `supabase migration new`; never invent timestamps.
 - Applied migrations are immutable.
+- ADR 0037 permits connected development `bridge` administration. Reconcile an
+  unapplied local filename to the verified tool-assigned version before merge;
+  retain exact SQL bytes and provenance, never duplicate or repair hosted history.
 - Keep this directory flat. Only this `AGENTS.md` and migration SQL belong here.
 - Put exactly one `-- service-owner: <service-key>` header on physical line 1
   of each migration not present in the production baseline; never rewrite
