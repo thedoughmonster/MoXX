@@ -40,7 +40,8 @@
     "momi_archive",
     "momi_communications",
     "momi_agent_ops",
-    "momi_governance"
+    "momi_governance",
+    "bridge"
   ],
   "policies": {
     "max_handwritten_lines": 120,
