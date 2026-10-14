@@ -24,6 +24,8 @@
   protected integration branches.
 - Do not deploy, change provider settings, or retire a source repository
   without an explicitly authorized cutover issue and verified rollback path.
+- Standing development `bridge` schema administration follows MoMi ADR 0037;
+  its exact target and exclusions do not change normal merge or release rules.
 
 ## Validation
 

@@ -1,0 +1,106 @@
+{
+  "$schema": "../../schemas/service-manifest-v1.schema.json",
+  "schema_version": 1,
+  "service_key": "wholesale-invoicing",
+  "purpose": "Own effective-dated wholesale standing orders and deterministic weekly invoice preview snapshots.",
+  "kind": "core_capability",
+  "service_type": "dataset_owner",
+  "lifecycle_status": "active",
+  "implementation_status": "implemented",
+  "functions": [],
+  "contracts": {
+    "provides": [
+      "momi.wholesale_invoicing.standing_order.save.v1",
+      "momi.wholesale_invoicing.week.preview.v1",
+      "momi.wholesale_invoicing.standing_order.save.v2",
+      "momi.wholesale_invoicing.calendar.read.v1"
+    ],
+    "consumes": []
+  },
+  "database": {
+    "read": [
+      "bridge.invoice_policy_versions",
+      "bridge.invoice_standing_orders",
+      "bridge.invoice_standing_order_versions",
+      "bridge.invoice_version_weekday_lines",
+      "bridge.invoice_weeks",
+      "bridge.invoice_weekly_snapshots",
+      "bridge.invoice_weekly_snapshot_lines"
+    ],
+    "write": [
+      "bridge.invoice_policy_versions",
+      "bridge.invoice_standing_orders",
+      "bridge.invoice_standing_order_versions",
+      "bridge.invoice_version_weekday_lines",
+      "bridge.invoice_weeks",
+      "bridge.invoice_weekly_snapshots",
+      "bridge.invoice_weekly_snapshot_lines"
+    ]
+  },
+  "network": {
+    "outbound_hosts": []
+  },
+  "secrets": [],
+  "configuration": [],
+  "deployment": {
+    "owns": [],
+    "depends_on": []
+  },
+  "runtime_dependencies": [],
+  "approved_packages": [],
+  "owned_dataset": {
+    "dataset_key": "momi.wholesale_invoicing",
+    "dataset_class": "domain",
+    "private_relations": [
+      "bridge.invoice_policy_versions",
+      "bridge.invoice_standing_orders",
+      "bridge.invoice_standing_order_versions",
+      "bridge.invoice_version_weekday_lines",
+      "bridge.invoice_weeks",
+      "bridge.invoice_weekly_snapshots",
+      "bridge.invoice_weekly_snapshot_lines"
+    ],
+    "private_routines": [
+      "bridge.invoice_validate_standing_order_v1",
+      "bridge.invoice_save_standing_order_v1",
+      "bridge.invoice_preview_week_v1",
+      "bridge.invoice_calendar_version_guard_v1",
+      "bridge.invoice_save_standing_order_v2",
+      "bridge.invoice_calendar_snapshot_v1"
+    ],
+    "public_reads": [
+      "momi.wholesale_invoicing.calendar.read.v1"
+    ],
+    "public_routine_reads": [
+      {
+        "contract": "momi.wholesale_invoicing.calendar.read.v1",
+        "routine": "bridge.invoice_calendar_snapshot_v1"
+      }
+    ],
+    "public_commands": [
+      "momi.wholesale_invoicing.standing_order.save.v1",
+      "momi.wholesale_invoicing.week.preview.v1",
+      "momi.wholesale_invoicing.standing_order.save.v2"
+    ],
+    "public_routine_commands": [
+      {
+        "contract": "momi.wholesale_invoicing.standing_order.save.v1",
+        "routine": "bridge.invoice_save_standing_order_v1"
+      },
+      {
+        "contract": "momi.wholesale_invoicing.week.preview.v1",
+        "routine": "bridge.invoice_preview_week_v1"
+      },
+      {
+        "contract": "momi.wholesale_invoicing.standing_order.save.v2",
+        "routine": "bridge.invoice_save_standing_order_v2"
+      }
+    ],
+    "emitted_events": []
+  },
+  "test_impact": {
+    "schema_version": 1,
+    "owner_service": "wholesale-invoicing",
+    "categories": {"local_unit":[],"local_integration":[{"id":"wholesale-invoicing:local_integration:bootstrap:v1","test":"services/wholesale-invoicing/tests/bootstrap.test.ts","reason":"Exact reviewed object installation, rollback, no runtime grants and retained unrelated evidence.","services":["wholesale-invoicing"],"contracts":[],"triggers":[]},{"id":"wholesale-invoicing:local_integration:calendar-contract:v1","test":"services/wholesale-invoicing/tests/calendar_contract.test.ts","reason":"Versioned calendar metadata, reader, lifecycle, replay and fail-closed legacy behavior.","services":["wholesale-invoicing"],"contracts":[],"triggers":[]},{"id":"wholesale-invoicing:local_integration:standing-orders:v1","test":"services/wholesale-invoicing/tests/standing_orders.test.ts","reason":"Effective dates, command replay, version fencing and protected invoice intervals.","services":["wholesale-invoicing"],"contracts":[],"triggers":[]},{"id":"wholesale-invoicing:local_integration:weekly-previews:v1","test":"services/wholesale-invoicing/tests/weekly_previews.test.ts","reason":"Exact case pricing, immutable revisions, duplicate identity and local-calendar expansion.","services":["wholesale-invoicing"],"contracts":[],"triggers":[]}],"provider_contract":[{"id":"wholesale-invoicing:provider_contract:calendar-boundary:v1","test":"services/wholesale-invoicing/tests/calendar_boundary.test.ts","reason":"Private calendar reader, immutable revisions, absent runtime grants and preserved unrelated data.","services":["wholesale-invoicing"],"contracts":[{"provider_service":"wholesale-invoicing","contract":"momi.wholesale_invoicing.calendar.read.v1"},{"provider_service":"wholesale-invoicing","contract":"momi.wholesale_invoicing.standing_order.save.v2"}],"triggers":[]},{"id":"wholesale-invoicing:provider_contract:private-boundary:v1","test":"services/wholesale-invoicing/tests/private_boundary.test.ts","reason":"Private routine access, immutable evidence, disabled delivery and invalid-input rejection.","services":["wholesale-invoicing"],"contracts":[{"provider_service":"wholesale-invoicing","contract":"momi.wholesale_invoicing.standing_order.save.v1"},{"provider_service":"wholesale-invoicing","contract":"momi.wholesale_invoicing.week.preview.v1"}],"triggers":[]}],"consumer_contract":[],"cross_service_integration":[],"mandatory_global":[],"risk_triggered":[{"id":"wholesale-invoicing:risk_triggered:exact-ownership:v1","test":"services/wholesale-invoicing/tests/ownership.test.ts","reason":"Exact owned objects and native migration authority match the owner-only bootstrap.","services":["wholesale-invoicing"],"contracts":[],"triggers":["architecture","manifest","migration"]}]}
+  }
+}
