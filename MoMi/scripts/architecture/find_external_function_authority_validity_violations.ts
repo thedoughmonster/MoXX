@@ -8,10 +8,23 @@ export function findExternalFunctionAuthorityValidityViolations(
   const violations: string[] = []
   for (const authority of authorities) {
     const label = authority.function_slug
-    for (const [name, value] of [
+    const dates = [
       ["verified_at", authority.verified_at],
       ["valid_until", authority.valid_until],
-    ]) {
+    ]
+    if (authority.lifecycle_status === "retired_retained") {
+      dates.push(["retirement.verified_at", authority.retirement.verified_at])
+      if (authority.retirement.verified_at > authority.verified_at) {
+        violations.push(`${label}: retirement verification cannot follow authority verification`)
+      }
+      const expected = `https://github.com/${authority.owner_repository}/actions/runs/`
+      const evidence = authority.retirement.evidence_url
+      if (!evidence.startsWith(expected) ||
+        !/^[1-9][0-9]*$/.test(evidence.slice(expected.length))) {
+        violations.push(`${label}: retirement evidence must identify an owner workflow run`)
+      }
+    }
+    for (const [name, value] of dates) {
       const parsed = new Date(`${value}T00:00:00.000Z`)
       if (Number.isNaN(parsed.valueOf()) ||
         parsed.toISOString().slice(0, 10) !== value) {

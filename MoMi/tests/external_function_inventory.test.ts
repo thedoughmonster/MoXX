@@ -22,6 +22,7 @@ const architecture = {
   retirements: [],
   externalFunctionAuthorities: [{
     function_slug: "external-v1",
+    lifecycle_status: "active",
     owner_repository: "thedoughmonster/momi-symphony",
     environments: [{ name: "dev", project_ref: "xtbraqnlskmqxinjxxdn" }],
     adapter_path: "supabase/functions/external-v1/index.ts",
@@ -40,6 +41,24 @@ test("requires externally owned functions with owner-bound hosted metadata", () 
   assert.deepEqual(result.missing, [])
   assert.deepEqual(result.unexpected, [])
   assert.deepEqual(result.invalid_metadata, [])
+})
+
+test("retired retained functions remain required with strict hosted metadata", () => {
+  const retained = {
+    ...architecture,
+    externalFunctionAuthorities: architecture.externalFunctionAuthorities.map((item) => ({
+      ...item, lifecycle_status: "retired_retained",
+    })),
+  } as Architecture
+  const absent = reconcileInventory(retained, "dev", [], "2026-07-21")
+  assert.deepEqual(absent.missing, ["external-v1"])
+  assert.deepEqual(absent.retired, [])
+  const invalid = reconcileInventory(retained, "dev", [{
+    ...hostedFunction("external-v1"), status: "REMOVED", ezbr_sha256: null,
+  }], "2026-07-21")
+  assert.ok(invalid.invalid_metadata.some((item) => item.includes("status must be ACTIVE")))
+  assert.ok(invalid.invalid_metadata.some((item) => item.includes("entrypoint_path")))
+  assert.ok(invalid.invalid_metadata.some((item) => item.includes("bundle hash")))
 })
 
 test("rejects missing or mismatched externally owned functions", () => {

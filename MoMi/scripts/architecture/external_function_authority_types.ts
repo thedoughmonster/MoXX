@@ -3,7 +3,6 @@ export type ExternalFunctionAuthority = {
   function_slug: string
   owner_repository: string
   owner_service: string
-  lifecycle_status: "active"
   environments: Array<{ name: "dev"; project_ref: string }>
   deployment_workflow: ".github/workflows/deploy-dev.yml"
   adapter_path: string
@@ -16,4 +15,15 @@ export type ExternalFunctionAuthority = {
     state: "active" | "policy_disabled"
     evidence_url: string
   }
-}
+} & ({
+  lifecycle_status: "active"
+  retirement?: never
+} | {
+  lifecycle_status: "retired_retained"
+  caller: { state: "policy_disabled" }
+  retirement: {
+    source_revision: string
+    verified_at: string
+    evidence_url: string
+  }
+})
