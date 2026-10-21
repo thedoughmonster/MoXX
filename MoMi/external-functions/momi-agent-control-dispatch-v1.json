@@ -4,17 +4,22 @@
   "function_slug": "momi-agent-control-dispatch-v1",
   "owner_repository": "thedoughmonster/momi-symphony",
   "owner_service": "agent-control",
-  "lifecycle_status": "active",
+  "lifecycle_status": "retired_retained",
   "environments": [{"name": "dev", "project_ref": "xtbraqnlskmqxinjxxdn"}],
   "deployment_workflow": ".github/workflows/deploy-dev.yml",
   "adapter_path": "supabase/functions/momi-agent-control-dispatch-v1/index.ts",
   "verify_jwt": false,
   "source_revision": "2fde514cca5a915ba3793f4f9391dbe35ca17c2f",
-  "verified_at": "2026-08-23",
-  "valid_until": "2026-09-22",
+  "verified_at": "2026-10-21",
+  "valid_until": "2026-11-20",
+  "retirement": {
+    "source_revision": "d5acffd23a81c311090825e3c125fe65871c966d",
+    "verified_at": "2026-10-21",
+    "evidence_url": "https://github.com/thedoughmonster/momi-symphony/actions/runs/39653140144"
+  },
   "caller": {
     "kind": "database_trigger",
-    "state": "active",
-    "evidence_url": "https://github.com/thedoughmonster/momi-symphony/blob/2fde514cca5a915ba3793f4f9391dbe35ca17c2f/supabase/migrations/20260814125236_add_agent_control_dispatch_trigger_adapter.sql"
+    "state": "policy_disabled",
+    "evidence_url": "https://github.com/thedoughmonster/momi-symphony/actions/runs/39653140144"
   }
 }
