@@ -1,9 +1,10 @@
 # Agent Deployment Procedure
 
-Linear owns work state, PR CI owns final validation, the local Node 24
-coordinator owns receipt-bound orchestration, and protected GitHub workflows
+The authorized task and PR evidence record work state. PR CI owns final
+validation, the local Node 24 coordinator owns receipt-bound orchestration,
+and protected GitHub workflows
 own hosted development migration and Edge Function deployment. GitHub retains
-code, CI, review, merge, and release evidence; it is not a parallel work ledger.
+code, CI, review, merge, and release evidence. No external work tracker is required.
 
 ## Publish and validate
 
@@ -21,8 +22,8 @@ code, CI, review, merge, and release evidence; it is not a parallel work ledger.
    checkout materialized from the committed head. Development and production
    migration baselines are pinned to resolved SHAs and recorded with their trees
    in the receipt before the clean source HEAD and refs are rechecked.
-4. Commit, push, and open one draft PR to `dev`. Link the Linear issue when
-   available for traceability; no duplicate GitHub issue metadata is required.
+4. When authorized, commit, push, and open one draft PR to `dev`. Record the task
+   scope and acceptance evidence; no external work-tracker issue is required.
 5. Let the PR job named `validate-final` derive and run exactly one final gate.
 6. Download its `validation-<head-sha>` artifact after success.
 
@@ -80,7 +81,7 @@ Supabase plugin, CLI, dashboard, or local code.
 - GitHub credentials remain in the GitHub CLI credential store.
 - Development Supabase credentials remain protected GitHub environment secrets.
 - The default database login is short-lived and internal to the pinned CLI.
-- During active development, an accepted Linear issue may authorize a
+- During active development, explicit recorded human approval may authorize a
   non-expiring credential or Supabase token-to-database use only through the
   protected, least-privilege, owner-bound, revocable, and rollback-ready
   exception in [Release credentials](release-credentials.md).

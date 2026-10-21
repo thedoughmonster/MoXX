@@ -3,11 +3,13 @@ import { existsSync } from "node:fs"
 import { readFile, readdir } from "node:fs/promises"
 import test from "node:test"
 
-test("repository declares one work authority and one code-evidence authority", async () => {
+test("repository accepts authorized task and PR evidence without a work tracker", async () => {
   const contract = await readFile("AGENTS.md", "utf8")
-  assert.match(contract, /Linear is the sole authority for planning and execution work state/)
+  assert.match(contract, /authorized task and PR evidence record scope, decisions, and delivery state/)
+  assert.match(contract, /No external work tracker is required/)
   assert.match(contract, /GitHub owns branches, PRs, CI, reviews, merge, and release evidence/)
-  assert.match(contract, /not a parallel work-state ledger/)
+  assert.match(contract, /Preserve historical issue identifiers and decisions as audit evidence/)
+  assert.doesNotMatch(contract, /Bind every change to one Linear issue|Linear is the sole authority/)
 })
 
 test("retired parallel governance surfaces are absent", async () => {
@@ -53,7 +55,22 @@ test("PR template omits retired delivery-proof metadata", async () => {
   const disposition = ["Dis", "position"].join("")
   assert.doesNotMatch(template, new RegExp(owning, "i"))
   assert.doesNotMatch(template, new RegExp(`^${disposition}:`, "im"))
-  assert.match(template, /Linear issue link, when available/)
+  assert.match(template, /authorized task and its acceptance criteria/)
+  assert.match(template, /no external work-tracker issue is required/)
+  assert.doesNotMatch(template, /Linear issue/)
+})
+
+test("development skills require scoped human authority without tracker access", async () => {
+  const paths = ["develop-repository-change", "momi-execution"]
+  for (const name of paths) {
+    const source = await readFile(`.agents/skills/${name}/SKILL.md`, "utf8")
+    assert.match(source, /authorized task/)
+    assert.match(source, /task or PR/)
+    assert.doesNotMatch(source, /Confirm the native Linear connector|Bind the change to exactly one Linear issue/)
+  }
+  const execution = await readFile(".agents/skills/momi-execution/SKILL.md", "utf8")
+  assert.match(execution, /Do not merge unless the user explicitly requested it/)
+  assert.match(execution, /Never promote to production without explicit authority/)
 })
 
 test("active contracts omit retired remote issue authority", async () => {
