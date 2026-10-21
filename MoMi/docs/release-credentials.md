@@ -22,8 +22,8 @@ strip `SUPABASE_DB_PASSWORD` and `PGPASSWORD`.
 
 ## Active-development non-expiring exception
 
-While MoMi is in active development, an accepted Linear issue may authorize a
-credential with no automatic expiry. The issue must bind one credential name
+While MoMi is in active development, explicit recorded human approval may
+authorize a credential with no automatic expiry. The approval must bind one credential name
 and purpose to the exact environments, projects, provider identity, minimum
 required roles or scopes, and any available network restriction. It must also
 name the owner, protected authoritative store, rotation and immediate-revocation
@@ -31,14 +31,15 @@ procedure, read-only verification, and rollback path. Non-expiring means valid
 until revoked; it does not mean unowned or exempt from rotation after exposure,
 owner change, scope change, failed verification, or the end of active
 development. This policy creates no credential or provider mutation authority
-by itself.
+by itself. Record approval in the authorized task or PR; no external work
+tracker is required.
 
-For Supabase token-to-database access, the issue must explicitly authorize that
+For Supabase token-to-database access, the approval must explicitly authorize that
 use and the exact database role. The token may be consumed only inside the
 approved workflow or pinned client after the provider access mapping is enabled.
 Repository code must not copy it into `SUPABASE_DB_PASSWORD`, `PGPASSWORD`, a
 connection URL, command argument, unrelated child process, artifact, or receipt,
-and must not propagate it beyond the approved pinned client. If the issue does
+and must not propagate it beyond the approved pinned client. If the approval does
 not authorize this exact exception, the CLI-owned short-lived login remains
 mandatory.
 
@@ -102,7 +103,7 @@ GitHub workflows.
 2. Repair only the failed credential authority after that check also fails.
 3. For development migration auth, inspect the protected workflow; for
    production, verify the CLI profile, exact linked ref, and project membership.
-   Use token-to-database access only when its accepted Linear issue authorizes
+   Use token-to-database access only when explicit recorded human approval authorizes
    the exact role and the active-development controls above are satisfied.
 4. For repository-only release, any database login attempt is a tooling defect.
 

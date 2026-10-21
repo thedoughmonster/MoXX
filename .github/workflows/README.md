@@ -25,8 +25,9 @@ MoXX has no scheduled database-access renewal workflow. MOX-409 authorizes the
 non-scheduled production model documented in
 `MoMi/docs/release-credentials.md`.
 
-Linear is the sole work-item authority. Root workflows neither ingest nor
-mutate GitHub Issues, and no GitHub issue state is a planning or completion
-gate. They do not enforce a duplicate delivery ledger through pull-request
-metadata. GitHub continues to own branches, commits, pull requests, CI, review
-history, and deployments.
+Work follows the user's authorized task, with scope, decisions, and validation
+recorded as task or PR evidence. No external work tracker is required. Root
+workflows neither ingest nor mutate GitHub Issues, and no external tracker
+state is a planning or completion gate. They do not enforce a duplicate delivery
+ledger through pull-request metadata. GitHub continues to own branches, commits,
+pull requests, CI, review history, and deployments.

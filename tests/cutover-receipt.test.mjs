@@ -81,8 +81,17 @@ test("keeps MoXX free of a scheduled Supabase renewal workflow", () => {
 test("keeps active workspace instructions and architecture identity on MoXX", () => {
   const agents = read("MoXi/AGENTS.md")
   assert.match(agents, /workspace in `thedoughmonster\/MoXX`/)
-  assert.match(agents, /Linear is the sole active work-item authority/)
+  assert.match(agents, /user's authorized task defines the work scope/)
+  assert.match(agents, /task or PR evidence/)
+  assert.match(agents, /No external work\s+tracker is required\./)
+  assert.doesNotMatch(agents, /Linear is the sole(?: active)? work-item authority/)
   assert.doesNotMatch(agents, /This private repository owns|momi-backend#\d+/)
+
+  const rootAgents = read("AGENTS.md")
+  assert.match(rootAgents, /user's authorized task[\s\S]*task or PR evidence/)
+  assert.match(rootAgents, /No external work tracker is required\./)
+  assert.match(rootAgents, /explicitly authorized cutover task and verified rollback path/)
+  assert.match(agents, /handle credentials without exact authority from the owning task/)
 
   const schema = read("MoMi/schemas/architecture-snapshot-identity-v2.schema.json")
   assert.match(schema, /"repository": \{ "const": "thedoughmonster\/MoXX" \}/)

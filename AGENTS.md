@@ -12,6 +12,8 @@
 
 ## Hard rules
 
+- Work from the user's authorized task and retain scope, decisions, and
+  validation as task or PR evidence. No external work tracker is required.
 - Keep UI implementation and backend behavior independently reviewable even
   when they share one repository.
 - Do not move business logic into `MoXi` or presentation behavior into `MoMi`.
@@ -23,7 +25,7 @@
 - Use feature branches or isolated worktrees. Treat `dev` and `prod` as
   protected integration branches.
 - Do not deploy, change provider settings, or retire a source repository
-  without an explicitly authorized cutover issue and verified rollback path.
+  without an explicitly authorized cutover task and verified rollback path.
 
 ## Validation
 

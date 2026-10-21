@@ -2,7 +2,10 @@
 
 Describe the bounded change and its owner.
 
-Owning Linear issue: MOX-
+Authorized task or PR evidence:
+
+Link the task evidence or summarize the authorization here. No external work
+tracker is required.
 
 ## Product scope
 

@@ -98,7 +98,7 @@ preview, apply, or parity mismatch stops the release. There is no caller flag,
 environment bypass, or manual release override for this path.
 
 The authenticated CLI owns its database login. Short-lived login is the default;
-an accepted Linear issue may authorize the active-development non-expiring
+explicit recorded human approval may authorize the active-development non-expiring
 exception in [Release credentials](release-credentials.md). Repository code
 passes no password, database URL, JIT option, or credential-shaped receipt data.
 
