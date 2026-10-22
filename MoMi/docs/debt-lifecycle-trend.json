@@ -1,9 +1,9 @@
 {
   "generated": true,
-  "as_of": "2026-08-25",
+  "as_of": "2026-10-22",
   "purpose": "Review signal only; lower debt counts do not prove correct ownership.",
   "total": 81,
-  "oldest_age_days": 38,
+  "oldest_age_days": 96,
   "by_issue": {
     "MOX-20": 56,
     "MOX-22": 15,
