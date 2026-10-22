@@ -99,6 +99,26 @@ GitHub workflows.
 
 ## Failure handling
 
+### Proposed retention-only production consumer
+
+Pending and unactivated: ADR 0036 proposes allowing `deploy-prod.yml` dispatched
+from `dev` at the exact approved SHA, using the protected `prod` environment's
+`SUPABASE_ACCESS_TOKEN`, owned by Zac, to execute only three pinned retention SQL
+sources against `viodfldzuoypnpqaagag` through the pinned CLI and existing
+`postgres` mapping, then deploy only the approved governor payload. This expands
+both MOX-409's consumer purpose and its production branch authority. Both require
+explicit user approval before configuration, merge or use. Production environment
+branch eligibility must be verified; permitting `dev` there, if needed, requires
+separate explicit approval. This PR changes no protected environment settings.
+It creates no credential, role or provider mapping. Existing protected custody,
+network/role restrictions and immediate-revocation procedures remain unchanged.
+The exact approved document must match `MOMI_RETENTION_APPROVAL_SHA256`, expire
+within 24 hours and precede the runner's fixed sunset. Remove that digest to
+disable future attempts; committed SQL requires the separate recovery described
+in the [retention exception procedure](retention-release-exception.md).
+
+### Existing failure handling
+
 1. Repeat sandbox-failed read-only auth checks with approved network access.
 2. Repair only the failed credential authority after that check also fails.
 3. For development migration auth, inspect the protected workflow; for

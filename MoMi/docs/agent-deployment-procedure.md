@@ -105,6 +105,9 @@ migrations.
 
 ## Failure and rollback
 
+The [proposed retention exception](retention-release-exception.md) is unactivated
+and separately approval-bound; it does not relax the normal rules above.
+
 Inspect the exact failed job or migration step and fix the owning change. Do not retry through a different deployment authority. Stop for destructive effects,
 secret exposure, production exposure without authority, or inability to prove
 rollback. Git revert is code rollback; applied schema corrections are additive

@@ -130,6 +130,7 @@ test("keeps function deployment behind the guarded apply entry point", async () 
   assert.deepEqual(deployCommands.sort(), ["deploy/deploy_functions.ts"])
   assert.deepEqual(deployCallers.sort(), [
     "deploy/deploy_functions.ts",
+    "release/retention/execute.ts",
     "run_deploy_apply.ts",
   ])
   const apply = await readFile(new URL("../scripts/run_deploy_apply.ts", import.meta.url), "utf8")
