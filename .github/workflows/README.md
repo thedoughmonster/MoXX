@@ -7,6 +7,8 @@ as source-history reference material and are not execution authorities in MoXX.
 Root workflows route product commands through `MoMi/` or `MoXi/` explicitly.
 Backend deployment apply remains limited to `deploy-dev.yml` and
 `deploy-prod.yml`; UI deployment remains limited to the two Cloudflare workflows.
+The repository-wide LikeC4 model is validated independently by
+`validate-architecture.yml`; it does not deploy or change tunnel configuration.
 Secret values are never stored here: workflows reference repository or
 environment secrets by name.
 `cloudflare-credential-preflight.yml` and

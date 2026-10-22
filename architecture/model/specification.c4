@@ -1,0 +1,132 @@
+specification {
+  element person {
+    style {
+      shape person
+      color muted
+    }
+  }
+
+  element product {
+    notation 'Product boundary'
+    style {
+      shape rectangle
+      icon bootstrap:boxes
+      opacity 5%
+    }
+  }
+
+  element plane {
+    notation 'Product plane'
+    style {
+      shape rectangle
+      icon bootstrap:folder
+      opacity 5%
+    }
+  }
+
+  element experience {
+    notation 'Experience family'
+    style {
+      shape rectangle
+      icon bootstrap:window
+      opacity 10%
+    }
+  }
+
+  element domain {
+    notation 'Product domain'
+    style {
+      shape rectangle
+      icon bootstrap:diagram-3
+      opacity 10%
+    }
+  }
+
+  element capability {
+    notation 'Architectural capability'
+    style {
+      shape rectangle
+      icon bootstrap:check2-square
+    }
+  }
+
+  element webapp {
+    notation 'Web application'
+    style {
+      shape browser
+      icon bootstrap:window
+    }
+  }
+
+  element service {
+    notation 'Backend service'
+    style {
+      shape rectangle
+      icon bootstrap:gear
+    }
+  }
+
+  element adapter {
+    notation 'Integration adapter'
+    style {
+      shape component
+      icon bootstrap:arrow-left-right
+    }
+  }
+
+  element database {
+    notation 'Data store'
+    style {
+      shape cylinder
+      icon bootstrap:database
+    }
+  }
+
+  element platform {
+    notation 'Managed platform'
+    style {
+      shape rectangle
+      icon bootstrap:cloud
+      opacity 20%
+    }
+  }
+
+  element external {
+    notation 'Third-party system'
+    style {
+      shape rectangle
+      icon bootstrap:building
+      opacity 20%
+    }
+  }
+
+  tag discovery {
+  }
+
+  tag planned {
+  }
+
+  tag implemented {
+  }
+
+  tag legacy {
+  }
+
+  tag customer-facing {
+  }
+
+  tag staff-facing {
+  }
+
+  tag moxx-owned {
+    color green
+  }
+
+  tag managed-platform {
+    color indigo
+  }
+
+  tag third-party {
+    color gray
+  }
+}

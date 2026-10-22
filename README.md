@@ -4,10 +4,16 @@ MoXX is the product monorepo for the Dough Monster application surfaces.
 
 - `MoXi/` owns user interfaces and browser-facing presentation.
 - `MoMi/` owns backend services, database migrations, and backend contracts.
+- `architecture/` owns the repository-wide LikeC4 model and architecture
+  dashboard.
 
 Each directory retains its own toolchain, lockfile, and local `AGENTS.md`.
 Run commands from the owning directory unless a root command explicitly says
 otherwise.
+
+Architecture work is modeled as it is discovered. LikeC4 elements use distinct
+`discovery`, `planned`, and `implemented` lifecycle tags so proposed behavior is
+never mistaken for verified operational behavior.
 
 ## Repository authority
 

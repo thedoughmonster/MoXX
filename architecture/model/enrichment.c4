@@ -1,0 +1,251 @@
+model {
+  extend moxx {
+    link https://github.com/thedoughmonster/MoXX/tree/dev 'Source'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/README.md 'README'
+    metadata { sourcePath '/' }
+  }
+
+  extend moxx.moxi {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoXi 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoXi/README.md 'README'
+    metadata { sourcePath 'MoXi' }
+  }
+
+  extend moxx.moxi.customerExperiences.preorder {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoXi/src/features/preorder 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoXi/README.md 'README'
+    metadata { sourcePath 'MoXi/src/features/preorder' }
+  }
+
+  extend moxx.momi {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/docs/architecture.md 'Architecture'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/docs/service-catalog.md 'Service catalog'
+    metadata { sourcePath 'MoMi' }
+  }
+
+  extend moxx.momi.commerce.preorder {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/preorder-operations 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/preorder-operations/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/preorder-operations/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/preorder-operations' }
+  }
+
+  extend moxx.momi.commerce.checkout {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/cart-checkout-operations 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/cart-checkout-operations/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/cart-checkout-operations/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/cart-checkout-operations' }
+  }
+
+  extend moxx.momi.ingestion.toastIntegration.webhook {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/toast-webhook-ingestion 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/toast-webhook-ingestion/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/toast-webhook-ingestion/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/toast-webhook-ingestion' }
+  }
+
+  extend moxx.momi.ingestion.toastIntegration.acquisition {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/toast-data-acquisition 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/toast-data-acquisition/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/toast-data-acquisition/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/toast-data-acquisition' }
+  }
+
+  extend moxx.momi.ingestion.toastIntegration.orders {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/toast-order-ingest 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/toast-order-ingest/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/toast-order-ingest/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/toast-order-ingest' }
+  }
+
+  extend moxx.momi.ingestion.toastIntegration.stock {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/toast-stock-ingest 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/toast-stock-ingest/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/toast-stock-ingest/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/toast-stock-ingest' }
+  }
+
+  extend moxx.momi.ingestion.toastIntegration.hydration {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/toast-order-hydration 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/toast-order-hydration/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/toast-order-hydration/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/toast-order-hydration' }
+  }
+
+  extend moxx.momi.ingestion.toastIntegration.readApi {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/toast-order-read-api 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/toast-order-read-api/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/toast-order-read-api/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/toast-order-read-api' }
+  }
+
+  extend moxx.momi.ingestion.squareIntegration.acquisition {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/square-payment-acquisition 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/square-payment-acquisition/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/square-payment-acquisition/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/square-payment-acquisition' }
+  }
+
+  extend moxx.momi.ingestion.squareIntegration.delivery {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/square-payment-delivery 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/square-payment-delivery/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/square-payment-delivery/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/square-payment-delivery' }
+  }
+
+  extend moxx.momi.ingestion.trelloIntegration.acquisition {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/trello-data-acquisition 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/trello-data-acquisition/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/trello-data-acquisition/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/trello-data-acquisition' }
+  }
+
+  extend moxx.momi.ingestion.trelloIntegration.evidence {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/trello-evidence-ingestion 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/trello-evidence-ingestion/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/trello-evidence-ingestion/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/trello-evidence-ingestion' }
+  }
+
+  extend moxx.momi.ingestion.trelloIntegration.delivery {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/trello-task-delivery 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/trello-task-delivery/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/trello-task-delivery/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/trello-task-delivery' }
+  }
+
+  extend moxx.momi.data.routing {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/momi-event-routing 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/momi-event-routing/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/momi-event-routing/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/momi-event-routing' }
+  }
+
+  extend moxx.momi.data.projection {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/warehouse-projection 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/warehouse-projection/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/warehouse-projection/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/warehouse-projection' }
+  }
+
+  extend moxx.momi.data.readApi {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/warehouse-read-api 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/warehouse-read-api/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/warehouse-read-api/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/warehouse-read-api' }
+  }
+
+  extend moxx.momi.data.legacyRecipeTransform {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/legacy-recipe-transform 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/legacy-recipe-transform/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/legacy-recipe-transform/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/legacy-recipe-transform' }
+  }
+
+  extend moxx.momi.data.rawArchive {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/supabase/migrations 'Migrations'
+    metadata { sourcePath 'MoMi/supabase/migrations' }
+  }
+
+  extend moxx.momi.data.warehouse {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/supabase/migrations 'Migrations'
+    metadata { sourcePath 'MoMi/supabase/migrations' }
+  }
+
+  extend moxx.momi.workflows.fulfillment.kitchen {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/kitchen-task-management 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/kitchen-task-management/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/kitchen-task-management/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/kitchen-task-management' }
+  }
+
+  extend moxx.momi.workflows.alerting.orderAlerting {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/order-alerting 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/order-alerting/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/order-alerting/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/order-alerting' }
+  }
+
+  extend moxx.momi.workflows.alerting.slackDelivery {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/slack-order-delivery 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/slack-order-delivery/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/slack-order-delivery/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/slack-order-delivery' }
+  }
+
+  extend moxx.momi.workflows.communicationsDomain.gateway {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/communications-gateway 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/communications-gateway/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/communications-gateway/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/communications-gateway' }
+  }
+
+  extend moxx.momi.workflows.communicationsDomain.archive {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/communications-archive 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/communications-archive/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/communications-archive/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/communications-archive' }
+  }
+
+  extend moxx.momi.workflows.communicationsDomain.evaluation {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/communications-evaluation 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/communications-evaluation/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/communications-evaluation/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/communications-evaluation' }
+  }
+
+  extend moxx.momi.workflows.communicationsDomain.operations {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/communications-operations 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/communications-operations/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/communications-operations/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/communications-operations' }
+  }
+
+  extend moxx.momi.workflows.aiRuntime.gateway {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/model-execution-gateway 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/model-execution-gateway/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/model-execution-gateway/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/model-execution-gateway' }
+  }
+
+  extend moxx.momi.workflows.aiRuntime.registry {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/runtime-registry 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/runtime-registry/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/runtime-registry/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/runtime-registry' }
+  }
+
+  extend moxx.momi.governance.archive {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/archive-governance 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/archive-governance/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/archive-governance/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/archive-governance' }
+  }
+
+  extend moxx.momi.governance.cronHistory {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/cron-history-governance 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/cron-history-governance/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/cron-history-governance/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/cron-history-governance' }
+  }
+
+  extend moxx.momi.governance.baseline {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/project-baseline-governance 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/project-baseline-governance/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/project-baseline-governance/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/project-baseline-governance' }
+  }
+
+  extend moxx.momi.governance.agentControl {
+    link https://github.com/thedoughmonster/MoXX/tree/dev/MoMi/services/agent-control 'Code'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/agent-control/README.md 'README'
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/services/agent-control/service.json 'Manifest'
+    metadata { sourcePath 'MoMi/services/agent-control' }
+  }
+
+  extend moxx.mosi {
+    link https://github.com/thedoughmonster/MoXX/blob/dev/MoMi/docs/decisions/0018-canonical-product-plane-names.md 'Boundary ADR'
+    metadata { implementationStatus 'planned; no authorized concrete services' }
+  }
+}
