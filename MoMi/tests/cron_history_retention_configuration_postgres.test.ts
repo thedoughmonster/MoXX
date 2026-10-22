@@ -16,6 +16,9 @@ test("retention profile is opt-in and invalid configuration cannot mutate policy
     assert.deepEqual(defaults.rows, [{ completed_raw_retention: null,
       raw_retention: "7 days", exception_retention: "365 days",
       summary_retention: "90 days" }])
+    assert.deepEqual((await database.query(`select has_function_privilege(
+      'service_role', 'momi_cron_history.configure_retention_v1(integer,timestamptz)',
+      'EXECUTE') as allowed`)).rows, [{ allowed: false }])
     await database.query("select momi_cron_history.configure_v1('disarmed',500,0,0,null)")
     const before = await database.query("select to_jsonb(p) as policy from momi_cron_history.policy_control p")
     for (const days of [-1, 0, 7, 29, 31, 365]) {

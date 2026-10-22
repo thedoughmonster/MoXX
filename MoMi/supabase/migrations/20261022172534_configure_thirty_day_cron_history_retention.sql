@@ -86,9 +86,7 @@ end;
 $$;
 
 revoke all on function momi_cron_history.configure_retention_v1(integer, timestamptz)
-  from public, anon, authenticated;
-grant execute on function momi_cron_history.configure_retention_v1(integer, timestamptz)
-  to service_role;
+  from public, anon, authenticated, service_role;
 
 create or replace function momi_cron_history.run_batch_v1(
   p_batch_id uuid, p_limit integer, p_dry_run boolean default false
@@ -691,5 +689,235 @@ begin
   ) values (p_runid, p_exception_kind, p_declaration_key)
   on conflict (runid) do nothing;
   return found;
+end;
+$$;
+
+create or replace function momi_cron_history.record_provider_sample_v1(
+  p_tick_id uuid,
+  p_capability_token uuid,
+  p_source_observed_at timestamptz,
+  p_cpu_total_seconds numeric,
+  p_cpu_idle_seconds numeric,
+  p_ram_pct numeric,
+  p_swap_used_bytes numeric,
+  p_io_busy_seconds numeric,
+  p_allocated_disk_pct numeric,
+  p_provider_connections integer,
+  p_provider_warning boolean,
+  p_source_complete boolean
+) returns jsonb language plpgsql security definer set search_path = '' as $$
+declare
+  tick momi_cron_history.governor_ticks%rowtype;
+  previous momi_cron_history.health_samples%rowtype;
+  policy momi_cron_history.policy_control%rowtype;
+  elapsed_seconds numeric;
+  cpu_delta numeric;
+  idle_delta numeric;
+  io_delta numeric;
+  derived_cpu_pct numeric;
+  derived_io_pct numeric;
+  complete boolean;
+  waiting_count integer;
+  vacuum_count integer;
+  old_xact_count integer;
+  connection_count integer;
+  order_queue_length bigint;
+  order_oldest_age numeric;
+  projection_queue_length bigint;
+  projection_oldest_age numeric;
+  order_dlq_length bigint;
+  projection_dlq_length bigint;
+  gate jsonb;
+  batch_result jsonb;
+  response jsonb;
+  error_state text;
+  error_signature text;
+  next_error_count integer;
+begin
+  perform set_config('lock_timeout', '250ms', true);
+  perform set_config('statement_timeout', '3000ms', true);
+  select * into tick from momi_cron_history.governor_ticks
+  where tick_id = p_tick_id and capability_token = p_capability_token
+  for update;
+  if not found then
+    raise exception 'unknown governor tick' using errcode = '28000';
+  end if;
+  if tick.tick_status = 'completed' then return tick.result; end if;
+  if tick.tick_status <> 'claimed'
+    or tick.dispatched_at < now() - interval '2 minutes' then
+    raise exception 'inactive governor tick' using errcode = '28000';
+  end if;
+
+  select * into previous from momi_cron_history.health_samples
+  where source_complete
+    and cpu_total_seconds is not null
+    and cpu_idle_seconds is not null
+    and io_busy_seconds is not null
+  order by source_observed_at desc limit 1;
+  if found then
+    elapsed_seconds := extract(
+      epoch from p_source_observed_at - previous.source_observed_at
+    );
+    cpu_delta := p_cpu_total_seconds - previous.cpu_total_seconds;
+    idle_delta := p_cpu_idle_seconds - previous.cpu_idle_seconds;
+    io_delta := p_io_busy_seconds - previous.io_busy_seconds;
+    if elapsed_seconds > 0 and cpu_delta > 0
+      and idle_delta between 0 and cpu_delta then
+      derived_cpu_pct := least(
+        100, greatest(0, (cpu_delta - idle_delta) / cpu_delta * 100)
+      );
+    end if;
+    if elapsed_seconds > 0 and io_delta >= 0 then
+      derived_io_pct := greatest(0, io_delta / elapsed_seconds * 100);
+    end if;
+  end if;
+
+  complete := coalesce(
+    coalesce(p_source_complete, false)
+    and p_source_observed_at between now() - interval '5 minutes'
+      and now() + interval '30 seconds'
+    and p_cpu_total_seconds is not null
+    and p_cpu_idle_seconds is not null
+    and p_io_busy_seconds is not null
+    and p_ram_pct between 0 and 100
+    and p_swap_used_bytes >= 0
+    and p_allocated_disk_pct between 0 and 100
+    and p_provider_connections >= 0
+    and p_provider_warning is not null,
+    false
+  );
+
+  select count(*) into waiting_count from pg_locks where not granted;
+  select count(*) into vacuum_count from pg_stat_progress_vacuum;
+  select count(*) into old_xact_count from pg_stat_activity
+  where pid <> pg_backend_pid()
+    and xact_start < now() - interval '30 seconds';
+  select count(*) into connection_count from pg_stat_activity
+  where datname = current_database();
+  select queue_length, oldest_msg_age_sec
+  into order_queue_length, order_oldest_age
+  from pgmq.metrics('order_alerting_v1');
+  select queue_length, oldest_msg_age_sec
+  into projection_queue_length, projection_oldest_age
+  from pgmq.metrics('warehouse_projection_toast_v1');
+  select queue_length into order_dlq_length
+  from pgmq.metrics('order_alerting_v1_dead_letter');
+  select queue_length into projection_dlq_length
+  from pgmq.metrics('warehouse_projection_toast_v1_dead_letter');
+
+  insert into momi_cron_history.health_samples (
+    tick_id, source_observed_at, source_complete,
+    cpu_total_seconds, cpu_idle_seconds, io_busy_seconds,
+    cpu_pct, ram_pct, swap_used_bytes, io_pct, allocated_disk_pct,
+    provider_connections, provider_warning, waiting_locks,
+    active_vacuums, old_transactions, local_connections,
+    order_alert_queue_length, order_alert_oldest_age,
+    projection_queue_length, projection_oldest_age,
+    order_alert_dlq_length, projection_dlq_length
+  ) values (
+    p_tick_id, p_source_observed_at, complete,
+    p_cpu_total_seconds, p_cpu_idle_seconds, p_io_busy_seconds,
+    derived_cpu_pct, p_ram_pct, p_swap_used_bytes, derived_io_pct,
+    p_allocated_disk_pct, p_provider_connections, p_provider_warning,
+    waiting_count, vacuum_count, old_xact_count, connection_count,
+    order_queue_length, order_oldest_age,
+    projection_queue_length, projection_oldest_age,
+    order_dlq_length, projection_dlq_length
+  );
+
+  select * into policy from momi_cron_history.policy_control
+  where singleton for update;
+  gate := momi_cron_history.health_gate_v1();
+  if policy.phase in ('disarmed', 'paused') then
+    response := jsonb_build_object(
+      'ok', false, 'function_key', 'momi.cron_history.governor.v1',
+      'tick_id', p_tick_id, 'phase', policy.phase,
+      'disposition', 'inactive', 'receipt', null
+    );
+  elsif gate->>'state' = 'warming' then
+    response := jsonb_build_object(
+      'ok', true, 'function_key', 'momi.cron_history.governor.v1',
+      'tick_id', p_tick_id, 'phase', policy.phase,
+      'disposition', 'health_warming', 'receipt', gate
+    );
+  elsif gate->>'state' <> 'ready' then
+    update momi_cron_history.policy_control set
+      phase = 'paused',
+      last_stop_reason = left(
+        coalesce(gate->'reasons'->>0, 'health_gate_refused'), 160
+      ),
+      updated_at = now()
+    where singleton;
+    response := jsonb_build_object(
+      'ok', false, 'function_key', 'momi.cron_history.governor.v1',
+      'tick_id', p_tick_id, 'phase', 'paused',
+      'disposition', 'health_refused', 'receipt', gate
+    );
+  elsif policy.last_batch_at is not null
+    and policy.last_batch_at > now() - interval '30 seconds' then
+    response := jsonb_build_object(
+      'ok', true, 'function_key', 'momi.cron_history.governor.v1',
+      'tick_id', p_tick_id, 'phase', policy.phase,
+      'disposition', 'rate_limited', 'receipt', null
+    );
+  else
+    begin
+      batch_result := momi_cron_history.run_batch_v1(
+        p_tick_id, policy.batch_size, policy.phase = 'dry_run'
+      );
+      -- The completed initial drain can transition itself to steady state.
+      select phase into policy.phase from momi_cron_history.policy_control
+      where singleton;
+      update momi_cron_history.policy_control set
+        dry_run_complete = dry_run_complete or policy.phase = 'dry_run',
+        canary_complete = canary_complete or policy.phase = 'canary',
+        phase = case when policy.phase in ('dry_run', 'canary')
+          then 'paused' else policy.phase end,
+        last_stop_reason = case when policy.phase in ('dry_run', 'canary')
+          then policy.phase || '_complete' else null end,
+        last_error_signature = null,
+        identical_error_count = 0,
+        updated_at = now()
+      where singleton;
+      response := jsonb_build_object(
+        'ok', true, 'function_key', 'momi.cron_history.governor.v1',
+        'tick_id', p_tick_id,
+        'phase', case when policy.phase in ('dry_run', 'canary')
+          then 'paused' else policy.phase end,
+        'disposition', batch_result->>'status', 'receipt', batch_result
+      );
+    exception when others then
+      get stacked diagnostics error_state = returned_sqlstate;
+      error_signature := 'batch_error:' || error_state;
+      select case when last_error_signature = error_signature
+          then identical_error_count + 1 else 1 end
+      into next_error_count
+      from momi_cron_history.policy_control where singleton;
+      update momi_cron_history.policy_control set
+        last_error_signature = error_signature,
+        identical_error_count = least(next_error_count, 2),
+        phase = case when next_error_count >= 2 then 'paused' else phase end,
+        last_stop_reason = case when next_error_count >= 2
+          then error_signature else last_stop_reason end,
+        updated_at = now()
+      where singleton;
+      response := jsonb_build_object(
+        'ok', false, 'function_key', 'momi.cron_history.governor.v1',
+        'tick_id', p_tick_id,
+        'phase', case when next_error_count >= 2
+          then 'paused' else policy.phase end,
+        'disposition', 'batch_failed',
+        'receipt', jsonb_build_object(
+          'error_signature', error_signature,
+          'identical_error_count', next_error_count
+        )
+      );
+    end;
+  end if;
+
+  update momi_cron_history.governor_ticks set
+    tick_status = 'completed', completed_at = now(), result = response
+  where tick_id = p_tick_id;
+  return response;
 end;
 $$;

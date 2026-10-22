@@ -5,7 +5,8 @@ Use this supplement with [the main retention runbook](cron-history-retention-run
 ## Select The Thirty-Day Profile
 
 Keep the default profile unless the operator explicitly requests the thirty-day
-policy. Before processing any history, select it while disarmed or paused:
+policy. Before processing any history, select it as the migration owner while
+disarmed or paused. Runtime roles receive no new configuration privilege:
 
 ```sql
 select momi_cron_history.configure_retention_v1(30, '<approved UTC cutoff>'::timestamptz);
