@@ -5,13 +5,12 @@ import { validateArchitecture } from "../../architecture/validate_architecture.t
 import { deployFunctions } from "../../deploy/deploy_functions.ts"
 import { selectFunctions } from "../../deploy/select_functions.ts"
 import { linkProject } from "../../deploy/link_project.ts"
-import { runSupabase } from "../../deploy/run_supabase.ts"
+import { runRetentionSupabase as runSupabase } from "./run_supabase.ts"
 import { assertLinkedProjectRef } from "../assert_linked_project_ref.ts"
 import { runCommand } from "../run_command.ts"
 import { approveRetention } from "./approval.ts"
 import { assertRetentionAfter } from "./assert_after.ts"
 import { assertRetentionAppliedSources } from "./assert_applied_sources.ts"
-import { assertRetentionConfiguration } from "./assert_configuration.ts"
 import { assertRetentionSnapshot, type RetentionSnapshot } from "./assert_snapshot.ts"
 import { buildRetentionTransaction } from "./build_transaction.ts"
 import { retentionFunctionInventory } from "./function_inventory.ts"
@@ -31,8 +30,6 @@ export async function executeRetention(approval: RetentionApproval, developmentB
     const snapshotSql = readFileSync(new URL("snapshot.sql", import.meta.url), "utf8").trim()
     linkProject(approval.project_ref)
     assertLinkedProjectRef(approval.project_ref)
-    assertRetentionConfiguration(runSupabase(["secrets", "list", "--project-ref",
-      approval.project_ref, "--output", "json"], true))
     const queryArgs = ["db", "query", "--linked", "--workdir", workspaceRoot, "--output", "json"]
     const before = readRetentionQuery<RetentionSnapshot>(runSupabase([...queryArgs,
       `begin read only; set local statement_timeout='3000ms'; ${snapshotSql}; commit;`], true))

@@ -59,6 +59,23 @@ Never use a hosted store as a fetch-and-copy source. If another scope needs the
 same credential, its owner re-enters it from the approved source directly into
 that scope. Do not use `supabase secrets list` for this procedure because its
 output includes value-derived digests rather than names alone.
+Do not substitute another API or CLI enumeration that returns digests or other
+value-derived metadata, including a listing whose output would later be redacted.
+
+## Retention owner attestation
+
+The [retention release exception](retention-release-exception.md) requires an
+actual names-only dashboard confirmation by Zac for each exact target. Only
+after that observation, bind `metrics_secret_attestation` into the protected
+canonical approval with exactly `environment`, `project_ref`,
+`name: MOMI_CRON_HISTORY_METRICS_SECRET_KEY`, `present: true`, `owner: Zac`,
+`method: owner_dashboard_names_only`, and `observed_at` in strict UTC ISO form.
+No value, digest, length or other key metadata belongs in this record. This
+guide supplies no current attestation. Observation must precede or equal issue
+time; approval expiry cannot exceed 24 hours after observation. The runner
+rechecks binding and freshness before SQL and function deployment. The governor
+GET establishes presence only, not credential validity, and does not replace
+the owner confirmation or independent post-deployment check.
 
 ## Verify the hosted function safely
 

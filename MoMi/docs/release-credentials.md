@@ -116,6 +116,12 @@ The exact approved document must match `MOMI_RETENTION_APPROVAL_SHA256`, expire
 within 24 hours and precede the runner's fixed sunset. Remove that digest to
 disable future attempts; committed SQL requires the separate recovery described
 in the [retention exception procedure](retention-release-exception.md).
+Its required owner names-only attestation binds the exact runtime secret name
+and target; it grants no value access or alternate secret enumeration authority.
+At the approved window's end, no later than `2026-10-29T00:00:00Z`, restore
+MoXX's protected `prod` environment by removing only temporary `dev` branch
+policy `64025570`. Preserve original `prod` policy `58217824`, protections and
+unrelated later changes. This document does not perform that hosted restoration.
 
 ### Existing failure handling
 
