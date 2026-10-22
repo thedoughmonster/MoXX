@@ -38,9 +38,13 @@ export function hasExplicitInterfaceStatement(body) {
   return !["", "none", "n/a", "not applicable"].includes(statement)
 }
 
-export function assertRoutingPolicy(paths, body = "") {
+export function assertRoutingPolicy(paths, body = "", eventName) {
+  if (!["pull_request", "push"].includes(eventName)) {
+    throw new Error("Routing requires an explicit pull_request or push event")
+  }
   const selection = classifyPaths(paths)
-  if (selection.cross && !hasExplicitInterfaceStatement(body)) {
+  if (eventName === "pull_request" && selection.cross &&
+    !hasExplicitInterfaceStatement(body)) {
     throw new Error(
       "Changes spanning MoMi/ and MoXi/ require an explicit Interface impact statement",
     )
@@ -70,6 +74,7 @@ function main() {
   const selection = assertRoutingPolicy(
     changedPaths(base, head),
     process.env.MOXX_PR_BODY ?? "",
+    process.env.MOXX_EVENT_NAME,
   )
   const output = valueAfter("--github-output")
   const pairs = ["momi", "moxi", "root", "cross"].map(

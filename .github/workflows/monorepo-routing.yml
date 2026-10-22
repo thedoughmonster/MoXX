@@ -32,8 +32,8 @@ jobs:
       - name: Select product validation and enforce interface evidence
         id: selection
         env:
-          MOXX_PR_BODY: >-
-            ${{ github.event.pull_request.body || github.event.head_commit.message }}
+          MOXX_EVENT_NAME: ${{ github.event_name }}
+          MOXX_PR_BODY: ${{ github.event.pull_request.body }}
           MOXX_BASE_SHA: >-
             ${{ github.event.pull_request.base.sha || github.event.before }}
           MOXX_HEAD_SHA: >-
