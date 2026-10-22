@@ -1,22 +1,20 @@
 import { runCommand } from "../run_command.ts"
 import { validateValidationReceipt } from "../../dev_loop/validate_validation_receipt.ts"
+import { buildBoundPlan } from "../../dev_loop/build_bound_plan.ts"
+import { assertRetentionValidationBinding } from "./assert_validation_binding.ts"
 import { downloadRetentionEvidence } from "./download_evidence.ts"
 import { readSuccessfulRetentionRun } from "./read_successful_run.ts"
 import type { RetentionApproval } from "./types.ts"
 
-export function verifyRetentionEvidence(approval: RetentionApproval): string | undefined {
+export async function verifyRetentionEvidence(approval: RetentionApproval): Promise<string | undefined> {
   readSuccessfulRetentionRun(approval.validation.run_id, approval.validation.head_sha, "validation")
   const validation = validateValidationReceipt(downloadRetentionEvidence(
     approval.validation.run_id, `validation-${approval.validation.head_sha}`,
     "validation-receipt.json", approval.validation.receipt_sha256,
   ))
   const tree = runCommand("git", ["rev-parse", `${approval.source_sha}^{tree}`], { capture: true }).stdout.trim()
-  if (validation.counts.hard_failed !== 0 || validation.gate !== "full" ||
-      validation.identities.head_sha !== approval.validation.head_sha ||
-      validation.identities.head_tree !== tree ||
-      Number(validation.run_log.run_id) !== approval.validation.run_id) {
-    throw new Error("Retention source tree differs from authoritative validation")
-  }
+  const plan = await buildBoundPlan(validation.identities.base_sha!, approval.source_sha, false)
+  assertRetentionValidationBinding(approval, validation, plan, tree)
   if (approval.environment === "prod") {
     const pin = approval.dev_receipt!
     const run = readSuccessfulRetentionRun(pin.run_id, approval.source_sha, "development")

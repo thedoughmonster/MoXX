@@ -20,5 +20,5 @@ const approval = approveRetention(JSON.parse(process.env.MOMI_RETENTION_APPROVAL
   environment, source_sha: head, approval_sha256: process.env.MOMI_RETENTION_APPROVAL_SHA256 ?? "", now: Date.now(),
 })
 loadRetentionSources(workspaceRoot, approval)
-const developmentBundle = verifyRetentionEvidence(approval)
+const developmentBundle = await verifyRetentionEvidence(approval)
 if (!process.argv.includes("--verify-only")) await executeRetention(approval, developmentBundle)
