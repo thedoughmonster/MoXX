@@ -59,6 +59,7 @@
     "private_routines": [
       "momi_cron_history.claim_governor_tick_v1",
       "momi_cron_history.classify_return_v1",
+      "momi_cron_history.configure_retention_v1",
       "momi_cron_history.configure_v1",
       "momi_cron_history.derive_provider_warning_v1",
       "momi_cron_history.dispatch_governor_tick_v1",

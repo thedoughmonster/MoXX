@@ -3,7 +3,10 @@
 Use this runbook only after the exact validated #402 commit reaches the target.
 The migration is safe on arrival: the schedule exists, but
 `policy_control.phase` is `disarmed`, so it performs no network request or
-cleanup.
+cleanup. The thirty-day profile also requires the exact validated retention
+revision and its development-to-production release receipts. Verify hosted
+migration history before release: an unrelated missing migration is a release
+blocker, not permission to apply the backlog or mark it applied.
 
 ## Provider Preparation
 
@@ -36,6 +39,9 @@ select momi_cron_history.configure_v1('disarmed', 500, <order_alert_dlq_ceiling>
 Production's accepted starting ceilings are four order-alert dead letters and
 zero warehouse-projection dead letters. Development uses its own exact readback,
 never a copied production value.
+
+For an explicitly requested thirty-day policy, follow the
+[thirty-day selection supplement](cron-history-thirty-day-policy.md) before the dry run.
 
 ## Count-Only Dry Run
 
@@ -79,9 +85,17 @@ The job performs at most one transaction per minute and never catches up
 back-to-back. It pauses on health pressure, stale or incomplete metrics, two
 identical batch failures, or one unresolved claimed tick. Review the exact stop
 reason before resuming. A rate above 1,000 requires a newly accepted receipt key
-and may never exceed 5,000.
+and may never exceed 5,000. These limits originate in ADR 0022, not a Supabase
+platform limit. The configuration routine checks the receipt key's presence,
+not its external acceptance: the operator must verify that evidence. Use a
+measured step such as 2,000 only after a healthy 1,000-row receipt demonstrates
+duration below three seconds, WAL below 32 MiB, no spill and unchanged health.
+Review the same evidence before any further increase, never exceed 5,000, and
+do not interpret the internal thirty-second rate backstop as permission for
+twice-per-minute execution. Scan throughput includes retained rows; deletion
+throughput and completion time must come from actual receipts.
 
-When the cursor reaches the seven-day boundary and receipts stay healthy, switch
+For the default profile, when the cursor reaches the seven-day boundary and receipts stay healthy, switch
 to `steady` at 1,000 or lower. Stop immediately with:
 
 ```sql
