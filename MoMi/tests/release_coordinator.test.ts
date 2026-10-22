@@ -22,7 +22,7 @@ test("keeps migration apply in one model-opaque release module", async () => {
     const path = join(entry.parentPath, entry.name)
     const source = await readFile(path, "utf8")
     if (/["']db["']\s*,\s*["']push["']/.test(source)) {
-      callers.push(path.replaceAll("\\", "/").split("/scripts/")[1] ?? path)
+      callers.push(path.replaceAll("\\", "/").split("/scripts/")[1] ?? path.replaceAll("\\", "/"))
     }
   }
   assert.deepEqual(callers, ["scripts/release/apply_migrations.ts"])
