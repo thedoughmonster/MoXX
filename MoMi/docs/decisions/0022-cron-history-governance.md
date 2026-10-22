@@ -69,3 +69,34 @@ upgrade, and physical disk shrink remain separately gated.
 - A metrics outage or ambiguous commit stops cleanup instead of guessing.
 - The governor adds one low-frequency cron-history row per active minute.
 - Reports distinguish reusable relation pages from physical disk allocation.
+
+## October 22, 2026: Explicit Thirty-Day Raw Policy
+
+The operator may select a thirty-day completed-history profile before the
+governor processes history. Installation preserves the seven-day default and
+the existing five-argument phase configuration API. Selection pauses the
+governor and resets dry-run, canary and higher-rate acceptance; it never starts
+deletion. Switching profiles after real coverage or deletion is refused because
+previously removed raw records cannot be recovered by changing configuration.
+
+This profile removes only finite, consistently timed `succeeded` or `failed`
+records older than its cutoff. It preserves unfinished, unknown, null,
+nonfinite, reversed-timestamp and actively held records. Failures and other
+exceptions receive the same verified sanitized coverage before raw deletion;
+their sanitized ledger remains for 365 days, and routine summaries for 90 days.
+
+The initial drain freezes an explicitly supplied UTC cutoff and the current
+maximum runid. A bounded primary-key window advances over protected records
+without deleting or summarizing them. After accepted canary progression to
+drain, reaching that high-water mark clears the fixed cutoff and enters rolling
+thirty-day steady state. The final initial receipt records its cutoff and mark.
+Each rolling cycle captures its own high-water mark and wraps only after
+reaching it, so continuing ingress cannot indefinitely postpone reconsidering
+formerly unfinished or
+released held records are reconsidered without duplicating deleted coverage.
+Retention is asynchronous: records can remain longer than thirty days while
+the bounded scan catches up or health gates pause it.
+
+All existing health, coverage, rate, deployment and physical-space boundaries
+still apply. A higher batch rate remains an evidence-based operator decision,
+not an automatic consequence of increasing database compute size.
