@@ -170,6 +170,18 @@ assert.match(supabaseCredentialPreflight, /\/v1\/projects\/\$\{targetProjectRef\
 assert.doesNotMatch(supabaseCredentialPreflight, /\/v1\/branches\//)
 assert.match(supabaseCredentialPreflight, /endpoint: 'project_metadata'/)
 assert.match(supabaseCredentialPreflight, /http_status: response\.status/)
+const devHealthStep = supabaseCredentialPreflight.split(
+  "- name: Verify bounded development branch health read access",
+)[1]?.split("- name:")[0] ?? ""
+assert.match(devHealthStep, /if: inputs\.environment == 'dev'/)
+assert.match(devHealthStep, /run: node scripts\/verify-dev-supabase-read-access\.mjs/)
+assert.match(supabaseCredentialPreflight,
+  /- name: Verify bounded Supabase project read access\s+if: inputs\.environment == 'prod'/)
+const devHealthProbe = read("scripts/verify-dev-supabase-read-access.mjs")
+assert.match(devHealthProbe, /assertSupabasePreflightAuthority\(process\.env\)/)
+assert.match(devHealthProbe, /MOXX_TARGET_ENVIRONMENT !== "dev"/)
+assert.match(devHealthProbe, /xtbraqnlskmqxinjxxdn\/health\?services=auth&timeout_ms=2000/)
+assert.doesNotMatch(devHealthProbe, /\/branches\/|\/api-keys|\/secrets|\/database\//)
 assert.match(supabaseCredentialPreflight, /\/database\/jit/)
 assert.match(supabaseCredentialPreflight, /\/jit-access/)
 assert.match(supabaseCredentialPreflight, /permanent_database_mapping/)
