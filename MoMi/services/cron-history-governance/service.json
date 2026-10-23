@@ -15,10 +15,11 @@
   "network": { "outbound_hosts": ["same-origin:supabase-metrics"] },
   "secrets": [
     "SUPABASE_DB_URL",
-    "MOMI_CRON_HISTORY_METRICS_SECRET_KEY"
+    "SUPABASE_SECRET_KEYS"
   ],
   "configuration": [
-    "SUPABASE_URL"
+    "SUPABASE_URL",
+    "DENO_DEPLOYMENT_ID"
   ],
   "deployment": {
     "owns": [

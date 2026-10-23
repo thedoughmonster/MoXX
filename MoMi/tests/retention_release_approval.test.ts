@@ -43,7 +43,7 @@ test("rejects unknown context, environments, source identity, and protected hash
 
 test("rejects missing, extra, inherited, or non-data fields at every object level", () => {
   const { approval, context } = retentionApprovalFixture("prod")
-  for (const field of [null, "validation", "before", "dev_receipt", "metrics_secret_attestation"] as const) {
+  for (const field of [null, "validation", "before", "dev_receipt", "metrics_runtime_selection"] as const) {
     const baseline = field ? approval[field]! : approval
     for (const key of [...Object.keys(baseline), "extra"]) {
       const changed = structuredClone(approval)
@@ -133,7 +133,7 @@ test("rejects future issuance, expired, oversized, invalid, and post-sunset wind
   }
   const { approval, context } = retentionApprovalFixture()
   Object.assign(approval, { issued_at: "2026-10-28T00:00:00Z", expires_at: "2026-10-29T00:00:00Z" })
-  approval.metrics_secret_attestation.observed_at = approval.issued_at
+  approval.metrics_runtime_selection.selected_at = approval.issued_at
   Object.assign(context, { now: Date.parse(approval.issued_at), approval_sha256: hashText(canonicalJson(approval)) })
   assert.deepEqual(approveRetention(approval, context), approval)
   assert.throws(() => approveRetention(approval, { ...context, now: Date.parse(approval.expires_at) }))

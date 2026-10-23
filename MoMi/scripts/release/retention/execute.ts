@@ -75,7 +75,7 @@ export async function executeRetention(approval: RetentionApproval, developmentB
         governor.verify_jwt !== false || (approval.environment === "prod" &&
           governor.ezbr_sha256 !== developmentBundle)) throw new Error("Governor deployment inventory changed unexpectedly")
     const response = await fetch(`https://${approval.project_ref}.supabase.co/functions/v1/${retentionFunctionSlug}`,
-      { signal: AbortSignal.timeout(15000) })
+      { redirect: "error", signal: AbortSignal.timeout(15000) })
     const health = await response.json() as { disposition?: string; ok?: boolean }
     if (response.status !== 200 || !health.ok || health.disposition !== "configured") throw new Error("Governor not configured")
     const policy = readRetentionQuery<{ phase: string }>(runSupabase([...queryArgs,
