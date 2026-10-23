@@ -167,7 +167,9 @@ assert.match(
   /environment:\s*\$\{\{ inputs\.environment \}\}/,
 )
 assert.match(supabaseCredentialPreflight, /\/v1\/projects\/\$\{targetProjectRef\}/)
-assert.match(supabaseCredentialPreflight, /\/v1\/branches\/\$\{targetProjectRef\}/)
+assert.doesNotMatch(supabaseCredentialPreflight, /\/v1\/branches\//)
+assert.match(supabaseCredentialPreflight, /endpoint: 'project_metadata'/)
+assert.match(supabaseCredentialPreflight, /http_status: response\.status/)
 assert.match(supabaseCredentialPreflight, /\/database\/jit/)
 assert.match(supabaseCredentialPreflight, /\/jit-access/)
 assert.match(supabaseCredentialPreflight, /permanent_database_mapping/)
