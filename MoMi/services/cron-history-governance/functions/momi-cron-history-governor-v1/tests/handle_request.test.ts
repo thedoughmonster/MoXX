@@ -16,7 +16,7 @@ test("exposes a side-effect-free deployment liveness probe", async () => {
 });
 
 test("GET reports only configuration health without fetching or exposing runtime credentials", async (t) => {
-  const request = t.mock.method(globalThis, "fetch", async () => { throw new Error("must not fetch"); });
+  const request = t.mock.method(globalThis, "fetch", () => Promise.reject(new Error("must not fetch")));
   for (const [overrides, configured] of [
     [{ SUPABASE_DB_URL: "postgres://synthetic-db.invalid/test" }, true],
     [{ SUPABASE_DB_URL: undefined }, false],

@@ -9,8 +9,8 @@ import {
 test("fetches only the bound metrics endpoint with Basic service_role, no redirects, and a two-second limit", async (t) => {
   const signal = new AbortController().signal;
   const timeout = t.mock.method(AbortSignal, "timeout", () => signal);
-  const request = t.mock.method(globalThis, "fetch", async (_input, _init) =>
-    new Response("metric 1", { headers: { date: "Thu, 22 Oct 2026 16:00:00 GMT" } }));
+  const request = t.mock.method(globalThis, "fetch", (_input, _init) =>
+    Promise.resolve(new Response("metric 1", { headers: { date: "Thu, 22 Oct 2026 16:00:00 GMT" } })));
   for (const ref of syntheticRefs) {
     await withMetricsRuntime({
       ...syntheticMetricsEnvironment,
@@ -32,7 +32,7 @@ test("fetches only the bound metrics endpoint with Basic service_role, no redire
 });
 
 test("invalid runtime configuration fails generically before any HTTP request", async (t) => {
-  const request = t.mock.method(globalThis, "fetch", async () => { throw new Error("must not fetch"); });
+  const request = t.mock.method(globalThis, "fetch", () => Promise.reject(new Error("must not fetch")));
   for (const overrides of [
     { SUPABASE_SECRET_KEYS: undefined }, { SUPABASE_SECRET_KEYS: `{${syntheticSecret}` },
     { SUPABASE_SECRET_KEYS: JSON.stringify({ other: syntheticSecret }) },
@@ -47,9 +47,9 @@ test("invalid runtime configuration fails generically before any HTTP request", 
 });
 
 test("request exceptions including refused redirects never expose credentials or provider detail", async (t) => {
-  const request = t.mock.method(globalThis, "fetch", async (_url, options) => {
+  const request = t.mock.method(globalThis, "fetch", (_url, options) => {
     assert.equal(options?.redirect, "error");
-    throw new TypeError(`redirect refused; Authorization: ${syntheticSecret}`);
+    return Promise.reject(new TypeError(`redirect refused; Authorization: ${syntheticSecret}`));
   });
   await withMetricsRuntime(syntheticMetricsEnvironment, async () => {
     await assert.rejects(fetchMetrics, { message: "metrics_request_failed" });
@@ -59,8 +59,8 @@ test("request exceptions including refused redirects never expose credentials or
 
 test("body-read exceptions expose only the generic response failure", async (t) => {
   const response = new Response(null);
-  t.mock.method(response, "text", async () => { throw new Error(`stream failed: ${syntheticSecret}`); });
-  t.mock.method(globalThis, "fetch", async () => response);
+  t.mock.method(response, "text", () => Promise.reject(new Error(`stream failed: ${syntheticSecret}`)));
+  t.mock.method(globalThis, "fetch", () => Promise.resolve(response));
   await withMetricsRuntime(syntheticMetricsEnvironment, async () => {
     await assert.rejects(fetchMetrics, (error: unknown) => {
       assert.ok(error instanceof Error);
@@ -74,9 +74,9 @@ test("body-read exceptions expose only the generic response failure", async (t) 
 
 test("keeps provider error bodies and redirects out of returned failures", async (t) => {
   for (const status of [302, 401, 503]) {
-    t.mock.method(globalThis, "fetch", async () => new Response(syntheticSecret, {
+    t.mock.method(globalThis, "fetch", () => Promise.resolve(new Response(syntheticSecret, {
       status, headers: { location: "https://example.test/collect" },
-    }));
+    })));
     await withMetricsRuntime(syntheticMetricsEnvironment, async () => {
       await assert.rejects(fetchMetrics, { message: `metrics_http_${status}` });
     });
@@ -89,7 +89,7 @@ test("retains both declared and actual two-megabyte response guards", async (t) 
     new Response("not read", { headers: { "content-length": "2000001" } }),
     new Response("x".repeat(2_000_001)),
   ]) {
-    t.mock.method(globalThis, "fetch", async () => response);
+    t.mock.method(globalThis, "fetch", () => Promise.resolve(response));
     await withMetricsRuntime(syntheticMetricsEnvironment, async () => {
       await assert.rejects(fetchMetrics, { message: "metrics_too_large" });
     });
