@@ -15,6 +15,15 @@ export type RetentionApproval = {
   source_sha: string
   issued_at: string
   expires_at: string
+  metrics_secret_attestation: {
+    environment: RetentionEnvironment
+    project_ref: string
+    name: "MOMI_CRON_HISTORY_METRICS_SECRET_KEY"
+    present: true
+    owner: "Zac"
+    method: "owner_dashboard_names_only"
+    observed_at: string
+  }
   validation: { run_id: number; head_sha: string; receipt_sha256: string }
   before: {
     ledger_sha256: string

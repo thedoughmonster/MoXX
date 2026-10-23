@@ -31,8 +31,9 @@ not permission to replay their CREATE statements or mark them applied.
 Use a strictly validated, bounded approval document. It binds `source_sha`,
 environment/project, issue and expiry times, validation run/head/receipt digest,
 `before` ledger/object/function digests and complete sorted `versions`,
-`function_source_sha256`, exact `migrations`, sorted `deferred_versions`, and
-`dev_receipt`. Unknown hosted versions remain in the full before inventory;
+`function_source_sha256`, exact `migrations`, sorted `deferred_versions`,
+`dev_receipt`, and `metrics_secret_attestation`. Unknown hosted versions remain
+in the full before inventory;
 deferred versions are local versions absent from that inventory and this release.
 Selected SQL bytes must match immutable hashes in the source-pinned runner.
 The authenticated validation receipt must have the same full Git tree as the
@@ -57,6 +58,26 @@ environment value or file, never shell interpolation. Validate it before the
 step receiving Supabase credentials. Normal apply and exception apply are
 mutually exclusive; conflicting normal inputs must fail. Artifact verification
 needs only `actions: read`; the runner cannot modify its approval variable.
+
+## Owner Names-Only Attestation
+
+Each approval requires `metrics_secret_attestation` with exactly these fields:
+
+- `environment` and `project_ref`: the approval's exact target.
+- `name`: `MOMI_CRON_HISTORY_METRICS_SECRET_KEY`; `present`: `true`.
+- `owner`: `Zac`; `method`: `owner_dashboard_names_only`.
+- `observed_at`: a strict UTC ISO timestamp ending in `Z`.
+
+Create this record only after Zac actually confirms the name in the selected
+project's dashboard, following the [names-only guide](supabase-edge-function-secrets.md).
+This document supplies no live attestation. Never infer one from prior evidence
+or a GET response. No value, digest, length or other key metadata field is allowed;
+do not use secrets listings or alternate digest-bearing enumeration.
+Observation must be at or before `issued_at`; approval expiry must be no later
+than 24 hours after observation. The protected canonical approval digest binds
+this record. Recheck its binding and freshness before SQL and function deployment.
+The governor's GET checks presence only, not authentication validity; retain the
+independent post-deployment configuration/liveness and disarmed-state checks.
 
 ## Apply And Evidence
 

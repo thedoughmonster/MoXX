@@ -57,7 +57,7 @@ export function approveRetention(
   const approval = record(value, [
     "schema_version", "kind", "environment", "project_ref", "source_sha",
     "issued_at", "expires_at", "validation", "before", "function_source_sha256",
-    "migrations", "deferred_versions", "dev_receipt",
+    "migrations", "deferred_versions", "dev_receipt", "metrics_secret_attestation",
   ], "approval")
   if (approval.schema_version !== 1 || approval.kind !== "retention-release-exception" ||
     approval.environment !== context.environment ||
@@ -97,6 +97,19 @@ export function approveRetention(
   if (issued > context.now || expires <= context.now || expires <= issued ||
     expires - issued > 86_400_000 || expires > Date.parse(retentionSunset)) {
     return fail("approval validity window")
+  }
+  const attestation = record(approval.metrics_secret_attestation,
+    ["environment", "project_ref", "name", "present", "owner", "method", "observed_at"],
+    "metrics secret attestation")
+  if (attestation.environment !== approval.environment || attestation.project_ref !== approval.project_ref ||
+    attestation.name !== "MOMI_CRON_HISTORY_METRICS_SECRET_KEY" || attestation.present !== true ||
+    attestation.owner !== "Zac" || attestation.method !== "owner_dashboard_names_only") {
+    return fail("metrics secret attestation identity")
+  }
+  const observed = timestamp(attestation.observed_at)
+  if (observed > issued || observed > context.now ||
+    context.now - observed >= 86_400_000 || expires - observed > 86_400_000) {
+    return fail("metrics secret attestation freshness")
   }
   if (hashText(canonicalJson(approval)) !== context.approval_sha256) {
     return fail("protected approval hash mismatch")

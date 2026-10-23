@@ -18,6 +18,11 @@ export function retentionApprovalFixture(environment: RetentionEnvironment = "de
     source_sha: "a".repeat(40),
     issued_at: "2026-10-22T12:00:00Z",
     expires_at: "2026-10-23T12:00:00Z",
+    metrics_secret_attestation: {
+      environment, project_ref: retentionProjects[environment],
+      name: "MOMI_CRON_HISTORY_METRICS_SECRET_KEY", present: true,
+      owner: "Zac", method: "owner_dashboard_names_only", observed_at: "2026-10-22T12:00:00Z",
+    },
     validation: { run_id: 11, head_sha: "a".repeat(40), receipt_sha256: "b".repeat(64) },
     before: {
       ledger_sha256: "c".repeat(64),
