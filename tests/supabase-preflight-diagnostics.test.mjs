@@ -11,7 +11,7 @@ const prodRef = "viodfldzuoypnpqaagag"
 const marker = "fixture-private-response-must-not-escape"
 const token = "sbp_fixture_not_a_credential"
 
-async function run(responses, environment = "dev", credential = token) {
+async function run(responses, environment = "prod", credential = token) {
   const requests = []
   const logs = []
   let bodyReads = 0
@@ -47,24 +47,11 @@ async function run(responses, environment = "dev", credential = token) {
   return { requests, logs, bodyReads, error }
 }
 
-test("dev reports only a fixed endpoint/status and safe success flags", async () => {
-  const result = await run([{ status: 200, body: {
-    ref: devRef, db_pass: marker, jwt_secret: marker, unexpected: marker,
-  } }])
-  assert.deepEqual(result.requests, [`https://api.supabase.com/v1/projects/${devRef}`])
-  assert.equal(result.error, undefined)
-  assert.deepEqual(result.logs, [
-    { endpoint: "project_metadata", http_status: 200 },
-    { authenticated: true, environment: "dev", permanent_database_mapping: "not_applicable",
-      target_resource: "project", target_metadata: "readable", target_reference_matched: true },
-  ])
-})
-
 for (const status of [301, 401, 403, 404, 429, 500]) {
-  test(`dev stops on HTTP ${status} without reading a body or requesting credentials`, async () => {
+  test(`production stops on HTTP ${status} without reading a body or requesting credentials`, async () => {
     const result = await run([{ status, body: { db_pass: marker, jwt_secret: marker } }])
-    assert.deepEqual(result.requests, [`https://api.supabase.com/v1/projects/${devRef}`])
-    assert.deepEqual(result.logs, [{ endpoint: "project_metadata", http_status: status }])
+    assert.deepEqual(result.requests, [`https://api.supabase.com/v1/projects/${prodRef}`])
+    assert.deepEqual(result.logs, [])
     assert.equal(result.bodyReads, 0)
     assert.equal(result.error, `Supabase API rejected target metadata read with HTTP ${status}`)
   })
@@ -77,21 +64,21 @@ test("network and JSON failures never echo exception content", async () => {
   assert.equal(network.requests.length, 1)
   const json = await run([{ status: 200, invalidJson: true }])
   assert.equal(json.error, "Supabase API returned non-JSON with HTTP 200")
-  assert.deepEqual(json.logs, [{ endpoint: "project_metadata", http_status: 200 }])
+  assert.deepEqual(json.logs, [])
 })
 
 test("invalid metadata and wrong references remain failures", async () => {
-  for (const body of [null, [], marker, { ref: prodRef }, {}]) {
+  for (const body of [null, [], marker, { ref: devRef }, {}]) {
     const result = await run([{ status: 200, body }])
     assert.match(result.error, /rejected target metadata|mismatched target reference/)
-    assert.deepEqual(result.logs, [{ endpoint: "project_metadata", http_status: 200 }])
+    assert.deepEqual(result.logs, [])
     assert.equal(result.requests.length, 1)
   }
 })
 
 test("missing or malformed credentials never produce a request or derived output", async () => {
   for (const credential of ["", "invalid fixture", "sbp_invalid\nfixture"]) {
-    const result = await run([], "dev", credential)
+    const result = await run([], "prod", credential)
     assert.equal(result.error, "SUPABASE_ACCESS_TOKEN is missing or malformed")
     assert.deepEqual(result.requests, [])
     assert.deepEqual(result.logs, [])
@@ -100,7 +87,7 @@ test("missing or malformed credentials never produce a request or derived output
 
 test("production retains its exact existing read-only mapping checks", async () => {
   const result = await run([
-    { status: 200, body: { ref: prodRef } },
+    { status: 200, body: { ref: prodRef, db_pass: marker, jwt_secret: marker } },
     { status: 200, body: { state: "enabled", appliedSuccessfully: true } },
     { status: 200, body: { user_roles: [{ role: "postgres", expires_at: null }] } },
   ], "prod")
