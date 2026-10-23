@@ -1,7 +1,7 @@
 # Branch-scoped Edge Function secrets
 
-Use this guide only to place a runtime secret directly into its intended
-Supabase scope and to verify its name is present. It does not authorize a
+Use this guide for runtime source selection or direct placement into the
+intended Supabase scope and names-only verification. It does not authorize a
 provider change, function deployment, secret rotation, or value retrieval.
 
 Supabase branches are isolated environments, and the dashboard branch selector
@@ -62,20 +62,30 @@ output includes value-derived digests rather than names alone.
 Do not substitute another API or CLI enumeration that returns digests or other
 value-derived metadata, including a listing whose output would later be redacted.
 
-## Retention owner attestation
+## Retention runtime source selection
 
-The [retention release exception](retention-release-exception.md) requires an
-actual names-only dashboard confirmation by Zac for each exact target. Only
-after that observation, bind `metrics_secret_attestation` into the protected
-canonical approval with exactly `environment`, `project_ref`,
-`name: MOMI_CRON_HISTORY_METRICS_SECRET_KEY`, `present: true`, `owner: Zac`,
-`method: owner_dashboard_names_only`, and `observed_at` in strict UTC ISO form.
-No value, digest, length or other key metadata belongs in this record. This
-guide supplies no current attestation. Observation must precede or equal issue
-time; approval expiry cannot exceed 24 hours after observation. The runner
-rechecks binding and freshness before SQL and function deployment. The governor
-GET establishes presence only, not credential validity, and does not replace
-the owner confirmation or independent post-deployment check.
+The governor reuses only the JSON entry `SUPABASE_SECRET_KEYS['default']` injected
+by the runtime; do not place a custom secret or use the entry procedure above.
+Supabase describes this dictionary in [default secrets](https://supabase.com/docs/guides/functions/secrets#default-secrets).
+This is a broad `service_role` credential with RLS bypass, not a metrics-only
+credential. Reuse couples rotation to its other consumers. Before a request,
+require the exact canonical dev/prod `SUPABASE_URL` and a matching project in
+`DENO_DEPLOYMENT_ID`. No legacy/custom/PAT fallback, listing, copying or secret
+configuration is authorized; only the runtime may consume the selected key.
+
+The [release approval](retention-release-exception.md) remains schema version 1
+and binds `metrics_runtime_selection`: exact `environment`, `project_ref`,
+`source: SUPABASE_SECRET_KEYS`, `key: default`, `owner: Zac`,
+`method: owner_runtime_source_selection`, and strict UTC ISO `selected_at`.
+Selection is consent/provenance, not proof of runtime presence or authentication;
+presence remains unverified and this guide supplies no real selection record.
+No value, digest, length or other key metadata belongs in it. Selection must
+precede or equal issue time; expiry cannot exceed selection plus 24 hours.
+Recheck the protected canonical hash binding and freshness before SQL and deploy.
+Post-deployment `configured` GET verifies parser/project presence only; failure
+blocks the success receipt and leaves cleanup disarmed. Retain the complete
+authenticated 15-minute health baseline before cleanup. If SQL already committed,
+report partial state without automatic replay.
 
 ## Verify the hosted function safely
 

@@ -32,7 +32,7 @@ Use a strictly validated, bounded approval document. It binds `source_sha`,
 environment/project, issue and expiry times, validation run/head/receipt digest,
 `before` ledger/object/function digests and complete sorted `versions`,
 `function_source_sha256`, exact `migrations`, sorted `deferred_versions`,
-`dev_receipt`, and `metrics_secret_attestation`. Unknown hosted versions remain
+`dev_receipt`, and `metrics_runtime_selection`. Unknown hosted versions remain
 in the full before inventory;
 deferred versions are local versions absent from that inventory and this release.
 Selected SQL bytes must match immutable hashes in the source-pinned runner.
@@ -59,25 +59,29 @@ step receiving Supabase credentials. Normal apply and exception apply are
 mutually exclusive; conflicting normal inputs must fail. Artifact verification
 needs only `actions: read`; the runner cannot modify its approval variable.
 
-## Owner Names-Only Attestation
+## Owner Runtime Source Selection
 
-Each approval requires `metrics_secret_attestation` with exactly these fields:
+Approval `schema_version` remains `1`. Replace `metrics_secret_attestation`
+with required `metrics_runtime_selection`, containing exactly these fields:
 
 - `environment` and `project_ref`: the approval's exact target.
-- `name`: `MOMI_CRON_HISTORY_METRICS_SECRET_KEY`; `present`: `true`.
-- `owner`: `Zac`; `method`: `owner_dashboard_names_only`.
-- `observed_at`: a strict UTC ISO timestamp ending in `Z`.
+- `source`: `SUPABASE_SECRET_KEYS`; `key`: `default`.
+- `owner`: `Zac`; `method`: `owner_runtime_source_selection`.
+- `selected_at`: a strict UTC ISO timestamp ending in `Z`.
 
-Create this record only after Zac actually confirms the name in the selected
-project's dashboard, following the [names-only guide](supabase-edge-function-secrets.md).
-This document supplies no live attestation. Never infer one from prior evidence
-or a GET response. No value, digest, length or other key metadata field is allowed;
-do not use secrets listings or alternate digest-bearing enumeration.
-Observation must be at or before `issued_at`; approval expiry must be no later
-than 24 hours after observation. The protected canonical approval digest binds
-this record. Recheck its binding and freshness before SQL and function deployment.
-The governor's GET checks presence only, not authentication validity; retain the
-independent post-deployment configuration/liveness and disarmed-state checks.
+Selection records Zac's consent and provenance, not live presence or successful
+authentication. Runtime presence is unverified; this document supplies no real
+selection record. Reuse only the injected default entry, following the
+[runtime selection guide](supabase-edge-function-secrets.md#retention-runtime-source-selection).
+No value, digest, length or other key metadata field is allowed; no secret
+listing, copying, configuration or legacy/custom/PAT fallback is authorized.
+Selection must be at or before `issued_at`; expiry must be no later than 24
+hours after selection. The protected canonical digest binds the record; recheck
+its binding and freshness before SQL and function deployment. Runtime requests
+require matching canonical dev/prod `SUPABASE_URL` and `DENO_DEPLOYMENT_ID`.
+Post-deployment `configured` GET checks parser/project presence only. Failure
+blocks a success receipt and leaves cleanup disarmed. A complete authenticated
+15-minute health baseline remains mandatory before cleanup.
 
 ## Apply And Evidence
 
@@ -120,10 +124,10 @@ Missing authority, mismatched evidence, an ambiguous commit or failed readback
 stops the operation. Do not fall back to normal `db push`, another publisher,
 extra credentials, history repair or a wider migration set.
 
-A failed transaction rolls back its SQL and history together. If SQL committed
-before a later failure, retain the actual state and failure receipt and reconcile
-it read-only. This one-shot runner cannot resume against already applied selected
-versions. Recovery needs separately reviewed authority and an exact approved
+A failed transaction rolls back its SQL and history together. SQL can commit
+before missing runtime configuration is discovered. Retain partial state and
+failure evidence; reconcile read-only. This one-shot runner cannot resume
+applied selected versions. Recovery needs separately reviewed authority and an exact approved
 repair; a fresh approval alone does not enable a retry.
 Do not replay CREATE statements or erase history. Keep the governor disarmed.
 Revoke the protected approval digest to prevent another attempt; expiry and

@@ -39,7 +39,7 @@ test("retention inspection cannot bypass its restricted transport or serialize s
   assert.equal((execute.match(/approveRetention\(approval/g) ?? []).length, 2)
   assert.ok(execute.indexOf("approveRetention(approval") < execute.indexOf('evidence.stage = "sql"'))
   assert.ok(execute.lastIndexOf("approveRetention(approval") < execute.indexOf("deployFunctions(approval"))
-  assert.doesNotMatch(execute, /metrics_secret_attestation|configuration_inventory|secret_digest/)
+  assert.doesNotMatch(execute, /metrics_runtime_selection|configuration_inventory|secret_digest/)
   assert.match(execute, /health.disposition !== "configured"/)
   assert.match(execute, /policy.phase !== "disarmed"/)
 })
