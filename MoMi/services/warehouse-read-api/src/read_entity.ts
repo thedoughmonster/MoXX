@@ -30,7 +30,31 @@ export async function readEntity(
     from (values (true)) as request(present)
     left join authorized_work as work on true
     left join active_contract as contract on true
-    left join ${sql("momi_api")}.${sql(contract.viewName)} as record
+    left join lateral (
+      select entity_id, entity_type, schema_version,
+        canonical_document, provenance, freshness
+      from momi_api.payments_by_id_v1
+      where ${contract.viewName} = 'payments_by_id_v1'
+        and entity_id = ${input.entity_id}::uuid
+      union all
+      select entity_id, entity_type, schema_version,
+        canonical_document, provenance, freshness
+      from momi_api.menu_entities_by_id_v1
+      where ${contract.viewName} = 'menu_entities_by_id_v1'
+        and entity_id = ${input.entity_id}::uuid
+      union all
+      select entity_id, entity_type, schema_version,
+        canonical_document, provenance, freshness
+      from momi_api.employees_by_id_v1
+      where ${contract.viewName} = 'employees_by_id_v1'
+        and entity_id = ${input.entity_id}::uuid
+      union all
+      select entity_id, entity_type, schema_version,
+        canonical_document, provenance, freshness
+      from momi_api.schedules_by_id_v1
+      where ${contract.viewName} = 'schedules_by_id_v1'
+        and entity_id = ${input.entity_id}::uuid
+    ) as record
       on work.work_id is not null and contract.active
       and record.entity_id = ${input.entity_id}::uuid
     limit 1

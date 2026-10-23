@@ -114,6 +114,8 @@ verify_jwt = false
 verify_jwt = false
 [functions.momi-preorder-bootstrap-v1]
 verify_jwt = false
+[functions.momi-preorder-contribution-v1]
+verify_jwt = false
 [functions.momi-preorder-quote-v1]
 verify_jwt = false
 [functions.momi-preorder-checkout-hold-v1]
@@ -131,4 +133,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.momi-cron-history-governor-v1]
+verify_jwt = false
+
+[functions.momi-admin-data-v1]
 verify_jwt = false

@@ -29,6 +29,9 @@ operational state. It has:
 - one `dataset_class`: `domain`, `operational`, or `raw_evidence`, constrained
   by `service_type`;
 - optional `private_schema`, `private_schemas`, and `db_role` declarations;
+- optional `runtime_set_role_from: postgres`, requiring `db_role`, explicitly
+  permits only the owner-role grant to that pooled login with INHERIT FALSE and
+  SET TRUE (or SET FALSE for rollback); no other membership or role options;
 - exact `schema.relation` entries in `private_relations`;
 - exact schema-qualified names for every active routine in `private_routines`;
 - versioned contract keys ending in `.vN` for `public_reads` and

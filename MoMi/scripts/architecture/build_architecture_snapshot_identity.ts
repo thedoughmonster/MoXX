@@ -13,6 +13,11 @@ import {
   type ArchitectureSnapshot,
   type ArchitectureSnapshotIdentity,
 } from "./architecture_snapshot_identity_types.ts"
+import {
+  repositoryAuthority,
+  repositoryAuthorityBranch,
+  repositoryProductPath,
+} from "./repository_authority.ts"
 
 export async function buildArchitectureSnapshotIdentity(
   root = workspaceRoot,
@@ -23,9 +28,10 @@ export async function buildArchitectureSnapshotIdentity(
   }
   const identity: ArchitectureSnapshotIdentity = {
     $schema: architectureSnapshotIdentitySchemaId,
-    schema_version: 1,
-    repository: "thedoughmonster/momi-backend",
-    branch: "dev",
+    schema_version: 2,
+    repository: repositoryAuthority,
+    branch: repositoryAuthorityBranch,
+    product_path: repositoryProductPath,
     commit: source.commit,
     service_manifest_schema: {
       id: "https://momi.local/schemas/service-manifest-v1.schema.json",
@@ -38,7 +44,7 @@ export async function buildArchitectureSnapshotIdentity(
     architecture_contract_version: 2,
   }
   const schema = await readJson<object>(join(
-    root, "schemas", "architecture-snapshot-identity-v1.schema.json",
+    root, "schemas", "architecture-snapshot-identity-v2.schema.json",
   ))
   validateJson(schema, identity, "architecture snapshot identity")
   return { identity, digest: digestArchitectureSnapshotIdentity(identity) }

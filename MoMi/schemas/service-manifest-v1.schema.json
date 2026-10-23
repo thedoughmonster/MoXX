@@ -15,7 +15,7 @@
       "event_router", "dataset_owner", "read_facade", "destination_adapter"
     ] },
     "owned_dataset": {
-      "type": "object", "additionalProperties": false,
+      "dependentRequired": { "runtime_set_role_from": ["db_role"] }, "type": "object", "additionalProperties": false,
       "required": ["dataset_key", "dataset_class", "private_relations"],
       "properties": {
         "dataset_key": { "type": "string",
@@ -30,7 +30,7 @@
         "public_routine_reads": { "$ref": "#/$defs/public_routine_command_set" }, "public_routine_commands": { "$ref": "#/$defs/public_routine_command_set" },
         "dynamic_read_routines": { "$ref": "#/$defs/dynamic_read_routine_set" },
         "emitted_events": { "$ref": "#/$defs/event_key_set" },
-        "db_role": { "type": "string", "pattern": "^svc_[a-z][a-z0-9_]*$" }
+        "db_role": { "type": "string", "pattern": "^svc_[a-z][a-z0-9_]*$" }, "runtime_set_role_from": { "const": "postgres" }
       }
     },
     "lifecycle_status": { "enum": ["active", "retiring", "retired"] }, "implementation_status": { "enum": ["declared", "implemented", "hosted_inactive", "operational"] },

@@ -1,12 +1,16 @@
 import { runGit } from "./run_git.ts"
 
-export function listChangedPaths(baseSha: string, headSha: string): string[] {
+export function listChangedPaths(
+  baseSha: string,
+  headSha: string,
+  includeWorktree = true,
+): string[] {
   const output = runGit([
     "diff", "--relative", "--name-only", "--no-renames",
     `${baseSha}...${headSha}`, "--", ".",
   ])
   const paths = new Set(output ? output.split("\n").filter(Boolean) : [])
-  if (runGit(["rev-parse", "HEAD"]) === headSha) {
+  if (includeWorktree && runGit(["rev-parse", "HEAD"]) === headSha) {
     const status = runGit(
       ["status", "--short", "--untracked-files=all", "--", "."],
       false,

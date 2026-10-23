@@ -48,6 +48,7 @@ test("concurrent delivery binding and consumption have one winner", {
     const replay = second.unsafe(`select
       momi_api.bind_order_alert_delivery_v2(${secondCapability[0].id},
         '${secondToken}','${event}',7,'${delivery}') as bound`).execute()
+    const replayFailure = assert.rejects(replay, { code: "23505" })
     let bindBlockers: number[] = []
     for (let attempt = 0; attempt < 100 && bindBlockers.length === 0;
       attempt += 1) {
@@ -58,7 +59,7 @@ test("concurrent delivery binding and consumption have one winner", {
     }
     await first.unsafe("commit")
     try {
-      await assert.rejects(replay, { code: "23505" })
+      await replayFailure
     } finally {
       await second.unsafe("rollback")
     }

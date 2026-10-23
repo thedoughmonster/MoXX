@@ -2,7 +2,8 @@
 
 - Status: accepted
 - Date: 2026-07-28
-- Partially superseded by: ADR 0027 for the unimplemented change-request contract
+- Partially superseded by: ADR 0027 for the unimplemented change-request contract;
+  ADR 0033 for future shared cart and checkout authority
 
 ## Context
 
@@ -66,6 +67,14 @@ and route versions.
 ADR 0027 removes the unimplemented change-request declaration from the current
 surface until a separately accepted design supplies an exact callable binding.
 
+ADR 0033 establishes `cart-checkout-operations` as the source-neutral logical
+owner for future shared draft-order, cart, checkout, recovery, and order-change
+reference contracts. This does not transfer the active preorder runtime:
+`preorder-operations` remains the only writer for its current dataset and the
+seven public version-one contract keys above remain active and unchanged.
+Compatibility is additive until a later issue binds and proves each replacement
+surface with exactly one active writer.
+
 ## Correctness Rules
 
 - Every command carries a stable command identity and expected resource version.
@@ -101,7 +110,7 @@ surface until a separately accepted design supplies an exact callable binding.
   payment infrastructure.
 - MoMi keeps non-financial business authority while Square keeps financial
   authority.
-- Provider replacement or later MoMi canonicalization does not change the
-  browser contract.
+- Provider replacement or later MoMi canonicalization does not silently change
+  the active preorder browser contract; migration is additive and versioned.
 - The launch adds one coherent business owner instead of a generic commerce
   service.

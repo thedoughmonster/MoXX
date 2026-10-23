@@ -212,7 +212,6 @@ export function ReviewPreorder({
             <strong>{customerDetails.fullName}</strong>
             <span>{customerDetails.email}</span>
             <span>{customerDetails.phone}</span>
-            {customerDetails.pickupNotes && <span>{customerDetails.pickupNotes}</span>}
           </address>
         </section>
 

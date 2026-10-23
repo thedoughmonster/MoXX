@@ -5,10 +5,16 @@ import { resolve } from "node:path"
 
 const MOMI_PREFIX = "MoMi/"
 const MOXI_PREFIX = "MoXi/"
+const MOMI_VALIDATION_WORKFLOW = ".github/workflows/validate.yml"
+const MOXI_VALIDATION_WORKFLOW = ".github/workflows/validate-ui.yml"
 
 export function classifyPath(path) {
-  if (path.startsWith(MOMI_PREFIX)) return "momi"
-  if (path.startsWith(MOXI_PREFIX)) return "moxi"
+  if (path.startsWith(MOMI_PREFIX) || path === MOMI_VALIDATION_WORKFLOW) {
+    return "momi"
+  }
+  if (path.startsWith(MOXI_PREFIX) || path === MOXI_VALIDATION_WORKFLOW) {
+    return "moxi"
+  }
   return "root"
 }
 
@@ -32,9 +38,13 @@ export function hasExplicitInterfaceStatement(body) {
   return !["", "none", "n/a", "not applicable"].includes(statement)
 }
 
-export function assertRoutingPolicy(paths, body = "") {
+export function assertRoutingPolicy(paths, body = "", eventName) {
+  if (!["pull_request", "push"].includes(eventName)) {
+    throw new Error("Routing requires an explicit pull_request or push event")
+  }
   const selection = classifyPaths(paths)
-  if (selection.cross && !hasExplicitInterfaceStatement(body)) {
+  if (eventName === "pull_request" && selection.cross &&
+    !hasExplicitInterfaceStatement(body)) {
     throw new Error(
       "Changes spanning MoMi/ and MoXi/ require an explicit Interface impact statement",
     )
@@ -64,6 +74,7 @@ function main() {
   const selection = assertRoutingPolicy(
     changedPaths(base, head),
     process.env.MOXX_PR_BODY ?? "",
+    process.env.MOXX_EVENT_NAME,
   )
   const output = valueAfter("--github-output")
   const pairs = ["momi", "moxi", "root", "cross"].map(

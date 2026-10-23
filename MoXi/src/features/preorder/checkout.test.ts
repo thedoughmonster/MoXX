@@ -164,8 +164,7 @@ const input = {
   customerDetails: {
     fullName: 'Synthetic Customer',
     email: 'synthetic@example.invalid',
-    phone: '+1 555 010 0200',
-    pickupNotes: ''
+    phone: '+1 555 010 0200'
   }
 } as const;
 

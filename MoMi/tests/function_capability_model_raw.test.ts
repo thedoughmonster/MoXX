@@ -3,6 +3,8 @@ import test from "node:test"
 
 import { inspectRawFunctionCapabilityModel } from
   "../scripts/architecture/inspect_raw_function_capability_model.ts"
+import { createCapabilityArchitecture } from
+  "./function_capability_model_fixture.ts"
 
 const base = {
   function_key: "momi.example.call.v1",
@@ -19,6 +21,19 @@ test("reports absence without rejecting transitional manifests", () => {
     ).map((item) => item.code),
     ["capability_model_absent"],
   )
+})
+
+test("fixture crosses the real Function Manifest v1 adoption boundary", () => {
+  const architecture = createCapabilityArchitecture([{ key: "example" }], [{
+    key: base.function_key,
+    owner: "example",
+    called: base.capability_model.called_contracts,
+  }])
+  const manifest = architecture.functions[0]!.manifest
+  assert.equal(manifest.capability_model?.schema_version, 1)
+  assert.deepEqual(inspectRawFunctionCapabilityModel(
+    manifest, "services/example/functions/example/function.json",
+  ), [])
 })
 
 test("rejects shape and unsupported versions before schema loading", () => {

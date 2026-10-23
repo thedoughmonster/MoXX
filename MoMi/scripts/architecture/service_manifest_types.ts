@@ -40,6 +40,7 @@ export type OwnedDataset = {
   dynamic_read_routines?: DynamicReadRoutine[]
   emitted_events?: string[]
   db_role?: string
+  runtime_set_role_from?: "postgres"
 }
 
 export type PublicRelationRead = {

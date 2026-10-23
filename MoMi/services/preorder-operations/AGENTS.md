@@ -1,6 +1,9 @@
 # Preorder Operations Rules
 
 - Own only the public preorder business lifecycle declared by ADR 0019.
+- Remain the sole active writer for the existing preorder public v1 surface
+  until an additive, separately authorized cart/checkout cutover proves a
+  replacement writer; never repurpose current contract keys as shared routes.
 - Expose customer-safe, source-neutral versioned contracts only.
 - Never expose a private relation, provider DTO, secret, or arbitrary query.
 - Create durable order intent before any paid provider work.

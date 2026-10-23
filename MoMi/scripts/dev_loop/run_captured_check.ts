@@ -9,16 +9,19 @@ export function runCapturedCheck(
   check: CheckCommand,
   stdoutPath: string,
   stderrPath: string,
+  environment: NodeJS.ProcessEnv = {},
+  workingDirectory = workspaceRoot,
 ): { status: number; stdout_sha256: string; stderr_sha256: string } {
   const stdoutDescriptor = openSync(stdoutPath, "w")
   const stderrDescriptor = openSync(stderrPath, "w")
   let result
   try {
     result = spawnSync(check.command, check.args, {
-      cwd: workspaceRoot,
+      cwd: workingDirectory,
       stdio: ["ignore", stdoutDescriptor, stderrDescriptor],
       env: {
         ...process.env,
+        ...environment,
         SUPABASE_DB_PASSWORD: undefined,
         PGPASSWORD: undefined,
       },

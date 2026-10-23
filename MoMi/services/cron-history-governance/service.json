@@ -15,10 +15,11 @@
   "network": { "outbound_hosts": ["same-origin:supabase-metrics"] },
   "secrets": [
     "SUPABASE_DB_URL",
-    "MOMI_CRON_HISTORY_METRICS_SECRET_KEY"
+    "SUPABASE_SECRET_KEYS"
   ],
   "configuration": [
-    "SUPABASE_URL"
+    "SUPABASE_URL",
+    "DENO_DEPLOYMENT_ID"
   ],
   "deployment": {
     "owns": [
@@ -59,6 +60,7 @@
     "private_routines": [
       "momi_cron_history.claim_governor_tick_v1",
       "momi_cron_history.classify_return_v1",
+      "momi_cron_history.configure_retention_v1",
       "momi_cron_history.configure_v1",
       "momi_cron_history.derive_provider_warning_v1",
       "momi_cron_history.dispatch_governor_tick_v1",

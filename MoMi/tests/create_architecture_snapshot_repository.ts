@@ -22,10 +22,10 @@ export async function createArchitectureSnapshotRepository(): Promise<string> {
       $id: "https://momi.local/schemas/function-manifest-v1.schema.json",
     }))
   const identitySchema = await readFile(
-    join(workspaceRoot, "schemas", "architecture-snapshot-identity-v1.schema.json"),
+    join(workspaceRoot, "schemas", "architecture-snapshot-identity-v2.schema.json"),
   )
   await writeFile(
-    join(root, "schemas", "architecture-snapshot-identity-v1.schema.json"),
+    join(root, "schemas", "architecture-snapshot-identity-v2.schema.json"),
     identitySchema,
   )
   assert.equal(spawnSync("git", ["init", "-b", "dev"], { cwd: root }).status, 0)
@@ -36,7 +36,7 @@ export async function createArchitectureSnapshotRepository(): Promise<string> {
     "config", "user.name", "Snapshot Test",
   ], { cwd: root }).status, 0)
   assert.equal(spawnSync("git", ["remote", "add", "origin",
-    "https://github.com/thedoughmonster/momi-backend.git"],
+    "https://github.com/thedoughmonster/MoXX.git"],
   { cwd: root }).status, 0)
   assert.equal(spawnSync("git", ["add", "."], { cwd: root }).status, 0)
   assert.equal(spawnSync("git", ["commit", "-m", "fixture"],

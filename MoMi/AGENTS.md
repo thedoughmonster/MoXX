@@ -101,11 +101,11 @@ capabilities. Modules remain separated by business capability.
 - Treat the Toast event GUID as the delivery idempotency key.
 - Store runtime secrets in Supabase, deployment secrets in GitHub, and local CLI credentials in the approved release host's credential store; use the [branch-scoped Edge Function secret guide](docs/supabase-edge-function-secrets.md) for target selection, names-only placement, and content-free verification.
 - Authenticate the pinned Supabase CLI by OAuth/PAT; short-lived database login remains the default.
-  During active development, an accepted Linear issue may explicitly authorize a non-expiring credential, including Supabase token-to-database access, under [Release credentials](docs/release-credentials.md).
+  During active development, explicit recorded human approval may authorize a non-expiring credential, including Supabase token-to-database access, under [Release credentials](docs/release-credentials.md).
   The exception changes lifetime only; protected placement, least privilege, named ownership, rotation/revocation, rollback, and content-free verification remain mandatory.
 ## Default Development Loop (momi-default-development-loop/v1)
 - Keep one agent responsible for each change from diagnosis through handoff.
-- Bind every change to one Linear issue and an isolated feature worktree.
+- Bind every change to one authorized task and an isolated feature worktree.
 - Run focused checks while iterating; do not duplicate the PR's final gate
   locally.
 - Keep mechanical enforcement in the one impact-selected PR gate.
@@ -113,27 +113,23 @@ capabilities. Modules remain separated by business capability.
   material security, privacy, cost, or exposure decision, destructive migration,
   production infrastructure change, or irreconcilable repository-law conflict.
 - Do not create role ceremonies, readiness packets, or repeated review loops.
-- Publish one PR and link its Linear issue for traceability when available.
+- Publish one PR when authorized, with task scope and validation evidence.
 - Verify changed hosted behavior with one controlled acceptance event.
 ## Backend Release Rules
 - For hosted backend changes, release the exact PR validation receipt to development, then promote only that exact development receipt.
 ## Execution and Planning Authority
-- Use the `momi-execution` skill for an assigned Linear issue.
-- Linear is the sole authority for planning and execution work state.
+- Use the `momi-execution` skill for an assigned implementation task.
+- The authorized task and PR evidence record scope, decisions, and delivery state.
+- No external work tracker is required; do not require new Linear activity.
 - GitHub owns branches, PRs, CI, reviews, merge, and release evidence; it is
-  not a parallel work-state ledger.
-- The coding agent owns one bounded issue through review, validated merge, development release, and controlled acceptance. Humans retain planning, material architecture decisions, and production authority.
-- After required checks pass, perform one final review and feedback sweep. With no
-  blocking feedback, merge to `dev`, release required hosted changes,
-  verify one controlled acceptance event, and never begin neighboring work.
-- Use `Initiative → Project → Epic → Feature/Task/Bug → Sub-task`.
-- Initiatives are business outcomes; MoMi, MoSi, MoXi, and shared are surfaces, not roots.
-- Opened is L1-L3 only; keep possible decomposition in `Future decomposition candidates`.
-- Create L4/L5 directly in Designing only while their immediate parent is in Designing.
-- L4/L5 may regress to Discovering with the unresolved question recorded, never to Opened.
-- Before Building, L4 is independently closable and L5 is the smallest useful slice.
-- Do not mirror Linear planning metadata into repository automation or manifests.
-- Correct planning drift in Linear before implementation.
+  not a required second task ledger.
+- The coding agent owns one bounded task through the requested delivery stage. Humans retain planning, material architecture decisions, and production authority.
+- State the outcome, acceptance criteria, owner, exclusions, and dependencies in
+  the task or PR; resolve material scope conflicts before implementation.
+- After required checks pass, perform one final review and feedback sweep. Merge,
+  release, and verify hosted acceptance only within the user's explicit authority.
+- Preserve historical issue identifiers and decisions as audit evidence.
+- Record follow-up work in the task or PR; never begin neighboring work implicitly.
 ## Code Review Rules
 - Block unauthorized ownership, private-data, public-contract, or deployer changes.
 - Block material correctness, security, privacy, data-loss, or rollback defects.

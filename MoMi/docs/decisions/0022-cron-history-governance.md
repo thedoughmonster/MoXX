@@ -32,6 +32,8 @@ outcomes, and declared exceptions remain individually available in the extension
 table for 365 days. Active incident holds preserve raw rows until explicit
 release. `end_time` is authoritative; incomplete rows are never deleted.
 
+The following records the original August credential choice; the accepted
+October 23 decision below replaces that choice.
 A single one-minute cron job dispatches an internal Edge Function only while an
 operator-selected phase is active. The function scrapes the same project's
 Supabase Metrics API with a dedicated Secret API key, reduces only allowlisted
@@ -69,3 +71,60 @@ upgrade, and physical disk shrink remain separately gated.
 - A metrics outage or ambiguous commit stops cleanup instead of guessing.
 - The governor adds one low-frequency cron-history row per active minute.
 - Reports distinguish reusable relation pages from physical disk allocation.
+
+## October 22, 2026: Explicit Thirty-Day Raw Policy
+
+The operator may select a thirty-day completed-history profile before the
+governor processes history. Installation preserves the seven-day default and
+the existing five-argument phase configuration API. Selection pauses the
+governor and resets dry-run, canary and higher-rate acceptance; it never starts
+deletion. Switching profiles after real coverage or deletion is refused because
+previously removed raw records cannot be recovered by changing configuration.
+
+This profile removes only finite, consistently timed `succeeded` or `failed`
+records older than its cutoff. It preserves unfinished, unknown, null,
+nonfinite, reversed-timestamp and actively held records. Failures and other
+exceptions receive the same verified sanitized coverage before raw deletion;
+their sanitized ledger remains for 365 days, and routine summaries for 90 days.
+
+The initial drain freezes an explicitly supplied UTC cutoff and the current
+maximum runid. A bounded primary-key window advances over protected records
+without deleting or summarizing them. After accepted canary progression to
+drain, reaching that high-water mark clears the fixed cutoff and enters rolling
+thirty-day steady state. The final initial receipt records its cutoff and mark.
+Each rolling cycle captures its own high-water mark and wraps only after
+reaching it, so continuing ingress cannot indefinitely postpone reconsidering
+formerly unfinished or
+released held records are reconsidered without duplicating deleted coverage.
+Retention is asynchronous: records can remain longer than thirty days while
+the bounded scan catches up or health gates pause it.
+
+All existing health, coverage, rate, deployment and physical-space boundaries
+still apply. A higher batch rate remains an evidence-based operator decision,
+not an automatic consequence of increasing database compute size.
+
+## October 23, 2026: Accepted Runtime Credential Reuse
+
+The user accepted local implementation of metrics authentication using only the
+runtime-injected JSON entry `SUPABASE_SECRET_KEYS['default']`. This supersedes
+the dedicated custom-key requirement above. No legacy service-role key, custom
+secret or PAT fallback is permitted; do not list, copy or configure secrets.
+Supabase documents the injected dictionary and deployment identity in
+[default secrets](https://supabase.com/docs/guides/functions/secrets#default-secrets)
+and Secret API key authentication in the
+[Metrics API guide](https://supabase.com/docs/guides/observability/metrics/vendor-agnostic).
+This key has broad `service_role` authority, including RLS bypass; it is not
+metrics-only. Reuse couples its rotation and revocation to other consumers.
+Before a request, `SUPABASE_URL` must be the exact canonical dev or prod origin
+and agree with the project in `DENO_DEPLOYMENT_ID`. Missing or malformed runtime
+configuration fails closed. Consume the key only internally for same-project
+metrics authentication; never expose its value or value-derived metadata.
+
+The protected release approval binds the owner's runtime-source selection as
+consent and provenance, not proof of presence or successful authentication.
+Runtime presence remains unverified; this decision supplies no selection record.
+The deployed `configured` GET verifies parser/project presence only. A failed
+check blocks a success receipt and leaves cleanup disarmed, even if release SQL
+already committed; report that partial state without automatic replay. The
+authenticated, complete 15-minute health baseline remains required before
+cleanup. No deployment, activation or credential mutation is granted here.

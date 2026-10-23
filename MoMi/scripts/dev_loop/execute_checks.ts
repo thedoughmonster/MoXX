@@ -4,9 +4,13 @@ import { basename, join } from "node:path"
 
 import { workspaceRoot } from "../architecture/paths.ts"
 import { runCapturedCheck } from "./run_captured_check.ts"
+import type { CheckExecutionBinding } from "./final_validation_types.ts"
 import type { CheckCommand, CommandEvidence } from "./types.ts"
 
-export function executeChecks(checks: CheckCommand[]): CommandEvidence[] {
+export function executeChecks(
+  checks: CheckCommand[],
+  binding: CheckExecutionBinding = {},
+): CommandEvidence[] {
   for (const check of checks) {
     const advisory = check.advisory
     const advisoryKeys = Object.keys(advisory ?? {}).sort().join(",")
@@ -30,10 +34,14 @@ export function executeChecks(checks: CheckCommand[]): CommandEvidence[] {
     ) throw new Error(`Invalid enforcement metadata for check ${check.id || "(missing)"}`)
   }
   const logRoot = join(workspaceRoot, ".momi", "logs")
+  const tempRoot = binding.environment?.TMPDIR ??
+    join(workspaceRoot, ".momi", "tmp")
   mkdirSync(logRoot, { recursive: true })
+  mkdirSync(tempRoot, { recursive: true })
   const directory = mkdtempSync(join(logRoot, "run-"))
   const relativeDirectory = `.momi/logs/${basename(directory)}`
   return checks.map((check) => {
+    binding.assert_invariants?.()
     const started = performance.now()
     const name = check.id.replaceAll(/[^a-z0-9-]/gi, "-")
     const stdoutPath = `${relativeDirectory}/${name}.stdout.log`
@@ -42,7 +50,10 @@ export function executeChecks(checks: CheckCommand[]): CommandEvidence[] {
       check,
       join(workspaceRoot, stdoutPath),
       join(workspaceRoot, stderrPath),
+      binding.environment,
+      binding.workspace_root,
     )
+    binding.assert_invariants?.()
     return {
       id: check.id,
       enforcement: check.enforcement,

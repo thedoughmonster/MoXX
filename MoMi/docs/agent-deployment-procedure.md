@@ -1,9 +1,10 @@
 # Agent Deployment Procedure
 
-Linear owns work state, PR CI owns final validation, the local Node 24
-coordinator owns receipt-bound orchestration, and protected GitHub workflows
+The authorized task and PR evidence record work state. PR CI owns final
+validation, the local Node 24 coordinator owns receipt-bound orchestration,
+and protected GitHub workflows
 own hosted development migration and Edge Function deployment. GitHub retains
-code, CI, review, merge, and release evidence; it is not a parallel work ledger.
+code, CI, review, merge, and release evidence. No external work tracker is required.
 
 ## Publish and validate
 
@@ -12,11 +13,19 @@ code, CI, review, merge, and release evidence; it is not a parallel work ledger.
    `git fetch origin refs/heads/dev:refs/remotes/origin/dev`; a narrowed
    `git fetch origin dev` updates `FETCH_HEAD` only and is not a freshness
    precondition.
-2. Run `pnpm momi-check changed` while iterating.
-3. Commit, push, and open one draft PR to `dev`. Link the Linear issue when
-   available for traceability; no duplicate GitHub issue metadata is required.
-4. Let the PR job named `validate-final` derive and run exactly one final gate.
-5. Download its `validation-<head-sha>` artifact after success.
+2. Run `pnpm momi-check changed` while iterating. This is focused working-tree
+   evidence only; it writes `.momi/focused-validation-receipt.json` and cannot
+   satisfy the exact-HEAD final gate.
+3. Final validation runs `pnpm momi-check changed --final --base <commit>
+   --head <commit>`. It requires a clean repository, resolves both identities
+   once, then builds the plan and runs every child check in an isolated detached
+   checkout materialized from the committed head. Development and production
+   migration baselines are pinned to resolved SHAs and recorded with their trees
+   in the receipt before the clean source HEAD and refs are rechecked.
+4. When authorized, commit, push, and open one draft PR to `dev`. Record the task
+   scope and acceptance evidence; no external work-tracker issue is required.
+5. Let the PR job named `validate-final` derive and run exactly one final gate.
+6. Download its `validation-<head-sha>` artifact after success.
 
 The bound `diff_sha256` is SHA-256 over the exact raw bytes emitted by
 `git diff --relative --binary --no-ext-diff --no-renames`. The coordinator
@@ -72,7 +81,7 @@ Supabase plugin, CLI, dashboard, or local code.
 - GitHub credentials remain in the GitHub CLI credential store.
 - Development Supabase credentials remain protected GitHub environment secrets.
 - The default database login is short-lived and internal to the pinned CLI.
-- During active development, an accepted Linear issue may authorize a
+- During active development, explicit recorded human approval may authorize a
   non-expiring credential or Supabase token-to-database use only through the
   protected, least-privilege, owner-bound, revocable, and rollback-ready
   exception in [Release credentials](release-credentials.md).
@@ -95,6 +104,9 @@ environment variable can override these checks. No other GitHub workflow applies
 migrations.
 
 ## Failure and rollback
+
+The [proposed retention exception](retention-release-exception.md) is unactivated
+and separately approval-bound; it does not relax the normal rules above.
 
 Inspect the exact failed job or migration step and fix the owning change. Do not retry through a different deployment authority. Stop for destructive effects,
 secret exposure, production exposure without authority, or inability to prove

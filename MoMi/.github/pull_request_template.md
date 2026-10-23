@@ -8,5 +8,5 @@
 
 ## Traceability
 
-- Linear issue link, when available. This is useful traceability and is not a
-  duplicate work-state or merge authority.
+- Summarize the authorized task and its acceptance criteria. Include task or PR
+  evidence when available; no external work-tracker issue is required.

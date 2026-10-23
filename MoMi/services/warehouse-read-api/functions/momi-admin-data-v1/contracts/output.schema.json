@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "momi://momi.admin.sales_health.v1/output",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "capturedAt", "latestObservation", "timezone", "location", "bucketMinutes", "days"],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "capturedAt": {"type": "string", "format": "date-time"},
+    "latestObservation": {"type": ["string", "null"], "format": "date-time"},
+    "timezone": {"type": "string"},
+    "location": {"type": "string"},
+    "bucketMinutes": {"const": 15},
+    "days": {
+      "type": "array",
+      "maxItems": 730,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["date", "sales", "orders", "ordinarySales", "ordinaryOrders", "missingAmounts", "missingTimes", "buckets", "channels"],
+        "properties": {
+          "date": {"type": "string", "format": "date"},
+          "sales": {"type": "number"},
+          "orders": {"type": "integer", "minimum": 0},
+          "ordinarySales": {"type": "number"},
+          "ordinaryOrders": {"type": "integer", "minimum": 0},
+          "missingAmounts": {"type": "integer", "minimum": 0},
+          "missingTimes": {"type": "integer", "minimum": 0},
+          "buckets": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "minItems": 6,
+              "maxItems": 6,
+              "prefixItems": [
+                {"type": "integer", "minimum": 0, "maximum": 1425, "multipleOf": 15},
+                {"type": "number"},
+                {"type": "integer", "minimum": 0},
+                {"type": "number"},
+                {"type": "integer", "minimum": 0},
+                {"type": "string"}
+              ]
+            }
+          },
+          "channels": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["channel", "sales", "orders"],
+              "properties": {"channel": {"type": "string"}, "sales": {"type": "number"}, "orders": {"type": "integer", "minimum": 0}}
+            }
+          }
+        }
+      }
+    }
+  }
+}

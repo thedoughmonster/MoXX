@@ -65,7 +65,7 @@ export async function provideFunctionCapabilityModel(
     }).sort((a, b) => compareUtf16(a.function_key, b.function_key))
   const payload = {
     $schema: functionCapabilityModelSchemaId,
-    schema_version: 1 as const,
+    schema_version: 2 as const,
     source_snapshot: sourceSnapshot,
     functions,
   }

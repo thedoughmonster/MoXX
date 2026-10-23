@@ -14,6 +14,7 @@ import { createServiceTestImpactFixture } from "./service_test_impact_fixture.ts
 const ordinaryPilotPaths = [
   "services/preorder-operations/functions/momi-preorder-bootstrap-v1/tests/bootstrap.test.ts",
   "services/preorder-operations/functions/momi-preorder-checkout-hold-v1/tests/hold.test.ts",
+  "services/preorder-operations/functions/momi-preorder-contribution-v1/tests/contribution.test.ts",
   "services/preorder-operations/functions/momi-preorder-order-intent-v1/tests/lifecycle_migration.test.ts",
   "services/preorder-operations/functions/momi-preorder-order-intent-v1/tests/order_intent.test.ts",
   "services/preorder-operations/functions/momi-preorder-order-status-v1/tests/order_status.test.ts",
@@ -89,7 +90,7 @@ test("gates risk selectors and distinguishes absent from declared empty", async 
       item.code === "selection_empty_when_required"))
 })
 
-test("resolves the 23/24-path pilot without widening authority", async () => {
+test("resolves the 24/25-path pilot without widening authority", async () => {
   const architecture = await validateArchitecture()
   const authority = { filesystem: [], database: [], network: [], secrets: [], provider: [], runtime: [], deployment: [], external_configuration: [] }
   const before = canonicalJson(authority)
@@ -105,8 +106,8 @@ test("resolves the 23/24-path pilot without widening authority", async () => {
     ...ordinaryPilotPaths,
     "services/preorder-operations/tests/preorder_lifecycle_postgres.test.ts",
   ].sort())
-  assert.equal(ordinary.tests.flatMap((item) => item.reasons).length, 23)
-  assert.equal(migration.tests.flatMap((item) => item.reasons).length, 24)
+  assert.equal(ordinary.tests.flatMap((item) => item.reasons).length, 24)
+  assert.equal(migration.tests.flatMap((item) => item.reasons).length, 25)
   assert.deepEqual(ordinary.metadata.map((item) => item.status), ["declared"])
   assert.deepEqual(ordinary.diagnostics, [])
   const categories = new Set(ordinary.tests.flatMap((item) =>

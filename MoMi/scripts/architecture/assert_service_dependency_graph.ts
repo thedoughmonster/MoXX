@@ -26,7 +26,7 @@ export async function assertServiceDependencyGraph(
   } catch (error) {
     diagnostics.push({
       code: "schema_invalid", field_path: "/",
-      expected: "Service Dependency Graph v1",
+      expected: "Service Dependency Graph v2",
       actual: error instanceof Error ? error.message : String(error),
     })
   }

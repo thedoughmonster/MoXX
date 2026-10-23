@@ -20,6 +20,13 @@ per-job/per-minute summaries for 90 days. Failures, recoveries, slow runs,
 unexpected results, and declared exceptions remain raw for 365 days. Active
 incident holds have no automatic expiry.
 
+Before processing history, an operator can explicitly select the thirty-day
+completed-history profile described in ADR 0022. It keeps recent and uncertain
+raw records, removes only older valid completed records after coverage, and
+retains the same sanitized summaries and exception ledger. Selection pauses
+the governor and requires fresh dry-run/canary acceptance. Installing the
+migration does not select or activate this profile.
+
 ## Operation
 
 The installed cron job is disarmed by default. A governed operator progresses

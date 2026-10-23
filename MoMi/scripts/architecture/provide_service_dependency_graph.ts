@@ -25,7 +25,7 @@ export function provideServiceDependencyGraph(
   if (diagnostics.length > 0) throw new ServiceDependencyGraphError(diagnostics)
   const payload = {
     $schema: serviceDependencyGraphSchemaId,
-    schema_version: 1 as const,
+    schema_version: 2 as const,
     source_snapshot: sourceSnapshot,
     nodes: buildServiceDependencyNodes(architecture.services),
     edges: buildServiceDependencyEdges(architecture.services),

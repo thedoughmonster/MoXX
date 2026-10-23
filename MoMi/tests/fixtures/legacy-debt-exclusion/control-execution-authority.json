@@ -4,7 +4,7 @@
   "work_item": "MOX-217",
   "service": "slack-order-delivery",
   "repository": "thedoughmonster/momi-backend",
-  "base_revision": "9215dd78e84ef6cf22818ff86a86655b78636dee",
+  "base_revision": "061e01a8e9ce5e247a3f3e8f300c419ac45c919f",
   "source_digest": "bb3f9491f977e91254d7ad90b3e33b7bbe20b3ad616dcfc810affbfc194a77c9",
   "filesystem": { "read": [], "write": [] },
   "database": {

@@ -17,7 +17,7 @@ test("reports strict and MOX-207 stale-snapshot assertion diagnostics", async ()
   await assert.rejects(assertServiceDependencyGraph({
     ...graph,
     $schema: "https://momi.local/schemas/wrong.json",
-    schema_version: 2,
+    schema_version: 3,
     digest: "0".repeat(64),
   }), (error: unknown) => {
     assert(error instanceof Error)

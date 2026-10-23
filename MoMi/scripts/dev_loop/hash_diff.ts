@@ -12,6 +12,7 @@ export async function hashDiff(
   baseSha: string,
   headSha: string,
   repositoryRoot = workspaceRoot,
+  includeWorktree = true,
 ): Promise<string> {
   const hash = createHash("sha256")
   await hashGitDiff(hash, [
@@ -19,6 +20,7 @@ export async function hashDiff(
     `${baseSha}...${headSha}`, "--", ".",
   ], repositoryRoot)
   if (
+    includeWorktree &&
     runGit(["rev-parse", "HEAD"], true, repositoryRoot) === headSha &&
     runGit(
       ["status", "--short", "--untracked-files=all", "--", "."],

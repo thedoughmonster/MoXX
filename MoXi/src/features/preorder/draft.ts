@@ -18,8 +18,7 @@ export const customerDetailsSchema = z.object({
   fullName: z.string().trim().min(2, 'Enter the pickup name.').max(100),
   email: z.string().trim().email('Enter a valid email address.').max(254),
   phone: z.string().trim()
-    .regex(/^[+()\-\s0-9]{7,24}$/, 'Enter a valid phone number.'),
-  pickupNotes: z.string().trim().max(240, 'Keep pickup notes under 240 characters.')
+    .regex(/^[+()\-\s0-9]{7,24}$/, 'Enter a valid phone number.')
 });
 
 export type CustomerDetails = z.infer<typeof customerDetailsSchema>;
@@ -27,8 +26,7 @@ export type CustomerDetails = z.infer<typeof customerDetailsSchema>;
 const storedCustomerDetailsSchema = z.object({
   fullName: z.string().max(100),
   email: z.string().max(254),
-  phone: z.string().max(24),
-  pickupNotes: z.string().max(240)
+  phone: z.string().max(24)
 });
 
 const storedDraftSchema = z.object({
@@ -46,8 +44,7 @@ export type RecoverableDraft = z.infer<typeof storedDraftSchema>;
 export const emptyCustomerDetails: CustomerDetails = {
   fullName: '',
   email: '',
-  phone: '',
-  pickupNotes: ''
+  phone: ''
 };
 
 export function loadRecoverableDraft(): RecoverableDraft | null {

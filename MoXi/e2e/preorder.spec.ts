@@ -28,11 +28,13 @@ test('supports fulfillment, allergen, cart, and review interactions', async ({ p
 
   await page.getByRole('button', { name: /Review preorder/ }).click();
   await expect(page.getByRole('heading', { name: 'Who’s picking up?' })).toBeVisible();
+  await expect(page.getByLabel(/Pickup notes/)).toHaveCount(0);
   await page.getByLabel('Pickup name').fill('Zac Monster');
   await page.getByLabel('Email').fill('zac@example.test');
   await page.getByLabel('Mobile phone').fill('562-555-0100');
   await page.getByRole('button', { name: 'Review preorder →' }).click();
   await expect(page.getByRole('heading', { name: 'Review your preorder' })).toBeVisible();
+  await expect(page.getByText('Pickup notes')).toHaveCount(0);
   await expect(page.getByText('Fresh authoritative quote required')).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Secure checkout' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Secure payment' })).toBeVisible();

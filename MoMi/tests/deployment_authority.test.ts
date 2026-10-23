@@ -96,7 +96,10 @@ test("codifies the supported agent deployment path", async () => {
   assert.match(procedure, /Never merge or push `prod` directly/)
   assert.match(procedure, /protected development workflow/)
   assert.match(procedure, /default database login is short-lived/)
-  assert.match(procedure, /accepted Linear issue.*non-expiring credential/s)
+  assert.match(procedure, /explicit recorded human approval.*non-expiring credential/s)
+  assert.match(credentials, /approval must bind one credential name/)
+  assert.match(credentials, /exact environments, projects, provider identity/)
+  assert.match(credentials, /Record approval in the authorized task or PR/)
   assert.match(credentials, /minimum\s+required roles or scopes/)
   assert.match(credentials, /name the owner/)
   assert.match(credentials, /rotation and immediate-revocation/)
@@ -127,6 +130,7 @@ test("keeps function deployment behind the guarded apply entry point", async () 
   assert.deepEqual(deployCommands.sort(), ["deploy/deploy_functions.ts"])
   assert.deepEqual(deployCallers.sort(), [
     "deploy/deploy_functions.ts",
+    "release/retention/execute.ts",
     "run_deploy_apply.ts",
   ])
   const apply = await readFile(new URL("../scripts/run_deploy_apply.ts", import.meta.url), "utf8")

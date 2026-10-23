@@ -64,6 +64,13 @@ export function buildCompactReceipt(input: ReceiptInput): CompactReceipt {
       ...(input.head_sha ? { head_sha: input.head_sha } : {}),
       ...(input.base_tree ? { base_tree: input.base_tree } : {}),
       ...(input.head_tree ? { head_tree: input.head_tree } : {}),
+      ...(input.development_sha
+        ? { development_sha: input.development_sha } : {}),
+      ...(input.development_tree
+        ? { development_tree: input.development_tree } : {}),
+      ...(input.production_sha ? { production_sha: input.production_sha } : {}),
+      ...(input.production_tree
+        ? { production_tree: input.production_tree } : {}),
       ...(input.diff_sha256 ? { diff_sha256: input.diff_sha256 } : {}),
       ...(input.impact_sha256 ? { impact_sha256: input.impact_sha256 } : {}),
       ...(input.plan_sha256 ? { plan_sha256: input.plan_sha256 } : {}),

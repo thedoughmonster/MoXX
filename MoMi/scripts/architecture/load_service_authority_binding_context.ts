@@ -15,6 +15,7 @@ import type {
 } from "./service_authority_binding_types.ts"
 import type { LoadedService } from "./types.ts"
 import { validateJson } from "./validate_json.ts"
+import { repositoryAuthority } from "./repository_authority.ts"
 
 export async function loadServiceAuthorityBindingContext(
   root: string,
@@ -73,14 +74,14 @@ export async function loadServiceAuthorityBindingContext(
     return key && finding.evidence[key] ? [finding.evidence[key]] : []
   })
   return {
-    root, repository: "thedoughmonster/momi-backend", revision, manifests,
+    root, repository: repositoryAuthority, revision, manifests,
     debt: { source_path: "docs/service-access-debt-baseline.json",
       schema_id: debtSchema.$id, schema_version: debt.schema_version,
       source_digest: await digestServiceAuthoritySource(debtPath),
       findings: debt.findings },
     executions, execution_schema: executionSchema, execution_trust: executionTrust,
     execution_context: {
-      root, repository: "thedoughmonster/momi-backend",
+      root, repository: repositoryAuthority,
       baseRevision: "", sourceDigest: "", services: serviceAuthorities,
       databaseOwners: buildExecutionAuthorityDatabaseOwners(services),
       externalAuthorities: [], debtTargets: [...new Set(debtTargets)].sort(),

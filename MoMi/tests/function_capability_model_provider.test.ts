@@ -5,13 +5,13 @@ import { provideFunctionCapabilityModel } from "../scripts/architecture/provide_
 import { validateArchitecture } from "../scripts/architecture/validate_architecture.ts"
 import { createCapabilityArchitecture } from "./function_capability_model_fixture.ts"
 import { graphSourceSnapshot } from "./service_dependency_graph_fixture.ts"
-test("projects the six adopted consumers without provider authority", async () => {
+test("projects the seven adopted consumers without provider authority", async () => {
   const architecture = await validateArchitecture()
   const result = await provideFunctionCapabilityModel(architecture, graphSourceSnapshot, graphSourceSnapshot)
   assert(result.projection)
-  assert.equal(result.projection.functions.length, 6)
+  assert.equal(result.projection.functions.length, 7)
   assert.equal(result.diagnostics.filter((item) =>
-    item.code === "capability_model_absent").length, 33)
+    item.code === "capability_model_absent").length, 34)
   const square = result.projection.functions.find((item) => item.function_key === "momi.preorder.payment.initiate.v1")!
   assert.deepEqual(square.direct_capabilities, ["database_read", "database_write"])
   assert.deepEqual(square.called_contracts, [{

@@ -85,12 +85,17 @@ export function validateValidationReceipt(value: unknown): ValidationReceipt {
   if (
     receipt?.schema_version !== 2 || receipt.kind !== "validation" ||
     receipt.required_job !== "validate-final" ||
+    receipt.evidence_scope !== "exact_committed_head" ||
     (receipt.gate !== "full" && receipt.gate !== "path_scoped") ||
     !/^[1-9][0-9]*$/.test(receipt.run_log?.run_id ?? "") ||
     !/^[0-9a-f]{40}$/.test(receipt.identities?.base_sha ?? "") ||
     !/^[0-9a-f]{40}$/.test(receipt.identities?.head_sha ?? "") ||
     !/^[0-9a-f]{40}$/.test(receipt.identities?.base_tree ?? "") ||
     !/^[0-9a-f]{40}$/.test(receipt.identities?.head_tree ?? "") ||
+    !/^[0-9a-f]{40}$/.test(receipt.identities?.development_sha ?? "") ||
+    !/^[0-9a-f]{40}$/.test(receipt.identities?.development_tree ?? "") ||
+    !/^[0-9a-f]{40}$/.test(receipt.identities?.production_sha ?? "") ||
+    !/^[0-9a-f]{40}$/.test(receipt.identities?.production_tree ?? "") ||
     !/^[0-9a-f]{64}$/.test(receipt.identities?.diff_sha256 ?? "") ||
     !/^[0-9a-f]{64}$/.test(receipt.identities?.impact_sha256 ?? "") ||
     !/^[0-9a-f]{64}$/.test(receipt.identities?.plan_sha256 ?? "") ||

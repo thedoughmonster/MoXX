@@ -30,17 +30,15 @@ test("selects the documented non-scheduled database access authority", () => {
   assert.match(authority, /\.github\/workflows\/deploy-prod\.yml/)
   assert.match(authority, /\.github\/workflows\/supabase-credential-preflight\.yml/)
   assert.match(authority, /thedoughmonster\/momi-backend/)
-  assert.match(authority, /\.github\/workflows\/renew-database-access\.yml/)
-  assert.match(
-    authority,
-    /source GitHub `prod` environment secret `SUPABASE_ACCESS_TOKEN`/,
-  )
-  assert.match(authority, /workflow state is `disabled_manually`/)
+  assert.match(authority, /source workflow[\s\S]*is `disabled_manually`/)
+  assert.match(authority, /post-disable protected-production preflight succeeded/)
+  assert.match(authority, /names-only\s+source credential placement/)
+  assert.match(authority, /no value was\s+read or exposed/)
   assert.match(authority, /rollback drill is proof-only/)
   assert.match(authority, /registers no monthly or other scheduled renewal event/)
   assert.match(
     authority,
-    /Re-enabling the source scheduler[\s\S]*requires\s+separate explicit authority/,
+    /Re-enabling the source scheduler[\s\S]*requires a\s+separately authorized rollback window/,
   )
 })
 

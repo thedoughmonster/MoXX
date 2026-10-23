@@ -49,14 +49,14 @@ export async function assertArchitectureSnapshotIdentity(
   const schema = await readJson<object>(
     root === workspaceRoot
       ? architectureSnapshotIdentitySchemaPath
-      : `${root}/schemas/architecture-snapshot-identity-v1.schema.json`,
+      : `${root}/schemas/architecture-snapshot-identity-v2.schema.json`,
   )
   try {
     validateJson(schema, record.identity, "source_snapshot.identity")
   } catch (error) {
     input.push({
       code: "schema_invalid", field_path: "/identity",
-      expected: "Architecture Snapshot Identity v1",
+      expected: "Architecture Snapshot Identity v2",
       actual: error instanceof Error ? error.message : String(error),
     })
   }

@@ -78,11 +78,6 @@ export function CustomerDetailsStep({
             <input autoComplete="tel" inputMode="tel" {...register('phone')} aria-invalid={Boolean(errors.phone)} />
             {errors.phone && <span className="field-error">{errors.phone.message}</span>}
           </label>
-          <label>
-            Pickup notes <span className="optional-label">Optional</span>
-            <textarea rows={3} {...register('pickupNotes')} aria-invalid={Boolean(errors.pickupNotes)} />
-            {errors.pickupNotes && <span className="field-error">{errors.pickupNotes.message}</span>}
-          </label>
           <p className="draft-retention">
             A recoverable draft stays in this browser for up to 24 hours and is
             revalidated before any future submission.

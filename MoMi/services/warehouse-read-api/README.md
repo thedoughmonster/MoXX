@@ -63,11 +63,14 @@ was observed without leaking a source DTO.
 
 The API reads approved versioned views only and never fetches Toast or reads
 `toast_raw` directly. Exact raw reconstruction remains privileged archive work.
-Toast acquisition and webhook HTTP boundaries are unchanged. The legacy source
-reader remains separate until order-alert migration is complete. Its dynamic
-view identifier is exact current access debt. While it remains, every runtime
-TypeScript file in this service is source-hashed into that finding, so any code
-change must first replace the dynamic identifier with static relation reads.
+Toast acquisition and webhook HTTP boundaries are unchanged. Entity routes use
+static approved view reads with the existing authorization and type checks.
+
+The private admin uses momi.admin.sales_health.v1 through momi-admin-data-v1.
+It receives only its configured sales aggregates, with source timestamps and
+missingness counts. A scoped server credential admits an expiring one-use
+capability; no application database credential is exposed. See the versioned
+contract and MOX-583 for scope, custody, activation and rollback.
 
 ## Verification
 

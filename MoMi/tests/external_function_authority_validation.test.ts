@@ -12,6 +12,7 @@ import type { LoadedFunction, RetirementManifest } from
 
 const authority = {
   function_slug: "external-v1",
+  lifecycle_status: "active",
   verified_at: "2026-08-23",
   valid_until: "2026-09-22",
   environments: [{ name: "dev" }],
@@ -42,11 +43,14 @@ test("external authority cannot overlap local or retirement authority", () => {
   const local = [{ slug: "external-v1" }] as LoadedFunction[]
   const retirement = [{ function_slug: "external-v1", environments: ["dev"] }] as
     unknown as RetirementManifest[]
-  assert.deepEqual(
-    findExternalFunctionAuthorityConflicts([authority], retirement, local),
-    [
-      "external-v1: cannot be externally owned and retiring",
-      "external-v1: cannot be locally and externally owned",
-    ],
-  )
+  for (const lifecycle_status of ["active", "retired_retained"] as const) {
+    const record = { ...authority, lifecycle_status } as ExternalFunctionAuthority
+    assert.deepEqual(
+      findExternalFunctionAuthorityConflicts([record], retirement, local),
+      [
+        "external-v1: cannot be externally owned and retiring",
+        "external-v1: cannot be locally and externally owned",
+      ],
+    )
+  }
 })

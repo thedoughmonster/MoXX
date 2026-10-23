@@ -3,11 +3,12 @@ import type { CompactReceipt } from "./types.ts"
 export function renderAgentValidationSummary(
   receipt: CompactReceipt,
   receiptPath: string,
+  label = "Validation",
 ): string {
   const failed = receipt.commands.filter((item) => item.status !== 0)
   const disposition = receipt.counts.hard_failed > 0 ? "FAIL" : "PASS"
   const lines = [
-    `Validation ${disposition}: ${receipt.counts.commands} checks in ${receipt.duration_ms}ms`,
+    `${label} ${disposition}: ${receipt.counts.commands} checks in ${receipt.duration_ms}ms`,
     ...receipt.commands.map((item) =>
       `- ${item.status === 0 ? "pass" : "fail"} [${item.enforcement}] ${item.id} (${item.duration_ms}ms, exit ${item.status})`
     ),

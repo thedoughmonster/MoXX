@@ -6,11 +6,12 @@ on:
     paths:
       - "MoXi/**"
       - ".github/workflows/validate-ui.yml"
-  pull_request:
-    branches: [dev, prod]
-    paths:
-      - "MoXi/**"
-      - ".github/workflows/validate-ui.yml"
+  workflow_call:
+    inputs:
+      head_sha:
+        description: Exact candidate commit
+        required: true
+        type: string
 
 concurrency:
   group: validate-ui-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
@@ -30,6 +31,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: ${{ inputs.head_sha || github.sha }}
       - name: Setup pnpm
         uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4.3.0
         with:

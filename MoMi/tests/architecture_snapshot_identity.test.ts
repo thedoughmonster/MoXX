@@ -19,13 +19,14 @@ const identity: ArchitectureSnapshotIdentity = {
   $schema: architectureSnapshotIdentitySchemaId,
   architecture_contract_version: 2,
   branch: "dev",
+  product_path: "MoMi",
   commit: "199b290990aea2731542a08bb91757ca83a72eb3",
   function_manifest_schema: {
     id: "https://momi.local/schemas/function-manifest-v1.schema.json",
     version: 1,
   },
-  repository: "thedoughmonster/momi-backend",
-  schema_version: 1,
+  repository: "thedoughmonster/MoXX",
+  schema_version: 2,
   service_manifest_schema: {
     id: "https://momi.local/schemas/service-manifest-v1.schema.json",
     version: 1,
@@ -37,7 +38,7 @@ test("validates and digests the accepted current-dev identity", async () => {
   assert.doesNotThrow(() => validateJson(schema, identity, "identity"))
   assert.equal(
     digestArchitectureSnapshotIdentity(identity),
-    "fe73901c2fd9af22383185da9a47ff820c3af358fcc266effac3aa6f9902da21",
+    "cf7c678d13b98545d60506e213581500b8ac0e7702ba626f49b69045f814d79a",
   )
   const reordered = Object.fromEntries(
     Object.entries(identity).reverse(),
@@ -54,6 +55,21 @@ test("validates and digests the accepted current-dev identity", async () => {
   )
 })
 
+test("retains the immutable v1 source identity as historical evidence", async () => {
+  const schema = await readJson<object>(new URL(
+    "../schemas/architecture-snapshot-identity-v1.schema.json", import.meta.url,
+  ).pathname)
+  const historical: Record<string, unknown> = {
+    ...identity,
+    $schema:
+      "https://momi.local/schemas/architecture-snapshot-identity-v1.schema.json",
+    schema_version: 1,
+    repository: "thedoughmonster/momi-backend",
+  }
+  delete historical.product_path
+  assert.doesNotThrow(() => validateJson(schema, historical, "historical identity"))
+})
+
 test("rejects incomplete, abbreviated, uppercase, and unknown identities", async () => {
   const schema = await readJson<object>(architectureSnapshotIdentitySchemaPath)
   const invalid = [
@@ -61,7 +77,7 @@ test("rejects incomplete, abbreviated, uppercase, and unknown identities", async
     { ...identity, commit: identity.commit.slice(0, 12) },
     { ...identity, commit: identity.commit.toUpperCase() },
     { ...identity, unexpected: true },
-    { ...identity, schema_version: 2 },
+    { ...identity, schema_version: 1 },
   ]
   for (const candidate of invalid) {
     assert.throws(() => validateJson(schema, candidate, "identity"))

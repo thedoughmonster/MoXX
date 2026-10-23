@@ -84,7 +84,37 @@ their policy version so later publications cannot rewrite frozen quote or order
 evidence. The launch maps weekdays to 07:00–14:00, weekends to 08:00–14:00,
 and computes the cutoff from versioned data as 17:00 local on the prior day.
 
+## Shared cart contribution boundary
+
+`momi.preorder.contribution.revalidate.v1` is the additive preorder-owner
+boundary for the shared cart contract family. It rebuilds selected campaign,
+menu, product, option, pickup date/location/window, price, full-payment,
+allergen, capacity, quantity, cutoff, eligibility, disclosure, and exact rule
+version evidence from the current published owner configuration. Restored or
+edited selections receive every material customer-safe correction before they
+can be accepted. The route reads the existing physical capacity ledger through
+the bootstrap owner routine; it creates no second cart, checkout, order, hold,
+or capacity ledger and never accepts browser state as policy evidence.
+
 ## Quote authority
+
+Physical capacity is keyed by surface and pickup date across policy versions.
+The locked physical ledger is used for bootstrap, quote, hold, and direct-order
+admission against the current published limit. Window counters remain local to
+the policy version that created each quote or order, so publication preserves
+historical identities without copying an allocation into another window.
+Unpaid orders receive a 30-minute capacity deadline. The minute-scheduled
+`expire_abandoned_orders_v1` releases each allocation once, only for
+`awaiting_payment` orders whose durable attempts are all declined or canceled
+without review flags (or which have no attempt). Pending, authorized, paid,
+indeterminate, refund, and review-required evidence protects capacity until
+authoritative reconciliation permits release. Browser disappearance is not
+payment evidence. Late payment after release requires attention and never
+allocates a second slot.
+
+Required backend CI enables `MOMI_PREORDER_PG_INTEGRATION=1` and runs the
+preorder PostgreSQL suites against disposable containers, including publication,
+concurrent expiry/replay, hold release, and payment-evidence regressions.
 
 The quote route accepts no customer identity or payment data. The database
 locks one command identity, refreshes the exact fourteen-day window horizon,
